@@ -3,8 +3,8 @@
 class SelectionSort : public BaseAlgorithm
 {
 public:
-    SelectionSort();
-    ~SelectionSort();
+	SelectionSort() {};
+	~SelectionSort() {};
 
     void run();
 };

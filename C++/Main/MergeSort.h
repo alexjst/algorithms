@@ -4,8 +4,8 @@ class MergeSort :
     public BaseAlgorithm
 {
 public:
-    MergeSort();
-    ~MergeSort();
+	MergeSort() {};
+	~MergeSort() {};
 
     void run();
 };

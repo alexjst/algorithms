@@ -5,15 +5,6 @@
 
 using namespace std;
 
-InsertionSort::InsertionSort()
-{
-}
-
-
-InsertionSort::~InsertionSort()
-{
-}
-
 void InsertionSort::run()
 {
     const int len = 50000;

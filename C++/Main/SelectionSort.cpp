@@ -5,14 +5,6 @@
 
 using namespace std;
 
-SelectionSort::SelectionSort()
-{
-}
-
-SelectionSort::~SelectionSort()
-{
-}
-
 void SelectionSort::run()
 {
     const int len = 50000;

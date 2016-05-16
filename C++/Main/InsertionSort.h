@@ -3,8 +3,8 @@
 class InsertionSort : public BaseAlgorithm
 {
 public:
-    InsertionSort();
-    ~InsertionSort();
+	InsertionSort() {};
+	~InsertionSort() {};
 
     void run();
 };

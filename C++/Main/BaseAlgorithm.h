@@ -5,8 +5,8 @@
 class BaseAlgorithm
 {
 public:
-    BaseAlgorithm();
-    ~BaseAlgorithm();
+	BaseAlgorithm() {};
+	~BaseAlgorithm() {};
 
     class PerfTimer {
     public:

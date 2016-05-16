@@ -5,15 +5,6 @@
 
 using namespace std;
 
-BaseAlgorithm::BaseAlgorithm()
-{
-}
-
-
-BaseAlgorithm::~BaseAlgorithm()
-{
-}
-
 BaseAlgorithm::PerfTimer::PerfTimer()
 {
 #if _DEBUG

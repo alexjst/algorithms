@@ -34,14 +34,6 @@ void msort(int* data, int* aux, int low, int high)
 
 }
 
-MergeSort::MergeSort()
-{
-}
-
-MergeSort::~MergeSort()
-{
-}
-
 void MergeSort::run()
 {
     const int len = 50000;
