@@ -11,10 +11,14 @@ using namespace std;
 
 void FirstMissingPositive::run()
 {
-	int data[] = { 3, 4, -1, 1, 7, -3, 2, 9 };
+	int data[] = { 3, 4, -1, 1, 7, -3, 2, 9 }; // missing 5
 	int len = sizeof(data) / sizeof(int);
 
-
+    for (int i = 0; i < len; i++) {
+        while (data[i] >= 1 && data[i] <= len && data[i]!=data[data[i]-1]) {
+            swap(data[i], data[data[i]-1]);
+        }
+    }
 
 	// now expecting [1, 2, 3, ....]
 	int missing = len + 1;
