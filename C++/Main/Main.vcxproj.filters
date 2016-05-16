@@ -39,6 +39,9 @@
     <ClCompile Include="SimpleExpressionEval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FirstMissingPositive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAlgorithm.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SimpleExpressionEval.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FirstMissingPositive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

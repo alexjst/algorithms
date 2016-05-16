@@ -8,9 +8,9 @@
 int main()
 {
     //SelectionSort algo1 = SelectionSort();
-    //InsertionSort algo2 = InsertionSort();
+    InsertionSort algo = InsertionSort();
     //MergeSort algo3 = MergeSort();
-	SimpleExpressionEval algo = SimpleExpressionEval();
+	// SimpleExpressionEval algo = SimpleExpressionEval();
     algo.run();
 
     system("pause");

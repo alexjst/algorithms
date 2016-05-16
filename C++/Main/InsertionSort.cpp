@@ -7,7 +7,7 @@ using namespace std;
 
 void InsertionSort::run()
 {
-    const int len = 50000;
+    const int len = 10;
     int data[len] = { 0 };
 
     srand((unsigned)time(NULL));
@@ -24,11 +24,14 @@ void InsertionSort::run()
                 int swp = data[j];
                 data[j] = data[j - 1];
                 data[j - 1] = swp;
-            }
+			}
+			else {
+				break;
+			}
         }
     }
 
     for (int i = 0; i < len; i++) {
-        //cout << data[i] << endl;
+        cout << data[i] << endl;
     }
 }
