@@ -71,8 +71,10 @@
     <ClCompile Include="InsertionSort.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MergeSort.cpp" />
+    <ClCompile Include="SearchRangeFromSortedArray.cpp" />
     <ClCompile Include="SelectionSort.cpp" />
     <ClCompile Include="SimpleExpressionEval.cpp" />
+    <ClCompile Include="SortColors.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAlgorithm.h" />
@@ -81,8 +83,10 @@
     <ClInclude Include="FirstMissingPositive.h" />
     <ClInclude Include="InsertionSort.h" />
     <ClInclude Include="MergeSort.h" />
+    <ClInclude Include="SearchRangeFromSortedArray.h" />
     <ClInclude Include="SelectionSort.h" />
     <ClInclude Include="SimpleExpressionEval.h" />
+    <ClInclude Include="SortColors.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

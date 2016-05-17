@@ -5,6 +5,8 @@
 #include "CountOnesFromSequence.h"
 #include "SimpleExpressionEval.h"
 #include "FirstMissingPositive.h"
+#include "SortColors.h"
+#include "SearchRangeFromSortedArray.h"
 
 int main()
 {
@@ -12,7 +14,9 @@ int main()
     //InsertionSort algo = InsertionSort();
     //MergeSort algo3 = MergeSort();
 	//SimpleExpressionEval algo = SimpleExpressionEval();
-    FirstMissingPositive algo = FirstMissingPositive();
+    //FirstMissingPositive algo = FirstMissingPositive();
+	//SortColors algo = SortColors();
+	SearchRangeFromSortedArray algo = SearchRangeFromSortedArray();
     algo.run();
 
     system("pause");
