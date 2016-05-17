@@ -7,6 +7,7 @@
 #include "FirstMissingPositive.h"
 #include "SortColors.h"
 #include "SearchRangeFromSortedArray.h"
+#include "Search2DMatrix.h"
 
 int main()
 {
@@ -16,7 +17,8 @@ int main()
 	//SimpleExpressionEval algo = SimpleExpressionEval();
     //FirstMissingPositive algo = FirstMissingPositive();
 	//SortColors algo = SortColors();
-	SearchRangeFromSortedArray algo = SearchRangeFromSortedArray();
+	//SearchRangeFromSortedArray algo = SearchRangeFromSortedArray();
+    Search2DMatrix algo = Search2DMatrix();
     algo.run();
 
     system("pause");

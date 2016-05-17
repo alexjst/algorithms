@@ -71,6 +71,7 @@
     <ClCompile Include="InsertionSort.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MergeSort.cpp" />
+    <ClCompile Include="Search2DMatrix.cpp" />
     <ClCompile Include="SearchRangeFromSortedArray.cpp" />
     <ClCompile Include="SelectionSort.cpp" />
     <ClCompile Include="SimpleExpressionEval.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="FirstMissingPositive.h" />
     <ClInclude Include="InsertionSort.h" />
     <ClInclude Include="MergeSort.h" />
+    <ClInclude Include="Search2DMatrix.h" />
     <ClInclude Include="SearchRangeFromSortedArray.h" />
     <ClInclude Include="SelectionSort.h" />
     <ClInclude Include="SimpleExpressionEval.h" />
