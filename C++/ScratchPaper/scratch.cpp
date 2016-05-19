@@ -1,11 +1,11 @@
 // check if one tree is a sub-tree of another (not memory location, but contents of the tree nodes)
 //
-
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
+/*
 struct Node{
     int data;
     Node* left;
@@ -81,4 +81,20 @@ int main()
         cout << "NO" << endl;
     system("pause");
     return 0;
+}
+*/
+int main()
+{
+	int data[] = {1,6,1,3,6};
+	int len = sizeof(data) / sizeof(int);
+
+	int val = 0;
+	for (int i = 0; i < len; i++) {
+		val ^= data[i];
+	}
+
+	cout << val << endl;
+
+	system("pause");
+	return 0;
 }

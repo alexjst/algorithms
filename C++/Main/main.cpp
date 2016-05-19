@@ -8,6 +8,8 @@
 #include "SortColors.h"
 #include "SearchRangeFromSortedArray.h"
 #include "Search2DMatrix.h"
+#include "TreePreorderIteratively.h"
+#include "ReverseLinkedList.h"
 
 int main()
 {
@@ -18,7 +20,9 @@ int main()
     //FirstMissingPositive algo = FirstMissingPositive();
 	//SortColors algo = SortColors();
 	//SearchRangeFromSortedArray algo = SearchRangeFromSortedArray();
-    Search2DMatrix algo = Search2DMatrix();
+    //Search2DMatrix algo = Search2DMatrix();
+	//TreePreorderIteratively algo = TreePreorderIteratively();
+	ReverseLinkedList algo = ReverseLinkedList();
     algo.run();
 
     system("pause");
