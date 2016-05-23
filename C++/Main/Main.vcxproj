@@ -71,6 +71,7 @@
     <ClCompile Include="InsertionSort.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MergeSort.cpp" />
+    <ClCompile Include="ParlindromePartitioning.cpp" />
     <ClCompile Include="ReverseLinkedList.cpp" />
     <ClCompile Include="Search2DMatrix.cpp" />
     <ClCompile Include="SearchRangeFromSortedArray.cpp" />
@@ -86,6 +87,7 @@
     <ClInclude Include="FirstMissingPositive.h" />
     <ClInclude Include="InsertionSort.h" />
     <ClInclude Include="MergeSort.h" />
+    <ClInclude Include="ParlindromePartitioning.h" />
     <ClInclude Include="ReverseLinkedList.h" />
     <ClInclude Include="Search2DMatrix.h" />
     <ClInclude Include="SearchRangeFromSortedArray.h" />

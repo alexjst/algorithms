@@ -89,8 +89,8 @@ int main()
 	int len = sizeof(data) / sizeof(int);
 
 	int val = 0;
-	for (int i = 0; i < len; i++) {
-		val ^= data[i];
+	for (int i : data) { // range-based for loop
+		val ^= i;
 	}
 
 	cout << val << endl;

@@ -10,6 +10,7 @@
 #include "Search2DMatrix.h"
 #include "TreePreorderIteratively.h"
 #include "ReverseLinkedList.h"
+#include "ParlindromePartitioning.h"
 
 int main()
 {
@@ -22,7 +23,8 @@ int main()
 	//SearchRangeFromSortedArray algo = SearchRangeFromSortedArray();
     //Search2DMatrix algo = Search2DMatrix();
 	//TreePreorderIteratively algo = TreePreorderIteratively();
-	ReverseLinkedList algo = ReverseLinkedList();
+	//ReverseLinkedList algo = ReverseLinkedList();
+    ParlindromePartitioning algo = ParlindromePartitioning();
     algo.run();
 
     system("pause");
