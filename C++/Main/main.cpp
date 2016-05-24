@@ -11,6 +11,8 @@
 #include "TreePreorderIteratively.h"
 #include "ReverseLinkedList.h"
 #include "ParlindromePartitioning.h"
+#include "NonDivisableSubset.h"
+#include "BfsShortestReach.h"
 
 int main()
 {
@@ -24,7 +26,9 @@ int main()
     //Search2DMatrix algo = Search2DMatrix();
 	//TreePreorderIteratively algo = TreePreorderIteratively();
 	//ReverseLinkedList algo = ReverseLinkedList();
-    ParlindromePartitioning algo = ParlindromePartitioning();
+    //ParlindromePartitioning algo = ParlindromePartitioning();
+    //NonDivisableSubset algo = NonDivisableSubset();
+    BfsShortestReach algo = BfsShortestReach();
     algo.run();
 
     system("pause");

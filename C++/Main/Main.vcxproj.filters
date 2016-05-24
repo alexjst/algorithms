@@ -60,6 +60,12 @@
     <ClCompile Include="ParlindromePartitioning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NonDivisableSubset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BfsShortestReach.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAlgorithm.h">
@@ -102,6 +108,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ParlindromePartitioning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NonDivisableSubset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BfsShortestReach.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

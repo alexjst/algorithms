@@ -65,12 +65,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseAlgorithm.cpp" />
+    <ClCompile Include="BfsShortestReach.cpp" />
     <ClCompile Include="BuySell.cpp" />
     <ClCompile Include="CountOnesFromSequence.cpp" />
     <ClCompile Include="FirstMissingPositive.cpp" />
     <ClCompile Include="InsertionSort.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MergeSort.cpp" />
+    <ClCompile Include="NonDivisableSubset.cpp" />
     <ClCompile Include="ParlindromePartitioning.cpp" />
     <ClCompile Include="ReverseLinkedList.cpp" />
     <ClCompile Include="Search2DMatrix.cpp" />
@@ -82,11 +84,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAlgorithm.h" />
+    <ClInclude Include="BfsShortestReach.h" />
     <ClInclude Include="BuySell.h" />
     <ClInclude Include="CountOnesFromSequence.h" />
     <ClInclude Include="FirstMissingPositive.h" />
     <ClInclude Include="InsertionSort.h" />
     <ClInclude Include="MergeSort.h" />
+    <ClInclude Include="NonDivisableSubset.h" />
     <ClInclude Include="ParlindromePartitioning.h" />
     <ClInclude Include="ReverseLinkedList.h" />
     <ClInclude Include="Search2DMatrix.h" />
