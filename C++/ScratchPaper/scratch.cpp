@@ -12,29 +12,22 @@ using namespace std;
 
 int main() {
 	/* Enter your code here. Read input from STDIN. Print output to STDOUT */
-	//ifstream in("d:/test.txt");
-	srand((unsigned)time(NULL));
+	ifstream in("d:/test.txt");
 	int n, k, a;
-	//in >> n >> k;
-	n = rand() % (10000) + 1;
-	k = rand() % 100 + 1;
+	in >> n >> k;
 
 	vector<int> flags(k);
-	vector<int> bfflags(n);
 
 	for (int i = 0; i<n; i++) {
-		//in >> a;
-		a = rand() % 1000000000 + 1;
-		bfflags[i] = a;
+		in >> a;
 		a = a % k;
 		flags[a] += 1;
 	}
-	unsigned long long result = accumulate(flags.begin(), flags.end(), 0);
-	result = result * (result - 1) / 2;
-	cout << result << endl;
+
+	int result = 0;
 	if (flags[0] > 1)
-		result -= flags[0] * (flags[0] - 1) / 2;
-	cout << result << endl;
+		result += 1;
+
 	int mid = (k+1) / 2;
 	bool k_is_even = (k % 2 == 0);
 	if (k_is_even && flags[mid]>1 && mid>0)
