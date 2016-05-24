@@ -30,7 +30,7 @@ void doPartition(const string& input, int start, int end)
         if (isParlindrome(input, start, i)) {
             if (start == 0)
                 cout << endl;
-            cout << "\"" << input.substr(start, i - start + 1) << "\"";
+            cout << input.substr(start, i - start + 1) << endl;
             doPartition(input, i + 1, end);
         }
     }
@@ -43,7 +43,8 @@ void parlinDromePartition(const string& input)
 
 void ParlindromePartitioning::run()
 {
-    string input("aab");
+    //string input("aab");
+	string input("amor,romaracecarsteponnopetstacowasitacaroracatisaw");
     parlinDromePartition(input);
 }
 

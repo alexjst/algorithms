@@ -1,100 +1,70 @@
-// check if one tree is a sub-tree of another (not memory location, but contents of the tree nodes)
-//
-#include <iostream>
+#include <cmath>
+#include <cstdio>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <numeric>
+#include <algorithm>
+#include <ctime>
 
 using namespace std;
 
-/*
-struct Node{
-    int data;
-    Node* left;
-    Node* right;
 
-    Node(int d) { data = d; left = nullptr; right = nullptr; }
-};
+int main() {
+	/* Enter your code here. Read input from STDIN. Print output to STDOUT */
+	//ifstream in("d:/test.txt");
+	srand((unsigned)time(NULL));
+	int n, k, a;
+	//in >> n >> k;
+	n = rand() % (10000) + 1;
+	k = rand() % 100 + 1;
 
-bool isIdentical(Node* t1, Node* t2)
-{
-    if (t1 == nullptr && t2 == nullptr)
-        return true;
-    if (t1 == nullptr || t2 == nullptr)
-        return false;
+	vector<int> flags(k);
+	vector<int> bfflags(n);
 
-    if (t1->data == t2->data && isIdentical(t1->left, t2->left) && isIdentical(t2->right, t2->right))
-        return true;
-    else
-        return false;
-}
+	for (int i = 0; i<n; i++) {
+		//in >> a;
+		a = rand() % 1000000000 + 1;
+		bfflags[i] = a;
+		a = a % k;
+		flags[a] += 1;
+	}
+	unsigned long long result = accumulate(flags.begin(), flags.end(), 0);
+	result = result * (result - 1) / 2;
+	cout << result << endl;
+	if (flags[0] > 1)
+		result -= flags[0] * (flags[0] - 1) / 2;
+	cout << result << endl;
+	int mid = (k+1) / 2;
+	bool k_is_even = (k % 2 == 0);
+	if (k_is_even && flags[mid]>1 && mid>0)
+		result -= flags[mid] * (flags[mid] - 1) / 2;
 
-bool isSubTree(Node* A, Node* B) // returns true if A is a subtree of B
-{
-    if (isIdentical(A, B))
-        return true;
-    else if (!B)
-        return false;
-    else if (isSubTree(A, B->left))
-        return true;
-    else if (isSubTree(A, B->right))
-        return true;
-    else
-        return false;
-}
-
-int main()
-{
-    Node* B = new Node(1);
-    Node* b1 = new Node(2);
-    Node* b2 = new Node(3);
-    Node* b3 = new Node(4);
-    Node* b4 = new Node(5);
-    B->left = b1; B->right = b2;
-    b1->left = b3; b1->right = b4;
-
-    Node* A = new Node(2);
-    Node* a1 = new Node(4);
-    Node* a2 = new Node(5);
-    A->left = a1; A->right = a2;
-
-    //YES
-    if (isSubTree(A, B))
-        cout << "YES" << endl;
-    else
-        cout << "NO" << endl;
-
-    //NO
-    if (isSubTree(B, A))
-        cout << "YES" << endl;
-    else
-        cout << "NO" << endl;
-
-    //NO
-    if (isSubTree(A, nullptr))
-        cout << "YES" << endl;
-    else
-        cout << "NO" << endl;
-
-    //YES
-    if (isSubTree(nullptr, B))
-        cout << "YES" << endl;
-    else
-        cout << "NO" << endl;
-    system("pause");
-    return 0;
-}
-*/
-int main()
-{
-	int data[] = {1,6,1,3,6};
-	int len = sizeof(data) / sizeof(int);
-
-	int val = 0;
-	for (int i : data) { // range-based for loop
-		val ^= i;
+	for (int i = 1; i<mid; i++) {
+		result -= flags[i] * flags[k - i];
 	}
 
-	cout << val << endl;
+	cout << result << endl;
+
+	cout << "\nnow with brute force:" << endl;
+	int bfcount = 0;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < i; j++) {
+			if ((bfflags[i] + bfflags[j]) % k != 0)
+				bfcount++;
+		}
+	}
+	cout << bfcount << endl;
+
+	//in.close();
+
+	//cout << ULLONG_MAX;
+	if (bfcount != result)
+		cout << "FAILED" << endl;
+	else
+		cout << "SUCCESS!" << endl;
 
 	system("pause");
+
 	return 0;
 }
