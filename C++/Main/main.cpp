@@ -31,8 +31,8 @@ int main()
 	//ReverseLinkedList algo = ReverseLinkedList();
     //ParlindromePartitioning algo = ParlindromePartitioning();
     //NonDivisableSubset algo = NonDivisableSubset();
-    //BfsShortestReach algo = BfsShortestReach();
-	StlAlgorithms algo = StlAlgorithms();
+    BfsShortestReach algo = BfsShortestReach();
+	//StlAlgorithms algo = StlAlgorithms();
 	algo.run();
 
 	std::cout << std::endl;
