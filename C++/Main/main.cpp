@@ -16,6 +16,7 @@
 #include "NonDivisableSubset.h"
 #include "BfsShortestReach.h"
 #include "StlAlgorithms.h"
+#include "DijkstraShortestReach.h"
 
 int main()
 {
@@ -31,7 +32,8 @@ int main()
 	//ReverseLinkedList algo = ReverseLinkedList();
     //ParlindromePartitioning algo = ParlindromePartitioning();
     //NonDivisableSubset algo = NonDivisableSubset();
-    BfsShortestReach algo = BfsShortestReach();
+    //BfsShortestReach algo = BfsShortestReach();
+    DijkstraShortestReach algo = DijkstraShortestReach();
 	//StlAlgorithms algo = StlAlgorithms();
 	algo.run();
 

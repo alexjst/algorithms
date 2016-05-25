@@ -68,6 +68,7 @@
     <ClCompile Include="BfsShortestReach.cpp" />
     <ClCompile Include="BuySell.cpp" />
     <ClCompile Include="CountOnesFromSequence.cpp" />
+    <ClCompile Include="DijkstraShortestReach.cpp" />
     <ClCompile Include="FirstMissingPositive.cpp" />
     <ClCompile Include="InsertionSort.cpp" />
     <ClCompile Include="main.cpp" />
@@ -88,6 +89,7 @@
     <ClInclude Include="BfsShortestReach.h" />
     <ClInclude Include="BuySell.h" />
     <ClInclude Include="CountOnesFromSequence.h" />
+    <ClInclude Include="DijkstraShortestReach.h" />
     <ClInclude Include="FirstMissingPositive.h" />
     <ClInclude Include="InsertionSort.h" />
     <ClInclude Include="MergeSort.h" />
