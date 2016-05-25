@@ -66,7 +66,7 @@ using namespace std;
 
 class Graph {
 public:
-    Graph(int N) { V.resize(N); for (int i = 0; i<N; i++) v[i] = i; }
+    Graph(int N) { V.resize(N); for (int i = 0; i<N; i++) V[i] = i; }
     void AddEdge(int p, int q) {}
 private:
     vector<int> V;

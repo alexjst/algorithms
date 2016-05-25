@@ -80,6 +80,7 @@
     <ClCompile Include="SelectionSort.cpp" />
     <ClCompile Include="SimpleExpressionEval.cpp" />
     <ClCompile Include="SortColors.cpp" />
+    <ClCompile Include="StlAlgorithms.cpp" />
     <ClCompile Include="TreePreorderIteratively.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +99,7 @@
     <ClInclude Include="SelectionSort.h" />
     <ClInclude Include="SimpleExpressionEval.h" />
     <ClInclude Include="SortColors.h" />
+    <ClInclude Include="StlAlgorithms.h" />
     <ClInclude Include="TreePreorderIteratively.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

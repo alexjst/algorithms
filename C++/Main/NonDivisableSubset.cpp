@@ -8,7 +8,7 @@ using namespace std;
 
 void NonDivisableSubset::run()
 {
-    int n, k, a;
+    //int n, k, a;
     int n = 4, k = 3;
 
     // will be init to 0 when allocated on the stack
@@ -16,7 +16,7 @@ void NonDivisableSubset::run()
 
     int nums[4] = {1, 7, 4, 3};
     for (int i = 0; i<n; i++) {
-        a = nums[i];
+        int a = nums[i];
         a = a % k;
         flags[a] += 1;
     }

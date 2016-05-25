@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "SelectionSort.h"
 #include "InsertionSort.h"
 #include "MergeSort.h"
@@ -13,6 +15,7 @@
 #include "ParlindromePartitioning.h"
 #include "NonDivisableSubset.h"
 #include "BfsShortestReach.h"
+#include "StlAlgorithms.h"
 
 int main()
 {
@@ -28,9 +31,11 @@ int main()
 	//ReverseLinkedList algo = ReverseLinkedList();
     //ParlindromePartitioning algo = ParlindromePartitioning();
     //NonDivisableSubset algo = NonDivisableSubset();
-    BfsShortestReach algo = BfsShortestReach();
-    algo.run();
+    //BfsShortestReach algo = BfsShortestReach();
+	StlAlgorithms algo = StlAlgorithms();
+	algo.run();
 
-    system("pause");
+	std::cout << std::endl;
+	system("pause");
     return 0;
 }
