@@ -38,55 +38,88 @@ For unreachable nodes, print -1.
 #include "DijkstraShortestReach.h"
 
 #include <vector>
+#include <queue>
 #include <iostream>
+#include <functional>
+#include <algorithm>
+#include <fstream>
+#include <limits>
 
 using namespace std;
 
+class Edge {
+public:
+	Edge(int i, double w) { id = i; weight = w; }
+	int id;
+	double weight;
+	bool operator<(const Edge& rhs) const {
+		if (this->weight > rhs.weight)
+			return true;
+		else
+			return false;
+	}
+};
+
 void DijkstraShortestReach::run()
 {
-    int T;
-    cin >> T;
+	/* Enter your code here. Read input from STDIN. Print output to STDOUT */
+	double inf = numeric_limits<double>::infinity();
+	ifstream in("Data/DijkstraShortestReach.txt");
+	int T;
+	in >> T;
 
-    for (int t = 0; t<T; t++) {
-        vector<vector<int>> adj;
-        vector<bool> marked;
-        vector<int> edgeTo;
-        vector<int> distTo;
+	for (int t = 0; t<T; t++) {
+		int N, M;
+		in >> N >> M;
+		vector<vector<Edge>> adj(N);
+		vector<bool> marked(N); fill(marked.begin(), marked.end(), false);
+		vector<int> edgeTo(N); fill(edgeTo.begin(), edgeTo.end(), -1);
+		vector<double> distTo(N); fill(distTo.begin(), distTo.end(), inf);
+		priority_queue<Edge, vector<Edge>> pq;
 
-        int N, M;
-        cin >> N >> M;
-        adj.resize(N);
-        marked.resize(N); fill(marked.begin(), marked.end(), false);
-        edgeTo.resize(N); fill(edgeTo.begin(), edgeTo.end(), -1);
-        distTo.resize(N); fill(distTo.begin(), distTo.end(), -1);
-        for (int m = 0; m<M; m++) {
-            int v, w;
-            cin >> v >> w;
-            adj[v - 1].push_back(w - 1);
-            adj[w - 1].push_back(v - 1);
-        }
-        int S;
-        cin >> S;
-        queue<int> bfsQueue;
-        bfsQueue.push(S - 1);
-        marked[S - 1] = true;
-        distTo[S - 1] = 0;
-        while (!bfsQueue.empty()) {
-            int s = bfsQueue.front();
-            bfsQueue.pop();
-            for_each(adj[s].begin(), adj[s].end(), [&](int i) {
-                if (!marked[i]) {
-                    bfsQueue.push(i);
-                    marked[i] = true;
-                    edgeTo[i] = s;
-                    distTo[i] = distTo[s] + 6;
-                }
-            });
-        }
-        for (int i = 0; i<N; i++) {
-            if (i != (S - 1))
-                cout << distTo[i] << " ";
-        }
-        cout << endl;
-    }
+		for (int m = 0; m<M; m++) {
+			int x, y, r;
+			in >> x >> y >> r;
+			adj[x - 1].push_back(Edge(y - 1,r)); // undirected
+			adj[y - 1].push_back(Edge(x - 1,r));
+		}
+
+		int S;
+		in >> S;
+
+		pq.push(Edge(S - 1,0));
+		distTo[S - 1] = 0;
+		while (!pq.empty()) {
+			Edge s = pq.top();
+			marked[s.id] = true;
+			pq.pop();
+			for (unsigned int i = 0; i< adj[s.id].size(); i++) {
+				Edge e = adj[s.id][i];
+				if (!marked[e.id]) {
+					pq.push(e);
+					if (distTo[e.id]>distTo[s.id] + e.weight) {
+						distTo[e.id] = distTo[s.id] + e.weight;
+					}
+				}
+			}
+		}
+
+		bool first = true;
+		for (int i = 0; i<N; i++) {
+			if (i != S - 1) {
+				if (!first)
+					cout << " ";
+
+				if (distTo[i] == inf) {
+					cout << "-1";
+					first = false;
+				}
+				else {
+					cout << distTo[i];
+					first = false;
+				}
+			}
+		}
+		cout << endl;
+	}
 }
