@@ -72,6 +72,12 @@
     <ClCompile Include="DijkstraShortestReach.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mysqrt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SynchronousShopping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAlgorithm.h">
@@ -126,6 +132,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DijkstraShortestReach.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mysqrt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SynchronousShopping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

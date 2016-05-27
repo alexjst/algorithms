@@ -73,6 +73,7 @@
     <ClCompile Include="InsertionSort.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MergeSort.cpp" />
+    <ClCompile Include="mysqrt.cpp" />
     <ClCompile Include="NonDivisableSubset.cpp" />
     <ClCompile Include="ParlindromePartitioning.cpp" />
     <ClCompile Include="ReverseLinkedList.cpp" />
@@ -82,6 +83,7 @@
     <ClCompile Include="SimpleExpressionEval.cpp" />
     <ClCompile Include="SortColors.cpp" />
     <ClCompile Include="StlAlgorithms.cpp" />
+    <ClCompile Include="SynchronousShopping.cpp" />
     <ClCompile Include="TreePreorderIteratively.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +95,7 @@
     <ClInclude Include="FirstMissingPositive.h" />
     <ClInclude Include="InsertionSort.h" />
     <ClInclude Include="MergeSort.h" />
+    <ClInclude Include="mysqrt.h" />
     <ClInclude Include="NonDivisableSubset.h" />
     <ClInclude Include="ParlindromePartitioning.h" />
     <ClInclude Include="ReverseLinkedList.h" />
@@ -102,6 +105,7 @@
     <ClInclude Include="SimpleExpressionEval.h" />
     <ClInclude Include="SortColors.h" />
     <ClInclude Include="StlAlgorithms.h" />
+    <ClInclude Include="SynchronousShopping.h" />
     <ClInclude Include="TreePreorderIteratively.h" />
   </ItemGroup>
   <ItemGroup>

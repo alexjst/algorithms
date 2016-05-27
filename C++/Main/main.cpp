@@ -17,6 +17,8 @@
 #include "BfsShortestReach.h"
 #include "StlAlgorithms.h"
 #include "DijkstraShortestReach.h"
+#include "mysqrt.h"
+#include "SynchronousShopping.h"
 
 int main()
 {
@@ -33,8 +35,10 @@ int main()
     //ParlindromePartitioning algo = ParlindromePartitioning();
     //NonDivisableSubset algo = NonDivisableSubset();
     //BfsShortestReach algo = BfsShortestReach();
-    DijkstraShortestReach algo = DijkstraShortestReach();
+    //DijkstraShortestReach algo = DijkstraShortestReach();
 	//StlAlgorithms algo = StlAlgorithms();
+	//mysqrt algo = mysqrt();
+	SynchronousShopping algo = SynchronousShopping();
 	algo.run();
 
 	std::cout << std::endl;
