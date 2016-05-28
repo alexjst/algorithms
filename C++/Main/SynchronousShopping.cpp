@@ -69,9 +69,15 @@ Little Cat can choose the following route: , and buy fish from the fishmonger at
 
 using namespace std;
 
+struct Link {
+    int id;
+    int weight;
+    Link(int _id, int _weight) { id = _id; weight = _weight; }
+};
+
 struct Node {
 	int id;
-	vector<pair<int, int> > adj; // center id and distance/weight to it
+	vector<Link> adj; // center id and distance/weight to it
 	int dist; // dist to single source
 	set<int> fish;
 
@@ -84,11 +90,12 @@ struct Node {
 	}
 };
 
-Node joinFish(const Node& from, const Node& to, const int weight) {
-	Node n = to;
-	n.fish.insert(from.fish.begin(), from.fish.end());
-	n.dist = from.dist + weight;
-	return n;
+// travel from one node to another, with weight being the link
+Node travel(const Node& from, const Node& to, const int weight) {
+	Node node = to;
+	node.fish.insert(from.fish.begin(), from.fish.end());
+	node.dist = from.dist + weight;
+	return node;
 }
 
 void SynchronousShopping::run()
@@ -115,8 +122,8 @@ void SynchronousShopping::run()
 	for (int m = 0; m < M; m++) {
 		int x, y, z;
 		in >> x >> y >> z;
-		graph[x - 1].adj.push_back(make_pair(y - 1, z));
-		graph[y - 1].adj.push_back(make_pair(x - 1, z));
+		graph[x - 1].adj.push_back(Link(y - 1, z));
+		graph[y - 1].adj.push_back(Link(x - 1, z));
 	}
 	in.close();
 
@@ -130,24 +137,30 @@ void SynchronousShopping::run()
 	pq.push(graph[0]);
 	while (!pq.empty()) {
 		Node cur = pq.top();
-		if (cur.id == N - 1) {
-			for (auto dest : destinations) {
-				// check if dest and cur have combined fish set complete, if so, return results. 
-				Node checker = joinFish(cur, dest, 0);
-				if (checker.fish.size() == K) {
-					result = max(cur.dist, dest.dist);
-					break; // break out two loops
-				}
-			}
+        pq.pop();
+        if (cur.id == N - 1) {
+            if (cur.fish.size() == K) { // the two cats could use the same path, reaching solution
+                result = cur.dist;
+                break;
+            }
+            else {
+                for (auto dest : destinations) {
+                    // check if dest and cur have combined fish set complete, if so, return results. 
+                    Node checker = travel(cur, dest, 0);
+                    if (checker.fish.size() == K) {
+                        result = max(cur.dist, dest.dist);
+                        break; // break out two loops
+                    }
+                }
+            }
 
 			if (result > 0) // break out the outer loop when result is found
 				break;
 
 			destinations.push_back(cur);
 		}
-		pq.pop();
 		for (auto nbr : cur.adj) {
-			Node n = joinFish(cur, graph[nbr.first], nbr.second);
+			Node n = travel(cur, graph[nbr.id], nbr.weight);
 			pq.push(n);
 		}
 	}
