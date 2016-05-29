@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "LeetCodeShuffle.h" // this will generate 10 random problem to solve
+
 #include "SelectionSort.h"
 #include "InsertionSort.h"
 #include "MergeSort.h"
@@ -19,9 +21,13 @@
 #include "DijkstraShortestReach.h"
 #include "mysqrt.h"
 #include "SynchronousShopping.h"
+#include "MergeTwoSortedList.h"
+#include "NextPermutation.h"
 
 int main()
 {
+    //LeetCodeShuffle algo = LeetCodeShuffle();
+
     //SelectionSort algo1 = SelectionSort();
     //InsertionSort algo = InsertionSort();
     //MergeSort algo3 = MergeSort();
@@ -38,7 +44,9 @@ int main()
     //DijkstraShortestReach algo = DijkstraShortestReach();
 	//StlAlgorithms algo = StlAlgorithms();
 	//mysqrt algo = mysqrt();
-	SynchronousShopping algo = SynchronousShopping();
+	//SynchronousShopping algo = SynchronousShopping();
+    //MergeTwoSortedList algo = MergeTwoSortedList();
+    NextPermutation algo = NextPermutation();
 	algo.run();
 
 	std::cout << std::endl;
