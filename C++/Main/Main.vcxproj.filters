@@ -87,6 +87,9 @@
     <ClCompile Include="LeetCodeShuffle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SingleNumber_II.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAlgorithm.h">
@@ -156,6 +159,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LeetCodeShuffle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SingleNumber_II.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

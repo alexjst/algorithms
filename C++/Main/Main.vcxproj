@@ -84,6 +84,7 @@
     <ClCompile Include="SelectionSort.cpp" />
     <ClCompile Include="LeetCodeShuffle.cpp" />
     <ClCompile Include="SimpleExpressionEval.cpp" />
+    <ClCompile Include="SingleNumber_II.cpp" />
     <ClCompile Include="SortColors.cpp" />
     <ClCompile Include="StlAlgorithms.cpp" />
     <ClCompile Include="SynchronousShopping.cpp" />
@@ -109,6 +110,7 @@
     <ClInclude Include="SelectionSort.h" />
     <ClInclude Include="LeetCodeShuffle.h" />
     <ClInclude Include="SimpleExpressionEval.h" />
+    <ClInclude Include="SingleNumber_II.h" />
     <ClInclude Include="SortColors.h" />
     <ClInclude Include="StlAlgorithms.h" />
     <ClInclude Include="SynchronousShopping.h" />

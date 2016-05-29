@@ -23,6 +23,7 @@
 #include "SynchronousShopping.h"
 #include "MergeTwoSortedList.h"
 #include "NextPermutation.h"
+#include "SingleNumber_II.h"
 
 int main()
 {
@@ -46,7 +47,8 @@ int main()
 	//mysqrt algo = mysqrt();
 	//SynchronousShopping algo = SynchronousShopping();
     //MergeTwoSortedList algo = MergeTwoSortedList();
-    NextPermutation algo = NextPermutation();
+    //NextPermutation algo = NextPermutation();
+    SingleNumber_II algo = SingleNumber_II();
 	algo.run();
 
 	std::cout << std::endl;
