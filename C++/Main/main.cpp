@@ -24,6 +24,8 @@
 #include "MergeTwoSortedList.h"
 #include "NextPermutation.h"
 #include "SingleNumber_II.h"
+#include "SwapNodesInPairs.h"
+#include "ReorderList.h"
 
 int main()
 {
@@ -48,7 +50,9 @@ int main()
 	//SynchronousShopping algo = SynchronousShopping();
     //MergeTwoSortedList algo = MergeTwoSortedList();
     //NextPermutation algo = NextPermutation();
-    SingleNumber_II algo = SingleNumber_II();
+    //SingleNumber_II algo = SingleNumber_II();
+	//SwapNodesInPairs algo = SwapNodesInPairs();
+	ReorderList algo = ReorderList();
 	algo.run();
 
 	std::cout << std::endl;

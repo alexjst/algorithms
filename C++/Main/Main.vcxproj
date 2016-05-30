@@ -78,6 +78,7 @@
     <ClCompile Include="NextPermutation.cpp" />
     <ClCompile Include="NonDivisableSubset.cpp" />
     <ClCompile Include="ParlindromePartitioning.cpp" />
+    <ClCompile Include="ReorderList.cpp" />
     <ClCompile Include="ReverseLinkedList.cpp" />
     <ClCompile Include="Search2DMatrix.cpp" />
     <ClCompile Include="SearchRangeFromSortedArray.cpp" />
@@ -87,6 +88,7 @@
     <ClCompile Include="SingleNumber_II.cpp" />
     <ClCompile Include="SortColors.cpp" />
     <ClCompile Include="StlAlgorithms.cpp" />
+    <ClCompile Include="SwapNodesInPairs.cpp" />
     <ClCompile Include="SynchronousShopping.cpp" />
     <ClCompile Include="TreePreorderIteratively.cpp" />
   </ItemGroup>
@@ -104,6 +106,7 @@
     <ClInclude Include="NextPermutation.h" />
     <ClInclude Include="NonDivisableSubset.h" />
     <ClInclude Include="ParlindromePartitioning.h" />
+    <ClInclude Include="ReorderList.h" />
     <ClInclude Include="ReverseLinkedList.h" />
     <ClInclude Include="Search2DMatrix.h" />
     <ClInclude Include="SearchRangeFromSortedArray.h" />
@@ -113,6 +116,7 @@
     <ClInclude Include="SingleNumber_II.h" />
     <ClInclude Include="SortColors.h" />
     <ClInclude Include="StlAlgorithms.h" />
+    <ClInclude Include="SwapNodesInPairs.h" />
     <ClInclude Include="SynchronousShopping.h" />
     <ClInclude Include="TreePreorderIteratively.h" />
   </ItemGroup>
