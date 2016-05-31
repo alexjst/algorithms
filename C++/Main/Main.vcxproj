@@ -64,8 +64,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BalancedBinaryTree.cpp" />
     <ClCompile Include="BaseAlgorithm.cpp" />
     <ClCompile Include="BfsShortestReach.cpp" />
+    <ClCompile Include="BinaryTreeLevelOrderII.cpp" />
     <ClCompile Include="BuySell.cpp" />
     <ClCompile Include="CountOnesFromSequence.cpp" />
     <ClCompile Include="DijkstraShortestReach.cpp" />
@@ -93,8 +95,10 @@
     <ClCompile Include="TreePreorderIteratively.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BalancedBinaryTree.h" />
     <ClInclude Include="BaseAlgorithm.h" />
     <ClInclude Include="BfsShortestReach.h" />
+    <ClInclude Include="BinaryTreeLevelOrderII.h" />
     <ClInclude Include="BuySell.h" />
     <ClInclude Include="CountOnesFromSequence.h" />
     <ClInclude Include="DijkstraShortestReach.h" />

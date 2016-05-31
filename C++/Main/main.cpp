@@ -26,6 +26,9 @@
 #include "SingleNumber_II.h"
 #include "SwapNodesInPairs.h"
 #include "ReorderList.h"
+#include "BinaryTreeLevelOrderII.h"
+#include "BalancedBinaryTree.h"
+
 
 int main()
 {
@@ -52,8 +55,10 @@ int main()
     //NextPermutation algo = NextPermutation();
     //SingleNumber_II algo = SingleNumber_II();
 	//SwapNodesInPairs algo = SwapNodesInPairs();
-	ReorderList algo = ReorderList();
-	algo.run();
+	//ReorderList algo = ReorderList();
+    //BinaryTreeLevelOrderII algo = BinaryTreeLevelOrderII();
+    BalancedBinaryTree algo;
+    algo.run();
 
 	std::cout << std::endl;
 	system("pause");

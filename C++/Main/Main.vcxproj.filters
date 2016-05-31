@@ -96,6 +96,12 @@
     <ClCompile Include="ReorderList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BinaryTreeLevelOrderII.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BalancedBinaryTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAlgorithm.h">
@@ -174,6 +180,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ReorderList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryTreeLevelOrderII.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BalancedBinaryTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
