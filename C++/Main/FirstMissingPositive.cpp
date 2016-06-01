@@ -15,7 +15,8 @@ void FirstMissingPositive::run()
 	int len = sizeof(data) / sizeof(int);
 
     for (int i = 0; i < len; i++) {
-        while (data[i] >= 1 && data[i] <= len && data[i]!=data[data[i]-1]) {
+        //while (data[i] >= 1 && data[i] <= len && data[i]!=data[data[i]-1]) { // both this line and the following line works!
+		while (data[i] >= 1 && data[i] <= len && data[i] != i+1) {
             swap(data[i], data[data[i]-1]);
         }
     }

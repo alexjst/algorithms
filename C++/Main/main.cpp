@@ -38,7 +38,7 @@ int main()
     //InsertionSort algo = InsertionSort();
     //MergeSort algo3 = MergeSort();
 	//SimpleExpressionEval algo = SimpleExpressionEval();
-    //FirstMissingPositive algo = FirstMissingPositive();
+    FirstMissingPositive algo = FirstMissingPositive();
 	//SortColors algo = SortColors();
 	//SearchRangeFromSortedArray algo = SearchRangeFromSortedArray();
     //Search2DMatrix algo = Search2DMatrix();
@@ -57,7 +57,7 @@ int main()
 	//SwapNodesInPairs algo = SwapNodesInPairs();
 	//ReorderList algo = ReorderList();
     //BinaryTreeLevelOrderII algo = BinaryTreeLevelOrderII();
-    BalancedBinaryTree algo;
+    //BalancedBinaryTree algo;
     algo.run();
 
 	std::cout << std::endl;

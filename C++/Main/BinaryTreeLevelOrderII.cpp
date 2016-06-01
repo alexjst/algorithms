@@ -22,45 +22,32 @@ return its bottom-up level order traversal as:
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 using namespace std;
 
 struct Node {
-    int data;
-    Node* left;
-    Node* right;
-    Node(int d) :data(d), left(nullptr), right(nullptr) {}
+	int data;
+	Node* left;
+	Node* right;
+	Node(int d) : data(d), left(nullptr), right(nullptr) {};
 };
 
-void levelOrder(Node* root, vector<vector<int> >& result, int level)
-{
-    queue<Node*>* q1 = new queue<Node*>();
-    queue<Node*>* q2 = new queue<Node*>();
-
-    q1->push(root);
-
-    while (!q1->empty()) {
-        Node* n = q1->front();
-        q1->pop();
-        result.resize(level + 1);
-        result[level].push_back(n->data);
-        if (n->left) q2->push(n->left);
-        if (n->right) q2->push(n->right);
-        if (q1->empty()) {
-            if (q2->empty()) return;
-            swap(q1, q2); ++level;
-        }
-    }
-
-    reverse(result.begin(), result.end());
+void dfs(Node* parent, vector<vector<int> >& result, int level) {
+	if (!parent) return;
+	if (level == result.size())
+		result.push_back(vector<int>());
+	result[level].push_back(parent->data);
+	dfs(parent->left, result, level + 1);
+	dfs(parent->right, result, level + 1);
 }
 
-vector<vector<int> >& bottomUpLevelOrder(Node* root)
-{
-    vector<vector<int> >* result = new vector<vector<int> >();
-    if (root)	levelOrder(root, *result, 0);
-
-    return *result;
+vector<vector<int>>  bottomUpLevelOrder(Node* root) {
+	vector<vector<int> > result;
+	dfs(root, result, 0);
+	reverse(result.begin(), result.end());
+	return result;
 }
+
 
 void BinaryTreeLevelOrderII::run()
 {
@@ -69,11 +56,11 @@ void BinaryTreeLevelOrderII::run()
     Node n2(9); n1.left = &n2;
     Node n3(20); n1.right = &n3;
     Node n4(15); n2.left = &n4;
-    Node n5(7); n2.left = &n5;
+    Node n5(7); n2.right = &n5;
 
     auto result = bottomUpLevelOrder(&n1);
     for (auto level : result) {
-        cout << "------------" << endl;
+        cout << "\n------------" << endl;
         for (auto d : level) cout << d << " ";
     }
 }
