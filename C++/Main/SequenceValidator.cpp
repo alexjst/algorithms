@@ -3,9 +3,11 @@
 #include <vector>
 #include <algorithm>
 
+typedef int8_t BYTE;
+
 using namespace std;
 
-int ones(int8_t& input) {
+int ones(BYTE input) {
     int count = 0;
     for (int i = 1; i <= 8; i++) {
         if (((input >> (8 - i)) & 1) == 1)

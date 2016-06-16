@@ -1,3 +1,24 @@
+/*
+Study poing: Binary Search
+
+Binary Search uses 3-way compare as shown below:
+
+int binary_search(vector<int> input, int target)
+{
+    int lo = 0, hi = input.size()-1;
+    while (lo<=hi) {
+        int mid = (lo+hi)/2;
+        if (input[mid]<target) lo = mid+1;
+        else if (input[mid]>target) hi = mid-1;
+        else return mid;
+    }
+    return -1; // not found
+}
+
+Then, starting from Binary Search, we have a varied version called "rotated sorted array's binary search, where the given input array is sorted but roated"
+
+*/
+
 #include "SearchInRotatedSortedArray_II.h"
 #include <vector>
 #include <iostream>
