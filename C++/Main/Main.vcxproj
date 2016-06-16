@@ -83,6 +83,7 @@
     <ClCompile Include="ReorderList.cpp" />
     <ClCompile Include="ReverseLinkedList.cpp" />
     <ClCompile Include="Search2DMatrix.cpp" />
+    <ClCompile Include="SearchInRotatedSortedArray_II.cpp" />
     <ClCompile Include="SearchRangeFromSortedArray.cpp" />
     <ClCompile Include="SelectionSort.cpp" />
     <ClCompile Include="LeetCodeShuffle.cpp" />
@@ -114,6 +115,7 @@
     <ClInclude Include="ReorderList.h" />
     <ClInclude Include="ReverseLinkedList.h" />
     <ClInclude Include="Search2DMatrix.h" />
+    <ClInclude Include="SearchInRotatedSortedArray_II.h" />
     <ClInclude Include="SearchRangeFromSortedArray.h" />
     <ClInclude Include="SelectionSort.h" />
     <ClInclude Include="LeetCodeShuffle.h" />

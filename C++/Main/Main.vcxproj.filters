@@ -102,7 +102,11 @@
     <ClCompile Include="BalancedBinaryTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="SequenceValidator.cpp">
+=======
+    <ClCompile Include="SearchInRotatedSortedArray_II.cpp">
+>>>>>>> 0b5c7ac71651de26fe6a8a7092b501dea6f17899
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -192,6 +196,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SequenceValidator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchInRotatedSortedArray_II.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
