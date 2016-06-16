@@ -102,6 +102,9 @@
     <ClCompile Include="BalancedBinaryTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SearchInRotatedSortedArray_II.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAlgorithm.h">
@@ -186,6 +189,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BalancedBinaryTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchInRotatedSortedArray_II.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -28,6 +28,7 @@
 #include "ReorderList.h"
 #include "BinaryTreeLevelOrderII.h"
 #include "BalancedBinaryTree.h"
+#include "SearchInRotatedSortedArray_II.h"
 
 
 int main()
@@ -38,7 +39,7 @@ int main()
     //InsertionSort algo = InsertionSort();
     //MergeSort algo3 = MergeSort();
 	//SimpleExpressionEval algo = SimpleExpressionEval();
-    FirstMissingPositive algo = FirstMissingPositive();
+    //FirstMissingPositive algo = FirstMissingPositive();
 	//SortColors algo = SortColors();
 	//SearchRangeFromSortedArray algo = SearchRangeFromSortedArray();
     //Search2DMatrix algo = Search2DMatrix();
@@ -58,6 +59,7 @@ int main()
 	//ReorderList algo = ReorderList();
     //BinaryTreeLevelOrderII algo = BinaryTreeLevelOrderII();
     //BalancedBinaryTree algo;
+	SearchInRotatedSortedArray_II algo;
     algo.run();
 
 	std::cout << std::endl;
