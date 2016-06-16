@@ -86,6 +86,7 @@
     <ClCompile Include="SearchRangeFromSortedArray.cpp" />
     <ClCompile Include="SelectionSort.cpp" />
     <ClCompile Include="LeetCodeShuffle.cpp" />
+    <ClCompile Include="SequenceValidator.cpp" />
     <ClCompile Include="SimpleExpressionEval.cpp" />
     <ClCompile Include="SingleNumber_II.cpp" />
     <ClCompile Include="SortColors.cpp" />
@@ -116,6 +117,7 @@
     <ClInclude Include="SearchRangeFromSortedArray.h" />
     <ClInclude Include="SelectionSort.h" />
     <ClInclude Include="LeetCodeShuffle.h" />
+    <ClInclude Include="SequenceValidator.h" />
     <ClInclude Include="SimpleExpressionEval.h" />
     <ClInclude Include="SingleNumber_II.h" />
     <ClInclude Include="SortColors.h" />
