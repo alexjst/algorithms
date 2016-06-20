@@ -29,37 +29,42 @@
 #include "BinaryTreeLevelOrderII.h"
 #include "BalancedBinaryTree.h"
 #include "SearchInRotatedSortedArray_II.h"
-
+#include "FlattenBinaryTreeToLinkedList.h"
+#include "UniqueWordAbbreviation.h"
+#include "BinaryTreeLongestConsecutiveSequence.h"
 
 int main()
 {
-    //LeetCodeShuffle algo = LeetCodeShuffle();
+    //LeetCodeShuffle algo;
 
-    //SelectionSort algo1 = SelectionSort();
-    //InsertionSort algo = InsertionSort();
-    //MergeSort algo3 = MergeSort();
-	//SimpleExpressionEval algo = SimpleExpressionEval();
-    //FirstMissingPositive algo = FirstMissingPositive();
-	//SortColors algo = SortColors();
-	//SearchRangeFromSortedArray algo = SearchRangeFromSortedArray();
-    //Search2DMatrix algo = Search2DMatrix();
-	//TreePreorderIteratively algo = TreePreorderIteratively();
-	//ReverseLinkedList algo = ReverseLinkedList();
-    //ParlindromePartitioning algo = ParlindromePartitioning();
-    //NonDivisableSubset algo = NonDivisableSubset();
-    //BfsShortestReach algo = BfsShortestReach();
-    //DijkstraShortestReach algo = DijkstraShortestReach();
-	//StlAlgorithms algo = StlAlgorithms();
-	//mysqrt algo = mysqrt();
-	//SynchronousShopping algo = SynchronousShopping();
-    //MergeTwoSortedList algo = MergeTwoSortedList();
-    //NextPermutation algo = NextPermutation();
-    //SingleNumber_II algo = SingleNumber_II();
-	//SwapNodesInPairs algo = SwapNodesInPairs();
-	//ReorderList algo = ReorderList();
-    //BinaryTreeLevelOrderII algo = BinaryTreeLevelOrderII();
+    //SelectionSort algo;
+    //InsertionSort algo;
+    //MergeSort algo;
+	//SimpleExpressionEval algo;
+    //FirstMissingPositive algo;
+	//SortColors algo;
+	//SearchRangeFromSortedArray algo;
+    //Search2DMatrix algo;
+	//TreePreorderIteratively algo;
+	//ReverseLinkedList algo;
+    //ParlindromePartitioning algo;
+    //NonDivisableSubset algo;
+    //BfsShortestReach algo;
+    //DijkstraShortestReach algo;
+	//StlAlgorithms algo;
+	//mysqrt algo;
+	//SynchronousShopping algo;
+    //MergeTwoSortedList algo;
+    //NextPermutation algo;
+    //SingleNumber_II algo;
+	//SwapNodesInPairs algo;
+	//ReorderList algo;
+    //BinaryTreeLevelOrderII algo;
     //BalancedBinaryTree algo;
-	SearchInRotatedSortedArray_II algo;
+	//SearchInRotatedSortedArray_II algo;
+    //FlattenBinaryTreeToLinkedList algo;
+    //UniqueWordAbbreviation algo;
+    BinaryTreeLongestConsecutiveSequence algo;
     algo.run();
 
 	std::cout << std::endl;

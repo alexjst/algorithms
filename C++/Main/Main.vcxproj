@@ -68,10 +68,12 @@
     <ClCompile Include="BaseAlgorithm.cpp" />
     <ClCompile Include="BfsShortestReach.cpp" />
     <ClCompile Include="BinaryTreeLevelOrderII.cpp" />
+    <ClCompile Include="BinaryTreeLongestConsecutiveSequence.cpp" />
     <ClCompile Include="BuySell.cpp" />
     <ClCompile Include="CountOnesFromSequence.cpp" />
     <ClCompile Include="DijkstraShortestReach.cpp" />
     <ClCompile Include="FirstMissingPositive.cpp" />
+    <ClCompile Include="FlattenBinaryTreeToLinkedList.cpp" />
     <ClCompile Include="InsertionSort.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MergeSort.cpp" />
@@ -95,16 +97,19 @@
     <ClCompile Include="SwapNodesInPairs.cpp" />
     <ClCompile Include="SynchronousShopping.cpp" />
     <ClCompile Include="TreePreorderIteratively.cpp" />
+    <ClCompile Include="UniqueWordAbbreviation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BalancedBinaryTree.h" />
     <ClInclude Include="BaseAlgorithm.h" />
     <ClInclude Include="BfsShortestReach.h" />
     <ClInclude Include="BinaryTreeLevelOrderII.h" />
+    <ClInclude Include="BinaryTreeLongestConsecutiveSequence.h" />
     <ClInclude Include="BuySell.h" />
     <ClInclude Include="CountOnesFromSequence.h" />
     <ClInclude Include="DijkstraShortestReach.h" />
     <ClInclude Include="FirstMissingPositive.h" />
+    <ClInclude Include="FlattenBinaryTreeToLinkedList.h" />
     <ClInclude Include="InsertionSort.h" />
     <ClInclude Include="MergeSort.h" />
     <ClInclude Include="MergeTwoSortedList.h" />
@@ -127,6 +132,7 @@
     <ClInclude Include="SwapNodesInPairs.h" />
     <ClInclude Include="SynchronousShopping.h" />
     <ClInclude Include="TreePreorderIteratively.h" />
+    <ClInclude Include="UniqueWordAbbreviation.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Data\DijkstraShortestReach.txt" />

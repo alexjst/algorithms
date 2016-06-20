@@ -1,210 +1,77 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="BalancedBinaryTree.cpp" />
+    <ClCompile Include="BaseAlgorithm.cpp" />
+    <ClCompile Include="BfsShortestReach.cpp" />
+    <ClCompile Include="BinaryTreeLevelOrderII.cpp" />
+    <ClCompile Include="BuySell.cpp" />
+    <ClCompile Include="CountOnesFromSequence.cpp" />
+    <ClCompile Include="DijkstraShortestReach.cpp" />
+    <ClCompile Include="FirstMissingPositive.cpp" />
+    <ClCompile Include="InsertionSort.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MergeSort.cpp" />
+    <ClCompile Include="MergeTwoSortedList.cpp" />
+    <ClCompile Include="mysqrt.cpp" />
+    <ClCompile Include="NextPermutation.cpp" />
+    <ClCompile Include="NonDivisableSubset.cpp" />
+    <ClCompile Include="ParlindromePartitioning.cpp" />
+    <ClCompile Include="ReorderList.cpp" />
+    <ClCompile Include="ReverseLinkedList.cpp" />
+    <ClCompile Include="Search2DMatrix.cpp" />
+    <ClCompile Include="SearchInRotatedSortedArray_II.cpp" />
+    <ClCompile Include="SearchRangeFromSortedArray.cpp" />
+    <ClCompile Include="SelectionSort.cpp" />
+    <ClCompile Include="LeetCodeShuffle.cpp" />
+    <ClCompile Include="SequenceValidator.cpp" />
+    <ClCompile Include="SimpleExpressionEval.cpp" />
+    <ClCompile Include="SingleNumber_II.cpp" />
+    <ClCompile Include="SortColors.cpp" />
+    <ClCompile Include="StlAlgorithms.cpp" />
+    <ClCompile Include="SwapNodesInPairs.cpp" />
+    <ClCompile Include="SynchronousShopping.cpp" />
+    <ClCompile Include="TreePreorderIteratively.cpp" />
+    <ClCompile Include="FlattenBinaryTreeToLinkedList.cpp" />
+    <ClCompile Include="UniqueWordAbbreviation.cpp" />
+    <ClCompile Include="BinaryTreeLongestConsecutiveSequence.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseAlgorithm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SelectionSort.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InsertionSort.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MergeSort.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BuySell.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CountOnesFromSequence.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleExpressionEval.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FirstMissingPositive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SortColors.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SearchRangeFromSortedArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Search2DMatrix.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TreePreorderIteratively.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ReverseLinkedList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParlindromePartitioning.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NonDivisableSubset.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BfsShortestReach.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StlAlgorithms.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DijkstraShortestReach.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mysqrt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SynchronousShopping.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MergeTwoSortedList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NextPermutation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LeetCodeShuffle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SingleNumber_II.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SwapNodesInPairs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ReorderList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BinaryTreeLevelOrderII.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BalancedBinaryTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-<<<<<<< HEAD
-    <ClCompile Include="SequenceValidator.cpp">
-=======
-    <ClCompile Include="SearchInRotatedSortedArray_II.cpp">
->>>>>>> 0b5c7ac71651de26fe6a8a7092b501dea6f17899
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClInclude Include="BalancedBinaryTree.h" />
+    <ClInclude Include="BaseAlgorithm.h" />
+    <ClInclude Include="BfsShortestReach.h" />
+    <ClInclude Include="BinaryTreeLevelOrderII.h" />
+    <ClInclude Include="BuySell.h" />
+    <ClInclude Include="CountOnesFromSequence.h" />
+    <ClInclude Include="DijkstraShortestReach.h" />
+    <ClInclude Include="FirstMissingPositive.h" />
+    <ClInclude Include="InsertionSort.h" />
+    <ClInclude Include="MergeSort.h" />
+    <ClInclude Include="MergeTwoSortedList.h" />
+    <ClInclude Include="mysqrt.h" />
+    <ClInclude Include="NextPermutation.h" />
+    <ClInclude Include="NonDivisableSubset.h" />
+    <ClInclude Include="ParlindromePartitioning.h" />
+    <ClInclude Include="ReorderList.h" />
+    <ClInclude Include="ReverseLinkedList.h" />
+    <ClInclude Include="Search2DMatrix.h" />
+    <ClInclude Include="SearchInRotatedSortedArray_II.h" />
+    <ClInclude Include="SearchRangeFromSortedArray.h" />
+    <ClInclude Include="SelectionSort.h" />
+    <ClInclude Include="LeetCodeShuffle.h" />
+    <ClInclude Include="SequenceValidator.h" />
+    <ClInclude Include="SimpleExpressionEval.h" />
+    <ClInclude Include="SingleNumber_II.h" />
+    <ClInclude Include="SortColors.h" />
+    <ClInclude Include="StlAlgorithms.h" />
+    <ClInclude Include="SwapNodesInPairs.h" />
+    <ClInclude Include="SynchronousShopping.h" />
+    <ClInclude Include="TreePreorderIteratively.h" />
+    <ClInclude Include="FlattenBinaryTreeToLinkedList.h" />
+    <ClInclude Include="UniqueWordAbbreviation.h" />
+    <ClInclude Include="BinaryTreeLongestConsecutiveSequence.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseAlgorithm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SelectionSort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InsertionSort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MergeSort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BuySell.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CountOnesFromSequence.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleExpressionEval.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FirstMissingPositive.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SortColors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SearchRangeFromSortedArray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Search2DMatrix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TreePreorderIteratively.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReverseLinkedList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ParlindromePartitioning.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NonDivisableSubset.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BfsShortestReach.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StlAlgorithms.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DijkstraShortestReach.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mysqrt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SynchronousShopping.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MergeTwoSortedList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NextPermutation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LeetCodeShuffle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SingleNumber_II.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SwapNodesInPairs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReorderList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BinaryTreeLevelOrderII.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BalancedBinaryTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SequenceValidator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SearchInRotatedSortedArray_II.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Data\DijkstraShortestReach.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
+    <Text Include="Data\DijkstraShortestReach.txt" />
   </ItemGroup>
 </Project>
