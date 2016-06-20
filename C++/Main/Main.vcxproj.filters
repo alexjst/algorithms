@@ -35,6 +35,7 @@
     <ClCompile Include="FlattenBinaryTreeToLinkedList.cpp" />
     <ClCompile Include="UniqueWordAbbreviation.cpp" />
     <ClCompile Include="BinaryTreeLongestConsecutiveSequence.cpp" />
+    <ClCompile Include="FindMedianFromDataStream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BalancedBinaryTree.h" />
@@ -70,6 +71,7 @@
     <ClInclude Include="FlattenBinaryTreeToLinkedList.h" />
     <ClInclude Include="UniqueWordAbbreviation.h" />
     <ClInclude Include="BinaryTreeLongestConsecutiveSequence.h" />
+    <ClInclude Include="FindMedianFromDataStream.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Data\DijkstraShortestReach.txt" />

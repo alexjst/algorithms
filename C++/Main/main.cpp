@@ -32,6 +32,7 @@
 #include "FlattenBinaryTreeToLinkedList.h"
 #include "UniqueWordAbbreviation.h"
 #include "BinaryTreeLongestConsecutiveSequence.h"
+#include "FindMedianFromDataStream.h"
 
 int main()
 {
@@ -64,7 +65,8 @@ int main()
 	//SearchInRotatedSortedArray_II algo;
     //FlattenBinaryTreeToLinkedList algo;
     //UniqueWordAbbreviation algo;
-    BinaryTreeLongestConsecutiveSequence algo;
+    //BinaryTreeLongestConsecutiveSequence algo;
+    FindMedianFromDataStream algo;
     algo.run();
 
 	std::cout << std::endl;

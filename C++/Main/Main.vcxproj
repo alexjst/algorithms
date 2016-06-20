@@ -72,6 +72,7 @@
     <ClCompile Include="BuySell.cpp" />
     <ClCompile Include="CountOnesFromSequence.cpp" />
     <ClCompile Include="DijkstraShortestReach.cpp" />
+    <ClCompile Include="FindMedianFromDataStream.cpp" />
     <ClCompile Include="FirstMissingPositive.cpp" />
     <ClCompile Include="FlattenBinaryTreeToLinkedList.cpp" />
     <ClCompile Include="InsertionSort.cpp" />
@@ -108,6 +109,7 @@
     <ClInclude Include="BuySell.h" />
     <ClInclude Include="CountOnesFromSequence.h" />
     <ClInclude Include="DijkstraShortestReach.h" />
+    <ClInclude Include="FindMedianFromDataStream.h" />
     <ClInclude Include="FirstMissingPositive.h" />
     <ClInclude Include="FlattenBinaryTreeToLinkedList.h" />
     <ClInclude Include="InsertionSort.h" />
