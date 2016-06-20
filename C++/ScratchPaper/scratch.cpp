@@ -1,43 +1,67 @@
-#include <cmath>
-#include <cstdio>
-#include <vector>
-#include <iostream>
-#include <fstream>
+#include <queue>
+#include <functional>
 #include <algorithm>
+#include <iostream>
 
 using namespace std;
 
-int main() {
-	/* Enter your code here. Read input from STDIN. Print output to STDOUT */
-	ifstream in("d:/test.txt");
-	int n, k, a;
-	in >> n >> k;
+class MedianFinder {
+public:
 
-    // will be init to 0 when allocated on the stack
-	vector<int> flags(k);
+	// Adds a number into the data structure.
+	void addNum(int num) {
+		int leftSize = left.size();
+		int rightSize = right.size();
 
-	for (int i = 0; i<n; i++) {
-		in >> a;
-		a = a % k;
-		flags[a] += 1;
+		if (leftSize == 0) {
+			if (rightSize == 0) right.push(num);
+			else {
+				int rightTop = right.top();
+				if (num <= rightTop) left.push(num);
+				else {
+					right.pop();
+					left.push(rightTop);
+					right.push(num);
+				}
+			}
+		}
+		else {
+			int leftTop = left.top();
+			int rightTop = right.top();
+			if (leftSize == rightSize) {
+				if (leftTop <= num) right.push(num);
+				else {
+					left.pop(); left.push(num); right.push(leftTop);
+				}
+			}
+			else {
+				if (num <= rightTop) left.push(num);
+				else {
+					right.pop(); right.push(num); left.push(rightTop);
+				}
+			}
+		}
 	}
 
-	int result = 0;
-	if (flags[0] >= 1)
-		result += 1;
-
-	for (int i = 1, j=k-1; i<=j; i++, j--) {
-        if (i == j)
-            result += 1;
-        else
-            result += max(flags[i], flags[j]);
+	// Returns the median of current data stream
+	double findMedian() {
+		if (left.size() == right.size()) return (left.top() + right.top()) / 2.0;
+		else return (double)right.top();
 	}
+private:
+	priority_queue<int> left;
+	priority_queue<int, vector<int>, greater<int> > right;
+};
 
-	cout << result << endl;
 
-	in.close();
+
+int main()
+{
+	MedianFinder inst;
+	inst.addNum(2);
+	inst.addNum(1);
+	inst.addNum(3);
+	cout << inst.findMedian() << endl;
 
 	system("pause");
-
-	return 0;
 }
