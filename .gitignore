@@ -251,3 +251,6 @@ paket-files/
 .idea/
 *.sln.iml
 
+# Mac specific
+.DS_store
+
