@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - DedupArray",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.src.DedupArray"
+        }
+    ]
+}
