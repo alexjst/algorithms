@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - DedupArray2",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.src.DedupArray2"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - DedupArray",
             "request": "launch",
             "mainClass": "alexyang.algorithms.Java.src.DedupArray"
