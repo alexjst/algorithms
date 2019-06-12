@@ -257,3 +257,6 @@ paket-files/
 # Windows specific
 *.obj
 *.exe
+
+# Java specific
+*.class
