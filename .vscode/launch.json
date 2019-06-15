@@ -2,6 +2,24 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - RotateArray",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.src.RotateArray"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ContiguousArray",
+            "request": "launch",
+            "mainClass": "ContiguousArray"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - BuySellStock2",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.src.BuySellStock2"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - DedupArray2",
             "request": "launch",
             "mainClass": "alexyang.algorithms.Java.src.DedupArray2"
