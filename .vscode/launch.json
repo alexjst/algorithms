@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - IntersectionOfTwoArrays",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.src.IntersectionOfTwoArrays"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - RotateArray",
             "request": "launch",
             "mainClass": "alexyang.algorithms.Java.src.RotateArray"
