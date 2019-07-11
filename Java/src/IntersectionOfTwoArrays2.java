@@ -31,6 +31,10 @@ class IntersectionOfTwoArrays {
 
     private static int[] intersect(int[] arr1, int[] arr2) {
         int[] result = {};
-        return result;
+        if (arr1 == null || arr1.length == 0 || arr2 == null || arr2.length == 0) {
+            return result;
+        }
+
+        
     }
 }
