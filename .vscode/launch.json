@@ -2,6 +2,18 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Solution",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.src.Solution"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - MinStack",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.src.MinStack"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - IntersectionOfTwoArrays",
             "request": "launch",
             "mainClass": "alexyang.algorithms.Java.src.IntersectionOfTwoArrays"
