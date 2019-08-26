@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Problem_20190823_ProductExceptSelf",
+            "request": "launch",
+            "mainClass": "DailyCodingProblem.Problem_20190823_ProductExceptSelf"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Solution",
             "request": "launch",
             "mainClass": "alexyang.algorithms.Java.src.Solution"

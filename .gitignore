@@ -260,3 +260,6 @@ paket-files/
 
 # Java specific
 *.class
+
+# Visual Studio Code
+*launch.json
