@@ -262,4 +262,6 @@ paket-files/
 *.class
 
 # Visual Studio Code
-*launch.json
+.vscode/launch.json
+.vscode/settings.json
+
