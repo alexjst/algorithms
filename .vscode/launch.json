@@ -2,6 +2,18 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Problem_20190824_TreeSerialization",
+            "request": "launch",
+            "mainClass": "Problem_20190824_TreeSerialization"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Problem_20190828_DecodingMessage",
+            "request": "launch",
+            "mainClass": "Problem_20190828_DecodingMessage"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Problem_20190823_ProductExceptSelf",
             "request": "launch",
             "mainClass": "DailyCodingProblem.Problem_20190823_ProductExceptSelf"

@@ -35,7 +35,37 @@ class Problem_20190824_TreeSerialization {
 
     public static Node deserialize(String s) {
         if (s.equals("null")) return null;
-        else {
+        else if (!s.startsWith("(")) {
+            return new Node(Integer.parseInt(s));
+        } else {
+            int firstComma = -1;
+            int secondComma = -1;
+            int count = 0; // count of single parenthes
+            int i=0;
+            for (; i<s.length(); i++) {
+                char c = s.charAt(i);
+                if (c=='(') {
+                    count++;
+                } else if (c==')') {
+                    count--;
+                }
+                if (count==1 && c==',') {
+                    if (firstComma < 0) firstComma = i;
+                    else {
+                        secondComma = i;
+                        break;
+                    }
+                }
+            }
+            String firstSeg = s.substring(1, firstComma);
+            String secondSeg = s.substring(firstComma+1, secondComma);
+            String thirdSeg = s.substring(secondComma+1, s.length()- 1);
+            Node left = deserialize(secondSeg);
+            Node right = deserialize(thirdSeg);
+            Node parent = deserialize(firstSeg);
+            parent.left = left;
+            parent.right = right;
+            return parent;
         }
     }
 
@@ -50,7 +80,10 @@ class Problem_20190824_TreeSerialization {
         Node root = n1;
 
         String s = serialize(root);
-        System.out.println(s);
-        // Node r = deserialize(s);
+        System.out.println("first round: " + s);
+        Node r = deserialize(s);
+        String s2 = serialize(r);
+        System.out.println("second round: " + s2);
+        assert s.equals(s2);
     }
 }
