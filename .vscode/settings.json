@@ -1,7 +1,7 @@
 {
     "code-runner.executorMap": {
-        "cpp": "cd $dir && g++ -std=c++11 $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
-        "cxx": "cd $dir && g++ -std=c++11 $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt"
+        "cpp": "cd $dir && g++ -std=c++11 $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe",
+        "cxx": "cd $dir && g++ -std=c++11 $fileName -o $fileNameWithoutExt.exe && $dir$fileNameWithoutExt.exe"
     },
     "files.exclude": {
         "**/*.class": true
