@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Problem_20190831_IntervalScheduler",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.DailyCodingProblem.Problem_20190831_IntervalScheduler"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Problem_20190824_TreeSerialization",
             "request": "launch",
             "mainClass": "Problem_20190824_TreeSerialization"

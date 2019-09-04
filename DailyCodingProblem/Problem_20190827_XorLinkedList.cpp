@@ -15,6 +15,7 @@ between nodes and memory addresses.
 class XorNode {
     int val;
     XorNode* both;
+public:
     XorNode(int value) {
         this->val = value;
         this->both = nullptr;
@@ -32,11 +33,16 @@ public:
     }
 
     XorNode* get(int idx) {
-
+        return nullptr;
     }
 };
 
 int main(int argc, char* argv[]) {
-    XorLinkedList a(0);
+    XorNode * n1 = new XorNode(1);
+    XorNode * n2 = new XorNode(2);
+    XorNode * n3 = new XorNode(3);
+    XorNode * n4 = new XorNode(4);
+    XorNode * n5 = new XorNode(5);
+
     return 0;
 }
