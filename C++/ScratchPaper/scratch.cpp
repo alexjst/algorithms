@@ -1,6 +1,7 @@
 #include <vector>
 #include <queue>
 #include <functional>
+#include <numeric>
 #include <algorithm>
 #include <iostream>
 #include <stack>
@@ -12,51 +13,58 @@ using namespace std;
 
 class Solution {
 public:
-    string simplifyPath(string path) {
-        stack<string> pathStack;
-        int len = path.length();
-        if (len <= 1) return path;
-
-        for (int i = 0; i<len; i++) {
-            if (i == 0 || path[i] == '/') {
-                // find the next '/' or end of string
-                for (int j = i + 1; j <= len; j++) {
-                    if (j == len || path[j] == '/') {
-                        j--;
-                        int start = i + 1, end = j;
-                        if (end >= start) {
-                            string sub = path.substr(start, end - start + 1);
-                            if (sub.compare(".") == 0) {}
-                            else if (sub.compare("..") == 0) {
-                                if (pathStack.size()>0) pathStack.pop();
-                            }
-                            else {
-                                pathStack.push(sub);
-                            }
-                        }
-                        i = j; break;
-                    }
+    bool splitArraySameAverage(vector<int>& A) {
+        int sz = A.size();
+        if (sz < 2) return false;
+        
+        sort(A.begin(), A.end());
+        int sum = accumulate(A.begin(), A.end(), 0);
+        vector<pair<int, int>> countSumList;
+        double totalAvg = ((double)sum)/((double)sz);
+        countSumList.push_back(make_pair(0,0));
+        for (int i=0; i<sz; i++) {
+            vector<pair<int, int>> without(countSumList);
+            vector<pair<int, int>> withAi;
+            for (auto& p : without) {
+                p.first += 1;
+                p.second += A[i];
+                if (equalAvg(p,totalAvg)) {
+                    return true;
+                } else if (gtAvg(p, totalAvg)) {
+                    // do nothing
+                } else {
+                    withAi.push_back(p);
                 }
             }
+            for (auto& p : withAi) {
+                countSumList.push_back(p);
+            }
         }
-        vector<string> pathVec;
-        while (!pathStack.empty()) {
-            pathVec.push_back(pathStack.top());
-            pathStack.pop();
-        }
-        reverse(pathVec.begin(), pathVec.end());
-        string result;
-        for (auto& p : pathVec) {
-            result = result + "/" + p;
-        }
-        if (result.empty()) result = "/";
-        return result;
+        return false;
+    }
+
+private:
+    bool equalAvg(pair<int, int>& p, double avg) {
+        return doubleEqual(((double)(p.second))/((double)(p.first)), avg);
+    }
+    bool gtAvg(pair<int, int>& p, double avg) {
+        return doubleEqual(((double)(p.second))/((double)(p.first)), avg);
+    }
+    bool doubleEqual(double a, double b) {
+        if (abs(a-b) < 0.0001) return true;
+        else return false;
+    }
+    bool doubleGt(double a, double b) {
+        if ((a-b) > 0.0001) return true;
+        else return false;
     }
 };
 
 int main()
 {
     Solution s;
-    string result = s.simplifyPath("/a/./b/../../c/");
-	system("pause");
+    vector<int> A = {1, 2, 3, 4, 5, 6, 7, 8};
+    bool result = s.splitArraySameAverage(A);
+    cout << result << endl;
+	//system("pause");
 }

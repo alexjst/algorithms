@@ -6,3 +6,6 @@ The area of a circle is defined as πr^2. Estimate π to 3 decimal places using 
 Hint: The basic equation of a circle is x2 + y2 = r2.
  */
 
+class Problem_20190904_MonteCarloPi {
+
+}

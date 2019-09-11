@@ -6,5 +6,8 @@
     "files.exclude": {
         "**/*.exe": true,
         "**/*.class": true
+    },
+    "files.associations": {
+        "set": "cpp"
     }
 }

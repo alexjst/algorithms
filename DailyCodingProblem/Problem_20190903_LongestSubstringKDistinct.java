@@ -14,7 +14,7 @@ class Problem_20190903_LongestSubstringKDistinct {
 
         int i=0, j=0;
         while (true) {
-           while (j<len && (j-i+1) )
+           while (j<len && (j-i+1)<=k)
         }
 
     }
