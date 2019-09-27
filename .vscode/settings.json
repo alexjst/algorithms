@@ -8,6 +8,7 @@
         "**/*.class": true
     },
     "files.associations": {
-        "set": "cpp"
+        "set": "cpp",
+        "algorithm": "cpp"
     }
 }
