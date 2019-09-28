@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ColorSort",
+            "request": "launch",
+            "mainClass": "ColorSort",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - PowerSet",
             "request": "launch",
             "mainClass": "PowerSet",
