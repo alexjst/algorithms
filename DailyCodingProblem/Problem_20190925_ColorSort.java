@@ -1,5 +1,3 @@
-import java.util.Collections;
-
 /**
  * This problem was asked by Google.
 
