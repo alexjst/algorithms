@@ -20,9 +20,10 @@ Given two strings, compute the edit distance between them.
                  if (left.charAt(i-1)==right.charAt(j-1)) {
                      dp[i][j] = dp[i-1][j-1];
                  } else {
-                     dp[i][j] = Math.max();
+                     dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]) + 1;
                  }
              }
          }
+         return dp[llen][rlen];
      }
  }

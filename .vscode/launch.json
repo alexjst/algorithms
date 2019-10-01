@@ -2,6 +2,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - NQueen",
+            "request": "launch",
+            "mainClass": "NQueen",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - FindSingleAmongTripleDups",
+            "request": "launch",
+            "mainClass": "FindSingleAmongTripleDups",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - NumberToWords",
+            "request": "launch",
+            "mainClass": "NumberToWords",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Solution",
+            "request": "launch",
+            "mainClass": "Solution",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - ColorSort",
             "request": "launch",
             "mainClass": "ColorSort",

@@ -15,6 +15,11 @@ void printBinary(int num) {
     printf("\n");
 }
 
+void getInput() {
+    int a;
+    scanf("Input a numbrer: %d", a);
+}
+
 int main() {
     int a = 0b100;
     //int b = 0b110;
