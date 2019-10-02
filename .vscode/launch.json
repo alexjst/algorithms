@@ -2,6 +2,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - AbsoluteEssentials",
+            "request": "launch",
+            "mainClass": "AbsoluteEssentials",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Problem_20190823_ProductExceptSelf",
+            "request": "launch",
+            "mainClass": "Problem_20190823_ProductExceptSelf",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - MakePalindrome",
+            "request": "launch",
+            "mainClass": "MakePalindrome",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - NQueen",
             "request": "launch",
             "mainClass": "NQueen",

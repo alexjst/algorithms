@@ -11,8 +11,41 @@ can be made from "race" by adding three letters, but "ecarace" comes first alpha
 
 As another example, given the string "google", you should return "elgoogle".
 */
+
+/**
+ * Method:
+ * Go from outward bounds to internal mid position: if two outside chars are equal, go inward, otherwise choose the smaller char and go inward.
+ */
 class MakePalindrome {
+    public static void main(String[] args) {
+        System.out.println(makePalindrome("race"));
+        System.out.println(makePalindrome("google"));
+    }
     public static String makePalindrome(String input) {
-        return null;
+        int len = input.length();
+        if (len<2) return input;
+
+        StringBuilder sb = new StringBuilder();
+        for (int i=0, j=(input.length()-1); i<=j;) {
+            if (i==j) {
+                StringBuilder result = new StringBuilder(sb);
+                String reverse = sb.reverse().toString();
+                return result.append(input.charAt(i)).append(reverse).toString();
+            } else {
+                if (input.charAt(i) == input.charAt(j)) {
+                    sb.append(input.charAt(i));
+                    i++; j--;
+                } else if (input.charAt(i) < input.charAt(j)) {
+                    sb.append(input.charAt(i));
+                    i++;
+                } else {
+                    sb.append(input.charAt(j));
+                    j--;
+                }
+            }
+        }
+        StringBuilder result = new StringBuilder(sb);
+        String reverse = sb.reverse().toString();
+        return result.append(reverse).toString();
     }
 }
