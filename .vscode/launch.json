@@ -2,6 +2,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - RunLengthCoder",
+            "request": "launch",
+            "mainClass": "RunLengthCoder",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - MaxStack",
+            "request": "launch",
+            "mainClass": "MaxStack",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ArrayInversionsCount",
+            "request": "launch",
+            "mainClass": "ArrayInversionsCount",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Test",
+            "request": "launch",
+            "mainClass": "Test",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - AbsoluteEssentials",
             "request": "launch",
             "mainClass": "AbsoluteEssentials",

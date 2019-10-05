@@ -18,6 +18,8 @@ class AbsoluteEssentials {
          * 7. how to implement C++'s lower_bound and upper_bound
          * 8. how to use Stack and Queue
          * 9. BFS template with Queue
+         * 10. How to iterate through a Set and a Map
+         * 11. How to do random shuffle and generate a random integer number within a range.
          */
 
         /* 1. How to sort an object by its property? Let's say, let's compare
@@ -156,6 +158,37 @@ class AbsoluteEssentials {
                 q.offer(e);
             }
         }
+
+        /**
+         * 10. How to iterate a map?
+         */
+        // set is simpler, with just one element in each set entry
+        Set<Integer> mySet = new HashSet<>();
+        mySet.add(1);
+        for (Integer k: mySet) { System.out.println(k); }
+        // for map, ther are 3 ways to iterate: key, values or entry as a whole
+        Map<Integer, Integer> myMap = new HashMap<>();
+        myMap.put(1,2);
+        for (Integer k : myMap.keySet()) {
+            System.out.println(k);
+        }
+        for (Integer v : myMap.values()) {
+            System.out.println(v);
+        }
+        for (Map.Entry<Integer,Integer> entry : myMap.entrySet()) {
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
+
+        /**
+         * 11. How to do random shuffle and random integer generation within a range?
+         */
+        // Random shuffle a List with Collections.
+        List<Integer> shufTargetList = new ArrayList<>();
+        Collections.shuffle(shufTargetList);
+        // How to random shuttfle an array then? (not a list)
+        int[] shufTargetArray = new int[]{1,2,3,4,5,6,7,8,9};
+        Collections.shuffle(Arrays.asList(shufTargetArray));
+        return;
     }
 
     public static void printStringList(String prefix, List<String> in) {
