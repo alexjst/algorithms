@@ -188,6 +188,14 @@ class AbsoluteEssentials {
         // How to random shuttfle an array then? (not a list)
         int[] shufTargetArray = new int[]{1,2,3,4,5,6,7,8,9};
         Collections.shuffle(Arrays.asList(shufTargetArray));
+        // Generate integer random numbrer within a range
+        // Math.random() will get a random double from[0,1), that is including 0.9 but excluding 1.0
+        // so Math.random() * N casted to an integer will be an integer between 0 and N-1.
+        // for target range minInt and maxInt, N-1+minInt=maxInt so N = maxInt-minInt+1
+        int minInt = 20, maxInt = 40;
+        System.out.println( Math.random() * (maxInt - minInt + 1) + minInt); 
+
+
         return;
     }
 

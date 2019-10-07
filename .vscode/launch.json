@@ -2,6 +2,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - LongestPalindrome",
+            "request": "launch",
+            "mainClass": "LongestPalindrome",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - BuySellStockOnce",
+            "request": "launch",
+            "mainClass": "BuySellStockOnce",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Random5To7",
+            "request": "launch",
+            "mainClass": "Random5To7",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - RunLengthCoder",
             "request": "launch",
             "mainClass": "RunLengthCoder",
