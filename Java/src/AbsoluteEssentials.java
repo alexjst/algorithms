@@ -1,12 +1,14 @@
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.lang.StringBuilder;
 /**
  * This class contains demos code that are absolute Java essentails that are
  * needed to write algorithmic solutions quickly.
  * 
  */
 
- import java.util.*;
 
-class AbsoluteEssentials {
+public class AbsoluteEssentials {
     public static void main(String[] args) {
         /**
          * 1. how to sort an object by its property.
@@ -20,6 +22,7 @@ class AbsoluteEssentials {
          * 9. BFS template with Queue
          * 10. How to iterate through a Set and a Map
          * 11. How to do random shuffle and generate a random integer number within a range.
+         * 12. How to reset a StringBuilder without "new StringBuilder()" again?
          */
 
         /* 1. How to sort an object by its property? Let's say, let's compare
@@ -194,7 +197,20 @@ class AbsoluteEssentials {
         // for target range minInt and maxInt, N-1+minInt=maxInt so N = maxInt-minInt+1
         int minInt = 20, maxInt = 40;
         System.out.println( Math.random() * (maxInt - minInt + 1) + minInt); 
+        // Another way to generate a random number (other than the global Math.random()) is to use ThreadLocalRandom shown below
+        int randBound = 10; // exclusive
+        for (int i = 0; i < 100; i++) {
+            int rndWithinBound = ThreadLocalRandom.current().nextInt(randBound);
+            System.out.println(rndWithinBound);
+        }
 
+        /**
+         * 12. How to reset a StringBuilder without recreating a new instance?
+         */
+        StringBuilder sb = new StringBuilder();
+        sb.append("My String content.");
+        sb.setLength(0);
+        System.out.println("New content should be empty: (" + sb.toString() + ")");
 
         return;
     }

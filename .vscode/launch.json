@@ -2,6 +2,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - CalculatorParsed",
+            "request": "launch",
+            "mainClass": "CalculatorParsed",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - BracketsBalancedOrNot",
+            "request": "launch",
+            "mainClass": "BracketsBalancedOrNot",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - LongestPalindrome",
             "request": "launch",
             "mainClass": "LongestPalindrome",
