@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Interleaver",
+            "request": "launch",
+            "mainClass": "Interleaver",
+            "projectName": "algorithms_c25ccf6f"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - CalculatorParsed",
             "request": "launch",
             "mainClass": "CalculatorParsed",
