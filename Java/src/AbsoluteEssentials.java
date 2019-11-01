@@ -139,9 +139,18 @@ public class AbsoluteEssentials {
          */
 
         /**
-         * 8. How to use Stack and Queue
+         * 8. How to use Stack and Queue/PriorityQueue
          * 
-         * Note that Queue is Interfaces, and the implemention can be LinkedList.
+         * Note that Queue and Deque are Interfaces, and the implemention can be LinkedList.
+         * 
+         *     Queue<Integer> q = new LinkedList<>();
+         *     Deque<Integer> d = new LinkedList<>();
+         * 
+         * Howeverr, Stack and PriorityQueue and Deque are all concret classes.
+         * 
+         *     Stack<Integer> S = new Stack<>();
+         *     PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+         * 
          * 
          * Stack.push(E). Stack.pop(). Stack.peek() Queue.offer(E), Queue.poll(),
          * Queue.peek() Deque.offerFirst(E), Deque.offerLast(E), Deque.pollFirst(E),
@@ -154,8 +163,8 @@ public class AbsoluteEssentials {
         Queue<Integer> q = new LinkedList<>();
         q.offer(1); // first element
         while (!q.isEmpty()) {
-            Integer e = q.peek();
-            q.poll();
+            // poll will return the top element, similar to Stack.pop()
+            Integer e = q.poll();
             if (e < 10) {
                 e++;
                 q.offer(e);
@@ -163,7 +172,7 @@ public class AbsoluteEssentials {
         }
 
         /**
-         * 10. How to iterate a map?
+         * 10. How to iterate a map (or a set)?
          */
         // set is simpler, with just one element in each set entry
         Set<Integer> mySet = new HashSet<>();
