@@ -212,6 +212,9 @@ public class AbsoluteEssentials {
             int rndWithinBound = ThreadLocalRandom.current().nextInt(randBound);
             System.out.println(rndWithinBound);
         }
+        // ThreadLocalRandom is more convenient
+        // "ThreadLocalRandom.current().nextInt(bound)" returns [0, bound), and
+        // "ThreadLocalRandom.current().nextInt(lowerBound,upperBound)" returns [lowerBound, upperBound)
 
         /**
          * 12. How to reset a StringBuilder without recreating a new instance?
