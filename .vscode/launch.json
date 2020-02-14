@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Problem1",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.Opendoor.Problem1"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Interleaver",
             "request": "launch",
             "mainClass": "Interleaver",

@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Problem2",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.Opendoor.Problem2"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Problem1",
+            "request": "launch",
+            "mainClass": "alexyang.algorithms.Java.Opendoor.Problem1"
+        }
+    ]
+}

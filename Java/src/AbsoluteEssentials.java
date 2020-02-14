@@ -91,7 +91,7 @@ public class AbsoluteEssentials {
          */
         System.out.println(Integer.parseInt("123"));
         System.out.println(Double.parseDouble("1.23"));
-        System.out.println(String.valueOf("45.6"));
+        System.out.println(String.valueOf(45.6));
 
         /**
          * 4. How to initialize [] and List.
