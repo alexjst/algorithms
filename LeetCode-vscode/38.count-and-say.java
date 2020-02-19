@@ -61,8 +61,30 @@
 
 // @lc code=start
 class Solution {
+    StringBuilder res = new StringBuilder();
     public String countAndSay(int n) {
-        
+        if (n==1) return "1";
+        String prev = countAndSay(n-1);
+        char[] chars = prev.toCharArray();
+        int len = chars.length;
+        res.setLength(0);
+        int cnt = 0;
+        char c = ' ';
+        for (int i=0; i<len; i++) {
+            if (i==0 || chars[i] == chars[i-1]) {
+                cnt++;
+                c = chars[i];
+                continue;
+            } else {
+                res.append(String.valueOf(cnt));
+                res.append(c);
+                cnt = 1;
+                c = chars[i];
+            }
+        }
+        res.append(String.valueOf(cnt));
+        res.append(c);
+        return res.toString();
     }
 }
 // @lc code=end
