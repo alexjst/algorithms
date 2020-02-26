@@ -61,10 +61,39 @@
  * 
  */
 
+import java.util.*;
+
 // @lc code=start
 class Solution {
     public double knightProbability(int N, int K, int r, int c) {
         if (r<0 || r>=N || c<0 || c>=N) return 0.0;
+        if (K==0) return 1.0;
+
+        double[][] dp = new double[N][N];
+        double[][] dp2 = new double[N][N];
+        for (double[] row : dp) Arrays.fill(row, 1);
+
+        int[] dirs = { 1, 2, 1, -2, -1, 2, -1, -2, 1 };
+        for (int k = 0; k < K; k++) {
+            for (int i = 0; i<N; i++) {
+                for (int j=0; j<N; j++) {
+                    double res = 0.0;
+                    for (int d = 0; d < 8; d++) {
+                        int ni = i + dirs[d];
+                        int nj = j + dirs[d+1];
+                        if (ni>=0 && ni<N && nj>=0 && nj<N) {
+                            res += dp[ni][nj];
+                        }
+                    }
+                    dp2[i][j] = res / 8;
+                }
+            }
+            double[][] tmp = dp2;
+            dp2 = dp;
+            dp = tmp;
+        }
+
+        return dp[r][c];
     }
 }
 // @lc code=end
