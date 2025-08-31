@@ -265,3 +265,5 @@ paket-files/
 .vscode/launch.json
 .vscode/settings.json
 
+# Latex
+.texpadtmp/
