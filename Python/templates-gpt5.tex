@@ -1,0 +1,647 @@
+% !TEX program = pdflatex
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{caption}
+
+
+% ---- Printer-friendly colors (mostly grayscale) ----
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{keyword}{RGB}{0,0,120}
+\definecolor{comment}{RGB}{90,110,90}
+\definecolor{string}{RGB}{120,20,20}
+
+
+% ---- Listings configuration for Python ----
+\lstdefinestyle{py}{
+language=Python,
+basicstyle=\ttfamily\small,
+backgroundcolor=\color{codebg},
+keywordstyle=\color{keyword}\bfseries,
+stringstyle=\color{string},
+commentstyle=\itshape\color{comment},
+showstringspaces=false,
+tabsize=2,
+frame=single,
+framerule=0.5pt,
+rulecolor=\color{black},
+numbers=left,
+numberstyle=\tiny, numbersep=6pt,
+breaklines=true,
+columns=fullflexible,
+keepspaces=true,
+}
+
+
+% ---- Section formatting ----
+\titleformat{\section}{\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\large\bfseries}{}{0pt}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\itshape}{}{0pt}{}
+
+
+\hypersetup{
+colorlinks=true,
+linkcolor=black,
+urlcolor=black,
+citecolor=black,
+pdfauthor={Technical Interview Preparation Assistant},
+pdftitle={Coding Interview Patterns & Templates (Python)},
+pdfsubject={Printable reference guide for coding interviews},
+}
+
+
+\begin{document}
+
+
+\begin{center}
+{\LARGE \textbf{Coding Interview Patterns}}\\[0.4em]
+{\large Python Templates for Muscle Memory}\\[0.4em]
+{\normalsize Version: \today}
+\end{center}
+
+
+\vspace{0.5em}
+This printable reference collects the most frequently used patterns in modern software engineering interviews. Each template is concise, type hinted, and commented so you can rewrite it from memory.\footnote{Patterns consolidated from widely used interview references such as Educative's ``Grokking the Coding Interview'' and Tech Interview Handbook.}
+
+
+\tableofcontents
+\newpage
+
+\section{How to Use This Guide}
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Daily reps}: Pick 3--5 patterns, close the guide, and handwrite/type them from memory.
+  \item \textbf{Say it out loud}: For each line, state what it does and the complexity.
+  \item \textbf{Space repetition}: Rotate patterns; increase difficulty by removing comments.
+  \item \textbf{Drills}: After templating, solve 1--2 problems per pattern (e.g., from LeetCode).
+\end{itemize}
+
+\section{Core Patterns \,\& \,Complete Python Templates}
+
+% ---------------- DFS ----------------
+\subsection{Depth-First Search (DFS)}
+\subsubsection*{Recursive DFS (Graph/Tree)}
+\begin{lstlisting}[style=py,caption={Recursive DFS}]
+from typing import List, Dict, Set
+
+def dfs_recursive(graph: Dict[int, List[int]], start: int) -> List[int]:
+    visited: Set[int] = set()
+    order: List[int] = []
+
+    def dfs(u: int) -> None:
+        if u in visited:
+            return
+        visited.add(u)
+        order.append(u)
+        for v in graph.get(u, []):
+            dfs(v)
+
+    dfs(start)
+    return order
+\end{lstlisting}
+
+\subsubsection*{Iterative DFS (Using Stack)}
+\begin{lstlisting}[style=py,caption={Iterative DFS}]
+from typing import List, Dict
+
+def dfs_iterative(graph: Dict[int, List[int]], start: int) -> List[int]:
+    stack: List[int] = [start]
+    visited = set()
+    order: List[int] = []
+
+    while stack:
+        u = stack.pop()
+        if u in visited:
+            continue
+        visited.add(u)
+        order.append(u)
+        # push neighbors in reverse to mimic recursive order if needed
+        for v in reversed(graph.get(u, [])):
+            if v not in visited:
+                stack.append(v)
+    return order
+\end{lstlisting}
+
+% ---------------- BFS ----------------
+\subsection{Breadth-First Search (BFS)}
+\begin{lstlisting}[style=py,caption={BFS for shortest layers in unweighted graphs}]
+from collections import deque
+from typing import List, Dict
+
+def bfs(graph: Dict[int, List[int]], start: int) -> List[int]:
+    q = deque([start])
+    visited = {start}
+    order: List[int] = []
+
+    while q:
+        u = q.popleft()
+        order.append(u)
+        for v in graph.get(u, []):
+            if v not in visited:
+                visited.add(v)
+                q.append(v)
+    return order
+\end{lstlisting}
+
+% ------------- Topo Sort (Kahn) -------------
+\subsection{Topological Sort (Kahn's Algorithm)}
+\begin{lstlisting}[style=py,caption={Kahn's algorithm for DAGs}]
+from collections import deque, defaultdict
+from typing import List, Tuple
+
+def topo_sort_kahn(n: int, edges: List[Tuple[int, int]]) -> List[int]:
+    indeg = [0] * n
+    g = defaultdict(list)
+    for u, v in edges:
+        g[u].append(v)
+        indeg[v] += 1
+    q = deque([i for i in range(n) if indeg[i] == 0])
+    order: List[int] = []
+    while q:
+        u = q.popleft()
+        order.append(u)
+        for v in g[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0:
+                q.append(v)
+    return order  # if len(order) < n, there is a cycle
+\end{lstlisting}
+
+% ------------- Two Pointers -------------
+\subsection{Two Pointers}
+\subsubsection*{Opposite Ends (Sorted array/string)}
+\begin{lstlisting}[style=py,caption={Two pointers from both ends}]
+from typing import List
+
+def two_sum_sorted(nums: List[int], target: int) -> List[int]:
+    i, j = 0, len(nums) - 1
+    while i < j:
+        s = nums[i] + nums[j]
+        if s == target:
+            return [i, j]
+        if s < target:
+            i += 1
+        else:
+            j -= 1
+    return []
+\end{lstlisting}
+
+\subsubsection*{Fast/Slow (Cycle detection)}
+\begin{lstlisting}[style=py,caption={Floyd's Tortoise and Hare}]
+from typing import Optional
+
+class ListNode:
+    def __init__(self, val: int = 0, nxt: 'Optional[ListNode]' = None):
+        self.val = val
+        self.next = nxt
+
+def has_cycle(head: Optional[ListNode]) -> bool:
+    slow, fast = head, head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False
+\end{lstlisting}
+
+% ------------- Sliding Window -------------
+\subsection{Sliding Window}
+\subsubsection*{Fixed Size}
+\begin{lstlisting}[style=py,caption={Max sum over a window of size k}]
+from typing import List
+
+def max_window_sum(nums: List[int], k: int) -> int:
+    cur = sum(nums[:k])
+    best = cur
+    for i in range(k, len(nums)):
+        cur += nums[i] - nums[i - k]
+        best = max(best, cur)
+    return best
+\end{lstlisting}
+
+\subsubsection*{Variable Size (Longest substring with at most K distinct)}
+\begin{lstlisting}[style=py,caption={Generic variable-size window}]
+from collections import Counter
+from typing import Dict
+
+def longest_at_most_k_distinct(s: str, k: int) -> int:
+    count: Dict[str, int] = Counter()
+    left = 0
+    best = 0
+    for right, ch in enumerate(s):
+        count[ch] += 1
+        while len(count) > k:
+            left_ch = s[left]
+            count[left_ch] -= 1
+            if count[left_ch] == 0:
+                del count[left_ch]
+            left += 1
+        best = max(best, right - left + 1)
+    return best
+\end{lstlisting}
+
+% ------------- Binary Search -------------
+\subsection{Binary Search}
+\subsubsection*{Standard (Exact Match)}
+\begin{lstlisting}[style=py,caption={Binary search on sorted array}]
+from typing import List
+
+def binary_search(nums: List[int], target: int) -> int:
+    lo, hi = 0, len(nums) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1
+\end{lstlisting}
+
+\subsubsection*{First/Last Occurrence (Lower/Upper Bound)}
+\begin{lstlisting}[style=py,caption={Lower and upper bound}]
+from typing import List, Tuple
+
+def lower_upper_bound(nums: List[int], target: int) -> Tuple[int, int]:
+    # first index >= target
+    lo, hi = 0, len(nums)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if nums[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid
+    first = lo if lo < len(nums) and nums[lo] == target else -1
+
+    # first index > target
+    lo, hi = 0, len(nums)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if nums[mid] <= target:
+            lo = mid + 1
+        else:
+            hi = mid
+    last = lo - 1 if lo - 1 >= 0 and nums[lo - 1] == target else -1
+    return first, last
+\end{lstlisting}
+
+% ------------- Dynamic Programming -------------
+\subsection{Dynamic Programming}
+\subsubsection*{1D DP (Bottom-Up)}
+\begin{lstlisting}[style=py,caption={Classic 1D DP (e.g., climb stairs)}]
+from typing import List
+
+def dp_1d(n: int) -> int:
+    if n <= 1:
+        return 1
+    dp = [0] * (n + 1)
+    dp[0] = dp[1] = 1
+    for i in range(2, n + 1):
+        dp[i] = dp[i - 1] + dp[i - 2]
+    return dp[n]
+\end{lstlisting}
+
+\subsubsection*{2D DP (Grid Paths with Obstacles)}
+\begin{lstlisting}[style=py,caption={2D DP grid template}]
+from typing import List
+
+def dp_2d(grid: List[List[int]]) -> int:
+    m, n = len(grid), len(grid[0])
+    dp = [[0] * n for _ in range(m)]
+    dp[0][0] = 1 if grid[0][0] == 0 else 0
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == 1 or (i == 0 and j == 0):
+                continue
+            top = dp[i - 1][j] if i > 0 else 0
+            left = dp[i][j - 1] if j > 0 else 0
+            dp[i][j] = top + left
+    return dp[m - 1][n - 1]
+\end{lstlisting}
+
+% ------------- Backtracking -------------
+\subsection{Backtracking}
+\subsubsection*{General Template}
+\begin{lstlisting}[style=py,caption={Backtracking skeleton}]
+from typing import List
+
+def backtrack_template(choices: List[int]) -> List[List[int]]:
+    path: List[int] = []
+    res: List[List[int]] = []
+
+    def backtrack(start: int = 0) -> None:
+        # record if path is a complete solution
+        res.append(path.copy())
+        for i in range(start, len(choices)):
+            # choose
+            path.append(choices[i])
+            # explore
+            backtrack(i + 1)  # or backtrack(start) for permutations with used[]
+            # un-choose
+            path.pop()
+
+    backtrack(0)
+    return res
+\end{lstlisting}
+
+\subsubsection*{Permutations}
+\begin{lstlisting}[style=py,caption={Permutations using used[] flag}]
+from typing import List
+
+def permutations(nums: List[int]) -> List[List[int]]:
+    res: List[List[int]] = []
+    used = [False] * len(nums)
+    path: List[int] = []
+
+    def dfs() -> None:
+        if len(path) == len(nums):
+            res.append(path.copy())
+            return
+        for i, x in enumerate(nums):
+            if used[i]:
+                continue
+            used[i] = True
+            path.append(x)
+            dfs()
+            path.pop()
+            used[i] = False
+
+    dfs()
+    return res
+\end{lstlisting}
+
+% ------------- Heap Operations -------------
+\subsection{Heap Operations (\texttt{heapq})}
+\begin{lstlisting}[style=py,caption={Min-heap, max-heap idioms, k-way merge}]
+import heapq
+from typing import Iterable, List, Tuple
+
+# Min-heap
+h: List[int] = []
+for x in [5, 1, 4]:
+    heapq.heappush(h, x)
+smallest = heapq.heappop(h)
+
+# Max-heap via negation
+h_max: List[int] = []
+for x in [5, 1, 4]:
+    heapq.heappush(h_max, -x)
+max_val = -heapq.heappop(h_max)
+
+# Heapify existing list
+arr = [7, 2, 6]
+heapq.heapify(arr)  # in-place, O(n)
+
+# Merge k sorted lists
+def merge_k_sorted(lists: List[List[int]]) -> List[int]:
+    out: List[int] = []
+    heap: List[Tuple[int, int, int]] = []  # (val, list_idx, elem_idx)
+    for i, lst in enumerate(lists):
+        if lst:
+            heapq.heappush(heap, (lst[0], i, 0))
+    while heap:
+        val, i, j = heapq.heappop(heap)
+        out.append(val)
+        if j + 1 < len(lists[i]):
+            heapq.heappush(heap, (lists[i][j + 1], i, j + 1))
+    return out
+\end{lstlisting}
+
+% ------------- Union-Find -------------
+\subsection{Union-Find (Disjoint Set Union)}
+\begin{lstlisting}[style=py,caption={Path compression + union by rank}]
+from typing import List
+
+class DSU:
+    def __init__(self, n: int):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x: int) -> int:
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # path compression
+        return self.parent[x]
+
+    def union(self, x: int, y: int) -> bool:
+        rx, ry = self.find(x), self.find(y)
+        if rx == ry:
+            return False
+        if self.rank[rx] < self.rank[ry]:
+            self.parent[rx] = ry
+        elif self.rank[rx] > self.rank[ry]:
+            self.parent[ry] = rx
+        else:
+            self.parent[ry] = rx
+            self.rank[rx] += 1
+        return True
+\end{lstlisting}
+
+% ------------- Trie -------------
+\subsection{Trie (Prefix Tree)}
+\begin{lstlisting}[style=py,caption={Trie with insert/search/prefix}]
+from typing import Dict
+
+class TrieNode:
+    def __init__(self):
+        self.children: Dict[str, TrieNode] = {}
+        self.end = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        node = self.root
+        for ch in word:
+            if ch not in node.children:
+                node.children[ch] = TrieNode()
+            node = node.children[ch]
+        node.end = True
+
+    def search(self, word: str) -> bool:
+        node = self.root
+        for ch in word:
+            if ch not in node.children:
+                return False
+            node = node.children[ch]
+        return node.end
+
+    def starts_with(self, prefix: str) -> bool:
+        node = self.root
+        for ch in prefix:
+            if ch not in node.children:
+                return False
+            node = node.children[ch]
+        return True
+\end{lstlisting}
+
+% ------------- Special Algorithms -------------
+\subsection{Special Algorithms}
+\subsubsection*{Kadane's Algorithm (Maximum Subarray)}
+\begin{lstlisting}[style=py,caption={Kadane in O(n)}]
+from typing import List
+
+def kadane(nums: List[int]) -> int:
+    best = cur = nums[0]
+    for x in nums[1:]:
+        cur = max(x, cur + x)
+        best = max(best, cur)
+    return best
+\end{lstlisting}
+
+\subsubsection*{Prefix Sum}
+\begin{lstlisting}[style=py,caption={Prefix sums and range queries}]
+from typing import List
+
+def prefix_sums(nums: List[int]) -> List[int]:
+    ps = [0]
+    for x in nums:
+        ps.append(ps[-1] + x)
+    return ps  # ps[i] = sum(nums[:i])
+
+# sum of nums[l:r] (l inclusive, r exclusive)
+def range_sum(ps: List[int], l: int, r: int) -> int:
+    return ps[r] - ps[l]
+\end{lstlisting}
+
+\subsubsection*{Monotonic Stack}
+\begin{lstlisting}[style=py,caption={Next greater element (increasing stack)}]
+from typing import List
+
+def next_greater(nums: List[int]) -> List[int]:
+    res = [-1] * len(nums)
+    stack: List[int] = []  # indices, stack maintains decreasing values
+    for i, x in enumerate(nums):
+        while stack and nums[stack[-1]] < x:
+            j = stack.pop()
+            res[j] = x
+        stack.append(i)
+    return res
+\end{lstlisting}
+
+\subsubsection*{Cyclic Sort (Arrays with 1..n)}
+\begin{lstlisting}[style=py,caption={Place numbers at correct indices}]
+from typing import List
+
+def cyclic_sort(nums: List[int]) -> None:
+    i = 0
+    n = len(nums)
+    while i < n:
+        j = nums[i] - 1
+        if 0 <= j < n and nums[i] != nums[j]:
+            nums[i], nums[j] = nums[j], nums[i]
+        else:
+            i += 1
+# in-place; useful for finding missing/duplicate numbers in 1..n
+\end{lstlisting}
+
+\section{Pattern Recognition Guide (When to Use What)}
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Two Pointers}: Sorted arrays/strings; pair sums; palindrome checks; removing duplicates in-place.
+  \item \textbf{Sliding Window}: Substrings/subarrays asking for longest/shortest/\# satisfying constraints; streaming data.
+  \item \textbf{Binary Search}: Sorted arrays; monotonic predicates (``can we?'' decision problems); answer-search on range.
+  \item \textbf{BFS}: Shortest path in unweighted graphs; nearest/levels; minimum steps.
+  \item \textbf{DFS}: Connectivity; components; recursion on trees; cycle detection (directed via color/stack).
+  \item \textbf{Topological Sort}: Prerequisites; ordering tasks; detect cycles in DAG.
+  \item \textbf{Union-Find}: Dynamic connectivity; components after unions; cycle detection in undirected graphs; Kruskal MST.
+  \item \textbf{Trie}: Prefix queries; autocomplete; word break; dictionary problems.
+  \item \textbf{DP (1D/2D)}: Overlapping subproblems with optimal substructure; sequences; knapsack; edit distance; grid paths.
+  \item \textbf{Backtracking}: Generate all valid configurations under constraints (permutations, subsets, N-Queens, parentheses).
+  \item \textbf{Heap}: Top-$k$ / k-way merge / running median; scheduling by priority.
+  \item \textbf{Kadane/Prefix Sum}: Max subarray; quick range sums; difference arrays.
+  \item \textbf{Monotonic Stack}: Next greater/smaller; histogram area; sliding window min/max (deque).
+  \item \textbf{Cyclic Sort}: Arrays containing $1..n$ to find missing/duplicate numbers quickly.
+\end{itemize}
+
+\section{Time \,\& \,Space Complexity Notes}
+\begin{itemize}[leftmargin=1.2em]
+  \item DFS/BFS: $O(V+E)$ time, $O(V)$ space (visited + recursion/queue).
+  \item Topo Sort (Kahn): $O(V+E)$ time, $O(V)$ space.
+  \item Two Pointers/Sliding Window: Usually $O(n)$ time, $O(1)$ or $O(K)$ space.
+  \item Binary Search: $O(\log n)$ time, $O(1)$ space.
+  \item DP: Depends on states; 1D often $O(n)$, 2D often $O(mn)$; can optimize space by rolling arrays.
+  \item Backtracking: Exponential in solutions; prune aggressively.
+  \item Heaps: Push/pop $O(\log n)$; heapify $O(n)$; k-way merge $O(N \log k)$.
+  \item Union-Find: $\alpha(n)$ inverse Ackermann for amortized almost-constant ops.
+  \item Trie: Insert/search $O(L)$ where $L$ is word length; space proportional to stored characters.
+  \item Monotonic Stack/Deque: Each element in/out once $\Rightarrow O(n)$ time, $O(n)$ space.
+\end{itemize}
+
+\section{Daily Practice Routine (45--90 minutes)}
+\begin{enumerate}[leftmargin=1.2em]
+  \item \textbf{Warm-up (5 min)}: Rewrite 1--2 templates from memory (rotate daily).
+  \item \textbf{Focused Drill (25--45 min)}: Solve 2 problems of the day's pattern. After each, restate the approach and complexity.
+  \item \textbf{Spaced Repetition (10 min)}: Flash-review 3 older problems; explain aloud without coding.
+  \item \textbf{Retrospective (5 min)}: Note mistakes and update your trigger words for pattern recognition.
+\end{enumerate}
+
+\section{4-Week Study Schedule}
+\subsection*{Week 1: Fundamentals}
+Two Pointers, Sliding Window, Binary Search, Prefix Sum, Kadane.
+\begin{itemize}[leftmargin=1.2em]
+  \item Day 1--2: Two Pointers (pairs, palindromes, dedupe)
+  \item Day 3--4: Sliding Window (fixed/variable, substrings)
+  \item Day 5: Binary Search (bounds, predicate search)
+  \item Day 6: Prefix Sums + Kadane
+  \item Day 7: Mixed review quiz + rewrite 5 templates
+\end{itemize}
+
+\subsection*{Week 2: Graphs \,\& \,Sets}
+DFS (rec/iter), BFS, Topological Sort, Union-Find.
+\begin{itemize}[leftmargin=1.2em]
+  \item Day 8--9: DFS/BFS on trees/graphs; shortest paths (unweighted)
+  \item Day 10: Cycle detection; components; bipartite check
+  \item Day 11: Topological Sort (Kahn) + prerequisites problems
+  \item Day 12: Union-Find (dynamic connectivity, Kruskal-style)
+  \item Day 13: Heaps (top-k, k-way merge)
+  \item Day 14: Review + mock
+\end{itemize}
+
+\subsection*{Week 3: DP \,\& \,Backtracking}
+1D/2D DP, classic sequences, and generation problems.
+\begin{itemize}[leftmargin=1.2em]
+  \item Day 15--16: 1D DP (climb stairs, house robber, coin change)
+  \item Day 17--18: 2D DP (grid paths, edit distance, LCS)
+  \item Day 19: State compression / rolling arrays
+  \item Day 20: Backtracking (subsets, permutations, combos)
+  \item Day 21: Review + speed drills
+\end{itemize}
+
+\subsection*{Week 4: Mastery \,\& \,Patterns Mix}
+Tries, Monotonic Stack, Cyclic Sort, mixed sets, and timed mocks.
+\begin{itemize}[leftmargin=1.2em]
+  \item Day 22: Trie (prefix queries, word search)
+  \item Day 23: Monotonic Stack (NGE, histogram, daily temps)
+  \item Day 24: Cyclic Sort (missing/duplicate in 1..n)
+  \item Day 25--26: Mixed sets under time pressure
+  \item Day 27: Full mock (70 min) + analysis
+  \item Day 28: Final review + rewrite all templates once
+\end{itemize}
+
+\section{Tips for Muscle Memory}
+\begin{itemize}[leftmargin=1.2em]
+  \item Build mental \emph{triggers}: e.g., ``longest/shortest subarray/substring'' $\Rightarrow$ sliding window.
+  \item Keep idioms ready: bounds patterns for binary search; deque for window min/max; DSU for connectivity.
+  \item Practice explaining: interviewers value clarity and tradeoffs as much as code.
+  \item Track your misses: create a ``red list'' of patterns you consistently forget.
+\end{itemize}
+
+\vfill
+\begin{center}
+  {\small This reference is intentionally compact. Recopy it until it becomes automatic. Good luck!}
+\end{center}
+
+\end{document}
+

@@ -1,0 +1,1607 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+
+% Page setup
+\geometry{left=2cm,right=2cm,top=2.5cm,bottom=2.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{FAANG Coding Interview Patterns}
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{Practice Until Perfect - Master These Templates}
+
+% Python syntax highlighting
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Python
+}
+
+\lstset{style=pythonstyle}
+
+% Custom boxes
+\newtcolorbox{patternbox}[1]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+\newtcolorbox{tipbox}{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title=Pro Tip
+}
+
+\newtcolorbox{complexitybox}{
+    colback=orange!5!white,
+    colframe=orange!75!black,
+    fonttitle=\bfseries,
+    title=Complexity Analysis
+}
+
+% Title formatting
+\titleformat{\section}{\Large\bfseries\color{blue!80!black}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{blue!60!black}}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% Title Page
+\begin{titlepage}
+\centering
+{\huge\bfseries FAANG Coding Interview Patterns \& Templates\par}
+\vspace{1cm}
+{\LARGE Python Reference Guide\par}
+\vspace{1.5cm}
+{\Large Master These Patterns for Interview Success\par}
+\vspace{2cm}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!50!black,width=0.8\textwidth]
+\centering
+\textbf{GOAL}: Practice these templates until they become muscle memory\\
+\textbf{COVERAGE}: 12 Essential Patterns + Recognition Guide\\
+\textbf{TIMELINE}: 4-Week Intensive Study Plan\\
+\textbf{TARGET}: FAANG/MAANG Interview Readiness
+\end{tcolorbox}
+
+\vspace{2cm}
+{\large Based on 2024 FAANG Interview Analysis\par}
+\vfill
+{\large \today\par}
+\end{titlepage}
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% Quick Reference Card
+\section{Quick Pattern Recognition Guide}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3cm}|p{4cm}|p{7cm}|}
+\hline
+\textbf{Pattern} & \textbf{Key Indicators} & \textbf{When to Use} \\
+\hline
+Two Pointers & Sorted array, pairs, palindromes & Finding pairs with target sum, removing duplicates \\
+\hline
+Sliding Window & Subarray/substring, contiguous & Max/min subarray, longest substring problems \\
+\hline
+DFS & Tree/graph traversal, explore all paths & Path finding, connectivity, topological sort \\
+\hline
+BFS & Shortest path, level-order & Minimum steps, level traversal \\
+\hline
+Binary Search & Sorted data, search space & Finding element, first/last occurrence \\
+\hline
+Dynamic Programming & Optimal substructure, overlapping subproblems & Optimization, counting, decision problems \\
+\hline
+Backtracking & Generate all combinations/permutations & N-Queens, Sudoku, subset generation \\
+\hline
+Heap & Top K, merge K, priority & Finding extremes, scheduling \\
+\hline
+Union-Find & Connected components, cycles & Graph connectivity, MST \\
+\hline
+Trie & Prefix matching, word games & Autocomplete, word search \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Core Algorithm Patterns}
+
+\subsection{1. Depth-First Search (DFS)}
+
+\begin{patternbox}{DFS - Tree Traversal}
+\textbf{Use Case:} Tree/graph traversal, path finding, cycle detection\\
+\textbf{Time:} O(V + E) for graphs, O(n) for trees\\
+\textbf{Space:} O(h) where h is height/depth
+\end{patternbox}
+
+\subsubsection{Recursive DFS Template}
+\begin{lstlisting}
+def dfs_recursive(root):
+    if not root:
+        return  # Base case
+
+    # Process current node
+    print(root.val)
+
+    # Recurse on children
+    dfs_recursive(root.left)
+    dfs_recursive(root.right)
+
+# With result collection
+def dfs_collect_paths(root, path=[], all_paths=[]):
+    if not root:
+        return
+
+    path.append(root.val)
+
+    # Leaf node - save path
+    if not root.left and not root.right:
+        all_paths.append(path[:])  # Copy path
+
+    dfs_collect_paths(root.left, path, all_paths)
+    dfs_collect_paths(root.right, path, all_paths)
+
+    path.pop()  # Backtrack
+    return all_paths
+\end{lstlisting}
+
+\subsubsection{Iterative DFS Template}
+\begin{lstlisting}
+def dfs_iterative(root):
+    if not root:
+        return
+
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        print(node.val)  # Process node
+
+        # Add children (right first for left-to-right order)
+        if node.right:
+            stack.append(node.right)
+        if node.left:
+            stack.append(node.left)
+
+# Graph DFS with visited set
+def dfs_graph(graph, start):
+    visited = set()
+    stack = [start]
+
+    while stack:
+        node = stack.pop()
+        if node not in visited:
+            visited.add(node)
+            print(node)  # Process node
+
+            # Add neighbors
+            for neighbor in graph[node]:
+                if neighbor not in visited:
+                    stack.append(neighbor)
+\end{lstlisting}
+
+\subsection{2. Breadth-First Search (BFS)}
+
+\begin{patternbox}{BFS - Level-by-Level Traversal}
+\textbf{Use Case:} Shortest path, level-order traversal, minimum steps\\
+\textbf{Time:} O(V + E) for graphs, O(n) for trees\\
+\textbf{Space:} O(w) where w is maximum width
+\end{patternbox}
+
+\subsubsection{Standard BFS Template}
+\begin{lstlisting}
+from collections import deque
+
+def bfs_level_order(root):
+    if not root:
+        return []
+
+    result = []
+    queue = deque([root])
+
+    while queue:
+        level_size = len(queue)
+        level = []
+
+        for _ in range(level_size):
+            node = queue.popleft()
+            level.append(node.val)
+
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+
+        result.append(level)
+    return result
+
+# Simple BFS without levels
+def bfs_simple(root):
+    if not root:
+        return
+
+    queue = deque([root])
+    while queue:
+        node = queue.popleft()
+        print(node.val)  # Process node
+
+        if node.left:
+            queue.append(node.left)
+        if node.right:
+            queue.append(node.right)
+\end{lstlisting}
+
+\subsubsection{BFS for Shortest Path}
+\begin{lstlisting}
+def bfs_shortest_path(graph, start, target):
+    queue = deque([(start, 0)])  # (node, distance)
+    visited = set([start])
+
+    while queue:
+        node, dist = queue.popleft()
+
+        if node == target:
+            return dist
+
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append((neighbor, dist + 1))
+
+    return -1  # Target not reachable
+\end{lstlisting}
+
+\subsection{3. Two Pointers}
+
+\begin{patternbox}{Two Pointers - Efficient Array/String Processing}
+\textbf{Use Case:} Sorted arrays, palindromes, pairs with target sum\\
+\textbf{Time:} O(n) typically\\
+\textbf{Space:} O(1) space optimization
+\end{patternbox}
+
+\subsubsection{Opposite Ends Template}
+\begin{lstlisting}
+def two_sum_sorted(nums, target):
+    left, right = 0, len(nums) - 1
+
+    while left < right:
+        current_sum = nums[left] + nums[right]
+
+        if current_sum == target:
+            return [left, right]
+        elif current_sum < target:
+            left += 1
+        else:
+            right -= 1
+
+    return []
+
+def is_palindrome(s):
+    left, right = 0, len(s) - 1
+
+    while left < right:
+        if s[left] != s[right]:
+            return False
+        left += 1
+        right -= 1
+
+    return True
+
+def reverse_array(arr):
+    left, right = 0, len(arr) - 1
+
+    while left < right:
+        arr[left], arr[right] = arr[right], arr[left]
+        left += 1
+        right -= 1
+\end{lstlisting}
+
+\subsubsection{Fast and Slow Pointers}
+\begin{lstlisting}
+def has_cycle(head):
+    if not head or not head.next:
+        return False
+
+    slow = fast = head
+
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+
+        if slow == fast:
+            return True
+
+    return False
+
+def find_middle(head):
+    slow = fast = head
+
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+
+    return slow
+
+def remove_nth_from_end(head, n):
+    dummy = ListNode(0)
+    dummy.next = head
+    slow = fast = dummy
+
+    # Move fast n+1 steps ahead
+    for _ in range(n + 1):
+        fast = fast.next
+
+    # Move both until fast reaches end
+    while fast:
+        slow = slow.next
+        fast = fast.next
+
+    # Remove nth node
+    slow.next = slow.next.next
+    return dummy.next
+\end{lstlisting}
+
+\subsection{4. Sliding Window}
+
+\begin{patternbox}{Sliding Window - Contiguous Subarray/Substring}
+\textbf{Use Case:} Maximum/minimum subarray, longest substring\\
+\textbf{Time:} O(n) single pass\\
+\textbf{Space:} O(k) for tracking window contents
+\end{patternbox}
+
+\subsubsection{Fixed Size Window}
+\begin{lstlisting}
+def max_sum_subarray(nums, k):
+    if len(nums) < k:
+        return 0
+
+    # Calculate first window
+    window_sum = sum(nums[:k])
+    max_sum = window_sum
+
+    # Slide window
+    for i in range(k, len(nums)):
+        window_sum = window_sum - nums[i - k] + nums[i]
+        max_sum = max(max_sum, window_sum)
+
+    return max_sum
+
+def find_averages(nums, k):
+    result = []
+    window_sum = 0
+
+    for i in range(len(nums)):
+        window_sum += nums[i]
+
+        if i >= k - 1:
+            result.append(window_sum / k)
+            window_sum -= nums[i - k + 1]
+
+    return result
+\end{lstlisting}
+
+\subsubsection{Variable Size Window}
+\begin{lstlisting}
+def longest_substring_k_distinct(s, k):
+    if k == 0:
+        return 0
+
+    char_count = {}
+    left = 0
+    max_length = 0
+
+    for right in range(len(s)):
+        # Expand window
+        char_count[s[right]] = char_count.get(s[right], 0) + 1
+
+        # Contract window if needed
+        while len(char_count) > k:
+            char_count[s[left]] -= 1
+            if char_count[s[left]] == 0:
+                del char_count[s[left]]
+            left += 1
+
+        max_length = max(max_length, right - left + 1)
+
+    return max_length
+
+def min_window_substring(s, t):
+    if not s or not t:
+        return ""
+
+    t_count = {}
+    for char in t:
+        t_count[char] = t_count.get(char, 0) + 1
+
+    left = 0
+    min_len = float('inf')
+    min_start = 0
+    matched = 0
+    window_count = {}
+
+    for right in range(len(s)):
+        char = s[right]
+        window_count[char] = window_count.get(char, 0) + 1
+
+        if char in t_count and window_count[char] == t_count[char]:
+            matched += 1
+
+        while matched == len(t_count):
+            if right - left + 1 < min_len:
+                min_len = right - left + 1
+                min_start = left
+
+            left_char = s[left]
+            window_count[left_char] -= 1
+            if left_char in t_count and window_count[left_char] < t_count[left_char]:
+                matched -= 1
+            left += 1
+
+    return s[min_start:min_start + min_len] if min_len != float('inf') else ""
+\end{lstlisting}
+
+\subsection{5. Binary Search}
+
+\begin{patternbox}{Binary Search - Efficient Search in Sorted Space}
+\textbf{Use Case:} Finding element, first/last occurrence, search space\\
+\textbf{Time:} O(log n)\\
+\textbf{Space:} O(1) iterative, O(log n) recursive
+\end{patternbox}
+
+\subsubsection{Standard Binary Search}
+\begin{lstlisting}
+def binary_search(nums, target):
+    left, right = 0, len(nums) - 1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            return mid
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1
+
+def binary_search_recursive(nums, target, left=0, right=None):
+    if right is None:
+        right = len(nums) - 1
+
+    if left > right:
+        return -1
+
+    mid = left + (right - left) // 2
+
+    if nums[mid] == target:
+        return mid
+    elif nums[mid] < target:
+        return binary_search_recursive(nums, target, mid + 1, right)
+    else:
+        return binary_search_recursive(nums, target, left, mid - 1)
+\end{lstlisting}
+
+\subsubsection{Find First and Last Occurrence}
+\begin{lstlisting}
+def find_first_occurrence(nums, target):
+    left, right = 0, len(nums) - 1
+    result = -1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            result = mid
+            right = mid - 1  # Continue searching left
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return result
+
+def find_last_occurrence(nums, target):
+    left, right = 0, len(nums) - 1
+    result = -1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            result = mid
+            left = mid + 1  # Continue searching right
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return result
+
+def search_range(nums, target):
+    return [find_first_occurrence(nums, target),
+            find_last_occurrence(nums, target)]
+\end{lstlisting}
+
+\subsubsection{Binary Search on Answer}
+\begin{lstlisting}
+def find_peak_element(nums):
+    left, right = 0, len(nums) - 1
+
+    while left < right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] > nums[mid + 1]:
+            right = mid
+        else:
+            left = mid + 1
+
+    return left
+
+def search_rotated_sorted_array(nums, target):
+    left, right = 0, len(nums) - 1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            return mid
+
+        # Left half is sorted
+        if nums[left] <= nums[mid]:
+            if nums[left] <= target < nums[mid]:
+                right = mid - 1
+            else:
+                left = mid + 1
+        # Right half is sorted
+        else:
+            if nums[mid] < target <= nums[right]:
+                left = mid + 1
+            else:
+                right = mid - 1
+
+    return -1
+\end{lstlisting}
+
+\subsection{6. Dynamic Programming}
+
+\begin{patternbox}{Dynamic Programming - Optimal Substructure}
+\textbf{Use Case:} Optimization, counting, decision problems\\
+\textbf{Time:} Varies (often O(n²) or O(n*m))\\
+\textbf{Space:} O(n) to O(n*m) depending on dimensions
+\end{patternbox}
+
+\subsubsection{1D DP Template}
+\begin{lstlisting}
+def fibonacci(n):
+    if n <= 1:
+        return n
+
+    # Bottom-up approach
+    dp = [0] * (n + 1)
+    dp[1] = 1
+
+    for i in range(2, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+
+    return dp[n]
+
+# Space optimized
+def fibonacci_optimized(n):
+    if n <= 1:
+        return n
+
+    prev2, prev1 = 0, 1
+
+    for i in range(2, n + 1):
+        current = prev1 + prev2
+        prev2, prev1 = prev1, current
+
+    return prev1
+
+def climb_stairs(n):
+    if n <= 2:
+        return n
+
+    dp = [0] * (n + 1)
+    dp[1], dp[2] = 1, 2
+
+    for i in range(3, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+
+    return dp[n]
+
+def house_robber(nums):
+    if not nums:
+        return 0
+    if len(nums) == 1:
+        return nums[0]
+
+    dp = [0] * len(nums)
+    dp[0] = nums[0]
+    dp[1] = max(nums[0], nums[1])
+
+    for i in range(2, len(nums)):
+        dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+
+    return dp[-1]
+\end{lstlisting}
+
+\subsubsection{2D DP Template}
+\begin{lstlisting}
+def unique_paths(m, n):
+    # Create DP table
+    dp = [[1 for _ in range(n)] for _ in range(m)]
+
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[i][j] = dp[i-1][j] + dp[i][j-1]
+
+    return dp[m-1][n-1]
+
+def longest_common_subsequence(text1, text2):
+    m, n = len(text1), len(text2)
+    dp = [[0 for _ in range(n + 1)] for _ in range(m + 1)]
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if text1[i-1] == text2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+    return dp[m][n]
+
+def min_path_sum(grid):
+    m, n = len(grid), len(grid[0])
+
+    # Initialize first row and column
+    for i in range(1, m):
+        grid[i][0] += grid[i-1][0]
+
+    for j in range(1, n):
+        grid[0][j] += grid[0][j-1]
+
+    # Fill the DP table
+    for i in range(1, m):
+        for j in range(1, n):
+            grid[i][j] += min(grid[i-1][j], grid[i][j-1])
+
+    return grid[m-1][n-1]
+\end{lstlisting}
+
+\subsection{7. Backtracking}
+
+\begin{patternbox}{Backtracking - Explore All Possibilities}
+\textbf{Use Case:} Permutations, combinations, N-Queens, Sudoku\\
+\textbf{Time:} Exponential O(2^n) or O(n!)\\
+\textbf{Space:} O(depth) for recursion stack
+\end{patternbox}
+
+\subsubsection{General Backtracking Template}
+\begin{lstlisting}
+def backtrack_template(candidates, target, path=[], result=[]):
+    # Base case - solution found
+    if is_valid_solution(path, target):
+        result.append(path[:])  # Make a copy
+        return
+
+    # Explore all possibilities
+    for i, candidate in enumerate(candidates):
+        # Skip invalid candidates
+        if not is_valid_candidate(candidate, path):
+            continue
+
+        # Make choice
+        path.append(candidate)
+
+        # Recurse with remaining candidates
+        backtrack_template(candidates[i+1:], target, path, result)
+
+        # Undo choice (backtrack)
+        path.pop()
+
+    return result
+
+def generate_permutations(nums):
+    def backtrack(path, remaining):
+        if not remaining:
+            result.append(path[:])
+            return
+
+        for i in range(len(remaining)):
+            # Choose
+            path.append(remaining[i])
+            # Explore
+            backtrack(path, remaining[:i] + remaining[i+1:])
+            # Unchoose
+            path.pop()
+
+    result = []
+    backtrack([], nums)
+    return result
+\end{lstlisting}
+
+\subsubsection{Combinations and Subsets}
+\begin{lstlisting}
+def generate_subsets(nums):
+    def backtrack(start, path):
+        result.append(path[:])  # Add current subset
+
+        for i in range(start, len(nums)):
+            path.append(nums[i])
+            backtrack(i + 1, path)
+            path.pop()
+
+    result = []
+    backtrack(0, [])
+    return result
+
+def combination_sum(candidates, target):
+    def backtrack(start, path, remaining):
+        if remaining == 0:
+            result.append(path[:])
+            return
+
+        for i in range(start, len(candidates)):
+            if candidates[i] > remaining:
+                break
+
+            path.append(candidates[i])
+            # Can reuse same element
+            backtrack(i, path, remaining - candidates[i])
+            path.pop()
+
+    result = []
+    candidates.sort()
+    backtrack(0, [], target)
+    return result
+
+def letter_combinations(digits):
+    if not digits:
+        return []
+
+    phone = {
+        '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+        '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+    }
+
+    def backtrack(index, path):
+        if index == len(digits):
+            result.append("".join(path))
+            return
+
+        for letter in phone[digits[index]]:
+            path.append(letter)
+            backtrack(index + 1, path)
+            path.pop()
+
+    result = []
+    backtrack(0, [])
+    return result
+\end{lstlisting}
+
+\subsection{8. Heap Operations}
+
+\begin{patternbox}{Heap - Priority Queue for Top K Problems}
+\textbf{Use Case:} Top K elements, merge K sorted, scheduling\\
+\textbf{Time:} O(log n) insert/delete, O(1) peek\\
+\textbf{Space:} O(n) for heap storage
+\end{patternbox}
+
+\subsubsection{Min/Max Heap Templates}
+\begin{lstlisting}
+import heapq
+
+def find_kth_largest(nums, k):
+    # Use min heap of size k
+    min_heap = []
+
+    for num in nums:
+        heapq.heappush(min_heap, num)
+        if len(min_heap) > k:
+            heapq.heappop(min_heap)
+
+    return min_heap[0]
+
+def find_k_largest_elements(nums, k):
+    # Min heap approach
+    min_heap = []
+
+    for num in nums:
+        if len(min_heap) < k:
+            heapq.heappush(min_heap, num)
+        elif num > min_heap[0]:
+            heapq.heapreplace(min_heap, num)
+
+    return sorted(min_heap, reverse=True)
+
+# For max heap, negate values
+def max_heap_operations():
+    max_heap = []
+
+    # Insert (negate for max heap)
+    heapq.heappush(max_heap, -value)
+
+    # Extract max (negate result)
+    max_val = -heapq.heappop(max_heap)
+
+    # Peek max
+    max_val = -max_heap[0]
+\end{lstlisting}
+
+\subsubsection{Advanced Heap Applications}
+\begin{lstlisting}
+def merge_k_sorted_lists(lists):
+    import heapq
+
+    min_heap = []
+    # Add first element from each list
+    for i, lst in enumerate(lists):
+        if lst:
+            heapq.heappush(min_heap, (lst.val, i, lst))
+
+    dummy = ListNode(0)
+    current = dummy
+
+    while min_heap:
+        val, list_idx, node = heapq.heappop(min_heap)
+        current.next = node
+        current = current.next
+
+        # Add next element from same list
+        if node.next:
+            heapq.heappush(min_heap, (node.next.val, list_idx, node.next))
+
+    return dummy.next
+
+def top_k_frequent_elements(nums, k):
+    from collections import Counter
+    import heapq
+
+    count = Counter(nums)
+
+    # Min heap of size k
+    min_heap = []
+    for num, freq in count.items():
+        heapq.heappush(min_heap, (freq, num))
+        if len(min_heap) > k:
+            heapq.heappop(min_heap)
+
+    return [num for freq, num in min_heap]
+
+class MedianFinder:
+    def __init__(self):
+        self.small = []  # max heap (negated)
+        self.large = []  # min heap
+
+    def addNum(self, num):
+        # Add to max heap first
+        heapq.heappush(self.small, -num)
+
+        # Balance: move largest from small to large
+        heapq.heappush(self.large, -heapq.heappop(self.small))
+
+        # Ensure small has more or equal elements
+        if len(self.large) > len(self.small):
+            heapq.heappush(self.small, -heapq.heappop(self.large))
+
+    def findMedian(self):
+        if len(self.small) > len(self.large):
+            return -self.small[0]
+        return (-self.small[0] + self.large[0]) / 2
+\end{lstlisting}
+
+\subsection{9. Union-Find (Disjoint Set)}
+
+\begin{patternbox}{Union-Find - Connected Components}
+\textbf{Use Case:} Graph connectivity, cycle detection, MST\\
+\textbf{Time:} O(α(n)) amortized per operation\\
+\textbf{Space:} O(n) for parent and rank arrays
+\end{patternbox}
+
+\begin{lstlisting}
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+        self.components = n
+
+    def find(self, x):
+        # Path compression
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            return False  # Already connected
+
+        # Union by rank
+        if self.rank[root_x] < self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] > self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
+        self.components -= 1
+        return True
+
+    def connected(self, x, y):
+        return self.find(x) == self.find(y)
+
+    def count_components(self):
+        return self.components
+
+# Applications
+def number_of_islands(grid):
+    if not grid:
+        return 0
+
+    m, n = len(grid), len(grid[0])
+    uf = UnionFind(m * n)
+    islands = 0
+
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == '1':
+                islands += 1
+                # Check 4 directions
+                for di, dj in [(0,1), (1,0), (0,-1), (-1,0)]:
+                    ni, nj = i + di, j + dj
+                    if (0 <= ni < m and 0 <= nj < n and
+                        grid[ni][nj] == '1'):
+                        if uf.union(i*n + j, ni*n + nj):
+                            islands -= 1
+
+    return islands
+
+def redundant_connection(edges):
+    uf = UnionFind(len(edges) + 1)
+
+    for u, v in edges:
+        if not uf.union(u, v):
+            return [u, v]  # This edge creates a cycle
+
+    return []
+\end{lstlisting}
+
+\subsection{10. Trie (Prefix Tree)}
+
+\begin{patternbox}{Trie - Efficient String Storage and Search}
+\textbf{Use Case:} Autocomplete, word search, prefix matching\\
+\textbf{Time:} O(m) where m is string length\\
+\textbf{Space:} O(ALPHABET\_SIZE * N * M) worst case
+\end{patternbox}
+
+\begin{lstlisting}
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end_of_word = True
+
+    def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return node.is_end_of_word
+
+    def starts_with(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return True
+
+    def find_words_with_prefix(self, prefix):
+        # Find the prefix node
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return []
+            node = node.children[char]
+
+        # DFS to find all words
+        words = []
+        self._dfs(node, prefix, words)
+        return words
+
+    def _dfs(self, node, path, words):
+        if node.is_end_of_word:
+            words.append(path)
+
+        for char, child_node in node.children.items():
+            self._dfs(child_node, path + char, words)
+
+# Word Search II using Trie
+def find_words_in_board(board, words):
+    # Build trie
+    trie = Trie()
+    for word in words:
+        trie.insert(word)
+
+    result = set()
+    m, n = len(board), len(board[0])
+
+    def dfs(i, j, node, path):
+        if node.is_end_of_word:
+            result.add(path)
+
+        if (i < 0 or i >= m or j < 0 or j >= n or
+            board[i][j] not in node.children):
+            return
+
+        char = board[i][j]
+        board[i][j] = '#'  # Mark visited
+
+        # Explore 4 directions
+        for di, dj in [(0,1), (1,0), (0,-1), (-1,0)]:
+            dfs(i + di, j + dj, node.children[char], path + char)
+
+        board[i][j] = char  # Restore
+
+    # Try starting from each cell
+    for i in range(m):
+        for j in range(n):
+            if board[i][j] in trie.root.children:
+                dfs(i, j, trie.root, "")
+
+    return list(result)
+\end{lstlisting}
+
+\subsection{11. Topological Sort}
+
+\begin{patternbox}{Topological Sort - Ordering with Dependencies}
+\textbf{Use Case:} Course scheduling, dependency resolution\\
+\textbf{Time:} O(V + E)\\
+\textbf{Space:} O(V) for in-degree array and queue
+\end{patternbox}
+
+\begin{lstlisting}
+from collections import defaultdict, deque
+
+def topological_sort_kahn(num_courses, prerequisites):
+    # Build graph and in-degree array
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    # Initialize queue with nodes having in-degree 0
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    result = []
+
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+
+        # Reduce in-degree of neighbors
+        for neighbor in graph[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+
+    # Check if topological sort is possible
+    return result if len(result) == num_courses else []
+
+def can_finish_courses(num_courses, prerequisites):
+    topo_order = topological_sort_kahn(num_courses, prerequisites)
+    return len(topo_order) == num_courses
+
+# DFS-based topological sort
+def topological_sort_dfs(graph):
+    visited = set()
+    rec_stack = set()
+    result = []
+
+    def dfs(node):
+        if node in rec_stack:
+            return False  # Cycle detected
+        if node in visited:
+            return True
+
+        visited.add(node)
+        rec_stack.add(node)
+
+        for neighbor in graph.get(node, []):
+            if not dfs(neighbor):
+                return False
+
+        rec_stack.remove(node)
+        result.append(node)  # Add to result in post-order
+        return True
+
+    for node in graph:
+        if node not in visited:
+            if not dfs(node):
+                return []  # Cycle detected
+
+    return result[::-1]  # Reverse for correct order
+\end{lstlisting}
+
+\subsection{12. Special Algorithms}
+
+\subsubsection{Kadane's Algorithm - Maximum Subarray}
+\begin{lstlisting}
+def max_subarray_sum(nums):
+    if not nums:
+        return 0
+
+    max_sum = current_sum = nums[0]
+
+    for i in range(1, len(nums)):
+        # Either extend existing subarray or start new one
+        current_sum = max(nums[i], current_sum + nums[i])
+        max_sum = max(max_sum, current_sum)
+
+    return max_sum
+
+def max_subarray_with_indices(nums):
+    max_sum = current_sum = nums[0]
+    start = end = temp_start = 0
+
+    for i in range(1, len(nums)):
+        if current_sum < 0:
+            current_sum = nums[i]
+            temp_start = i
+        else:
+            current_sum += nums[i]
+
+        if current_sum > max_sum:
+            max_sum = current_sum
+            start = temp_start
+            end = i
+
+    return max_sum, start, end
+\end{lstlisting}
+
+\subsubsection{Prefix Sum}
+\begin{lstlisting}
+class PrefixSum:
+    def __init__(self, nums):
+        self.prefix = [0]
+        for num in nums:
+            self.prefix.append(self.prefix[-1] + num)
+
+    def range_sum(self, i, j):
+        # Sum from index i to j (inclusive)
+        return self.prefix[j + 1] - self.prefix[i]
+
+def subarray_sum_equals_k(nums, k):
+    count = 0
+    prefix_sum = 0
+    sum_count = {0: 1}  # prefix_sum -> frequency
+
+    for num in nums:
+        prefix_sum += num
+        if prefix_sum - k in sum_count:
+            count += sum_count[prefix_sum - k]
+        sum_count[prefix_sum] = sum_count.get(prefix_sum, 0) + 1
+
+    return count
+\end{lstlisting}
+
+\subsubsection{Monotonic Stack}
+\begin{lstlisting}
+def next_greater_element(nums):
+    result = [-1] * len(nums)
+    stack = []  # Store indices
+
+    for i in range(len(nums)):
+        while stack and nums[i] > nums[stack[-1]]:
+            index = stack.pop()
+            result[index] = nums[i]
+        stack.append(i)
+
+    return result
+
+def daily_temperatures(temperatures):
+    result = [0] * len(temperatures)
+    stack = []
+
+    for i, temp in enumerate(temperatures):
+        while stack and temp > temperatures[stack[-1]]:
+            prev_index = stack.pop()
+            result[prev_index] = i - prev_index
+        stack.append(i)
+
+    return result
+
+def largest_rectangle_in_histogram(heights):
+    stack = []
+    max_area = 0
+
+    for i, h in enumerate(heights + [0]):  # Add sentinel
+        while stack and h < heights[stack[-1]]:
+            height = heights[stack.pop()]
+            width = i if not stack else i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+
+    return max_area
+\end{lstlisting}
+
+\subsubsection{Cyclic Sort}
+\begin{lstlisting}
+def cyclic_sort(nums):
+    i = 0
+    while i < len(nums):
+        correct_index = nums[i] - 1
+        if nums[i] != nums[correct_index]:
+            nums[i], nums[correct_index] = nums[correct_index], nums[i]
+        else:
+            i += 1
+    return nums
+
+def find_missing_number(nums):
+    # Array contains n numbers in range [0, n]
+    i = 0
+    n = len(nums)
+
+    while i < n:
+        if nums[i] < n and nums[i] != nums[nums[i]]:
+            nums[nums[i]], nums[i] = nums[i], nums[nums[i]]
+        else:
+            i += 1
+
+    # Find the missing number
+    for i in range(n):
+        if nums[i] != i:
+            return i
+
+    return n
+
+def find_all_duplicates(nums):
+    duplicates = []
+
+    for i in range(len(nums)):
+        # Use array indices to mark presence
+        num = abs(nums[i])
+        if nums[num - 1] < 0:
+            duplicates.append(num)
+        else:
+            nums[num - 1] *= -1
+
+    return duplicates
+\end{lstlisting}
+
+\section{Pattern Recognition Guide}
+
+\begin{complexitybox}
+\textbf{Time Complexity Quick Reference:}
+\begin{itemize}
+\item O(1) - Hash table access, array index
+\item O(log n) - Binary search, heap operations
+\item O(n) - Single pass through array, BFS/DFS
+\item O(n log n) - Merge sort, heap sort
+\item O(n²) - Nested loops, bubble sort
+\item O(2^n) - Recursive algorithms without memoization
+\end{itemize}
+\end{complexitybox}
+
+\subsection{Decision Tree for Pattern Selection}
+
+\begin{enumerate}
+\item \textbf{Array/String Problems:}
+   \begin{itemize}
+   \item Sorted array $\rightarrow$ Binary Search
+   \item Two elements with condition $\rightarrow$ Two Pointers
+   \item Contiguous subarray/substring $\rightarrow$ Sliding Window
+   \item All subarrays $\rightarrow$ Prefix Sum or DP
+   \end{itemize}
+
+\item \textbf{Tree/Graph Problems:}
+   \begin{itemize}
+   \item Path finding $\rightarrow$ DFS
+   \item Shortest path $\rightarrow$ BFS
+   \item Level-order traversal $\rightarrow$ BFS
+   \item Connected components $\rightarrow$ Union-Find or DFS
+   \end{itemize}
+
+\item \textbf{Optimization Problems:}
+   \begin{itemize}
+   \item Optimal substructure $\rightarrow$ Dynamic Programming
+   \item Multiple choices at each step $\rightarrow$ Backtracking
+   \item Greedy choice property $\rightarrow$ Greedy Algorithm
+   \end{itemize}
+
+\item \textbf{Priority/Ordering Problems:}
+   \begin{itemize}
+   \item Top K elements $\rightarrow$ Heap
+   \item Streaming data $\rightarrow$ Heap
+   \item Dependencies $\rightarrow$ Topological Sort
+   \end{itemize}
+
+\item \textbf{String Matching:}
+   \begin{itemize}
+   \item Prefix operations $\rightarrow$ Trie
+   \item Pattern matching $\rightarrow$ KMP or Rolling Hash
+   \item Anagrams $\rightarrow$ Hash Map
+   \end{itemize}
+\end{enumerate}
+
+\begin{tipbox}
+\textbf{Red Flags for Common Patterns:}
+\begin{itemize}
+\item "Maximum/Minimum subarray" $\rightarrow$ Sliding Window or Kadane's
+\item "All permutations/combinations" $\rightarrow$ Backtracking
+\item "Shortest path in unweighted graph" $\rightarrow$ BFS
+\item "Detect cycle" $\rightarrow$ DFS or Union-Find
+\item "Top K" or "K-th largest" $\rightarrow$ Heap
+\end{itemize}
+\end{tipbox}
+
+\section{4-Week Study Schedule}
+
+\subsection{Week 1: Foundation Patterns}
+\textbf{Day 1-2:} Two Pointers \& Sliding Window
+\begin{itemize}
+\item Practice writing templates from memory
+\item Solve: Two Sum II, Container With Most Water, Longest Substring Without Repeating Characters
+\end{itemize}
+
+\textbf{Day 3-4:} DFS \& BFS
+\begin{itemize}
+\item Master both recursive and iterative approaches
+\item Solve: Binary Tree Inorder Traversal, Binary Tree Level Order Traversal, Number of Islands
+\end{itemize}
+
+\textbf{Day 5-7:} Binary Search
+\begin{itemize}
+\item Practice standard and modified binary search
+\item Solve: Search in Rotated Sorted Array, Find First and Last Position, Search Insert Position
+\end{itemize}
+
+\subsection{Week 2: Dynamic Programming \& Backtracking}
+\textbf{Day 8-10:} 1D \& 2D Dynamic Programming
+\begin{itemize}
+\item Focus on identifying optimal substructure
+\item Solve: Climbing Stairs, House Robber, Unique Paths, Longest Common Subsequence
+\end{itemize}
+
+\textbf{Day 11-14:} Backtracking
+\begin{itemize}
+\item Master the template and understand when to backtrack
+\item Solve: Permutations, Combinations, Subsets, N-Queens
+\end{itemize}
+
+\subsection{Week 3: Advanced Data Structures}
+\textbf{Day 15-17:} Heap Operations
+\begin{itemize}
+\item Learn min/max heap operations and applications
+\item Solve: Kth Largest Element, Top K Frequent Elements, Merge K Sorted Lists
+\end{itemize}
+
+\textbf{Day 18-19:} Union-Find
+\begin{itemize}
+\item Understand path compression and union by rank
+\item Solve: Number of Islands II, Redundant Connection, Friend Circles
+\end{itemize}
+
+\textbf{Day 20-21:} Trie
+\begin{itemize}
+\item Build trie from scratch and understand applications
+\item Solve: Implement Trie, Word Search II, Add and Search Word
+\end{itemize}
+
+\subsection{Week 4: Special Algorithms \& Integration}
+\textbf{Day 22-24:} Special Algorithms
+\begin{itemize}
+\item Kadane's Algorithm, Prefix Sum, Monotonic Stack
+\item Solve: Maximum Subarray, Subarray Sum Equals K, Next Greater Element
+\end{itemize}
+
+\textbf{Day 25-26:} Topological Sort
+\begin{itemize}
+\item Both Kahn's algorithm and DFS approach
+\item Solve: Course Schedule, Course Schedule II, Alien Dictionary
+\end{itemize}
+
+\textbf{Day 27-28:} Integration \& Mock Interviews
+\begin{itemize}
+\item Combine multiple patterns in complex problems
+\item Practice writing templates under time pressure
+\item Mock interview sessions
+\end{itemize}
+
+\section{Daily Practice Routine}
+
+\subsection{Morning Routine (30 minutes)}
+\begin{enumerate}
+\item \textbf{Template Writing (10 min):} Write 3 random templates from memory
+\item \textbf{Pattern Recognition (10 min):} Look at problem titles and identify patterns
+\item \textbf{Complexity Analysis (10 min):} Review time/space complexity for each pattern
+\end{enumerate}
+
+\subsection{Evening Session (60-90 minutes)}
+\begin{enumerate}
+\item \textbf{Problem Solving (45-60 min):}
+   \begin{itemize}
+   \item Choose 2-3 problems focusing on current week's patterns
+   \item Spend 5 minutes identifying the pattern before coding
+   \item Write solution from scratch using templates
+   \end{itemize}
+\item \textbf{Template Review (15-30 min):}
+   \begin{itemize}
+   \item Review any templates you struggled with
+   \item Write them again from memory
+   \item Note common mistakes or variations
+   \end{itemize}
+\end{enumerate}
+
+\subsection{Weekly Goals}
+\begin{itemize}
+\item \textbf{Week 1:} Master 4 foundational patterns
+\item \textbf{Week 2:} Add DP and backtracking to arsenal
+\item \textbf{Week 3:} Comfortable with advanced data structures
+\item \textbf{Week 4:} Integrate patterns and achieve fluency
+\end{itemize}
+
+\begin{tipbox}
+\textbf{Success Metrics:}
+\begin{itemize}
+\item Can write any template from memory in under 2 minutes
+\item Identify correct pattern within 30 seconds of reading problem
+\item Solve medium problems in 15-20 minutes
+\item Explain time/space complexity confidently
+\end{itemize}
+\end{tipbox}
+
+\section{Progress Tracking}
+
+\subsection{Template Mastery Checklist}
+Check off when you can write from memory in under 2 minutes:
+
+\begin{itemize}
+\item[$\square$] DFS (recursive)
+\item[$\square$] DFS (iterative)
+\item[$\square$] BFS (standard)
+\item[$\square$] BFS (level-order)
+\item[$\square$] Two Pointers (opposite ends)
+\item[$\square$] Two Pointers (fast/slow)
+\item[$\square$] Sliding Window (fixed)
+\item[$\square$] Sliding Window (variable)
+\item[$\square$] Binary Search (standard)
+\item[$\square$] Binary Search (first/last occurrence)
+\item[$\square$] 1D DP template
+\item[$\square$] 2D DP template
+\item[$\square$] Backtracking template
+\item[$\square$] Heap operations
+\item[$\square$] Union-Find (with optimizations)
+\item[$\square$] Trie implementation
+\item[$\square$] Topological Sort (Kahn's)
+\item[$\square$] Kadane's Algorithm
+\item[$\square$] Prefix Sum
+\item[$\square$] Monotonic Stack
+\end{itemize}
+
+\subsection{Problem Categories to Master}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Category} & \textbf{Easy} & \textbf{Medium} & \textbf{Hard} \\
+\hline
+Arrays \& Strings & 10 & 15 & 5 \\
+\hline
+Trees \& Graphs & 8 & 12 & 5 \\
+\hline
+Dynamic Programming & 5 & 10 & 5 \\
+\hline
+Backtracking & 3 & 8 & 3 \\
+\hline
+Heaps \& Priority Queues & 5 & 8 & 3 \\
+\hline
+Advanced Data Structures & 5 & 10 & 5 \\
+\hline
+\textbf{Total} & \textbf{36} & \textbf{63} & \textbf{26} \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Final Tips for Success}
+
+\begin{tipbox}
+\textbf{Interview Day Strategy:}
+\begin{enumerate}
+\item Spend 2-3 minutes understanding the problem completely
+\item Identify the pattern (this should be automatic by now)
+\item Explain your approach before coding
+\item Write the template structure first, then fill in details
+\item Test with simple examples
+\item Analyze time and space complexity
+\end{enumerate}
+\end{tipbox}
+
+\begin{complexitybox}
+\textbf{Common Optimizations:}
+\begin{itemize}
+\item Two-pass $\rightarrow$ One-pass with hash map
+\item Nested loops $\rightarrow$ Two pointers or hash map
+\item Recursion $\rightarrow$ DP with memoization
+\item Multiple data structures $\rightarrow$ Single optimized structure
+\item Extra space $\rightarrow$ In-place modifications
+\end{itemize}
+\end{complexitybox}
+
+\subsection{Red Flags to Avoid}
+\begin{itemize}
+\item Jumping into coding without understanding the problem
+\item Not identifying the pattern before starting
+\item Overcomplicating simple problems
+\item Not testing with edge cases
+\item Forgetting to analyze complexity
+\end{itemize}
+
+\subsection{Last-Minute Review (Day Before Interview)}
+\begin{enumerate}
+\item Write all 12 main templates from memory
+\item Review the pattern recognition guide
+\item Practice one problem from each category
+\item Get good sleep and stay confident
+\end{enumerate}
+
+\vspace{1cm}
+\begin{center}
+\textbf{\Large Remember: Consistency beats intensity.}\\
+\textbf{\Large Practice these templates daily until they become automatic!}
+\end{center}
+
+\end{document}

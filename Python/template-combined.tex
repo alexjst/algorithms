@@ -1,0 +1,166 @@
+% !TEX program = pdflatex
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\usepackage{caption}
+\usepackage{tcolorbox}
+
+% For beautiful syntax highlighting
+\usepackage{minted} % requires pygments + --shell-escape
+
+% ---- Printer-friendly colors (grayscale fallback) ----
+\definecolor{codebg}{RGB}{250,250,250}
+\definecolor{keyword}{RGB}{0,0,120}
+\definecolor{comment}{RGB}{90,110,90}
+\definecolor{string}{RGB}{120,20,20}
+
+% ---- Minted settings ----
+\setminted[python]{
+  fontsize=\small,
+  linenos,
+  numbersep=6pt,
+  frame=lines,
+  framesep=2mm,
+  baselinestretch=1.1,
+  bgcolor=codebg,
+  breaklines,
+  breakanywhere,
+}
+
+% ---- Section formatting ----
+\titleformat{\section}{\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\large\bfseries}{}{0pt}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\itshape}{}{0pt}{}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=black,
+  citecolor=black,
+  pdfauthor={Technical Interview Preparation Assistant},
+  pdftitle={Coding Interview Patterns & Templates (Python)},
+  pdfsubject={Printable reference guide for coding interviews},
+}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE \textbf{Coding Interview Patterns}}\\[0.4em]
+  {\large Python Templates for Muscle Memory}\\[0.4em]
+  {\normalsize Version: \today}
+\end{center}
+
+\vspace{0.5em}
+This reference combines the **printer-friendly focus** of the GPT-5 version, the **beautiful code formatting** of the Gemini version, and the **boxed summaries/tables** of the Claude version. Use the boxed notes for quick recognition, and the templates for daily rewriting drills.
+
+\tableofcontents
+\newpage
+
+% ---------------- Example Template ----------------
+\section{Core Patterns \,\& \,Templates}
+
+\subsection{Depth-First Search (DFS)}
+\begin{tcolorbox}[colback=codebg,colframe=black!50,title=When to Use DFS]
+  Use when exploring connectivity, components, cycle detection, or recursion on trees/graphs. Complexity $O(V+E)$. 
+\end{tcolorbox}
+
+\subsubsection*{Recursive DFS}
+\begin{minted}{python}
+from typing import List, Dict, Set
+
+def dfs_recursive(graph: Dict[int, List[int]], start: int) -> List[int]:
+    visited: Set[int] = set()
+    order: List[int] = []
+
+    def dfs(u: int) -> None:
+        if u in visited:
+            return
+        visited.add(u)
+        order.append(u)
+        for v in graph.get(u, []):
+            dfs(v)
+
+    dfs(start)
+    return order
+\end{minted}
+
+\subsubsection*{Iterative DFS}
+\begin{minted}{python}
+from typing import List, Dict
+
+def dfs_iterative(graph: Dict[int, List[int]], start: int) -> List[int]:
+    stack: List[int] = [start]
+    visited = set()
+    order: List[int] = []
+
+    while stack:
+        u = stack.pop()
+        if u in visited:
+            continue
+        visited.add(u)
+        order.append(u)
+        for v in reversed(graph.get(u, [])):
+            if v not in visited:
+                stack.append(v)
+    return order
+\end{minted}
+
+% ---------------- Pattern Guide Example ----------------
+\section{Pattern Recognition Guide}
+\begin{tcolorbox}[colback=codebg,colframe=black!60,title=Trigger Words]
+  \begin{itemize}[leftmargin=1.2em]
+    \item ``longest/shortest subarray/substring'' $\Rightarrow$ Sliding Window
+    \item ``sorted array'' $\Rightarrow$ Two Pointers / Binary Search
+    \item ``dynamic connectivity'' $\Rightarrow$ Union-Find
+    \item ``prerequisites ordering'' $\Rightarrow$ Topological Sort
+    \item ``prefix/suffix queries'' $\Rightarrow$ Prefix Sum / Trie
+  \end{itemize}
+\end{tcolorbox}
+
+% ---------------- Schedule ----------------
+\section{4-Week Study Schedule}
+\begin{tcolorbox}[colback=codebg,colframe=black!60,title=Overview]
+  Week 1: Fundamentals (Two Pointers, Sliding Window, Binary Search, Prefix Sum, Kadane) \\
+  Week 2: Graphs (DFS, BFS, Topological Sort, Union-Find, Heaps) \\
+  Week 3: DP \,\& Backtracking \\
+  Week 4: Advanced (Trie, Monotonic Stack, Cyclic Sort, Mixed Drills)
+\end{tcolorbox}
+
+% ---------------- Daily Routine ----------------
+\section{Daily Practice Routine}
+\begin{tcolorbox}[colback=codebg,colframe=black!60,title=45--90 Minutes]
+  \begin{enumerate}[leftmargin=1.2em]
+    \item Warm-up: Rewrite 1--2 templates from memory.
+    \item Focused Drill: Solve 2 problems of today’s pattern.
+    \item Flash Review: Recap 3 old problems aloud.
+    \item Retrospective: Write down mistakes and triggers.
+  \end{enumerate}
+\end{tcolorbox}
+
+% ---------------- Complexity Notes ----------------
+\section{Time \,\& \,Space Complexity}
+\begin{tcolorbox}[colback=codebg,colframe=black!60,title=Summary]
+  DFS/BFS: $O(V+E)$ time, $O(V)$ space. \\
+  Binary Search: $O(\log n)$ time. \\
+  Sliding Window: $O(n)$ time, small space. \\
+  DP: $O(n)$ or $O(mn)$ depending on states. \\
+  Union-Find: $\alpha(n)$ amortized. \\
+  Heaps: $O(\log n)$ push/pop. \\
+  Trie: $O(L)$ per word. \\
+  Monotonic Stack: $O(n)$.
+\end{tcolorbox}
+
+% (Other patterns/templates would follow here, all using minted + tcolorbox style)
+
+\end{document}
+

@@ -1,0 +1,1086 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{multicol}
+
+% Page setup
+\geometry{left=2cm,right=2cm,top=2.5cm,bottom=2.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{FAANG System Design Interview Guide}
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{Design at Scale - Master These Concepts}
+
+% Custom colors
+\definecolor{primaryblue}{rgb}{0.2, 0.4, 0.8}
+\definecolor{secondaryblue}{rgb}{0.4, 0.6, 1.0}
+\definecolor{lightblue}{rgb}{0.9, 0.95, 1.0}
+\definecolor{darkgreen}{rgb}{0.0, 0.6, 0.0}
+\definecolor{lightgreen}{rgb}{0.9, 1.0, 0.9}
+\definecolor{darkorange}{rgb}{0.8, 0.4, 0.0}
+\definecolor{lightorange}{rgb}{1.0, 0.95, 0.9}
+
+% Custom boxes
+\newtcolorbox{conceptbox}[1]{
+    colback=lightblue,
+    colframe=primaryblue,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+\newtcolorbox{frameworkbox}{
+    colback=lightgreen,
+    colframe=darkgreen,
+    fonttitle=\bfseries,
+    title=System Design Framework
+}
+
+\newtcolorbox{scaleBox}{
+    colback=lightorange,
+    colframe=darkorange,
+    fonttitle=\bfseries,
+    title=Scale Considerations
+}
+
+\newtcolorbox{tradeoffbox}{
+    colback=gray!10,
+    colframe=gray!70,
+    fonttitle=\bfseries,
+    title=Trade-offs Analysis
+}
+
+% Title formatting
+\titleformat{\section}{\Large\bfseries\color{primaryblue}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{secondaryblue}}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% Title Page
+\begin{titlepage}
+\centering
+{\huge\bfseries FAANG System Design Interview Guide\par}
+\vspace{1cm}
+{\LARGE Master Large-Scale System Architecture\par}
+\vspace{1.5cm}
+{\Large From Fundamentals to Complex Distributed Systems\par}
+\vspace{2cm}
+
+\begin{tcolorbox}[colback=lightblue,colframe=primaryblue,width=0.8\textwidth]
+\centering
+\textbf{OBJECTIVE}: Design systems that scale to millions of users\\
+\textbf{COVERAGE}: 25+ Core Concepts + Real Interview Questions\\
+\textbf{APPROACH}: Structured methodology for system design\\
+\textbf{TARGET}: Senior Engineer and Staff Engineer Positions
+\end{tcolorbox}
+
+\vspace{2cm}
+{\large Based on 2024 FAANG Interview Analysis\par}
+\vfill
+{\large \today\par}
+\end{titlepage}
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% Quick Reference
+\section{System Design Interview Overview}
+
+\subsection{What Interviewers Evaluate}
+
+System design interviews assess your ability to:
+\begin{itemize}
+\item \textbf{Architectural Thinking}: Break down complex problems into manageable components
+\item \textbf{Scalability Reasoning}: Design systems that handle growth from thousands to millions of users
+\item \textbf{Trade-off Analysis}: Make informed decisions between competing design choices
+\item \textbf{Communication}: Explain technical concepts clearly and drive the conversation
+\item \textbf{Practical Experience}: Demonstrate understanding of real-world constraints
+\end{itemize}
+
+\subsection{Common Interview Format}
+
+\begin{frameworkbox}
+\textbf{45-60 Minute Structure:}
+\begin{enumerate}
+\item \textbf{Clarification (5-10 min):} Understand requirements and constraints
+\item \textbf{High-level Design (10-15 min):} Architecture overview and main components
+\item \textbf{Deep Dive (20-25 min):} Detailed design of critical components
+\item \textbf{Scale \& Optimize (10-15 min):} Handle bottlenecks and scale to millions
+\item \textbf{Wrap-up (5 min):} Summary and additional considerations
+\end{enumerate}
+\end{frameworkbox}
+
+\subsection{Key Success Factors}
+
+\begin{itemize}
+\item \textbf{Start Simple}: Begin with a basic design and evolve it
+\item \textbf{Think Out Loud}: Verbalize your thought process
+\item \textbf{Ask Questions}: Clarify ambiguities early and often
+\item \textbf{Consider Trade-offs}: Every design decision has pros and cons
+\item \textbf{Estimate Scale}: Use back-of-envelope calculations
+\end{itemize}
+
+\section{Core System Design Concepts}
+
+\subsection{1. Scalability}
+
+\begin{conceptbox}{Scalability - Handling Growth}
+\textbf{Definition:} A system's ability to handle increased load gracefully\\
+\textbf{Types:} Vertical (scale up) vs Horizontal (scale out)\\
+\textbf{Goal:} Maintain performance as user base grows
+\end{conceptbox}
+
+\subsubsection{Vertical Scaling (Scale Up)}
+\begin{itemize}
+\item \textbf{Approach}: Add more power (CPU, RAM, Storage) to existing machine
+\item \textbf{Pros}: Simple, no code changes required, strong consistency
+\item \textbf{Cons}: Hardware limits, single point of failure, expensive
+\item \textbf{Use Cases}: Traditional databases, monolithic applications
+\end{itemize}
+
+\subsubsection{Horizontal Scaling (Scale Out)}
+\begin{itemize}
+\item \textbf{Approach}: Add more servers to handle increased load
+\item \textbf{Pros}: No hardware limits, fault tolerant, cost effective
+\item \textbf{Cons}: Complex implementation, eventual consistency, data consistency challenges
+\item \textbf{Use Cases}: Web servers, microservices, distributed databases
+\end{itemize}
+
+\begin{scaleBox}
+\textbf{Scale Estimation Framework:}
+\begin{itemize}
+\item Daily Active Users (DAU): 10M users
+\item Requests per day: 10M $\times$ 10 requests = 100M requests/day
+\item Requests per second: 100M / (24 $\times$ 3600) $\approx$ 1,200 RPS
+\item Peak load (3x average): 3,600 RPS
+\item Storage per user: 1KB $\times$ 10M = 10GB
+\end{itemize}
+\end{scaleBox}
+
+\subsection{2. Load Balancing}
+
+\begin{conceptbox}{Load Balancing - Traffic Distribution}
+\textbf{Purpose:} Distribute incoming requests across multiple servers\\
+\textbf{Benefits:} Prevents overload, improves availability, enables horizontal scaling\\
+\textbf{Types:} Layer 4 (Transport) vs Layer 7 (Application)
+\end{conceptbox}
+
+\subsubsection{Load Balancing Algorithms}
+\begin{itemize}
+\item \textbf{Round Robin}: Requests distributed sequentially
+\item \textbf{Weighted Round Robin}: Servers get requests based on capacity
+\item \textbf{Least Connections}: Route to server with fewest active connections
+\item \textbf{IP Hash}: Route based on client IP hash
+\item \textbf{Geographic}: Route based on client location
+\end{itemize}
+
+\subsubsection{Load Balancer Types}
+\begin{itemize}
+\item \textbf{Layer 4 (Transport Layer)}:
+  \begin{itemize}
+  \item Routes based on IP and port
+  \item Faster, lower latency
+  \item Cannot inspect application data
+  \end{itemize}
+\item \textbf{Layer 7 (Application Layer)}:
+  \begin{itemize}
+  \item Routes based on HTTP headers, URLs, cookies
+  \item More intelligent routing decisions
+  \item Higher latency due to content inspection
+  \end{itemize}
+\end{itemize}
+
+\subsection{3. Caching}
+
+\begin{conceptbox}{Caching - Performance Optimization}
+\textbf{Purpose:} Store frequently accessed data in fast storage\\
+\textbf{Benefit:} Reduces latency and database load\\
+\textbf{Principle:} Locality of reference - recently accessed data likely to be accessed again
+\end{conceptbox}
+
+\subsubsection{Cache Levels}
+\begin{itemize}
+\item \textbf{Browser Cache}: Client-side caching (CSS, JS, images)
+\item \textbf{CDN}: Geographic distribution of static content
+\item \textbf{Reverse Proxy}: Nginx, Apache cache responses
+\item \textbf{Application Cache}: In-memory caching (Redis, Memcached)
+\item \textbf{Database Cache}: Query result caching
+\end{itemize}
+
+\subsubsection{Cache Patterns}
+\begin{itemize}
+\item \textbf{Cache-Aside (Lazy Loading)}:
+  \begin{itemize}
+  \item Application manages cache directly
+  \item Read: Check cache $\rightarrow$ DB if miss $\rightarrow$ Update cache
+  \item Write: Update DB $\rightarrow$ Invalidate cache
+  \end{itemize}
+\item \textbf{Write-Through}:
+  \begin{itemize}
+  \item Write to cache and DB simultaneously
+  \item Ensures cache consistency
+  \item Higher write latency
+  \end{itemize}
+\item \textbf{Write-Behind (Write-Back)}:
+  \begin{itemize}
+  \item Write to cache immediately, DB asynchronously
+  \item Lower write latency
+  \item Risk of data loss
+  \end{itemize}
+\item \textbf{Refresh-Ahead}:
+  \begin{itemize}
+  \item Proactively refresh cache before expiration
+  \item Good for predictable access patterns
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Cache Eviction Policies}
+\begin{itemize}
+\item \textbf{LRU (Least Recently Used)}: Remove oldest accessed item
+\item \textbf{LFU (Least Frequently Used)}: Remove least accessed item
+\item \textbf{FIFO (First In, First Out)}: Remove oldest item
+\item \textbf{TTL (Time To Live)}: Remove expired items
+\end{itemize}
+
+\subsection{4. Database Design \& Scaling}
+
+\begin{conceptbox}{Database Scaling - Managing Data Growth}
+\textbf{Challenge:} Single database becomes bottleneck as data and traffic grow\\
+\textbf{Solutions:} Replication, Sharding, Partitioning\\
+\textbf{Trade-offs:} Consistency vs Availability vs Partition tolerance (CAP Theorem)
+\end{conceptbox}
+
+\subsubsection{Database Replication}
+\begin{itemize}
+\item \textbf{Master-Slave}:
+  \begin{itemize}
+  \item One master (writes), multiple slaves (reads)
+  \item Improves read performance
+  \item Single point of failure for writes
+  \end{itemize}
+\item \textbf{Master-Master}:
+  \begin{itemize}
+  \item Multiple masters, both read and write
+  \item Better availability
+  \item Complex conflict resolution
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Database Sharding}
+\begin{itemize}
+\item \textbf{Horizontal Partitioning}: Split data across multiple databases
+\item \textbf{Sharding Strategies}:
+  \begin{itemize}
+  \item \textbf{Range-based}: Shard by ID ranges (1-1000, 1001-2000)
+  \item \textbf{Hash-based}: Use hash function on shard key
+  \item \textbf{Geographic}: Shard by user location
+  \item \textbf{Directory-based}: Lookup service to find shard
+  \end{itemize}
+\item \textbf{Challenges}: Cross-shard queries, rebalancing, hot spots
+\end{itemize}
+
+\subsubsection{SQL vs NoSQL}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Aspect} & \textbf{SQL (RDBMS)} & \textbf{NoSQL} \\
+\hline
+Schema & Fixed schema, predefined structure & Flexible schema, dynamic structure \\
+\hline
+ACID Properties & Strong ACID compliance & Eventually consistent (BASE) \\
+\hline
+Scaling & Vertical scaling primarily & Horizontal scaling \\
+\hline
+Query Language & SQL (standardized) & Varied (document, key-value, graph) \\
+\hline
+Use Cases & Complex queries, transactions & Large scale, rapid development \\
+\hline
+Examples & MySQL, PostgreSQL, Oracle & MongoDB, Cassandra, Redis \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{5. Microservices Architecture}
+
+\begin{conceptbox}{Microservices - Service Decomposition}
+\textbf{Definition:} Architectural style organizing application as loosely coupled services\\
+\textbf{Benefits:} Independent deployment, technology diversity, fault isolation\\
+\textbf{Challenges:} Network complexity, data consistency, service discovery
+\end{conceptbox}
+
+\subsubsection{Microservices vs Monolith}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Aspect} & \textbf{Monolith} & \textbf{Microservices} \\
+\hline
+Deployment & Single deployable unit & Independent service deployment \\
+\hline
+Technology Stack & Single technology stack & Technology per service \\
+\hline
+Development & Centralized development & Distributed teams \\
+\hline
+Testing & Easier integration testing & Complex end-to-end testing \\
+\hline
+Network & In-process communication & Network communication \\
+\hline
+Data Management & Shared database & Database per service \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Microservices Patterns}
+\begin{itemize}
+\item \textbf{API Gateway}: Single entry point for all client requests
+\item \textbf{Service Discovery}: Mechanism to locate services dynamically
+\item \textbf{Circuit Breaker}: Prevent cascade failures
+\item \textbf{Bulkhead}: Isolate resources to prevent total system failure
+\item \textbf{Saga Pattern}: Manage distributed transactions
+\end{itemize}
+
+\subsection{6. Message Queues \& Event Streaming}
+
+\begin{conceptbox}{Asynchronous Communication - Decoupling Services}
+\textbf{Purpose:} Enable services to communicate without direct coupling\\
+\textbf{Benefits:} Improved scalability, reliability, and fault tolerance\\
+\textbf{Types:} Message queues, Pub/Sub, Event streaming
+\end{conceptbox}
+
+\subsubsection{Message Queue Patterns}
+\begin{itemize}
+\item \textbf{Point-to-Point}: One producer, one consumer per message
+\item \textbf{Publish-Subscribe}: One producer, multiple consumers
+\item \textbf{Request-Reply}: Synchronous-like communication over async transport
+\item \textbf{Dead Letter Queue}: Handle failed message processing
+\end{itemize}
+
+\subsubsection{Message Queue Technologies}
+\begin{itemize}
+\item \textbf{RabbitMQ}: Traditional message broker with routing
+\item \textbf{Apache Kafka}: High-throughput event streaming platform
+\item \textbf{Amazon SQS}: Managed message queue service
+\item \textbf{Redis Pub/Sub}: Lightweight publish-subscribe messaging
+\end{itemize}
+
+\subsection{7. Content Delivery Network (CDN)}
+
+\begin{conceptbox}{CDN - Global Content Distribution}
+\textbf{Purpose:} Deliver content from geographically distributed servers\\
+\textbf{Benefits:} Reduced latency, improved performance, reduced origin load\\
+\textbf{Content Types:} Static assets, dynamic content, video streaming
+\end{conceptbox}
+
+\subsubsection{CDN Strategies}
+\begin{itemize}
+\item \textbf{Push CDN}: Content uploaded to CDN during deployment
+\item \textbf{Pull CDN}: Content cached on first request (origin pull)
+\item \textbf{Cache Invalidation}: Remove stale content from edge servers
+\item \textbf{Geographic Routing}: Route users to nearest edge server
+\end{itemize}
+
+\subsection{8. Consistency Models}
+
+\begin{conceptbox}{Data Consistency - Managing Distributed State}
+\textbf{Challenge:} Maintaining consistent data across multiple nodes\\
+\textbf{Spectrum:} Strong consistency $\leftrightarrow$ Eventual consistency\\
+\textbf{Trade-off:} Consistency vs Availability vs Partition tolerance
+\end{conceptbox}
+
+\subsubsection{Consistency Levels}
+\begin{itemize}
+\item \textbf{Strong Consistency}: All nodes see same data simultaneously
+\item \textbf{Eventual Consistency}: System becomes consistent over time
+\item \textbf{Weak Consistency}: No guarantees about when data becomes consistent
+\item \textbf{Causal Consistency}: Maintains causal relationships between operations
+\end{itemize}
+
+\subsubsection{CAP Theorem}
+\begin{itemize}
+\item \textbf{Consistency}: All nodes return same data simultaneously
+\item \textbf{Availability}: System remains operational
+\item \textbf{Partition Tolerance}: System continues despite network failures
+\item \textbf{Reality}: Can only guarantee 2 out of 3 during network partitions
+\end{itemize}
+
+\section{System Design Interview Framework}
+
+\subsection{Step 1: Clarify Requirements (5-10 minutes)}
+
+\begin{frameworkbox}
+\textbf{Functional Requirements:}
+\begin{itemize}
+\item What specific features does the system need?
+\item What are the core user workflows?
+\item What actions can users perform?
+\end{itemize}
+
+\textbf{Non-Functional Requirements:}
+\begin{itemize}
+\item How many users will the system support?
+\item What is the expected read/write ratio?
+\item What are the latency requirements?
+\item What is the availability requirement (99.9\%)?
+\end{itemize}
+
+\textbf{Constraints \& Assumptions:}
+\begin{itemize}
+\item What is the scale (DAU, storage, bandwidth)?
+\item Are there any specific technology constraints?
+\item What is the budget/timeline?
+\end{itemize}
+\end{frameworkbox}
+
+\subsubsection{Example Questions to Ask}
+\begin{itemize}
+\item "How many daily active users are we expecting?"
+\item "What's the read to write ratio?"
+\item "Do we need to support real-time features?"
+\item "What's our availability target?"
+\item "Are there any compliance requirements?"
+\item "What devices/platforms need to be supported?"
+\end{itemize}
+
+\subsection{Step 2: Back-of-Envelope Estimation (5 minutes)}
+
+\begin{scaleBox}
+\textbf{Common Estimation Framework:}
+\begin{itemize}
+\item \textbf{Users}: 100M DAU
+\item \textbf{Usage}: 10 requests per user per day
+\item \textbf{Total Requests}: 1B requests/day
+\item \textbf{QPS}: 1B / (24 $\times$ 3600) $\approx$ 11,600 QPS
+\item \textbf{Peak QPS}: 11,600 $\times$ 3 = 35,000 QPS
+\item \textbf{Storage}: 1KB per request $\times$ 1B = 1TB/day
+\item \textbf{Bandwidth}: 35K QPS $\times$ 1KB = 35MB/s
+\end{itemize}
+\end{scaleBox}
+
+\subsubsection{Quick Reference Numbers}
+\begin{itemize}
+\item L1 cache reference: 0.5 ns
+\item L2 cache reference: 7 ns
+\item Main memory reference: 100 ns
+\item Send 1KB over network: 10 $\mu$s
+\item SSD random read: 150 $\mu$s
+\item Disk seek: 10 ms
+\item Network round trip: 500 $\mu$s (same datacenter)
+\end{itemize}
+
+\subsection{Step 3: High-Level Design (10-15 minutes)}
+
+\begin{frameworkbox}
+\textbf{Design Components:}
+\begin{enumerate}
+\item \textbf{Client}: Web browser, mobile app
+\item \textbf{Load Balancer}: Distribute traffic
+\item \textbf{Web Servers}: Handle HTTP requests
+\item \textbf{Application Servers}: Business logic
+\item \textbf{Database}: Data storage
+\item \textbf{Cache}: Performance optimization
+\item \textbf{CDN}: Static content delivery
+\end{enumerate}
+\end{frameworkbox}
+
+\subsubsection{Standard Web Architecture}
+\begin{verbatim}
+Client -> CDN -> Load Balancer -> Web Servers -> App Servers -> Database
+                     |
+                   Cache
+\end{verbatim}
+
+\subsection{Step 4: Deep Dive (20-25 minutes)}
+
+Focus on 2-3 critical components based on interviewer interest:
+
+\subsubsection{Database Design}
+\begin{itemize}
+\item Define data schema and relationships
+\item Choose SQL vs NoSQL based on requirements
+\item Design indexing strategy
+\item Plan for data partitioning/sharding
+\end{itemize}
+
+\subsubsection{API Design}
+\begin{itemize}
+\item Define RESTful endpoints
+\item Specify request/response formats
+\item Consider authentication and authorization
+\item Plan for API versioning
+\end{itemize}
+
+\subsubsection{Key Algorithms}
+\begin{itemize}
+\item News feed generation algorithm
+\item Recommendation algorithm
+\item Search ranking algorithm
+\item Matching algorithm (for ride-sharing, dating)
+\end{itemize}
+
+\subsection{Step 5: Scale the Design (10-15 minutes)}
+
+\begin{scaleBox}
+\textbf{Bottleneck Identification:}
+\begin{itemize}
+\item Database becomes read/write bottleneck
+\item Single points of failure
+\item Network bandwidth limitations
+\item Memory constraints
+\item Storage capacity limits
+\end{itemize}
+
+\textbf{Scaling Solutions:}
+\begin{itemize}
+\item Database replication and sharding
+\item Horizontal scaling of services
+\item Caching at multiple levels
+\item CDN for global distribution
+\item Message queues for async processing
+\end{itemize}
+\end{scaleBox}
+
+\subsection{Step 6: Address Follow-up Questions}
+
+Common follow-up topics:
+\begin{itemize}
+\item \textbf{Monitoring \& Logging}: How to monitor system health
+\item \textbf{Security}: Authentication, authorization, data protection
+\item \textbf{Disaster Recovery}: Backup and recovery strategies
+\item \textbf{Analytics}: Data pipeline for business intelligence
+\item \textbf{A/B Testing}: Feature rollout and experimentation
+\end{itemize}
+
+\section{Common System Design Questions}
+
+\subsection{1. Design a URL Shortener (bit.ly)}
+
+\subsubsection{Requirements}
+\begin{itemize}
+\item Shorten long URLs to short URLs
+\item Redirect short URLs to original URLs
+\item Custom aliases support
+\item Analytics (click tracking)
+\item Scale: 100M URLs per day, 100:1 read/write ratio
+\end{itemize}
+
+\subsubsection{High-Level Design}
+\begin{verbatim}
+Client -> Load Balancer -> Web Servers -> Application Servers -> Database
+                                                        |
+                                                      Cache
+\end{verbatim}
+
+\subsubsection{Database Schema}
+\begin{verbatim}
+URLs Table:
+- short_url (varchar, primary key)
+- long_url (varchar)
+- user_id (int)
+- created_at (timestamp)
+- expires_at (timestamp)
+
+Analytics Table:
+- short_url (varchar)
+- timestamp (timestamp)
+- user_agent (varchar)
+- ip_address (varchar)
+\end{verbatim}
+
+\subsubsection{Algorithm: Base62 Encoding}
+\begin{verbatim}
+Characters: [a-z, A-Z, 0-9] = 62 characters
+For 7-character short URL: 62^7 $\approx$ 3.5 trillion combinations
+
+function encode(id):
+    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    result = ""
+    while id > 0:
+        result = chars[id % 62] + result
+        id = id // 62
+    return result
+\end{verbatim}
+
+\subsubsection{Scaling Considerations}
+\begin{itemize}
+\item \textbf{Caching}: Cache popular URLs in Redis
+\item \textbf{Database Sharding}: Shard by short\_url hash
+\item \textbf{Rate Limiting}: Prevent abuse
+\item \textbf{Analytics}: Separate service for click tracking
+\end{itemize}
+
+\subsection{2. Design a Chat System (WhatsApp/Messenger)}
+
+\subsubsection{Requirements}
+\begin{itemize}
+\item One-on-one and group messaging
+\item Real-time message delivery
+\item Message history storage
+\item Online presence indicators
+\item Push notifications
+\item Scale: 1B users, 10B messages per day
+\end{itemize}
+
+\subsubsection{High-Level Architecture}
+\begin{verbatim}
+Mobile Client <-> Load Balancer <-> Chat Servers <-> Message Queue
+                                      |
+                               Message Database
+                                      |
+                                Push Notification Service
+\end{verbatim}
+
+\subsubsection{Real-Time Communication}
+\begin{itemize}
+\item \textbf{WebSocket}: Persistent connection for real-time messaging
+\item \textbf{Long Polling}: Alternative for environments without WebSocket
+\item \textbf{Server-Sent Events (SSE)}: One-way communication from server
+\end{itemize}
+
+\subsubsection{Message Storage}
+\begin{verbatim}
+Messages Table:
+- message_id (uuid, primary key)
+- chat_id (uuid)
+- sender_id (uuid)
+- content (text)
+- message_type (enum: text, image, video)
+- timestamp (timestamp)
+- status (enum: sent, delivered, read)
+
+Chats Table:
+- chat_id (uuid, primary key)
+- type (enum: one_on_one, group)
+- created_at (timestamp)
+- last_message_id (uuid)
+
+Participants Table:
+- chat_id (uuid)
+- user_id (uuid)
+- joined_at (timestamp)
+- role (enum: admin, member)
+\end{verbatim}
+
+\subsubsection{Scaling Strategies}
+\begin{itemize}
+\item \textbf{Message Sharding}: Shard messages by chat\_id
+\item \textbf{Connection Management}: Use connection pools and load balancing
+\item \textbf{Message Queue}: Apache Kafka for message distribution
+\item \textbf{Caching}: Cache recent messages and user sessions
+\end{itemize}
+
+\subsection{3. Design a Social Media Feed (Instagram/Facebook)}
+
+\subsubsection{Requirements}
+\begin{itemize}
+\item Users can create posts (text, images, videos)
+\item Users can follow other users
+\item Generate personalized news feed
+\item Like, comment, and share posts
+\item Scale: 1B users, 500M daily posts
+\end{itemize}
+
+\subsubsection{Core Components}
+\begin{itemize}
+\item \textbf{User Service}: Manage user profiles and relationships
+\item \textbf{Post Service}: Handle post creation and storage
+\item \textbf{Feed Generation Service}: Create personalized feeds
+\item \textbf{Notification Service}: Handle likes, comments, follows
+\end{itemize}
+
+\subsubsection{Feed Generation Approaches}
+
+\textbf{Pull Model (Fan-out on Read):}
+\begin{itemize}
+\item Generate feed when user requests it
+\item Query posts from all followed users
+\item Pros: Less storage, real-time updates
+\item Cons: Slow for users following many people
+\end{itemize}
+
+\textbf{Push Model (Fan-out on Write):}
+\begin{itemize}
+\item Pre-generate feeds when posts are created
+\item Store feeds in user's feed cache
+\item Pros: Fast feed retrieval
+\item Cons: High storage cost, celebrity problem
+\end{itemize}
+
+\textbf{Hybrid Approach:}
+\begin{itemize}
+\item Pull model for celebrities (users with many followers)
+\item Push model for regular users
+\item Merge results in real-time
+\end{itemize}
+
+\subsubsection{Database Design}
+\begin{verbatim}
+Users Table:
+- user_id (uuid, primary key)
+- username (varchar, unique)
+- email (varchar, unique)
+- profile_picture_url (varchar)
+
+Posts Table:
+- post_id (uuid, primary key)
+- user_id (uuid)
+- content (text)
+- media_urls (json array)
+- created_at (timestamp)
+- likes_count (int)
+- comments_count (int)
+
+Follows Table:
+- follower_id (uuid)
+- followee_id (uuid)
+- created_at (timestamp)
+- primary key (follower_id, followee_id)
+
+Feeds Table (for push model):
+- user_id (uuid)
+- post_id (uuid)
+- created_at (timestamp)
+- primary key (user_id, post_id)
+\end{verbatim}
+
+\subsection{4. Design a Video Streaming Service (YouTube/Netflix)}
+
+\subsubsection{Requirements}
+\begin{itemize}
+\item Upload and stream videos
+\item Support multiple video qualities
+\item Global content delivery
+\item Video recommendations
+\item View analytics
+\item Scale: 1B users, 500 hours uploaded per minute
+\end{itemize}
+
+\subsubsection{Architecture Components}
+\begin{itemize}
+\item \textbf{Upload Service}: Handle video uploads and processing
+\item \textbf{Encoding Service}: Convert videos to multiple formats
+\item \textbf{CDN}: Global video distribution
+\item \textbf{Metadata Service}: Store video information
+\item \textbf{Recommendation Service}: Generate personalized recommendations
+\end{itemize}
+
+\subsubsection{Video Processing Pipeline}
+\begin{verbatim}
+Upload -> Validation -> Encoding -> Storage -> CDN Distribution
+          |              |         |
+      Metadata      Thumbnails   Search Index
+\end{verbatim}
+
+\subsubsection{Video Encoding}
+\begin{itemize}
+\item \textbf{Multiple Resolutions}: 144p, 240p, 360p, 480p, 720p, 1080p, 4K
+\item \textbf{Adaptive Bitrate}: Adjust quality based on network conditions
+\item \textbf{Codecs}: H.264, H.265, VP9 for compression
+\item \textbf{Containers}: MP4, WebM for different platforms
+\end{itemize}
+
+\subsubsection{Storage Strategy}
+\begin{itemize}
+\item \textbf{Object Storage}: Amazon S3, Google Cloud Storage for video files
+\item \textbf{CDN}: CloudFront, CloudFlare for global distribution
+\item \textbf{Caching}: Cache popular videos at edge locations
+\item \textbf{Tiered Storage}: Hot, warm, and cold storage based on popularity
+\end{itemize}
+
+\section{Advanced Topics}
+
+\subsection{Distributed System Patterns}
+
+\subsubsection{Circuit Breaker Pattern}
+\begin{itemize}
+\item \textbf{Purpose}: Prevent cascade failures in distributed systems
+\item \textbf{States}: Closed (normal), Open (failing), Half-open (testing)
+\item \textbf{Implementation}: Monitor failure rate, trip circuit when threshold exceeded
+\item \textbf{Recovery}: Gradually test service recovery
+\end{itemize}
+
+\subsubsection{Bulkhead Pattern}
+\begin{itemize}
+\item \textbf{Purpose}: Isolate resources to prevent total system failure
+\item \textbf{Implementation}: Separate connection pools, thread pools, resources
+\item \textbf{Example}: Separate database connections for read/write operations
+\end{itemize}
+
+\subsubsection{Saga Pattern}
+\begin{itemize}
+\item \textbf{Purpose}: Manage distributed transactions across microservices
+\item \textbf{Types}: Choreography vs Orchestration
+\item \textbf{Compensation}: Define compensation actions for failed steps
+\end{itemize}
+
+\subsection{Security Considerations}
+
+\subsubsection{Authentication \& Authorization}
+\begin{itemize}
+\item \textbf{OAuth 2.0}: Industry standard for authorization
+\item \textbf{JWT}: JSON Web Tokens for stateless authentication
+\item \textbf{API Keys}: Simple authentication for service-to-service
+\item \textbf{Multi-factor Authentication}: Additional security layer
+\end{itemize}
+
+\subsubsection{Data Protection}
+\begin{itemize}
+\item \textbf{Encryption}: Data at rest and in transit
+\item \textbf{HTTPS}: TLS encryption for web traffic
+\item \textbf{Database Encryption}: Encrypt sensitive data fields
+\item \textbf{Key Management}: Secure key storage and rotation
+\end{itemize}
+
+\subsubsection{Common Security Threats}
+\begin{itemize}
+\item \textbf{SQL Injection}: Use parameterized queries
+\item \textbf{XSS}: Sanitize user inputs
+\item \textbf{CSRF}: Use CSRF tokens
+\item \textbf{DDoS}: Rate limiting and traffic filtering
+\end{itemize}
+
+\subsection{Monitoring \& Observability}
+
+\subsubsection{Metrics}
+\begin{itemize}
+\item \textbf{RED Method}: Rate, Errors, Duration
+\item \textbf{USE Method}: Utilization, Saturation, Errors
+\item \textbf{SLIs}: Service Level Indicators (latency, availability, throughput)
+\item \textbf{SLOs}: Service Level Objectives (99.9\% availability)
+\end{itemize}
+
+\subsubsection{Logging}
+\begin{itemize}
+\item \textbf{Structured Logging}: Use JSON format for machine parsing
+\item \textbf{Log Levels}: Debug, Info, Warning, Error, Fatal
+\item \textbf{Centralized Logging}: ELK Stack (Elasticsearch, Logstash, Kibana)
+\item \textbf{Log Aggregation}: Collect logs from all services
+\end{itemize}
+
+\subsubsection{Tracing}
+\begin{itemize}
+\item \textbf{Distributed Tracing}: Track requests across multiple services
+\item \textbf{Trace ID}: Unique identifier for request flow
+\item \textbf{Span}: Individual operation within a trace
+\item \textbf{Tools}: Jaeger, Zipkin, AWS X-Ray
+\end{itemize}
+
+\section{Integrated Study Schedule}
+
+\subsection{How to Combine with Coding Interview Prep}
+
+\begin{frameworkbox}
+\textbf{Integrated 6-Week Schedule:}
+\begin{itemize}
+\item \textbf{Weeks 1-4}: Focus on coding patterns (existing schedule)
+\item \textbf{Weeks 5-6}: Intensive system design preparation
+\item \textbf{Daily}: 15 minutes system design concepts review
+\item \textbf{Weekly}: 2-3 hours dedicated system design practice
+\end{itemize}
+\end{frameworkbox}
+
+\subsection{Week-by-Week Integration}
+
+\subsubsection{Weeks 1-2: Foundation + Basic Concepts}
+\textbf{Coding Focus}: Two Pointers, Sliding Window, DFS, BFS\\
+\textbf{System Design}: 15 min/day reading fundamental concepts
+\begin{itemize}
+\item Day 1: Scalability concepts
+\item Day 2: Load balancing
+\item Day 3: Caching strategies
+\item Day 4: Database basics
+\item Day 5: Review and practice estimation
+\item Weekend: Design a simple URL shortener (1 hour)
+\end{itemize}
+
+\subsubsection{Weeks 3-4: Algorithms + Intermediate Concepts}
+\textbf{Coding Focus}: Binary Search, Dynamic Programming, Backtracking\\
+\textbf{System Design}: 15 min/day + 1 design session per week
+\begin{itemize}
+\item Day 1: Microservices architecture
+\item Day 2: Message queues
+\item Day 3: CDN and caching
+\item Day 4: Database sharding
+\item Day 5: CAP theorem
+\item Weekend: Design a chat system (1.5 hours)
+\end{itemize}
+
+\subsubsection{Week 5: Advanced Data Structures + System Design Deep Dive}
+\textbf{Coding Focus}: Heaps, Union-Find, Trie\\
+\textbf{System Design}: 30 min/day + 2 design sessions
+\begin{itemize}
+\item Day 1: Design social media feed
+\item Day 2: Design video streaming service
+\item Day 3: Design search engine
+\item Day 4: Design ride-sharing service
+\item Day 5: Design e-commerce platform
+\item Weekend: Mock system design interview (2 hours)
+\end{itemize}
+
+\subsubsection{Week 6: Special Algorithms + System Design Mastery}
+\textbf{Coding Focus}: Topological Sort, Special Algorithms\\
+\textbf{System Design}: 45 min/day + daily practice
+\begin{itemize}
+\item Day 1: Design distributed cache
+\item Day 2: Design notification system
+\item Day 3: Design analytics platform
+\item Day 4: Design file storage system
+\item Day 5: Design monitoring system
+\item Weekend: Full mock interviews (3 hours)
+\end{itemize}
+
+\subsection{Daily Routine Enhancement}
+
+\subsubsection{Morning Routine (45 minutes total)}
+\begin{itemize}
+\item \textbf{Coding Templates (15 min):} Write 2-3 templates from memory
+\item \textbf{System Design Concepts (15 min):} Review 1-2 fundamental concepts
+\item \textbf{Estimation Practice (15 min):} Quick back-of-envelope calculations
+\end{itemize}
+
+\subsubsection{Evening Session (90-120 minutes total)}
+\begin{itemize}
+\item \textbf{Coding Problems (60 min):} 2-3 coding problems
+\item \textbf{System Design Practice (30-60 min):}
+  \begin{itemize}
+  \item Weeks 1-4: Concept review and simple designs
+  \item Weeks 5-6: Full system design practice
+  \end{itemize}
+\end{itemize}
+
+\section{System Design Practice Framework}
+
+\subsection{30-Minute Practice Session Structure}
+
+\begin{frameworkbox}
+\textbf{Quick Practice Format:}
+\begin{enumerate}
+\item \textbf{Problem Statement (2 min):} Read and understand requirements
+\item \textbf{Clarification (3 min):} List key questions and assumptions
+\item \textbf{High-level Design (10 min):} Draw main components
+\item \textbf{Deep Dive (10 min):} Focus on 1-2 critical components
+\item \textbf{Scaling (5 min):} Identify bottlenecks and solutions
+\end{enumerate}
+\end{frameworkbox}
+
+\subsection{60-Minute Full Practice Session}
+
+\begin{frameworkbox}
+\textbf{Complete Interview Simulation:}
+\begin{enumerate}
+\item \textbf{Requirements Gathering (10 min):} Thorough clarification
+\item \textbf{Estimation (5 min):} Back-of-envelope calculations
+\item \textbf{High-level Design (15 min):} Complete architecture diagram
+\item \textbf{Detailed Design (20 min):} Database schema, APIs, algorithms
+\item \textbf{Scaling \& Optimization (10 min):} Handle growth and bottlenecks
+\end{enumerate}
+\end{frameworkbox}
+
+\subsection{Self-Evaluation Checklist}
+
+After each practice session, evaluate:
+\begin{itemize}
+\item[$\square$] Did I ask clarifying questions?
+\item[$\square$] Did I estimate scale and performance requirements?
+\item[$\square$] Did I start with a simple design and evolve it?
+\item[$\square$] Did I consider trade-offs for each design decision?
+\item[$\square$] Did I identify and address potential bottlenecks?
+\item[$\square$] Did I discuss monitoring and failure scenarios?
+\item[$\square$] Did I stay within the time limit?
+\end{itemize}
+
+\section{Company-Specific Preparation}
+
+\subsection{Google}
+\begin{itemize}
+\item \textbf{Focus}: Scalability, distributed systems, algorithms
+\item \textbf{Common Questions}: Design Google Search, Gmail, Google Drive
+\item \textbf{Key Concepts}: MapReduce, BigTable, distributed consensus
+\item \textbf{Prep Time}: 2-3 weeks dedicated system design study
+\end{itemize}
+
+\subsection{Amazon}
+\begin{itemize}
+\item \textbf{Focus}: Service-oriented architecture, reliability, cost optimization
+\item \textbf{Common Questions}: Design Amazon cart, recommendation system, inventory
+\item \textbf{Key Concepts}: Microservices, DynamoDB, eventual consistency
+\item \textbf{Leadership Principles}: Customer obsession, ownership, bias for action
+\end{itemize}
+
+\subsection{Meta (Facebook)}
+\begin{itemize}
+\item \textbf{Focus}: Social features, real-time systems, mobile-first
+\item \textbf{Common Questions}: Design Facebook feed, Messenger, Instagram
+\item \textbf{Key Concepts}: Graph databases, real-time messaging, content ranking
+\item \textbf{Scale}: Billion-user scale considerations
+\end{itemize}
+
+\subsection{Netflix}
+\begin{itemize}
+\item \textbf{Focus}: Content delivery, personalization, streaming
+\item \textbf{Common Questions}: Design video streaming, recommendation engine
+\item \textbf{Key Concepts}: CDN optimization, A/B testing, microservices
+\item \textbf{Specialization}: Media processing and global distribution
+\end{itemize}
+
+\section{Final Preparation Tips}
+
+\subsection{Common Mistakes to Avoid}
+\begin{itemize}
+\item Jumping into details without understanding requirements
+\item Over-engineering the initial solution
+\item Ignoring non-functional requirements
+\item Not considering failure scenarios
+\item Focusing on implementation details too early
+\item Not communicating trade-offs clearly
+\end{itemize}
+
+\subsection{Day Before Interview}
+\begin{itemize}
+\item Review fundamental concepts (30 minutes)
+\item Practice one complete system design (60 minutes)
+\item Review common estimation numbers
+\item Prepare questions to ask the interviewer
+\item Get good sleep and stay confident
+\end{itemize}
+
+\subsection{During the Interview}
+\begin{itemize}
+\item Ask clarifying questions before designing
+\item Think out loud and explain your reasoning
+\item Start simple and build complexity gradually
+\item Draw diagrams to visualize your design
+\item Discuss trade-offs for major decisions
+\item Be prepared to defend your choices
+\item Stay calm if you don't know something - reason through it
+\end{itemize}
+
+\begin{tradeoffbox}
+\textbf{Remember}: System design interviews are about demonstrating your thought process, not finding the "perfect" solution. Show how you approach complex problems, make trade-offs, and design systems that can evolve with changing requirements.
+\end{tradeoffbox}
+
+\vspace{1cm}
+\begin{center}
+\textbf{\Large Success Formula: Fundamentals + Practice + Communication}\\
+\textbf{\Large Master the concepts, practice regularly, and think out loud!}
+\end{center}
+
+\end{document}
