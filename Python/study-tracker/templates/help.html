@@ -21,20 +21,37 @@
             color: white;
             border-radius: 15px;
         }
-        .navigation {
-            text-align: center;
-            margin-bottom: 20px;
+        /* New Navigation Bar Styles */
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Allows wrapping on very small screens */
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
         }
         .nav-link {
-            color: #007bff;
+            display: flex; /* Aligns icon and text */
+            align-items: center;
+            white-space: nowrap; /* Prevents icon and text from breaking lines */
             text-decoration: none;
-            margin: 0 15px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            color: #495057;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         .nav-link:hover {
-            background-color: #f1f3f4;
+            background-color: #f1f3f5;
+            color: #007bff;
+        }
+        .nav-link.active {
+            background-color: #e7f3ff;
+            color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
         }
         .help-section {
             background: white;
@@ -99,15 +116,17 @@
         <p>Master your coding interview preparation with this comprehensive guide</p>
     </div>
 
-    <div class="navigation">
-        <a href="/" class="nav-link">📅 Dashboard</a>
-        <a href="/history" class="nav-link">📊 History</a>
-        <a href="/preview" class="nav-link">🔮 Preview</a>
-        <a href="/practice" class="nav-link">🎯 Practice</a>
-        <a href="/analytics" class="nav-link">📈 Analytics</a>
-        <a href="/curriculum" class="nav-link">🛠️ Curriculum</a>
-        <a href="/config" class="nav-link">⚙️ Config</a>
-        <a href="/help" class="nav-link" style="background-color: #f1f3f4;">❓ Help</a>
+    <!-- New Navigation Bar Structure -->
+    <div class="nav-container">
+        <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" title="Go to Dashboard">📅 Dashboard</a>
+        <a href="/history" class="nav-link {% if active_page == 'history' %}active{% endif %}" title="View Progress History">📊 History</a>
+        <a href="/preview" class="nav-link {% if active_page == 'preview' %}active{% endif %}" title="See Upcoming Topics">🔮 Preview</a>
+        <a href="/practice" class="nav-link {% if active_page == 'practice' %}active{% endif %}" title="Practice & Mock Interviews">🎯 Practice</a>
+        <a href="/analytics" class="nav-link {% if active_page == 'analytics' %}active{% endif %}" title="Analyze Your Performance">📈 Analytics</a>
+        <a href="/curriculum" class="nav-link {% if active_page == 'curriculum' %}active{% endif %}" title="Edit the Curriculum">📚 Curriculum</a>
+        <a href="/templates" class="nav-link {% if active_page == 'templates' %}active{% endif %}" title="Coding Patterns & Templates">🔧 Templates</a>
+        <a href="/config" class="nav-link {% if active_page == 'config' %}active{% endif %}" title="Configure Your Plan">⚙️ Config</a>
+        <a href="/help" class="nav-link {% if active_page == 'help' %}active{% endif %}" title="Get Help">❓ Help</a>
     </div>
 
     <div class="help-section">

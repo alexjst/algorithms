@@ -1,3 +1,13 @@
 {
-  "completions": []
+  "completions": [
+    {
+      "date": "2025-09-28",
+      "track": "coding",
+      "topic": "Two Pointers",
+      "rating": 3,
+      "notes": "I basically need to memorize this. To prove it it might be a bit challenging and time-consuming but I should just memorize this. These problems are unlikely to be tested but still a good practice on array and pointers.",
+      "completed_on_time": true,
+      "timestamp": "2025-09-28T21:30:51.391916"
+    }
+  ]
 }

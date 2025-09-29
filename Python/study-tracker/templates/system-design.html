@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Design Templates - Study Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #2980b9;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .concept-box {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .framework-box {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .scale-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .tradeoff-box {
+            background: #f5f5f5;
+            border: 2px solid #757575;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .pattern-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid #17a2b8;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .highlight {
+            background: #fff9c4;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        ul, ol {
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .search-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .search-box {
+            width: 60%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #bdc3c7;
+            border-radius: 25px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-box:focus {
+            border-color: #3498db;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .back-link:hover {
+            background: #2980b9;
+        }
+        .design-example {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .schedule-table {
+            font-size: 0.9em;
+        }
+        .schedule-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        .checkbox {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../dashboard" class="back-link">← Back to Dashboard</a>
+
+        <h1>🏗️ System Design Templates</h1>
+
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search system design concepts, patterns, or examples...">
+        </div>
+
+        <div class="concept-box">
+            <h3><strong>🎯 OBJECTIVE</strong></h3>
+            <p><strong>Design systems that scale to millions of users</strong></p>
+            <ul>
+                <li><strong>COVERAGE:</strong> 25+ Core Concepts + Real Interview Questions</li>
+                <li><strong>APPROACH:</strong> Structured methodology for system design</li>
+                <li><strong>TARGET:</strong> Senior Engineer and Staff Engineer Positions</li>
+            </ul>
+        </div>
+
+        <h2>📋 System Design Interview Framework</h2>
+
+        <div class="framework-box">
+            <h3><strong>45-60 Minute Structure:</strong></h3>
+            <ol>
+                <li><strong>Clarification (5-10 min):</strong> Understand requirements and constraints</li>
+                <li><strong>High-level Design (10-15 min):</strong> Architecture overview and main components</li>
+                <li><strong>Deep Dive (20-25 min):</strong> Detailed design of critical components</li>
+                <li><strong>Scale & Optimize (10-15 min):</strong> Handle bottlenecks and scale to millions</li>
+                <li><strong>Wrap-up (5 min):</strong> Summary and additional considerations</li>
+            </ol>
+        </div>
+
+        <div class="pattern-section">
+            <h3>🎯 Key Success Factors</h3>
+            <ul>
+                <li><strong>Start Simple:</strong> Begin with a basic design and evolve it</li>
+                <li><strong>Think Out Loud:</strong> Verbalize your thought process</li>
+                <li><strong>Ask Questions:</strong> Clarify ambiguities early and often</li>
+                <li><strong>Consider Trade-offs:</strong> Every design decision has pros and cons</li>
+                <li><strong>Estimate Scale:</strong> Use back-of-envelope calculations</li>
+            </ul>
+        </div>
+
+        <h2>🏗️ Core System Design Concepts</h2>
+
+        <div class="pattern-section">
+            <h3>1. Scalability</h3>
+            <div class="concept-box">
+                <p><strong>Definition:</strong> A system's ability to handle increased load gracefully</p>
+                <p><strong>Types:</strong> Vertical (scale up) vs Horizontal (scale out)</p>
+                <p><strong>Goal:</strong> Maintain performance as user base grows</p>
+            </div>
+
+            <h4>Vertical Scaling (Scale Up)</h4>
+            <ul>
+                <li><strong>Approach:</strong> Add more power (CPU, RAM, Storage) to existing machine</li>
+                <li><strong>Pros:</strong> Simple, no code changes required, strong consistency</li>
+                <li><strong>Cons:</strong> Hardware limits, single point of failure, expensive</li>
+                <li><strong>Use Cases:</strong> Traditional databases, monolithic applications</li>
+            </ul>
+
+            <h4>Horizontal Scaling (Scale Out)</h4>
+            <ul>
+                <li><strong>Approach:</strong> Add more servers to handle increased load</li>
+                <li><strong>Pros:</strong> No hardware limits, fault tolerant, cost effective</li>
+                <li><strong>Cons:</strong> Complex implementation, eventual consistency, data consistency challenges</li>
+                <li><strong>Use Cases:</strong> Web servers, microservices, distributed databases</li>
+            </ul>
+
+            <div class="scale-box">
+                <h4>Scale Estimation Framework:</h4>
+                <ul>
+                    <li>Daily Active Users (DAU): 10M users</li>
+                    <li>Requests per day: 10M × 10 requests = 100M requests/day</li>
+                    <li>Requests per second: 100M / (24 × 3600) ≈ 1,200 RPS</li>
+                    <li>Peak load (3x average): 3,600 RPS</li>
+                    <li>Storage per user: 1KB × 10M = 10GB</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="pattern-section">
+            <h3>2. Load Balancing</h3>
+            <div class="concept-box">
+                <p><strong>Purpose:</strong> Distribute incoming requests across multiple servers</p>
+                <p><strong>Benefits:</strong> Prevents overload, improves availability, enables horizontal scaling</p>
+                <p><strong>Types:</strong> Layer 4 (Transport) vs Layer 7 (Application)</p>
+            </div>
+
+            <h4>Load Balancing Algorithms</h4>
+            <ul>
+                <li><strong>Round Robin:</strong> Requests distributed sequentially</li>
+                <li><strong>Weighted Round Robin:</strong> Servers get requests based on capacity</li>
+                <li><strong>Least Connections:</strong> Route to server with fewest active connections</li>
+                <li><strong>IP Hash:</strong> Route based on client IP hash</li>
+                <li><strong>Geographic:</strong> Route based on client location</li>
+            </ul>
+
+            <h4>Load Balancer Types</h4>
+            <ul>
+                <li><strong>Layer 4 (Transport Layer):</strong>
+                    <ul>
+                        <li>Routes based on IP and port</li>
+                        <li>Faster, lower latency</li>
+                        <li>Cannot inspect application data</li>
+                    </ul>
+                </li>
+                <li><strong>Layer 7 (Application Layer):</strong>
+                    <ul>
+                        <li>Routes based on HTTP headers, URLs, cookies</li>
+                        <li>More intelligent routing decisions</li>
+                        <li>Higher latency due to content inspection</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h3>3. Caching</h3>
+            <div class="concept-box">
+                <p><strong>Purpose:</strong> Store frequently accessed data in fast storage</p>
+                <p><strong>Benefit:</strong> Reduces latency and database load</p>
+                <p><strong>Principle:</strong> Locality of reference - recently accessed data likely to be accessed again</p>
+            </div>
+
+            <h4>Cache Levels</h4>
+            <ul>
+                <li><strong>Browser Cache:</strong> Client-side caching (CSS, JS, images)</li>
+                <li><strong>CDN:</strong> Geographic distribution of static content</li>
+                <li><strong>Reverse Proxy:</strong> Nginx, Apache cache responses</li>
+                <li><strong>Application Cache:</strong> In-memory caching (Redis, Memcached)</li>
+                <li><strong>Database Cache:</strong> Query result caching</li>
+            </ul>
+
+            <h4>Cache Patterns</h4>
+            <ul>
+                <li><strong>Cache-Aside (Lazy Loading):</strong>
+                    <ul>
+                        <li>Application manages cache directly</li>
+                        <li>Read: Check cache → DB if miss → Update cache</li>
+                        <li>Write: Update DB → Invalidate cache</li>
+                    </ul>
+                </li>
+                <li><strong>Write-Through:</strong>
+                    <ul>
+                        <li>Write to cache and DB simultaneously</li>
+                        <li>Ensures cache consistency</li>
+                        <li>Higher write latency</li>
+                    </ul>
+                </li>
+                <li><strong>Write-Behind (Write-Back):</strong>
+                    <ul>
+                        <li>Write to cache immediately, DB asynchronously</li>
+                        <li>Lower write latency</li>
+                        <li>Risk of data loss</li>
+                    </ul>
+                </li>
+                <li><strong>Refresh-Ahead:</strong>
+                    <ul>
+                        <li>Proactively refresh cache before expiration</li>
+                        <li>Good for predictable access patterns</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>Cache Eviction Policies</h4>
+            <ul>
+                <li><strong>LRU (Least Recently Used):</strong> Remove oldest accessed item</li>
+                <li><strong>LFU (Least Frequently Used):</strong> Remove least accessed item</li>
+                <li><strong>FIFO (First In, First Out):</strong> Remove oldest item</li>
+                <li><strong>TTL (Time To Live):</strong> Remove expired items</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h3>4. Database Design & Scaling</h3>
+            <div class="concept-box">
+                <p><strong>Challenge:</strong> Single database becomes bottleneck as data and traffic grow</p>
+                <p><strong>Solutions:</strong> Replication, Sharding, Partitioning</p>
+                <p><strong>Trade-offs:</strong> Consistency vs Availability vs Partition tolerance (CAP Theorem)</p>
+            </div>
+
+            <h4>Database Replication</h4>
+            <ul>
+                <li><strong>Master-Slave:</strong>
+                    <ul>
+                        <li>One master (writes), multiple slaves (reads)</li>
+                        <li>Improves read performance</li>
+                        <li>Single point of failure for writes</li>
+                    </ul>
+                </li>
+                <li><strong>Master-Master:</strong>
+                    <ul>
+                        <li>Multiple masters, both read and write</li>
+                        <li>Better availability</li>
+                        <li>Complex conflict resolution</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>Database Sharding</h4>
+            <ul>
+                <li><strong>Horizontal Partitioning:</strong> Split data across multiple databases</li>
+                <li><strong>Sharding Strategies:</strong>
+                    <ul>
+                        <li><strong>Range-based:</strong> Shard by ID ranges (1-1000, 1001-2000)</li>
+                        <li><strong>Hash-based:</strong> Use hash function on shard key</li>
+                        <li><strong>Geographic:</strong> Shard by user location</li>
+                        <li><strong>Directory-based:</strong> Lookup service to find shard</li>
+                    </ul>
+                </li>
+                <li><strong>Challenges:</strong> Cross-shard queries, rebalancing, hot spots</li>
+            </ul>
+
+            <div class="table-container">
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>SQL (RDBMS)</th>
+                        <th>NoSQL</th>
+                    </tr>
+                    <tr>
+                        <td>Schema</td>
+                        <td>Fixed schema, predefined structure</td>
+                        <td>Flexible schema, dynamic structure</td>
+                    </tr>
+                    <tr>
+                        <td>ACID Properties</td>
+                        <td>Strong ACID compliance</td>
+                        <td>Eventually consistent (BASE)</td>
+                    </tr>
+                    <tr>
+                        <td>Scaling</td>
+                        <td>Vertical scaling primarily</td>
+                        <td>Horizontal scaling</td>
+                    </tr>
+                    <tr>
+                        <td>Query Language</td>
+                        <td>SQL (standardized)</td>
+                        <td>Varied (document, key-value, graph)</td>
+                    </tr>
+                    <tr>
+                        <td>Use Cases</td>
+                        <td>Complex queries, transactions</td>
+                        <td>Large scale, rapid development</td>
+                    </tr>
+                    <tr>
+                        <td>Examples</td>
+                        <td>MySQL, PostgreSQL, Oracle</td>
+                        <td>MongoDB, Cassandra, Redis</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="pattern-section">
+            <h3>5. Microservices Architecture</h3>
+            <div class="concept-box">
+                <p><strong>Definition:</strong> Architectural style organizing application as loosely coupled services</p>
+                <p><strong>Benefits:</strong> Independent deployment, technology diversity, fault isolation</p>
+                <p><strong>Challenges:</strong> Network complexity, data consistency, service discovery</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Monolith</th>
+                        <th>Microservices</th>
+                    </tr>
+                    <tr>
+                        <td>Deployment</td>
+                        <td>Single deployable unit</td>
+                        <td>Independent service deployment</td>
+                    </tr>
+                    <tr>
+                        <td>Technology Stack</td>
+                        <td>Single technology stack</td>
+                        <td>Technology per service</td>
+                    </tr>
+                    <tr>
+                        <td>Development</td>
+                        <td>Centralized development</td>
+                        <td>Distributed teams</td>
+                    </tr>
+                    <tr>
+                        <td>Testing</td>
+                        <td>Easier integration testing</td>
+                        <td>Complex end-to-end testing</td>
+                    </tr>
+                    <tr>
+                        <td>Network</td>
+                        <td>In-process communication</td>
+                        <td>Network communication</td>
+                    </tr>
+                    <tr>
+                        <td>Data Management</td>
+                        <td>Shared database</td>
+                        <td>Database per service</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h4>Microservices Patterns</h4>
+            <ul>
+                <li><strong>API Gateway:</strong> Single entry point for all client requests</li>
+                <li><strong>Service Discovery:</strong> Mechanism to locate services dynamically</li>
+                <li><strong>Circuit Breaker:</strong> Prevent cascade failures</li>
+                <li><strong>Bulkhead:</strong> Isolate resources to prevent total system failure</li>
+                <li><strong>Saga Pattern:</strong> Manage distributed transactions</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h3>6. Message Queues & Event Streaming</h3>
+            <div class="concept-box">
+                <p><strong>Purpose:</strong> Enable services to communicate without direct coupling</p>
+                <p><strong>Benefits:</strong> Improved scalability, reliability, and fault tolerance</p>
+                <p><strong>Types:</strong> Message queues, Pub/Sub, Event streaming</p>
+            </div>
+
+            <h4>Message Queue Patterns</h4>
+            <ul>
+                <li><strong>Point-to-Point:</strong> One producer, one consumer per message</li>
+                <li><strong>Publish-Subscribe:</strong> One producer, multiple consumers</li>
+                <li><strong>Request-Reply:</strong> Synchronous-like communication over async transport</li>
+                <li><strong>Dead Letter Queue:</strong> Handle failed message processing</li>
+            </ul>
+
+            <h4>Message Queue Technologies</h4>
+            <ul>
+                <li><strong>RabbitMQ:</strong> Traditional message broker with routing</li>
+                <li><strong>Apache Kafka:</strong> High-throughput event streaming platform</li>
+                <li><strong>Amazon SQS:</strong> Managed message queue service</li>
+                <li><strong>Redis Pub/Sub:</strong> Lightweight publish-subscribe messaging</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h3>7. Content Delivery Network (CDN)</h3>
+            <div class="concept-box">
+                <p><strong>Purpose:</strong> Deliver content from geographically distributed servers</p>
+                <p><strong>Benefits:</strong> Reduced latency, improved performance, reduced origin load</p>
+                <p><strong>Content Types:</strong> Static assets, dynamic content, video streaming</p>
+            </div>
+
+            <h4>CDN Strategies</h4>
+            <ul>
+                <li><strong>Push CDN:</strong> Content uploaded to CDN during deployment</li>
+                <li><strong>Pull CDN:</strong> Content cached on first request (origin pull)</li>
+                <li><strong>Cache Invalidation:</strong> Remove stale content from edge servers</li>
+                <li><strong>Geographic Routing:</strong> Route users to nearest edge server</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h3>8. Consistency Models</h3>
+            <div class="concept-box">
+                <p><strong>Challenge:</strong> Maintaining consistent data across multiple nodes</p>
+                <p><strong>Spectrum:</strong> Strong consistency ↔ Eventual consistency</p>
+                <p><strong>Trade-off:</strong> Consistency vs Availability vs Partition tolerance</p>
+            </div>
+
+            <h4>Consistency Levels</h4>
+            <ul>
+                <li><strong>Strong Consistency:</strong> All nodes see same data simultaneously</li>
+                <li><strong>Eventual Consistency:</strong> System becomes consistent over time</li>
+                <li><strong>Weak Consistency:</strong> No guarantees about when data becomes consistent</li>
+                <li><strong>Causal Consistency:</strong> Maintains causal relationships between operations</li>
+            </ul>
+
+            <h4>CAP Theorem</h4>
+            <ul>
+                <li><strong>Consistency:</strong> All nodes return same data simultaneously</li>
+                <li><strong>Availability:</strong> System remains operational</li>
+                <li><strong>Partition Tolerance:</strong> System continues despite network failures</li>
+                <li><strong>Reality:</strong> Can only guarantee 2 out of 3 during network partitions</li>
+            </ul>
+        </div>
+
+        <h2>🚀 Common System Design Questions</h2>
+
+        <div class="design-example">
+            <h3>1. Design a URL Shortener (bit.ly)</h3>
+
+            <h4>Requirements</h4>
+            <ul>
+                <li>Shorten long URLs to short URLs</li>
+                <li>Redirect short URLs to original URLs</li>
+                <li>Custom aliases support</li>
+                <li>Analytics (click tracking)</li>
+                <li>Scale: 100M URLs per day, 100:1 read/write ratio</li>
+            </ul>
+
+            <h4>High-Level Design</h4>
+            <div class="code-block">Client -> Load Balancer -> Web Servers -> Application Servers -> Database
+                                                        |
+                                                      Cache</div>
+
+            <h4>Database Schema</h4>
+            <div class="code-block">URLs Table:
+- short_url (varchar, primary key)
+- long_url (varchar)
+- user_id (int)
+- created_at (timestamp)
+- expires_at (timestamp)
+
+Analytics Table:
+- short_url (varchar)
+- timestamp (timestamp)
+- user_agent (varchar)
+- ip_address (varchar)</div>
+
+            <h4>Algorithm: Base62 Encoding</h4>
+            <div class="code-block">Characters: [a-z, A-Z, 0-9] = 62 characters
+For 7-character short URL: 62^7 ≈ 3.5 trillion combinations
+
+function encode(id):
+    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    result = ""
+    while id > 0:
+        result = chars[id % 62] + result
+        id = id // 62
+    return result</div>
+
+            <h4>Scaling Considerations</h4>
+            <ul>
+                <li><strong>Caching:</strong> Cache popular URLs in Redis</li>
+                <li><strong>Database Sharding:</strong> Shard by short_url hash</li>
+                <li><strong>Rate Limiting:</strong> Prevent abuse</li>
+                <li><strong>Analytics:</strong> Separate service for click tracking</li>
+            </ul>
+        </div>
+
+        <div class="design-example">
+            <h3>2. Design a Chat System (WhatsApp/Messenger)</h3>
+
+            <h4>Requirements</h4>
+            <ul>
+                <li>One-on-one and group messaging</li>
+                <li>Real-time message delivery</li>
+                <li>Message history storage</li>
+                <li>Online presence indicators</li>
+                <li>Push notifications</li>
+                <li>Scale: 1B users, 10B messages per day</li>
+            </ul>
+
+            <h4>High-Level Architecture</h4>
+            <div class="code-block">Mobile Client <-> Load Balancer <-> Chat Servers <-> Message Queue
+                     |
+               Message Database
+                     |
+           Push Notification Service</div>
+
+            <h4>Real-Time Communication</h4>
+            <ul>
+                <li><strong>WebSocket:</strong> Persistent connection for real-time messaging</li>
+                <li><strong>Long Polling:</strong> Alternative for environments without WebSocket</li>
+                <li><strong>Server-Sent Events (SSE):</strong> One-way communication from server</li>
+            </ul>
+
+            <h4>Message Storage</h4>
+            <div class="code-block">Messages Table:
+- message_id (uuid, primary key)
+- chat_id (uuid)
+- sender_id (uuid)
+- content (text)
+- message_type (enum: text, image, video)
+- timestamp (timestamp)
+- status (enum: sent, delivered, read)
+
+Chats Table:
+- chat_id (uuid, primary key)
+- type (enum: one_on_one, group)
+- created_at (timestamp)
+- last_message_id (uuid)
+
+Participants Table:
+- chat_id (uuid)
+- user_id (uuid)
+- joined_at (timestamp)
+- role (enum: admin, member)</div>
+
+            <h4>Scaling Strategies</h4>
+            <ul>
+                <li><strong>Message Sharding:</strong> Shard messages by chat_id</li>
+                <li><strong>Connection Management:</strong> Use connection pools and load balancing</li>
+                <li><strong>Message Queue:</strong> Apache Kafka for message distribution</li>
+                <li><strong>Caching:</strong> Cache recent messages and user sessions</li>
+            </ul>
+        </div>
+
+        <div class="design-example">
+            <h3>3. Design a Social Media Feed (Instagram/Facebook)</h3>
+
+            <h4>Requirements</h4>
+            <ul>
+                <li>Users can create posts (text, images, videos)</li>
+                <li>Users can follow other users</li>
+                <li>Generate personalized news feed</li>
+                <li>Like, comment, and share posts</li>
+                <li>Scale: 1B users, 500M daily posts</li>
+            </ul>
+
+            <h4>Core Components</h4>
+            <ul>
+                <li><strong>User Service:</strong> Manage user profiles and relationships</li>
+                <li><strong>Post Service:</strong> Handle post creation and storage</li>
+                <li><strong>Feed Generation Service:</strong> Create personalized feeds</li>
+                <li><strong>Notification Service:</strong> Handle likes, comments, follows</li>
+            </ul>
+
+            <h4>Feed Generation Approaches</h4>
+
+            <strong>Pull Model (Fan-out on Read):</strong>
+            <ul>
+                <li>Generate feed when user requests it</li>
+                <li>Query posts from all followed users</li>
+                <li>Pros: Less storage, real-time updates</li>
+                <li>Cons: Slow for users following many people</li>
+            </ul>
+
+            <strong>Push Model (Fan-out on Write):</strong>
+            <ul>
+                <li>Pre-generate feeds when posts are created</li>
+                <li>Store feeds in user's feed cache</li>
+                <li>Pros: Fast feed retrieval</li>
+                <li>Cons: High storage cost, celebrity problem</li>
+            </ul>
+
+            <strong>Hybrid Approach:</strong>
+            <ul>
+                <li>Pull model for celebrities (users with many followers)</li>
+                <li>Push model for regular users</li>
+                <li>Merge results in real-time</li>
+            </ul>
+
+            <h4>Database Design</h4>
+            <div class="code-block">Users Table:
+- user_id (uuid, primary key)
+- username (varchar, unique)
+- email (varchar, unique)
+- profile_picture_url (varchar)
+
+Posts Table:
+- post_id (uuid, primary key)
+- user_id (uuid)
+- content (text)
+- media_urls (json array)
+- created_at (timestamp)
+- likes_count (int)
+- comments_count (int)
+
+Follows Table:
+- follower_id (uuid)
+- followee_id (uuid)
+- created_at (timestamp)
+- primary key (follower_id, followee_id)
+
+Feeds Table (for push model):
+- user_id (uuid)
+- post_id (uuid)
+- created_at (timestamp)
+- primary key (user_id, post_id)</div>
+        </div>
+
+        <div class="design-example">
+            <h3>4. Design a Video Streaming Service (YouTube/Netflix)</h3>
+
+            <h4>Requirements</h4>
+            <ul>
+                <li>Upload and stream videos</li>
+                <li>Support multiple video qualities</li>
+                <li>Global content delivery</li>
+                <li>Video recommendations</li>
+                <li>View analytics</li>
+                <li>Scale: 1B users, 500 hours uploaded per minute</li>
+            </ul>
+
+            <h4>Architecture Components</h4>
+            <ul>
+                <li><strong>Upload Service:</strong> Handle video uploads and processing</li>
+                <li><strong>Encoding Service:</strong> Convert videos to multiple formats</li>
+                <li><strong>CDN:</strong> Global video distribution</li>
+                <li><strong>Metadata Service:</strong> Store video information</li>
+                <li><strong>Recommendation Service:</strong> Generate personalized recommendations</li>
+            </ul>
+
+            <h4>Video Processing Pipeline</h4>
+            <div class="code-block">Upload -> Validation -> Encoding -> Storage -> CDN Distribution
+          |              |         |
+      Metadata      Thumbnails   Search Index</div>
+
+            <h4>Video Encoding</h4>
+            <ul>
+                <li><strong>Multiple Resolutions:</strong> 144p, 240p, 360p, 480p, 720p, 1080p, 4K</li>
+                <li><strong>Adaptive Bitrate:</strong> Adjust quality based on network conditions</li>
+                <li><strong>Codecs:</strong> H.264, H.265, VP9 for compression</li>
+                <li><strong>Containers:</strong> MP4, WebM for different platforms</li>
+            </ul>
+
+            <h4>Storage Strategy</h4>
+            <ul>
+                <li><strong>Object Storage:</strong> Amazon S3, Google Cloud Storage for video files</li>
+                <li><strong>CDN:</strong> CloudFront, CloudFlare for global distribution</li>
+                <li><strong>Caching:</strong> Cache popular videos at edge locations</li>
+                <li><strong>Tiered Storage:</strong> Hot, warm, and cold storage based on popularity</li>
+            </ul>
+        </div>
+
+        <h2>⚡ Advanced Topics</h2>
+
+        <div class="pattern-section">
+            <h3>Distributed System Patterns</h3>
+
+            <h4>Circuit Breaker Pattern</h4>
+            <ul>
+                <li><strong>Purpose:</strong> Prevent cascade failures in distributed systems</li>
+                <li><strong>States:</strong> Closed (normal), Open (failing), Half-open (testing)</li>
+                <li><strong>Implementation:</strong> Monitor failure rate, trip circuit when threshold exceeded</li>
+                <li><strong>Recovery:</strong> Gradually test service recovery</li>
+            </ul>
+
+            <h4>Bulkhead Pattern</h4>
+            <ul>
+                <li><strong>Purpose:</strong> Isolate resources to prevent total system failure</li>
+                <li><strong>Implementation:</strong> Separate connection pools, thread pools, resources</li>
+                <li><strong>Example:</strong> Separate database connections for read/write operations</li>
+            </ul>
+
+            <h4>Saga Pattern</h4>
+            <ul>
+                <li><strong>Purpose:</strong> Manage distributed transactions across microservices</li>
+                <li><strong>Types:</strong> Choreography vs Orchestration</li>
+                <li><strong>Compensation:</strong> Define compensation actions for failed steps</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h3>Security Considerations</h3>
+
+            <h4>Authentication & Authorization</h4>
+            <ul>
+                <li><strong>OAuth 2.0:</strong> Industry standard for authorization</li>
+                <li><strong>JWT:</strong> JSON Web Tokens for stateless authentication</li>
+                <li><strong>API Keys:</strong> Simple authentication for service-to-service</li>
+                <li><strong>Multi-factor Authentication:</strong> Additional security layer</li>
+            </ul>
+
+            <h4>Data Protection</h4>
+            <ul>
+                <li><strong>Encryption:</strong> Data at rest and in transit</li>
+                <li><strong>HTTPS:</strong> TLS encryption for web traffic</li>
+                <li><strong>Database Encryption:</strong> Encrypt sensitive data fields</li>
+                <li><strong>Key Management:</strong> Secure key storage and rotation</li>
+            </ul>
+
+            <h4>Common Security Threats</h4>
+            <ul>
+                <li><strong>SQL Injection:</strong> Use parameterized queries</li>
+                <li><strong>XSS:</strong> Sanitize user inputs</li>
+                <li><strong>CSRF:</strong> Use CSRF tokens</li>
+                <li><strong>DDoS:</strong> Rate limiting and traffic filtering</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h3>Monitoring & Observability</h3>
+
+            <h4>Metrics</h4>
+            <ul>
+                <li><strong>RED Method:</strong> Rate, Errors, Duration</li>
+                <li><strong>USE Method:</strong> Utilization, Saturation, Errors</li>
+                <li><strong>SLIs:</strong> Service Level Indicators (latency, availability, throughput)</li>
+                <li><strong>SLOs:</strong> Service Level Objectives (99.9% availability)</li>
+            </ul>
+
+            <h4>Logging</h4>
+            <ul>
+                <li><strong>Structured Logging:</strong> Use JSON format for machine parsing</li>
+                <li><strong>Log Levels:</strong> Debug, Info, Warning, Error, Fatal</li>
+                <li><strong>Centralized Logging:</strong> ELK Stack (Elasticsearch, Logstash, Kibana)</li>
+                <li><strong>Log Aggregation:</strong> Collect logs from all services</li>
+            </ul>
+
+            <h4>Tracing</h4>
+            <ul>
+                <li><strong>Distributed Tracing:</strong> Track requests across multiple services</li>
+                <li><strong>Trace ID:</strong> Unique identifier for request flow</li>
+                <li><strong>Span:</strong> Individual operation within a trace</li>
+                <li><strong>Tools:</strong> Jaeger, Zipkin, AWS X-Ray</li>
+            </ul>
+        </div>
+
+        <h2>📚 Integrated Study Schedule</h2>
+
+        <div class="framework-box">
+            <h3>Integrated 6-Week Schedule:</h3>
+            <ul>
+                <li><strong>Weeks 1-4:</strong> Focus on coding patterns (existing schedule)</li>
+                <li><strong>Weeks 5-6:</strong> Intensive system design preparation</li>
+                <li><strong>Daily:</strong> 15 minutes system design concepts review</li>
+                <li><strong>Weekly:</strong> 2-3 hours dedicated system design practice</li>
+            </ul>
+        </div>
+
+        <h3>Week-by-Week Integration</h3>
+
+        <div class="pattern-section">
+            <h4>Weeks 1-2: Foundation + Basic Concepts</h4>
+            <p><strong>Coding Focus:</strong> Two Pointers, Sliding Window, DFS, BFS</p>
+            <p><strong>System Design:</strong> 15 min/day reading fundamental concepts</p>
+            <ul>
+                <li>Day 1: Scalability concepts</li>
+                <li>Day 2: Load balancing</li>
+                <li>Day 3: Caching strategies</li>
+                <li>Day 4: Database basics</li>
+                <li>Day 5: Review and practice estimation</li>
+                <li>Weekend: Design a simple URL shortener (1 hour)</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h4>Weeks 3-4: Algorithms + Intermediate Concepts</h4>
+            <p><strong>Coding Focus:</strong> Binary Search, Dynamic Programming, Backtracking</p>
+            <p><strong>System Design:</strong> 15 min/day + 1 design session per week</p>
+            <ul>
+                <li>Day 1: Microservices architecture</li>
+                <li>Day 2: Message queues</li>
+                <li>Day 3: CDN and caching</li>
+                <li>Day 4: Database sharding</li>
+                <li>Day 5: CAP theorem</li>
+                <li>Weekend: Design a chat system (1.5 hours)</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h4>Week 5: Advanced Data Structures + System Design Deep Dive</h4>
+            <p><strong>Coding Focus:</strong> Heaps, Union-Find, Trie</p>
+            <p><strong>System Design:</strong> 30 min/day + 2 design sessions</p>
+            <ul>
+                <li>Day 1: Design social media feed</li>
+                <li>Day 2: Design video streaming service</li>
+                <li>Day 3: Design search engine</li>
+                <li>Day 4: Design ride-sharing service</li>
+                <li>Day 5: Design e-commerce platform</li>
+                <li>Weekend: Mock system design interview (2 hours)</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h4>Week 6: Special Algorithms + System Design Mastery</h4>
+            <p><strong>Coding Focus:</strong> Topological Sort, Special Algorithms</p>
+            <p><strong>System Design:</strong> 45 min/day + daily practice</p>
+            <ul>
+                <li>Day 1: Design distributed cache</li>
+                <li>Day 2: Design notification system</li>
+                <li>Day 3: Design analytics platform</li>
+                <li>Day 4: Design file storage system</li>
+                <li>Day 5: Design monitoring system</li>
+                <li>Weekend: Full mock interviews (3 hours)</li>
+            </ul>
+        </div>
+
+        <h2>🎯 Back-of-Envelope Estimation</h2>
+
+        <div class="scale-box">
+            <h3>Common Estimation Framework:</h3>
+            <ul>
+                <li><strong>Users:</strong> 100M DAU</li>
+                <li><strong>Usage:</strong> 10 requests per user per day</li>
+                <li><strong>Total Requests:</strong> 1B requests/day</li>
+                <li><strong>QPS:</strong> 1B / (24 × 3600) ≈ 11,600 QPS</li>
+                <li><strong>Peak QPS:</strong> 11,600 × 3 = 35,000 QPS</li>
+                <li><strong>Storage:</strong> 1KB per request × 1B = 1TB/day</li>
+                <li><strong>Bandwidth:</strong> 35K QPS × 1KB = 35MB/s</li>
+            </ul>
+        </div>
+
+        <div class="pattern-section">
+            <h3>Quick Reference Numbers</h3>
+            <ul>
+                <li>L1 cache reference: 0.5 ns</li>
+                <li>L2 cache reference: 7 ns</li>
+                <li>Main memory reference: 100 ns</li>
+                <li>Send 1KB over network: 10 μs</li>
+                <li>SSD random read: 150 μs</li>
+                <li>Disk seek: 10 ms</li>
+                <li>Network round trip: 500 μs (same datacenter)</li>
+            </ul>
+        </div>
+
+        <div class="tradeoff-box">
+            <h3><strong>Remember:</strong></h3>
+            <p>System design interviews are about demonstrating your thought process, not finding the "perfect" solution. Show how you approach complex problems, make trade-offs, and design systems that can evolve with changing requirements.</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const sections = document.querySelectorAll('.pattern-section, .design-example');
+
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                if (text.includes(searchTerm) || searchTerm === '') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

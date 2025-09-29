@@ -7,6 +7,12 @@ import random
 
 app = Flask(__name__)
 
+# Add JSON filter for templates
+def tojsonfilter(value):
+    return json.dumps(value)
+
+app.jinja_env.filters['tojsonfilter'] = tojsonfilter
+
 # Configuration
 DATA_DIR = "data"
 CURRICULUM_DIR = f"{DATA_DIR}/curriculum"
@@ -158,7 +164,8 @@ def dashboard():
                          coding_completion_data=coding_completion_data,
                          system_design_completion_data=system_design_completion_data,
                          due_reviews=due_reviews,
-                         total_time=total_time)
+                         total_time=total_time,
+                         active_page='dashboard')
 
 @app.route('/complete', methods=['POST'])
 def mark_complete():
@@ -241,7 +248,8 @@ def history():
                          completed_reviews=completed_reviews[:10],
                          total_topics=total_topics,
                          total_reviews=total_reviews,
-                         streak=streak)
+                         streak=streak,
+                         active_page='history')
 
 def calculate_streak(completions):
     """Calculate current completion streak"""
@@ -271,7 +279,7 @@ def calculate_streak(completions):
 def config_page():
     """Configuration page for study plan settings"""
     config = load_config()
-    return render_template('config.html', config=config)
+    return render_template('config.html', config=config, active_page='config')
 
 @app.route('/update_config', methods=['POST'])
 def update_config():
@@ -313,7 +321,7 @@ def preview():
                 'system_design': system_design_topic
             })
 
-    return render_template('preview.html', preview_days=preview_days)
+    return render_template('preview.html', preview_days=preview_days, active_page='preview')
 
 @app.route('/analytics')
 def analytics():
@@ -324,7 +332,7 @@ def analytics():
     # Calculate analytics data
     analytics_data = calculate_analytics(progress_data, reviews_data)
 
-    return render_template('analytics.html', **analytics_data)
+    return render_template('analytics.html', **analytics_data, active_page='analytics')
 
 @app.route('/curriculum')
 def curriculum_editor():
@@ -334,7 +342,8 @@ def curriculum_editor():
 
     return render_template('curriculum.html',
                          coding_curriculum=coding_curriculum,
-                         system_design_curriculum=system_design_curriculum)
+                         system_design_curriculum=system_design_curriculum,
+                         active_page='curriculum')
 
 @app.route('/api/curriculum/<track>', methods=['GET'])
 def get_curriculum(track):
@@ -764,12 +773,22 @@ def calculate_timer_analytics(completions):
 @app.route('/practice')
 def practice():
     """Practice mode page with random problems and mock interviews"""
-    return render_template('practice.html')
+    return render_template('practice.html', active_page='practice')
 
 @app.route('/help')
 def help_page():
     """Help and documentation page"""
-    return render_template('help.html')
+    return render_template('help.html', active_page='help')
+
+@app.route('/templates')
+def templates_page():
+    """Coding patterns and templates reference page"""
+    return render_template('templates.html', active_page='templates')
+
+@app.route('/system-design')
+def system_design_page():
+    """System design templates and concepts reference page"""
+    return render_template('system-design.html', active_page='system-design')
 
 @app.route('/api/random-problem', methods=['POST'])
 def random_problem():

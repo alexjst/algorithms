@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Patterns & Templates - Study Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        /* New Navigation Bar Styles */
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Allows wrapping on very small screens */
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        .nav-link {
+            display: flex; /* Aligns icon and text */
+            align-items: center;
+            white-space: nowrap; /* Prevents icon and text from breaking lines */
+            text-decoration: none;
+            color: #495057;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: #f1f3f5;
+            color: #007bff;
+        }
+        .nav-link.active {
+            background-color: #e7f3ff;
+            color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+        }
+        .pattern-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .pattern-header {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        .pattern-title {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+            font-size: 1.4em;
+        }
+        .pattern-meta {
+            font-size: 0.9em;
+            color: #666;
+            margin: 0;
+        }
+        .code-template {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .code-template pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .template-variant {
+            margin: 20px 0;
+        }
+        .variant-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .complexity-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .use-cases {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .use-cases h4 {
+            margin: 0 0 10px 0;
+            color: #155724;
+        }
+        .use-cases ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .search-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .pattern-nav {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .pattern-nav h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+        }
+        .pattern-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .pattern-link {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        .pattern-link:hover {
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+        }
+        @media (max-width: 768px) {
+            .pattern-links {
+                grid-template-columns: 1fr;
+            }
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Coding Patterns & Templates</h1>
+        <p>Complete reference guide with all 15 essential patterns from LaTeX source - master these for interview success</p>
+    </div>
+
+    <!-- New Navigation Bar Structure -->
+    <div class="nav-container">
+        <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" title="Go to Dashboard">📅 Dashboard</a>
+        <a href="/history" class="nav-link {% if active_page == 'history' %}active{% endif %}" title="View Progress History">📊 History</a>
+        <a href="/preview" class="nav-link {% if active_page == 'preview' %}active{% endif %}" title="See Upcoming Topics">🔮 Preview</a>
+        <a href="/practice" class="nav-link {% if active_page == 'practice' %}active{% endif %}" title="Practice & Mock Interviews">🎯 Practice</a>
+        <a href="/analytics" class="nav-link {% if active_page == 'analytics' %}active{% endif %}" title="Analyze Your Performance">📈 Analytics</a>
+        <a href="/curriculum" class="nav-link {% if active_page == 'curriculum' %}active{% endif %}" title="Edit the Curriculum">📚 Curriculum</a>
+        <a href="/templates" class="nav-link {% if active_page == 'templates' %}active{% endif %}" title="Coding Patterns & Templates">🔧 Templates</a>
+        <a href="/config" class="nav-link {% if active_page == 'config' %}active{% endif %}" title="Configure Your Plan">⚙️ Config</a>
+        <a href="/help" class="nav-link {% if active_page == 'help' %}active{% endif %}" title="Get Help">❓ Help</a>
+    </div>
+
+    <div class="search-section">
+        <h3>🔍 Quick Pattern Search</h3>
+        <input type="text" id="search-input" class="search-input" placeholder="Search patterns, techniques, or use cases (e.g., 'binary search', 'graph traversal', 'sliding window')...">
+        <div id="search-results-info" style="color: #666; font-size: 14px;"></div>
+    </div>
+
+    <div class="pattern-nav">
+        <h3>📋 Quick Navigation - All 15 Patterns</h3>
+        <div class="pattern-links">
+            <a href="#dfs" class="pattern-link">1. Depth-First Search</a>
+            <a href="#bfs" class="pattern-link">2. Breadth-First Search</a>
+            <a href="#two-pointers" class="pattern-link">3. Two Pointers</a>
+            <a href="#sliding-window" class="pattern-link">4. Sliding Window</a>
+            <a href="#binary-search" class="pattern-link">5. Binary Search</a>
+            <a href="#dynamic-programming" class="pattern-link">6. Dynamic Programming</a>
+            <a href="#backtracking" class="pattern-link">7. Backtracking</a>
+            <a href="#heap" class="pattern-link">8. Heap Operations</a>
+            <a href="#union-find" class="pattern-link">9. Union-Find</a>
+            <a href="#trie" class="pattern-link">10. Trie</a>
+            <a href="#topological-sort" class="pattern-link">11. Topological Sort</a>
+            <a href="#intervals" class="pattern-link">12. Interval Problems</a>
+            <a href="#matrix-traversal" class="pattern-link">13. Matrix Traversal</a>
+            <a href="#tree-construction" class="pattern-link">14. Tree Construction</a>
+            <a href="#special-algorithms" class="pattern-link">15. Special Algorithms</a>
+        </div>
+    </div>
+
+    <!-- 1. Depth-First Search Pattern -->
+    <div class="pattern-section" id="dfs">
+        <div class="pattern-header">
+            <h2 class="pattern-title">1. 🌳 Depth-First Search (DFS)</h2>
+            <p class="pattern-meta">Use Case: Tree/graph traversal, path finding, cycle detection | Time: O(V + E) | Space: O(h)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use DFS:</h4>
+            <ul>
+                <li>Tree traversal (preorder, inorder, postorder)</li>
+                <li>Path finding and counting paths</li>
+                <li>Cycle detection in graphs</li>
+                <li>Connected components</li>
+                <li>Topological sorting</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Recursive DFS Template</div>
+            <div class="code-template">
+<pre>def dfs_recursive(root):
+    if not root:
+        return  # Base case
+
+    # Process current node
+    print(root.val)
+
+    # Recurse on children
+    dfs_recursive(root.left)
+    dfs_recursive(root.right)
+
+# With result collection
+def dfs_collect_paths(root, path=[], all_paths=[]):
+    if not root:
+        return
+
+    path.append(root.val)
+
+    # Leaf node - save path
+    if not root.left and not root.right:
+        all_paths.append(path[:])  # Copy path
+
+    dfs_collect_paths(root.left, path, all_paths)
+    dfs_collect_paths(root.right, path, all_paths)
+
+    path.pop()  # Backtrack
+    return all_paths</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Iterative DFS Template</div>
+            <div class="code-template">
+<pre>def dfs_iterative(root):
+    if not root:
+        return
+
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        print(node.val)  # Process node
+
+        # Add children (right first for left-to-right order)
+        if node.right:
+            stack.append(node.right)
+        if node.left:
+            stack.append(node.left)
+
+# Graph DFS with visited set
+def dfs_graph(graph, start):
+    visited = set()
+    stack = [start]
+
+    while stack:
+        node = stack.pop()
+        if node not in visited:
+            visited.add(node)
+            print(node)  # Process node
+
+            # Add neighbors
+            for neighbor in graph[node]:
+                if neighbor not in visited:
+                    stack.append(neighbor)</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Breadth-First Search Pattern -->
+    <div class="pattern-section" id="bfs">
+        <div class="pattern-header">
+            <h2 class="pattern-title">2. 🔄 Breadth-First Search (BFS)</h2>
+            <p class="pattern-meta">Use Case: Shortest path, level-order traversal, minimum steps | Time: O(V + E) | Space: O(w)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use BFS:</h4>
+            <ul>
+                <li>Shortest path in unweighted graphs</li>
+                <li>Level-order tree traversal</li>
+                <li>Minimum steps problems</li>
+                <li>Multi-source shortest path</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Standard BFS Template</div>
+            <div class="code-template">
+<pre>from collections import deque
+
+def bfs_level_order(root):
+    if not root:
+        return []
+
+    result = []
+    queue = deque([root])
+
+    while queue:
+        level_size = len(queue)
+        level = []
+
+        for _ in range(level_size):
+            node = queue.popleft()
+            level.append(node.val)
+
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+
+        result.append(level)
+    return result</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">BFS for Shortest Path</div>
+            <div class="code-template">
+<pre>def bfs_shortest_path(graph, start, target):
+    queue = deque([(start, 0)])  # (node, distance)
+    visited = set([start])
+
+    while queue:
+        node, dist = queue.popleft()
+
+        if node == target:
+            return dist
+
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append((neighbor, dist + 1))
+
+    return -1  # Target not reachable</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Two Pointers Pattern -->
+    <div class="pattern-section" id="two-pointers">
+        <div class="pattern-header">
+            <h2 class="pattern-title">3. 🎯 Two Pointers Pattern</h2>
+            <p class="pattern-meta">Use Case: Sorted arrays, palindromes, pairs | Time: O(n) | Space: O(1)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Two Pointers:</h4>
+            <ul>
+                <li>Finding pairs in sorted arrays (Two Sum II, 3Sum)</li>
+                <li>Palindrome checking and manipulation</li>
+                <li>Container problems (Most Water)</li>
+                <li>Removing duplicates from sorted arrays</li>
+                <li>Cycle detection in linked lists</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Opposite Ends Template</div>
+            <div class="code-template">
+<pre>def two_sum_sorted(nums, target):
+    left, right = 0, len(nums) - 1
+
+    while left < right:
+        current_sum = nums[left] + nums[right]
+
+        if current_sum == target:
+            return [left, right]
+        elif current_sum < target:
+            left += 1
+        else:
+            right -= 1
+
+    return []
+
+def is_palindrome(s):
+    left, right = 0, len(s) - 1
+
+    while left < right:
+        if s[left] != s[right]:
+            return False
+        left += 1
+        right -= 1
+
+    return True</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Fast and Slow Pointers</div>
+            <div class="code-template">
+<pre># Floyd's Cycle Detection
+def has_cycle(head):
+    if not head or not head.next:
+        return False
+
+    slow = fast = head
+
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+
+        if slow == fast:
+            return True
+
+    return False
+
+def find_middle(head):
+    slow = fast = head
+
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+
+    return slow
+
+def remove_nth_from_end(head, n):
+    dummy = ListNode(0)
+    dummy.next = head
+    slow = fast = dummy
+
+    # Move fast n+1 steps ahead
+    for _ in range(n + 1):
+        fast = fast.next
+
+    # Move both until fast reaches end
+    while fast:
+        slow = slow.next
+        fast = fast.next
+
+    # Remove nth node
+    slow.next = slow.next.next
+    return dummy.next</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Sliding Window Pattern -->
+    <div class="pattern-section" id="sliding-window">
+        <div class="pattern-header">
+            <h2 class="pattern-title">4. 🪟 Sliding Window Pattern</h2>
+            <p class="pattern-meta">Use Case: Subarray/substring problems | Time: O(n) | Space: O(k)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Sliding Window:</h4>
+            <ul>
+                <li>Fixed-size window problems (max sum of k elements)</li>
+                <li>Variable-size windows (longest substring)</li>
+                <li>Character frequency problems</li>
+                <li>Subarray sum problems</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Fixed Size Window</div>
+            <div class="code-template">
+<pre>def max_sum_subarray(nums, k):
+    if len(nums) < k:
+        return 0
+
+    # Calculate first window
+    window_sum = sum(nums[:k])
+    max_sum = window_sum
+
+    # Slide window
+    for i in range(k, len(nums)):
+        window_sum = window_sum - nums[i - k] + nums[i]
+        max_sum = max(max_sum, window_sum)
+
+    return max_sum</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Variable Size Window</div>
+            <div class="code-template">
+<pre>def longest_substring_k_distinct(s, k):
+    if k == 0:
+        return 0
+
+    char_count = {}
+    left = 0
+    max_length = 0
+
+    for right in range(len(s)):
+        # Expand window
+        char_count[s[right]] = char_count.get(s[right], 0) + 1
+
+        # Contract window if needed
+        while len(char_count) > k:
+            char_count[s[left]] -= 1
+            if char_count[s[left]] == 0:
+                del char_count[s[left]]
+            left += 1
+
+        max_length = max(max_length, right - left + 1)
+
+    return max_length</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Binary Search Pattern -->
+    <div class="pattern-section" id="binary-search">
+        <div class="pattern-header">
+            <h2 class="pattern-title">5. 🔍 Binary Search Pattern</h2>
+            <p class="pattern-meta">Use Case: Sorted data search, optimization | Time: O(log n) | Space: O(1)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Binary Search:</h4>
+            <ul>
+                <li>Searching in sorted arrays</li>
+                <li>Finding first/last occurrence</li>
+                <li>Search in rotated sorted arrays</li>
+                <li>Optimization problems (minimize/maximize)</li>
+                <li>Square root, peak element problems</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Standard Binary Search</div>
+            <div class="code-template">
+<pre>def binary_search(nums, target):
+    left, right = 0, len(nums) - 1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            return mid
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Find First and Last Occurrence</div>
+            <div class="code-template">
+<pre>def find_first_occurrence(nums, target):
+    left, right = 0, len(nums) - 1
+    result = -1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            result = mid
+            right = mid - 1  # Continue searching left
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return result
+
+def find_last_occurrence(nums, target):
+    left, right = 0, len(nums) - 1
+    result = -1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            result = mid
+            left = mid + 1  # Continue searching right
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return result
+
+def search_range(nums, target):
+    return [find_first_occurrence(nums, target),
+            find_last_occurrence(nums, target)]</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Binary Search on Answer</div>
+            <div class="code-template">
+<pre>def find_peak_element(nums):
+    left, right = 0, len(nums) - 1
+
+    while left < right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] > nums[mid + 1]:
+            right = mid
+        else:
+            left = mid + 1
+
+    return left
+
+def search_rotated_sorted_array(nums, target):
+    left, right = 0, len(nums) - 1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            return mid
+
+        # Left half is sorted
+        if nums[left] <= nums[mid]:
+            if nums[left] <= target < nums[mid]:
+                right = mid - 1
+            else:
+                left = mid + 1
+        # Right half is sorted
+        else:
+            if nums[mid] < target <= nums[right]:
+                left = mid + 1
+            else:
+                right = mid - 1
+
+    return -1</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Dynamic Programming Pattern -->
+    <div class="pattern-section" id="dynamic-programming">
+        <div class="pattern-header">
+            <h2 class="pattern-title">6. 🧠 Dynamic Programming</h2>
+            <p class="pattern-meta">Use Case: Optimization, counting, decisions | Time: O(n²) or O(n*m) | Space: O(n) to O(n*m)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Dynamic Programming:</h4>
+            <ul>
+                <li>Optimization problems (min/max cost)</li>
+                <li>Counting problems (number of ways)</li>
+                <li>Decision problems (can/cannot)</li>
+                <li>Overlapping subproblems</li>
+                <li>Optimal substructure exists</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">1D DP Template</div>
+            <div class="code-template">
+<pre>def fibonacci(n):
+    if n <= 1:
+        return n
+
+    # Bottom-up approach
+    dp = [0] * (n + 1)
+    dp[1] = 1
+
+    for i in range(2, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+
+    return dp[n]
+
+# Space optimized
+def fibonacci_optimized(n):
+    if n <= 1:
+        return n
+
+    prev2, prev1 = 0, 1
+
+    for i in range(2, n + 1):
+        current = prev1 + prev2
+        prev2, prev1 = prev1, current
+
+    return prev1
+
+def climb_stairs(n):
+    if n <= 2:
+        return n
+
+    dp = [0] * (n + 1)
+    dp[1], dp[2] = 1, 2
+
+    for i in range(3, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+
+    return dp[n]
+
+def house_robber(nums):
+    if not nums:
+        return 0
+    if len(nums) == 1:
+        return nums[0]
+
+    dp = [0] * len(nums)
+    dp[0] = nums[0]
+    dp[1] = max(nums[0], nums[1])
+
+    for i in range(2, len(nums)):
+        dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+
+    return dp[-1]</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">2D DP Template</div>
+            <div class="code-template">
+<pre>def unique_paths(m, n):
+    dp = [[1 for _ in range(n)] for _ in range(m)]
+
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[i][j] = dp[i-1][j] + dp[i][j-1]
+
+    return dp[m-1][n-1]
+
+def longest_common_subsequence(text1, text2):
+    m, n = len(text1), len(text2)
+    dp = [[0 for _ in range(n + 1)] for _ in range(m + 1)]
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if text1[i-1] == text2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+    return dp[m][n]
+
+def min_path_sum(grid):
+    m, n = len(grid), len(grid[0])
+
+    # Initialize first row and column
+    for i in range(1, m):
+        grid[i][0] += grid[i-1][0]
+
+    for j in range(1, n):
+        grid[0][j] += grid[0][j-1]
+
+    # Fill the DP table
+    for i in range(1, m):
+        for j in range(1, n):
+            grid[i][j] += min(grid[i-1][j], grid[i][j-1])
+
+    return grid[m-1][n-1]</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Backtracking Pattern -->
+    <div class="pattern-section" id="backtracking">
+        <div class="pattern-header">
+            <h2 class="pattern-title">7. 🔙 Backtracking Pattern</h2>
+            <p class="pattern-meta">Use Case: Permutations, combinations, N-Queens | Time: O(2^n) or O(n!) | Space: O(depth)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Backtracking:</h4>
+            <ul>
+                <li>Generate all permutations/combinations</li>
+                <li>N-Queens, Sudoku solving</li>
+                <li>Word search in grids</li>
+                <li>Subset generation</li>
+                <li>Constraint satisfaction problems</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">General Backtracking Template</div>
+            <div class="code-template">
+<pre>def backtrack_template(candidates, target, path=[], result=[]):
+    # Base case - solution found
+    if is_valid_solution(path, target):
+        result.append(path[:])  # Make a copy
+        return
+
+    # Explore all possibilities
+    for i, candidate in enumerate(candidates):
+        # Skip invalid candidates
+        if not is_valid_candidate(candidate, path):
+            continue
+
+        # Make choice
+        path.append(candidate)
+
+        # Recurse with remaining candidates
+        backtrack_template(candidates[i+1:], target, path, result)
+
+        # Undo choice (backtrack)
+        path.pop()
+
+    return result</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Permutations</div>
+            <div class="code-template">
+<pre>def generate_permutations(nums):
+    def backtrack(path, remaining):
+        if not remaining:
+            result.append(path[:])
+            return
+
+        for i in range(len(remaining)):
+            # Choose
+            path.append(remaining[i])
+            # Explore
+            backtrack(path, remaining[:i] + remaining[i+1:])
+            # Unchoose
+            path.pop()
+
+    result = []
+    backtrack([], nums)
+    return result</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Subsets and Combinations</div>
+            <div class="code-template">
+<pre>def generate_subsets(nums):
+    def backtrack(start, path):
+        result.append(path[:])  # Add current subset
+
+        for i in range(start, len(nums)):
+            path.append(nums[i])
+            backtrack(i + 1, path)
+            path.pop()
+
+    result = []
+    backtrack(0, [])
+    return result
+
+def combination_sum(candidates, target):
+    def backtrack(start, path, remaining):
+        if remaining == 0:
+            result.append(path[:])
+            return
+
+        for i in range(start, len(candidates)):
+            if candidates[i] > remaining:
+                break
+
+            path.append(candidates[i])
+            backtrack(i, path, remaining - candidates[i])
+            path.pop()
+
+    result = []
+    candidates.sort()
+    backtrack(0, [], target)
+    return result
+
+def letter_combinations(digits):
+    if not digits:
+        return []
+
+    phone = {
+        '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+        '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+    }
+
+    def backtrack(index, path):
+        if index == len(digits):
+            result.append("".join(path))
+            return
+
+        for letter in phone[digits[index]]:
+            path.append(letter)
+            backtrack(index + 1, path)
+            path.pop()
+
+    result = []
+    backtrack(0, [])
+    return result</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Heap Operations Pattern -->
+    <div class="pattern-section" id="heap">
+        <div class="pattern-header">
+            <h2 class="pattern-title">8. 📚 Heap Operations</h2>
+            <p class="pattern-meta">Use Case: Top K elements, merge K sorted, priority | Time: O(log n) ops | Space: O(n)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Heaps:</h4>
+            <ul>
+                <li>Finding top K largest/smallest elements</li>
+                <li>Merge K sorted arrays/lists</li>
+                <li>Priority queue operations</li>
+                <li>Median maintenance</li>
+                <li>Scheduling problems</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Min/Max Heap Template</div>
+            <div class="code-template">
+<pre>import heapq
+
+def find_kth_largest(nums, k):
+    # Use min heap of size k
+    min_heap = []
+
+    for num in nums:
+        heapq.heappush(min_heap, num)
+        if len(min_heap) > k:
+            heapq.heappop(min_heap)
+
+    return min_heap[0]
+
+def find_k_largest_elements(nums, k):
+    # Min heap approach
+    min_heap = []
+
+    for num in nums:
+        if len(min_heap) < k:
+            heapq.heappush(min_heap, num)
+        elif num > min_heap[0]:
+            heapq.heapreplace(min_heap, num)
+
+    return sorted(min_heap, reverse=True)
+
+# For max heap, negate values
+def max_heap_operations():
+    max_heap = []
+
+    # Insert (negate for max heap)
+    heapq.heappush(max_heap, -value)
+
+    # Extract max (negate result)
+    max_val = -heapq.heappop(max_heap)
+
+    # Peek max
+    max_val = -max_heap[0]</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Advanced Heap Applications</div>
+            <div class="code-template">
+<pre>def merge_k_sorted_lists(lists):
+    import heapq
+
+    min_heap = []
+    # Add first element from each list
+    for i, lst in enumerate(lists):
+        if lst:
+            heapq.heappush(min_heap, (lst.val, i, lst))
+
+    dummy = ListNode(0)
+    current = dummy
+
+    while min_heap:
+        val, list_idx, node = heapq.heappop(min_heap)
+        current.next = node
+        current = current.next
+
+        # Add next element from same list
+        if node.next:
+            heapq.heappush(min_heap, (node.next.val, list_idx, node.next))
+
+    return dummy.next
+
+def top_k_frequent_elements(nums, k):
+    from collections import Counter
+    import heapq
+
+    count = Counter(nums)
+
+    # Min heap of size k
+    min_heap = []
+    for num, freq in count.items():
+        heapq.heappush(min_heap, (freq, num))
+        if len(min_heap) > k:
+            heapq.heappop(min_heap)
+
+    return [num for freq, num in min_heap]</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Median Finder</div>
+            <div class="code-template">
+<pre>class MedianFinder:
+    def __init__(self):
+        self.small = []  # max heap (negated)
+        self.large = []  # min heap
+
+    def addNum(self, num):
+        # Add to max heap first
+        heapq.heappush(self.small, -num)
+
+        # Balance: move largest from small to large
+        heapq.heappush(self.large, -heapq.heappop(self.small))
+
+        # Ensure small has more or equal elements
+        if len(self.large) > len(self.small):
+            heapq.heappush(self.small, -heapq.heappop(self.large))
+
+    def findMedian(self):
+        if len(self.small) > len(self.large):
+            return -self.small[0]
+        return (-self.small[0] + self.large[0]) / 2</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. Union-Find Pattern -->
+    <div class="pattern-section" id="union-find">
+        <div class="pattern-header">
+            <h2 class="pattern-title">9. 🔗 Union-Find (Disjoint Set)</h2>
+            <p class="pattern-meta">Use Case: Graph connectivity, cycle detection | Time: O(α(n)) amortized | Space: O(n)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Union-Find:</h4>
+            <ul>
+                <li>Detecting cycles in undirected graphs</li>
+                <li>Finding connected components</li>
+                <li>Minimum spanning tree algorithms</li>
+                <li>Dynamic connectivity queries</li>
+                <li>Island problems with updates</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Complete Union-Find Implementation</div>
+            <div class="code-template">
+<pre>class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+        self.components = n
+
+    def find(self, x):
+        # Path compression
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            return False  # Already connected
+
+        # Union by rank
+        if self.rank[root_x] < self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] > self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
+        self.components -= 1
+        return True
+
+    def connected(self, x, y):
+        return self.find(x) == self.find(y)</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Union-Find Applications</div>
+            <div class="code-template">
+<pre>def number_of_islands(grid):
+    if not grid:
+        return 0
+
+    m, n = len(grid), len(grid[0])
+    uf = UnionFind(m * n)
+    islands = 0
+
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == '1':
+                islands += 1
+                # Check 4 directions
+                for di, dj in [(0,1), (1,0), (0,-1), (-1,0)]:
+                    ni, nj = i + di, j + dj
+                    if (0 <= ni < m and 0 <= nj < n and
+                        grid[ni][nj] == '1'):
+                        if uf.union(i*n + j, ni*n + nj):
+                            islands -= 1
+
+    return islands
+
+def redundant_connection(edges):
+    uf = UnionFind(len(edges) + 1)
+
+    for u, v in edges:
+        if not uf.union(u, v):
+            return [u, v]  # This edge creates a cycle
+
+    return []</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 10. Trie Pattern -->
+    <div class="pattern-section" id="trie">
+        <div class="pattern-header">
+            <h2 class="pattern-title">10. 🌲 Trie (Prefix Tree)</h2>
+            <p class="pattern-meta">Use Case: Autocomplete, word search, prefix matching | Time: O(m) | Space: O(ALPHABET*N*M)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Trie:</h4>
+            <ul>
+                <li>Autocomplete and word suggestions</li>
+                <li>Word search in 2D grids</li>
+                <li>Prefix matching problems</li>
+                <li>Dictionary implementations</li>
+                <li>IP routing tables</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Complete Trie Implementation</div>
+            <div class="code-template">
+<pre>class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end_of_word = True
+
+    def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return node.is_end_of_word
+
+    def starts_with(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return True
+
+    def find_words_with_prefix(self, prefix):
+        # Find the prefix node
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return []
+            node = node.children[char]
+
+        # DFS to find all words
+        words = []
+        self._dfs(node, prefix, words)
+        return words
+
+    def _dfs(self, node, path, words):
+        if node.is_end_of_word:
+            words.append(path)
+
+        for char, child_node in node.children.items():
+            self._dfs(child_node, path + char, words)</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Word Search II with Trie</div>
+            <div class="code-template">
+<pre>def find_words_in_board(board, words):
+    # Build trie
+    trie = Trie()
+    for word in words:
+        trie.insert(word)
+
+    result = set()
+    m, n = len(board), len(board[0])
+
+    def dfs(i, j, node, path):
+        if node.is_end_of_word:
+            result.add(path)
+
+        if (i < 0 or i >= m or j < 0 or j >= n or
+            board[i][j] not in node.children):
+            return
+
+        char = board[i][j]
+        board[i][j] = '#'  # Mark visited
+
+        # Explore 4 directions
+        for di, dj in [(0,1), (1,0), (0,-1), (-1,0)]:
+            dfs(i + di, j + dj, node.children[char], path + char)
+
+        board[i][j] = char  # Restore
+
+    # Try starting from each cell
+    for i in range(m):
+        for j in range(n):
+            if board[i][j] in trie.root.children:
+                dfs(i, j, trie.root, "")
+
+    return list(result)</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 11. Topological Sort Pattern -->
+    <div class="pattern-section" id="topological-sort">
+        <div class="pattern-header">
+            <h2 class="pattern-title">11. 📊 Topological Sort</h2>
+            <p class="pattern-meta">Use Case: Course scheduling, dependency resolution | Time: O(V + E) | Space: O(V)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Topological Sort:</h4>
+            <ul>
+                <li>Course prerequisite scheduling</li>
+                <li>Build dependency resolution</li>
+                <li>Task scheduling with dependencies</li>
+                <li>Detecting cycles in directed graphs</li>
+                <li>Compilation order problems</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Kahn's Algorithm (BFS-based)</div>
+            <div class="code-template">
+<pre>from collections import defaultdict, deque
+
+def topological_sort_kahn(num_courses, prerequisites):
+    # Build graph and in-degree array
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    # Initialize queue with nodes having in-degree 0
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    result = []
+
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+
+        # Reduce in-degree of neighbors
+        for neighbor in graph[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+
+    # Check if topological sort is possible
+    return result if len(result) == num_courses else []</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">DFS-based Topological Sort</div>
+            <div class="code-template">
+<pre>def topological_sort_dfs(graph):
+    visited = set()
+    rec_stack = set()
+    result = []
+
+    def dfs(node):
+        if node in rec_stack:
+            return False  # Cycle detected
+        if node in visited:
+            return True
+
+        visited.add(node)
+        rec_stack.add(node)
+
+        for neighbor in graph.get(node, []):
+            if not dfs(neighbor):
+                return False
+
+        rec_stack.remove(node)
+        result.append(node)  # Add in post-order
+        return True
+
+    for node in graph:
+        if node not in visited:
+            if not dfs(node):
+                return []  # Cycle detected
+
+    return result[::-1]  # Reverse for correct order</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 12. Interval Problems Pattern -->
+    <div class="pattern-section" id="intervals">
+        <div class="pattern-header">
+            <h2 class="pattern-title">12. ⏱️ Interval Problems</h2>
+            <p class="pattern-meta">Use Case: Meeting rooms, overlapping intervals | Time: O(n log n) | Space: O(n)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Interval Techniques:</h4>
+            <ul>
+                <li>Meeting room scheduling</li>
+                <li>Merging overlapping intervals</li>
+                <li>Finding free time slots</li>
+                <li>Event scheduling problems</li>
+                <li>Range queries and updates</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Merge Intervals</div>
+            <div class="code-template">
+<pre>def merge_intervals(intervals):
+    if not intervals:
+        return []
+
+    # Sort by start time
+    intervals.sort(key=lambda x: x[0])
+    merged = [intervals[0]]
+
+    for current in intervals[1:]:
+        last = merged[-1]
+
+        # Overlapping intervals
+        if current[0] <= last[1]:
+            # Merge by updating end time
+            last[1] = max(last[1], current[1])
+        else:
+            # Non-overlapping, add to result
+            merged.append(current)
+
+    return merged
+
+def insert_interval(intervals, new_interval):
+    result = []
+    i = 0
+    n = len(intervals)
+
+    # Add all intervals before new_interval
+    while i < n and intervals[i][1] < new_interval[0]:
+        result.append(intervals[i])
+        i += 1
+
+    # Merge overlapping intervals
+    while i < n and intervals[i][0] <= new_interval[1]:
+        new_interval[0] = min(new_interval[0], intervals[i][0])
+        new_interval[1] = max(new_interval[1], intervals[i][1])
+        i += 1
+
+    result.append(new_interval)
+
+    # Add remaining intervals
+    while i < n:
+        result.append(intervals[i])
+        i += 1
+
+    return result</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Meeting Rooms II</div>
+            <div class="code-template">
+<pre>def min_meeting_rooms(intervals):
+    if not intervals:
+        return 0
+
+    # Separate start and end times
+    starts = sorted([interval[0] for interval in intervals])
+    ends = sorted([interval[1] for interval in intervals])
+
+    rooms = 0
+    end_ptr = 0
+
+    for start in starts:
+        # If meeting starts after another ends, reuse room
+        if start >= ends[end_ptr]:
+            end_ptr += 1
+        else:
+            # Need new room
+            rooms += 1
+
+    return rooms</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 13. Matrix Traversal Pattern -->
+    <div class="pattern-section" id="matrix-traversal">
+        <div class="pattern-header">
+            <h2 class="pattern-title">13. 🗺️ Matrix Traversal</h2>
+            <p class="pattern-meta">Use Case: Island problems, path finding, flood fill | Time: O(m*n) | Space: O(m*n)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Matrix Traversal:</h4>
+            <ul>
+                <li>Number of islands problems</li>
+                <li>Flood fill algorithms</li>
+                <li>Shortest path in grids</li>
+                <li>Word search in 2D grids</li>
+                <li>Region growing problems</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Number of Islands (DFS)</div>
+            <div class="code-template">
+<pre>def num_islands(grid):
+    if not grid or not grid[0]:
+        return 0
+
+    m, n = len(grid), len(grid[0])
+    count = 0
+
+    def dfs(i, j):
+        # Boundary check and water check
+        if (i < 0 or i >= m or j < 0 or j >= n or
+            grid[i][j] != '1'):
+            return
+
+        # Mark as visited
+        grid[i][j] = '0'
+
+        # Explore 4 directions
+        for di, dj in [(0,1), (1,0), (0,-1), (-1,0)]:
+            dfs(i + di, j + dj)
+
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == '1':
+                dfs(i, j)
+                count += 1
+
+    return count</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Rotting Oranges (Multi-source BFS)</div>
+            <div class="code-template">
+<pre>def oranges_rotting(grid):
+    from collections import deque
+
+    m, n = len(grid), len(grid[0])
+    queue = deque()
+    fresh = 0
+
+    # Find all rotten oranges and count fresh ones
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == 2:
+                queue.append((i, j))
+            elif grid[i][j] == 1:
+                fresh += 1
+
+    if fresh == 0:
+        return 0
+
+    time = 0
+    directions = [(0,1), (1,0), (0,-1), (-1,0)]
+
+    while queue:
+        time += 1
+        size = len(queue)
+
+        for _ in range(size):
+            x, y = queue.popleft()
+
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+
+                if (0 <= nx < m and 0 <= ny < n and
+                    grid[nx][ny] == 1):
+                    grid[nx][ny] = 2
+                    fresh -= 1
+                    queue.append((nx, ny))
+
+    return time - 1 if fresh == 0 else -1</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 14. Tree Construction Pattern -->
+    <div class="pattern-section" id="tree-construction">
+        <div class="pattern-header">
+            <h2 class="pattern-title">14. 🌳 Tree Construction</h2>
+            <p class="pattern-meta">Use Case: Build tree from traversals, serialize/deserialize | Time: O(n) | Space: O(n)</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>When to Use Tree Construction:</h4>
+            <ul>
+                <li>Building tree from preorder/inorder</li>
+                <li>Serializing and deserializing trees</li>
+                <li>Tree reconstruction problems</li>
+                <li>Converting between tree formats</li>
+                <li>Parsing expression trees</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Build Tree from Preorder and Inorder</div>
+            <div class="code-template">
+<pre>def build_tree_preorder_inorder(preorder, inorder):
+    if not preorder or not inorder:
+        return None
+
+    # Build hashmap for O(1) inorder lookups
+    inorder_map = {val: i for i, val in enumerate(inorder)}
+    self.preorder_idx = 0
+
+    def build(left, right):
+        if left > right:
+            return None
+
+        # Root is current preorder element
+        root_val = preorder[self.preorder_idx]
+        self.preorder_idx += 1
+        root = TreeNode(root_val)
+
+        # Find root position in inorder
+        root_idx = inorder_map[root_val]
+
+        # Build left subtree first (preorder property)
+        root.left = build(left, root_idx - 1)
+        root.right = build(root_idx + 1, right)
+
+        return root
+
+    return build(0, len(inorder) - 1)</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Serialize and Deserialize</div>
+            <div class="code-template">
+<pre>def serialize(root):
+    def preorder(node):
+        if not node:
+            result.append("null")
+            return
+
+        result.append(str(node.val))
+        preorder(node.left)
+        preorder(node.right)
+
+    result = []
+    preorder(root)
+    return ",".join(result)
+
+def deserialize(data):
+    def build():
+        val = next(values)
+        if val == "null":
+            return None
+
+        node = TreeNode(int(val))
+        node.left = build()
+        node.right = build()
+        return node
+
+    values = iter(data.split(","))
+    return build()</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 15. Special Algorithms Pattern -->
+    <div class="pattern-section" id="special-algorithms">
+        <div class="pattern-header">
+            <h2 class="pattern-title">15. ⚡ Special Algorithms</h2>
+            <p class="pattern-meta">Use Case: Kadane's, Prefix Sum, Monotonic Stack, Cyclic Sort | Various complexities</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>Special Algorithm Applications:</h4>
+            <ul>
+                <li>Maximum subarray problems (Kadane's)</li>
+                <li>Range sum queries (Prefix Sum)</li>
+                <li>Next greater element (Monotonic Stack)</li>
+                <li>Finding missing numbers (Cyclic Sort)</li>
+                <li>Array manipulation optimizations</li>
+            </ul>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Kadane's Algorithm - Maximum Subarray</div>
+            <div class="code-template">
+<pre>def max_subarray_sum(nums):
+    if not nums:
+        return 0
+
+    max_sum = current_sum = nums[0]
+
+    for i in range(1, len(nums)):
+        # Either extend existing subarray or start new one
+        current_sum = max(nums[i], current_sum + nums[i])
+        max_sum = max(max_sum, current_sum)
+
+    return max_sum
+
+def max_subarray_with_indices(nums):
+    max_sum = current_sum = nums[0]
+    start = end = temp_start = 0
+
+    for i in range(1, len(nums)):
+        if current_sum < 0:
+            current_sum = nums[i]
+            temp_start = i
+        else:
+            current_sum += nums[i]
+
+        if current_sum > max_sum:
+            max_sum = current_sum
+            start = temp_start
+            end = i
+
+    return max_sum, start, end</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Prefix Sum</div>
+            <div class="code-template">
+<pre>class PrefixSum:
+    def __init__(self, nums):
+        self.prefix = [0]
+        for num in nums:
+            self.prefix.append(self.prefix[-1] + num)
+
+    def range_sum(self, i, j):
+        # Sum from index i to j (inclusive)
+        return self.prefix[j + 1] - self.prefix[i]
+
+def subarray_sum_equals_k(nums, k):
+    count = 0
+    prefix_sum = 0
+    sum_count = {0: 1}  # prefix_sum -> frequency
+
+    for num in nums:
+        prefix_sum += num
+        if prefix_sum - k in sum_count:
+            count += sum_count[prefix_sum - k]
+        sum_count[prefix_sum] = sum_count.get(prefix_sum, 0) + 1
+
+    return count</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Monotonic Stack</div>
+            <div class="code-template">
+<pre>def next_greater_element(nums):
+    result = [-1] * len(nums)
+    stack = []  # Store indices
+
+    for i in range(len(nums)):
+        while stack and nums[i] > nums[stack[-1]]:
+            index = stack.pop()
+            result[index] = nums[i]
+        stack.append(i)
+
+    return result
+
+def daily_temperatures(temperatures):
+    result = [0] * len(temperatures)
+    stack = []
+
+    for i, temp in enumerate(temperatures):
+        while stack and temp > temperatures[stack[-1]]:
+            prev_index = stack.pop()
+            result[prev_index] = i - prev_index
+        stack.append(i)
+
+    return result
+
+def largest_rectangle_in_histogram(heights):
+    stack = []
+    max_area = 0
+
+    for i, h in enumerate(heights + [0]):  # Add sentinel
+        while stack and h < heights[stack[-1]]:
+            height = heights[stack.pop()]
+            width = i if not stack else i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+
+    return max_area</pre>
+            </div>
+        </div>
+
+        <div class="template-variant">
+            <div class="variant-title">Cyclic Sort</div>
+            <div class="code-template">
+<pre>def cyclic_sort(nums):
+    i = 0
+    while i < len(nums):
+        correct_index = nums[i] - 1
+        if nums[i] != nums[correct_index]:
+            nums[i], nums[correct_index] = nums[correct_index], nums[i]
+        else:
+            i += 1
+    return nums
+
+def find_missing_number(nums):
+    # Array contains n numbers in range [0, n]
+    i = 0
+    n = len(nums)
+
+    while i < n:
+        if nums[i] < n and nums[i] != nums[nums[i]]:
+            nums[nums[i]], nums[i] = nums[i], nums[nums[i]]
+        else:
+            i += 1
+
+    # Find the missing number
+    for i in range(n):
+        if nums[i] != i:
+            return i
+
+    return n
+
+def find_all_duplicates(nums):
+    duplicates = []
+
+    for i in range(len(nums)):
+        # Use array indices to mark presence
+        num = abs(nums[i])
+        if nums[num - 1] < 0:
+            duplicates.append(num)
+        else:
+            nums[num - 1] *= -1
+
+    return duplicates</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="pattern-section">
+        <div class="pattern-header">
+            <h2 class="pattern-title">🎯 Study Strategy</h2>
+            <p class="pattern-meta">Master these patterns progressively for maximum interview success</p>
+        </div>
+
+        <div class="use-cases">
+            <h4>Recommended Study Order:</h4>
+            <ul>
+                <li><strong>Week 1:</strong> Two Pointers, Sliding Window, Binary Search, DFS/BFS</li>
+                <li><strong>Week 2:</strong> Dynamic Programming, Backtracking, Heap Operations</li>
+                <li><strong>Week 3:</strong> Union-Find, Trie, Topological Sort, Intervals</li>
+                <li><strong>Week 4:</strong> Matrix Traversal, Tree Construction, Special Algorithms</li>
+            </ul>
+        </div>
+
+        <p><strong>💡 Pro Tips:</strong></p>
+        <ul>
+            <li>Practice writing templates from memory</li>
+            <li>Understand the underlying intuition, not just the code</li>
+            <li>Solve at least 3-5 problems per pattern</li>
+            <li>Time yourself to build speed and confidence</li>
+            <li>Review patterns regularly using spaced repetition</li>
+        </ul>
+    </div>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        const searchResultsInfo = document.getElementById('search-results-info');
+        let allPatterns = [];
+
+        // Store all pattern data for searching
+        document.addEventListener('DOMContentLoaded', function() {
+            const patternSections = document.querySelectorAll('.pattern-section');
+            patternSections.forEach((section, index) => {
+                const title = section.querySelector('.pattern-title')?.textContent || '';
+                const meta = section.querySelector('.pattern-meta')?.textContent || '';
+                const useCases = section.querySelector('.use-cases')?.textContent || '';
+                const codeContent = Array.from(section.querySelectorAll('.code-template')).map(el => el.textContent).join(' ');
+
+                allPatterns.push({
+                    element: section,
+                    title: title,
+                    meta: meta,
+                    useCases: useCases,
+                    searchText: (title + ' ' + meta + ' ' + useCases + ' ' + codeContent).toLowerCase()
+                });
+            });
+        });
+
+        // Search function
+        function performSearch(query) {
+            const searchTerm = query.toLowerCase().trim();
+
+            if (!searchTerm) {
+                // Show all patterns
+                allPatterns.forEach(pattern => {
+                    pattern.element.classList.remove('hidden');
+                });
+                searchResultsInfo.textContent = '';
+                return;
+            }
+
+            let visibleCount = 0;
+
+            allPatterns.forEach(pattern => {
+                if (pattern.searchText.includes(searchTerm)) {
+                    pattern.element.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    pattern.element.classList.add('hidden');
+                }
+            });
+
+            searchResultsInfo.textContent = `Found ${visibleCount} patterns matching "${query}"`;
+        }
+
+        // Add event listener for real-time search
+        searchInput.addEventListener('input', (e) => {
+            performSearch(e.target.value);
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.pattern-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                performSearch('');
+                searchInput.blur();
+            }
+        });
+
+        // Focus search on Ctrl+F or Cmd+F
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>
