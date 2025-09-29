@@ -375,23 +375,36 @@
         let pomodoroTimers = {};
 
         function startPomodoro(track, minutes) {
+            console.log(`Starting Pomodoro for track: ${track}, minutes: ${minutes}`);
+
+            // Clean up any existing timer for this track first
+            if (pomodoroTimers[track] && pomodoroTimers[track].interval) {
+                clearInterval(pomodoroTimers[track].interval);
+                console.log(`Cleared existing timer for ${track}`);
+            }
+
             const timeInSeconds = minutes * 60;
             const timerDisplay = document.getElementById(`${track}-timer`);
             const pomodoroSection = document.getElementById(`${track}-pomodoro`);
             const startButton = document.querySelector(`#${track}-topic .start-timer-btn`);
             const pauseButton = document.getElementById(`${track}-pause-btn`);
 
-            // Show timer section and hide start button
-            pomodoroSection.style.display = 'block';
-            startButton.style.display = 'none';
+            console.log(`Timer display element: ${timerDisplay ? 'found' : 'NOT FOUND'}`);
+            console.log(`Pomodoro section: ${pomodoroSection ? 'found' : 'NOT FOUND'}`);
 
-            // Initialize timer with expired state
+            // Show timer section and hide start button
+            if (pomodoroSection) pomodoroSection.style.display = 'block';
+            if (startButton) startButton.style.display = 'none';
+
+            // Initialize fresh timer state
             pomodoroTimers[track] = {
                 timeLeft: timeInSeconds,
                 isPaused: false,
                 interval: null,
                 expired: false
             };
+
+            console.log(`Timer initialized for ${track}:`, pomodoroTimers[track]);
 
             // Update button visibility - hide normal complete, show finish early
             const completeBtn = document.getElementById(`${track}-complete-btn`);
@@ -407,25 +420,44 @@
         }
 
         function startCountdown(track) {
+            console.log(`Starting countdown for ${track}`);
             const timer = pomodoroTimers[track];
-            if (!timer) return;
+            if (!timer) {
+                console.error(`No timer found for track: ${track}`);
+                return;
+            }
 
+            console.log(`Timer state:`, timer);
             timer.interval = setInterval(() => {
-                if (timer.isPaused) return;
+                if (timer.isPaused) {
+                    console.log(`Timer ${track} is paused`);
+                    return;
+                }
 
                 const minutes = Math.floor(timer.timeLeft / 60);
                 const seconds = timer.timeLeft % 60;
                 const timerDisplay = document.getElementById(`${track}-timer`);
 
-                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                if (!timerDisplay) {
+                    console.error(`Timer display element not found for ${track}`);
+                    clearInterval(timer.interval);
+                    return;
+                }
+
+                const timeText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timerDisplay.textContent = timeText;
+                console.log(`Timer ${track}: ${timeText}, timeLeft: ${timer.timeLeft}`);
 
                 if (timer.timeLeft <= 0) {
+                    console.log(`Timer ${track} completed`);
                     completePomodoro(track);
                     return;
                 }
 
                 timer.timeLeft--;
             }, 1000);
+
+            console.log(`Interval started for ${track}:`, timer.interval);
         }
 
         function pauseTimer(track) {
@@ -513,9 +545,12 @@
 
         // Function for finishing early with timer
         async function finishEarlyAndMarkComplete(track, topic) {
-            // Stop the timer first
+            // Stop the timer first and clean up state
             if (pomodoroTimers[track]) {
                 clearInterval(pomodoroTimers[track].interval);
+                // Properly reset the timer state to prevent conflicts
+                pomodoroTimers[track].interval = null;
+                pomodoroTimers[track].isPaused = false;
                 // Don't mark as expired since they finished early
             }
 
