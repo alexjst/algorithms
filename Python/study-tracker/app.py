@@ -19,6 +19,7 @@ CURRICULUM_DIR = f"{DATA_DIR}/curriculum"
 PROGRESS_FILE = f"{DATA_DIR}/progress.json"
 REVIEWS_FILE = f"{DATA_DIR}/reviews.json"
 CONFIG_FILE = f"{DATA_DIR}/config.json"
+TIMER_FILE = f"{DATA_DIR}/timer_state.json"
 
 def load_config():
     """Load configuration from config.json"""
@@ -111,6 +112,69 @@ def schedule_reviews(topic, track, completed_date):
         reviews_data['scheduled_reviews'].append(review)
 
     save_json_data(REVIEWS_FILE, reviews_data)
+
+def load_timer_state():
+    """Load timer state from JSON file"""
+    try:
+        with open(TIMER_FILE, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {
+            'active': False,
+            'paused': False,
+            'start_time': None,
+            'pause_time': None,
+            'duration': None,
+            'remaining': None,
+            'track': None,
+            'topic': None,
+            'last_updated': None
+        }
+
+def save_timer_state(timer_state):
+    """Save timer state to JSON file"""
+    timer_state['last_updated'] = datetime.now().isoformat()
+    with open(TIMER_FILE, 'w') as f:
+        json.dump(timer_state, f, indent=2)
+
+def get_current_timer_state():
+    """Get current timer state with real-time calculations"""
+    timer_state = load_timer_state()
+
+    if not timer_state['active']:
+        return timer_state
+
+    now = datetime.now()
+
+    if timer_state['paused'] and timer_state['pause_time']:
+        # Timer is paused - return last known remaining time
+        return timer_state
+    elif timer_state['start_time']:
+        # Timer is running - calculate remaining time
+        start_time = datetime.fromisoformat(timer_state['start_time'])
+        elapsed = (now - start_time).total_seconds()
+
+        if timer_state['pause_time']:
+            # Account for pause duration
+            pause_start = datetime.fromisoformat(timer_state['pause_time'])
+            if timer_state['paused']:
+                # Currently paused
+                elapsed -= (now - pause_start).total_seconds()
+            else:
+                # Was paused but now resumed
+                pause_duration = (pause_start - start_time).total_seconds() if 'resume_time' in timer_state else 0
+                elapsed -= pause_duration
+
+        remaining = max(0, timer_state['duration'] - elapsed)
+        timer_state['remaining'] = remaining
+
+        # Auto-complete if time is up
+        if remaining <= 0:
+            timer_state['active'] = False
+            timer_state['completed'] = True
+            save_timer_state(timer_state)
+
+    return timer_state
 
 @app.route('/')
 def dashboard():
@@ -257,18 +321,21 @@ def calculate_streak(completions):
         return 0
 
     # Group completions by date
-    dates = {}
+    dates = set()
     for completion in completions:
-        date = completion['date']
-        if date not in dates:
-            dates[date] = 0
-        dates[date] += 1
+        dates.add(completion['date'])
 
-    # Count consecutive days
+    # Count consecutive days, allowing for today to be missed
+    # (since you might not have studied today yet)
     today = datetime.now().date()
     streak = 0
     current_date = today
 
+    # If there's no activity today, start from yesterday
+    if today.strftime('%Y-%m-%d') not in dates:
+        current_date = today - timedelta(days=1)
+
+    # Count backwards from the starting date
     while current_date.strftime('%Y-%m-%d') in dates:
         streak += 1
         current_date -= timedelta(days=1)
@@ -665,9 +732,9 @@ def calculate_overall_stats(completions, reviews, calendar_data):
     # Total activity days
     active_days = len([day for day in calendar_data if day['count'] > 0])
 
-    # Average daily activity
+    # Average daily activity (activities per active day, not per calendar day)
     total_activities = sum(day['count'] for day in calendar_data)
-    avg_daily_activity = total_activities / len(calendar_data) if calendar_data else 0
+    avg_daily_activity = total_activities / active_days if active_days > 0 else 0
 
     # Most productive day
     most_productive_day = max(calendar_data, key=lambda x: x['count']) if calendar_data else None
@@ -1032,5 +1099,117 @@ def reset_curriculum_to_default(track):
     except Exception as e:
         return jsonify({'error': f'Failed to reset curriculum: {str(e)}'}), 500
 
+# Timer API Endpoints
+@app.route('/api/timer/state', methods=['GET'])
+def get_timer_state():
+    """Get current timer state"""
+    try:
+        timer_state = get_current_timer_state()
+        return jsonify(timer_state)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/timer/start', methods=['POST'])
+def start_timer():
+    """Start a new timer session"""
+    try:
+        data = request.get_json()
+        track = data.get('track')
+        topic = data.get('topic')
+        duration = data.get('duration', 25 * 60)  # Default 25 minutes in seconds
+
+        # Stop any existing timer
+        timer_state = load_timer_state()
+        timer_state.update({
+            'active': True,
+            'paused': False,
+            'start_time': datetime.now().isoformat(),
+            'pause_time': None,
+            'duration': duration,
+            'remaining': duration,
+            'track': track,
+            'topic': topic,
+            'completed': False
+        })
+
+        save_timer_state(timer_state)
+        return jsonify({'success': True, 'timer_state': timer_state})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/timer/pause', methods=['POST'])
+def pause_timer():
+    """Pause the current timer"""
+    try:
+        timer_state = get_current_timer_state()
+
+        if not timer_state['active']:
+            return jsonify({'error': 'No active timer'}), 400
+
+        if timer_state['paused']:
+            return jsonify({'error': 'Timer already paused'}), 400
+
+        timer_state['paused'] = True
+        timer_state['pause_time'] = datetime.now().isoformat()
+
+        save_timer_state(timer_state)
+        return jsonify({'success': True, 'timer_state': timer_state})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/timer/resume', methods=['POST'])
+def resume_timer():
+    """Resume a paused timer"""
+    try:
+        timer_state = load_timer_state()
+
+        if not timer_state['active'] or not timer_state['paused']:
+            return jsonify({'error': 'No paused timer to resume'}), 400
+
+        # Calculate how long we were paused
+        if timer_state['pause_time']:
+            pause_start = datetime.fromisoformat(timer_state['pause_time'])
+            pause_duration = (datetime.now() - pause_start).total_seconds()
+
+            # Adjust start time to account for pause
+            if timer_state['start_time']:
+                start_time = datetime.fromisoformat(timer_state['start_time'])
+                new_start_time = start_time + timedelta(seconds=pause_duration)
+                timer_state['start_time'] = new_start_time.isoformat()
+
+        timer_state['paused'] = False
+        timer_state['pause_time'] = None
+
+        save_timer_state(timer_state)
+        return jsonify({'success': True, 'timer_state': timer_state})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/timer/stop', methods=['POST'])
+def stop_timer():
+    """Stop the current timer"""
+    try:
+        timer_state = load_timer_state()
+
+        if not timer_state['active']:
+            return jsonify({'error': 'No active timer'}), 400
+
+        timer_state.update({
+            'active': False,
+            'paused': False,
+            'start_time': None,
+            'pause_time': None,
+            'duration': None,
+            'remaining': None,
+            'track': None,
+            'topic': None,
+            'completed': False
+        })
+
+        save_timer_state(timer_state)
+        return jsonify({'success': True, 'timer_state': timer_state})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5555)

@@ -84,7 +84,13 @@
                         <p>{{ day_info.coding.activity }}</p>
                         <p class="time-estimate">⏱️ {{ day_info.coding.time_estimate }} minutes</p>
                         {% if day_info.coding.problems %}
-                        <p><strong>Problems:</strong> {{ day_info.coding.problems | join(', ') }}</p>
+                        <p><strong>Problems:</strong>
+                        {% for problem in day_info.coding.problems %}
+                            <span style="display: inline-block; background: #e9f7ff; padding: 2px 6px; border-radius: 3px; margin: 1px; font-size: 0.9em;">
+                                {{ problem.number }}. {{ problem.title }}
+                            </span>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                        </p>
                         {% endif %}
                     {% else %}
                         <p class="no-topic">No coding topic scheduled</p>

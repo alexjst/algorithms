@@ -258,7 +258,8 @@
     dfs_recursive(root.left)
     dfs_recursive(root.right)
 
-# With result collection
+# Problem: Collect all root-to-leaf paths in binary tree
+# Time: O(n), Space: O(h) where h is height
 def dfs_collect_paths(root, path=[], all_paths=[]):
     if not root:
         return
@@ -295,7 +296,8 @@ def dfs_collect_paths(root, path=[], all_paths=[]):
         if node.left:
             stack.append(node.left)
 
-# Graph DFS with visited set
+# Problem: Traverse graph using DFS, avoid cycles
+# Time: O(V + E), Space: O(V)
 def dfs_graph(graph, start):
     visited = set()
     stack = [start]
@@ -336,6 +338,8 @@ def dfs_graph(graph, start):
             <div class="code-template">
 <pre>from collections import deque
 
+# Problem: Level-order traversal (BFS) of binary tree
+# Time: O(n), Space: O(w) where w is max width
 def bfs_level_order(root):
     if not root:
         return []
@@ -420,6 +424,8 @@ def bfs_level_order(root):
 
     return []
 
+# Problem: Check if string is palindrome
+# Time: O(n), Space: O(1)
 def is_palindrome(s):
     left, right = 0, len(s) - 1
 
@@ -436,7 +442,8 @@ def is_palindrome(s):
         <div class="template-variant">
             <div class="variant-title">Fast and Slow Pointers</div>
             <div class="code-template">
-<pre># Floyd's Cycle Detection
+<pre># Problem: Detect cycle in linked list (Floyd's algorithm)
+# Time: O(n), Space: O(1)
 def has_cycle(head):
     if not head or not head.next:
         return False
@@ -452,6 +459,8 @@ def has_cycle(head):
 
     return False
 
+# Problem: Find middle node of linked list
+# Time: O(n), Space: O(1)
 def find_middle(head):
     slow = fast = head
 
@@ -502,7 +511,9 @@ def remove_nth_from_end(head, n):
         <div class="template-variant">
             <div class="variant-title">Fixed Size Window</div>
             <div class="code-template">
-<pre>def max_sum_subarray(nums, k):
+<pre># Problem: Find maximum sum of k consecutive elements
+# Time: O(n), Space: O(1)
+def max_sum_subarray(nums, k):
     if len(nums) < k:
         return 0
 
@@ -510,7 +521,7 @@ def remove_nth_from_end(head, n):
     window_sum = sum(nums[:k])
     max_sum = window_sum
 
-    # Slide window
+    # Slide window: remove left, add right
     for i in range(k, len(nums)):
         window_sum = window_sum - nums[i - k] + nums[i]
         max_sum = max(max_sum, window_sum)
@@ -606,6 +617,8 @@ def remove_nth_from_end(head, n):
 
     return result
 
+# Problem: Find last occurrence of target in sorted array
+# Time: O(log n), Space: O(1)
 def find_last_occurrence(nums, target):
     left, right = 0, len(nums) - 1
     result = -1
@@ -645,6 +658,8 @@ def search_range(nums, target):
 
     return left
 
+# Problem: Search in rotated sorted array
+# Time: O(log n), Space: O(1)
 def search_rotated_sorted_array(nums, target):
     left, right = 0, len(nums) - 1
 
@@ -707,6 +722,8 @@ def search_rotated_sorted_array(nums, target):
     return dp[n]
 
 # Space optimized
+# Problem: Calculate nth Fibonacci number (optimized)
+# Time: O(n), Space: O(1)
 def fibonacci_optimized(n):
     if n <= 1:
         return n
@@ -719,6 +736,8 @@ def fibonacci_optimized(n):
 
     return prev1
 
+# Problem: Count ways to climb n stairs (1 or 2 steps)
+# Time: O(n), Space: O(n)
 def climb_stairs(n):
     if n <= 2:
         return n
@@ -731,6 +750,8 @@ def climb_stairs(n):
 
     return dp[n]
 
+# Problem: Rob houses without robbing adjacent ones
+# Time: O(n), Space: O(n)
 def house_robber(nums):
     if not nums:
         return 0
@@ -760,6 +781,8 @@ def house_robber(nums):
 
     return dp[m-1][n-1]
 
+# Problem: Find length of longest common subsequence
+# Time: O(m*n), Space: O(m*n)
 def longest_common_subsequence(text1, text2):
     m, n = len(text1), len(text2)
     dp = [[0 for _ in range(n + 1)] for _ in range(m + 1)]
@@ -865,7 +888,9 @@ def min_path_sum(grid):
         <div class="template-variant">
             <div class="variant-title">Subsets and Combinations</div>
             <div class="code-template">
-<pre>def generate_subsets(nums):
+<pre># Problem: Generate all subsets of array
+# Time: O(2^n), Space: O(2^n)
+def generate_subsets(nums):
     def backtrack(start, path):
         result.append(path[:])  # Add current subset
 
@@ -878,6 +903,8 @@ def min_path_sum(grid):
     backtrack(0, [])
     return result
 
+# Problem: Find all combinations that sum to target (reuse allowed)
+# Time: O(N^(T/M)), Space: O(T/M) where T=target, M=min candidate
 def combination_sum(candidates, target):
     def backtrack(start, path, remaining):
         if remaining == 0:
@@ -897,6 +924,8 @@ def combination_sum(candidates, target):
     backtrack(0, [], target)
     return result
 
+# Problem: Generate all letter combinations from phone digits
+# Time: O(3^N * 4^M), Space: O(3^N * 4^M)
 def letter_combinations(digits):
     if not digits:
         return []

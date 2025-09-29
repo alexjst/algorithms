@@ -51,7 +51,7 @@ def main():
     # Import and run the app
     try:
         from app import app
-        print("🌐 Starting server at http://localhost:5000")
+        print("🌐 Starting server at http://localhost:5555")
         print("📖 Open this URL in your browser to begin!")
         print()
         print("💡 Tips:")
@@ -63,7 +63,7 @@ def main():
         print("⏹️  Press Ctrl+C to stop the server")
         print("-" * 50)
 
-        app.run(debug=True, port=5000, host='127.0.0.1')
+        app.run(debug=True, port=5555, host='127.0.0.1')
 
     except KeyboardInterrupt:
         print("\n👋 Study tracker stopped. Keep up the great work!")

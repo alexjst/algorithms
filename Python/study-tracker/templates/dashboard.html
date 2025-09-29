@@ -82,6 +82,8 @@
         .timer-btn.stop:hover { background: #c82333; }
         .start-timer-btn { background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-left: 10px; cursor: pointer; font-size: 14px; }
         .start-timer-btn:hover { background: #138496; }
+        .template-link { background: #6c757d; color: white; text-decoration: none; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-size: 12px; }
+        .template-link:hover { background: #5a6268; color: white; }
     </style>
 </head>
 <body>
@@ -111,7 +113,7 @@
         {% if coding_topic %}
         <div class="topic {% if coding_topic_completed %}completed-section{% endif %}" id="coding-topic">
             <h3>💻 Coding: {{ coding_topic.topic }}
-                <a href="/templates#{{ coding_topic.topic.lower().replace(' ', '-').replace('(', '').replace(')', '') }}" target="_blank" class="start-timer-btn" style="background: #6c757d; font-size: 12px; padding: 4px 8px; margin-left: 10px;" title="View code templates and patterns for {{ coding_topic.topic }}">
+                <a href="/templates#{{ coding_topic.topic.lower().replace(' ', '-').replace('(', '').replace(')', '') }}" target="_blank" class="template-link" title="View code templates and patterns for {{ coding_topic.topic }}">
                     📖 Template
                 </a>
             </h3>
@@ -399,7 +401,7 @@
                         type: type,
                         rating: rating,
                         notes: notes,
-                        completed_on_time: getCompletionTimingStatus(track)
+                        completed_on_time: await getCompletionTimingStatus(track)
                     })
                 });
 
@@ -443,201 +445,324 @@
             }
         }
 
-        // Pomodoro Timer functionality
-        let pomodoroTimers = {};
+        // Server-synced Pomodoro Timer functionality
+        let updateInterval = null;
+        let currentTrack = null;
 
-        function startPomodoro(track, minutes) {
-            console.log(`Starting Pomodoro for track: ${track}, minutes: ${minutes}`);
+        // Initialize timer state sync when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            syncTimerState();
+            // Sync every 2 seconds to keep tabs in sync
+            setInterval(syncTimerState, 2000);
+        });
 
-            // Clean up any existing timer for this track first
-            if (pomodoroTimers[track] && pomodoroTimers[track].interval) {
-                clearInterval(pomodoroTimers[track].interval);
-                console.log(`Cleared existing timer for ${track}`);
+        async function syncTimerState() {
+            try {
+                const response = await fetch('/api/timer/state');
+                if (response.ok) {
+                    const state = await response.json();
+                    updateTimerDisplay(state);
+                }
+            } catch (error) {
+                console.error('Error syncing timer state:', error);
             }
-
-            const timeInSeconds = minutes * 60;
-            const timerDisplay = document.getElementById(`${track}-timer`);
-            const pomodoroSection = document.getElementById(`${track}-pomodoro`);
-            const startButton = document.querySelector(`#${track}-topic .start-timer-btn`);
-            const pauseButton = document.getElementById(`${track}-pause-btn`);
-
-            console.log(`Timer display element: ${timerDisplay ? 'found' : 'NOT FOUND'}`);
-            console.log(`Pomodoro section: ${pomodoroSection ? 'found' : 'NOT FOUND'}`);
-
-            // Show timer section and hide start button
-            if (pomodoroSection) pomodoroSection.style.display = 'block';
-            if (startButton) startButton.style.display = 'none';
-
-            // Initialize fresh timer state
-            pomodoroTimers[track] = {
-                timeLeft: timeInSeconds,
-                isPaused: false,
-                interval: null,
-                expired: false
-            };
-
-            console.log(`Timer initialized for ${track}:`, pomodoroTimers[track]);
-
-            // Update button visibility - hide normal complete, show finish early
-            const completeBtn = document.getElementById(`${track}-complete-btn`);
-            const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
-            if (completeBtn) completeBtn.style.display = 'none';
-            if (finishEarlyBtn) finishEarlyBtn.style.display = 'inline-block';
-
-            // Start countdown
-            startCountdown(track);
-
-            // Scroll to timer
-            pomodoroSection.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function startCountdown(track) {
-            console.log(`Starting countdown for ${track}`);
-            const timer = pomodoroTimers[track];
-            if (!timer) {
-                console.error(`No timer found for track: ${track}`);
+        function updateTimerDisplay(state) {
+            const allTracks = ['coding', 'system_design'];
+
+            if (!state.active) {
+                // No active timer - hide all timer sections and reset button states
+                hideAllTimers();
+                updateStartButtonStates(null);
                 return;
             }
 
-            console.log(`Timer state:`, timer);
-            timer.interval = setInterval(() => {
-                if (timer.isPaused) {
-                    console.log(`Timer ${track} is paused`);
-                    return;
-                }
+            // Show timer for the active track
+            const track = state.track;
+            const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+            const startButton = document.querySelector(`#${track}-topic .start-timer-btn`);
+            const timerDisplay = document.getElementById(`${track}-timer`);
+            const pauseButton = document.getElementById(`${track}-pause-btn`);
+            const completeBtn = document.getElementById(`${track}-complete-btn`);
+            const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
 
-                const minutes = Math.floor(timer.timeLeft / 60);
-                const seconds = timer.timeLeft % 60;
-                const timerDisplay = document.getElementById(`${track}-timer`);
+            if (!pomodoroSection || !timerDisplay) return;
 
-                if (!timerDisplay) {
-                    console.error(`Timer display element not found for ${track}`);
-                    clearInterval(timer.interval);
-                    return;
-                }
+            // Show timer section and hide start button
+            pomodoroSection.style.display = 'block';
+            if (startButton) startButton.style.display = 'none';
 
+            // Update timer display
+            if (state.remaining > 0) {
+                const minutes = Math.floor(state.remaining / 60);
+                const seconds = state.remaining % 60;
                 const timeText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 timerDisplay.textContent = timeText;
-                console.log(`Timer ${track}: ${timeText}, timeLeft: ${timer.timeLeft}`);
+                timerDisplay.style.color = '';
 
-                if (timer.timeLeft <= 0) {
-                    console.log(`Timer ${track} completed`);
-                    completePomodoro(track);
-                    return;
+                // Update button states
+                if (pauseButton) {
+                    if (state.paused) {
+                        pauseButton.innerHTML = '▶️ Resume';
+                        pauseButton.className = 'timer-btn';
+                    } else {
+                        pauseButton.innerHTML = '⏸️ Pause';
+                        pauseButton.className = 'timer-btn pause';
+                    }
                 }
 
-                timer.timeLeft--;
-            }, 1000);
+                // Show finish early button, hide complete button
+                if (completeBtn) completeBtn.style.display = 'none';
+                if (finishEarlyBtn) finishEarlyBtn.style.display = 'inline-block';
+            } else {
+                // Timer expired
+                timerDisplay.textContent = "00:00";
+                timerDisplay.style.color = '#28a745';
 
-            console.log(`Interval started for ${track}:`, timer.interval);
+                // Show complete button, hide finish early button
+                if (completeBtn) completeBtn.style.display = 'inline-block';
+                if (finishEarlyBtn) finishEarlyBtn.style.display = 'none';
+
+                // Show completion notification once
+                if (currentTrack !== track) {
+                    alert(`🎉 Pomodoro complete! Great focus session on ${track.replace('_', ' ')}!`);
+                    currentTrack = track;
+                }
+            }
+
+            // Hide timers for other tracks and update their start button states
+            for (const otherTrack of allTracks) {
+                if (otherTrack !== track) {
+                    const otherPomodoroSection = document.getElementById(`${otherTrack}-pomodoro`);
+                    const otherStartButton = document.querySelector(`#${otherTrack}-topic .start-timer-btn`);
+                    if (otherPomodoroSection) otherPomodoroSection.style.display = 'none';
+                    if (otherStartButton) otherStartButton.style.display = 'inline-block';
+                }
+            }
+
+            // Update start button states to show which has active timer
+            updateStartButtonStates(state);
         }
 
-        function pauseTimer(track) {
-            const timer = pomodoroTimers[track];
-            const pauseButton = document.getElementById(`${track}-pause-btn`);
+        function updateStartButtonStates(activeState) {
+            const allTracks = ['coding', 'system_design'];
 
-            if (!timer) return;
+            for (const track of allTracks) {
+                const startButton = document.querySelector(`#${track}-topic .start-timer-btn:not([title*="Template"])`);
+                if (!startButton) continue;
 
-            timer.isPaused = !timer.isPaused;
+                if (!activeState || !activeState.active) {
+                    // No active timer - reset to normal state
+                    startButton.innerHTML = '🍅 Start Timer';
+                    startButton.style.backgroundColor = '#17a2b8';
+                    startButton.title = `Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.`;
+                } else if (activeState.track === track) {
+                    // This track has the active timer - button should be hidden by timer display
+                    startButton.style.display = 'none';
+                } else {
+                    // Another track has active timer - show warning state
+                    const activeTrackName = activeState.track.replace('_', ' ');
+                    const remainingMins = Math.floor(activeState.remaining / 60);
+                    const remainingSecs = Math.floor(activeState.remaining % 60);
+                    const timeLeft = `${remainingMins}:${remainingSecs.toString().padStart(2, '0')}`;
 
-            if (timer.isPaused) {
-                pauseButton.innerHTML = '▶️ Resume';
-                pauseButton.className = 'timer-btn';
-            } else {
-                pauseButton.innerHTML = '⏸️ Pause';
-                pauseButton.className = 'timer-btn pause';
+                    startButton.innerHTML = `⚠️ Timer Active (${timeLeft})`;
+                    startButton.style.backgroundColor = '#ffc107';
+                    startButton.style.color = '#212529';
+                    startButton.title = `Another timer is active: ${activeTrackName} - "${activeState.topic}" (${timeLeft} remaining). Click to switch timers.`;
+                }
             }
         }
 
-        function stopTimer(track) {
-            const timer = pomodoroTimers[track];
-            if (!timer) return;
+        function hideAllTimers() {
+            const allTracks = ['coding', 'system_design'];
+            for (const track of allTracks) {
+                const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+                const startButton = document.querySelector(`#${track}-topic .start-timer-btn`);
+                const completeBtn = document.getElementById(`${track}-complete-btn`);
+                const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
 
-            clearInterval(timer.interval);
-            delete pomodoroTimers[track];
-
-            // Hide timer section and show start button
-            const pomodoroSection = document.getElementById(`${track}-pomodoro`);
-            const startButton = document.querySelector(`#${track}-topic .start-timer-btn`);
-
-            pomodoroSection.style.display = 'none';
-            startButton.style.display = 'inline-block';
-
-            // Reset button visibility to original state
-            const completeBtn = document.getElementById(`${track}-complete-btn`);
-            const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
-            if (completeBtn) completeBtn.style.display = 'inline-block';
-            if (finishEarlyBtn) finishEarlyBtn.style.display = 'none';
-
-            // Reset pause button
-            const pauseButton = document.getElementById(`${track}-pause-btn`);
-            pauseButton.innerHTML = '⏸️ Pause';
-            pauseButton.className = 'timer-btn pause';
+                if (pomodoroSection) pomodoroSection.style.display = 'none';
+                if (startButton) {
+                    startButton.style.display = 'inline-block';
+                    // Reset button appearance
+                    startButton.innerHTML = '🍅 Start Timer';
+                    startButton.style.backgroundColor = '#17a2b8';
+                    startButton.style.color = 'white';
+                }
+                if (completeBtn) completeBtn.style.display = 'inline-block';
+                if (finishEarlyBtn) finishEarlyBtn.style.display = 'none';
+            }
+            currentTrack = null;
         }
 
-        function completePomodoro(track) {
-            clearInterval(pomodoroTimers[track].interval);
+        async function startPomodoro(track, minutes) {
+            console.log(`Starting Pomodoro for track: ${track}, minutes: ${minutes}`);
 
-            // Mark timer as expired
-            pomodoroTimers[track].expired = true;
+            try {
+                // First check if there's already an active timer
+                const stateResponse = await fetch('/api/timer/state');
+                if (stateResponse.ok) {
+                    const currentState = await stateResponse.json();
 
-            const timerDisplay = document.getElementById(`${track}-timer`);
-            timerDisplay.textContent = "00:00";
-            timerDisplay.style.color = '#28a745';
+                    // If there's an active timer for a different track/topic, ask for confirmation
+                    if (currentState.active && currentState.track !== track) {
+                        const remainingMins = Math.floor(currentState.remaining / 60);
+                        const remainingSecs = Math.floor(currentState.remaining % 60);
+                        const timeLeft = `${remainingMins}:${remainingSecs.toString().padStart(2, '0')}`;
 
-            // Update button visibility - hide finish early, show normal complete
-            const completeBtn = document.getElementById(`${track}-complete-btn`);
-            const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
-            if (completeBtn) completeBtn.style.display = 'inline-block';
-            if (finishEarlyBtn) finishEarlyBtn.style.display = 'none';
+                        const currentTopicName = currentState.topic || 'Unknown Topic';
+                        const newTopicName = getTopicName(track);
 
-            // Show completion notification
-            alert(`🎉 Pomodoro complete! Great focus session on ${track.replace('_', ' ')}!`);
+                        const confirmed = confirm(
+                            `⚠️ You already have an active timer running!\n\n` +
+                            `Current: ${currentState.track.replace('_', ' ')} - "${currentTopicName}"\n` +
+                            `Time remaining: ${timeLeft}\n\n` +
+                            `Do you want to stop it and start a new timer for:\n` +
+                            `"${newTopicName}" (${minutes} minutes)?\n\n` +
+                            `Click OK to replace, Cancel to keep current timer.`
+                        );
 
-            // Auto-hide timer after a moment
-            setTimeout(() => {
-                stopTimer(track);
-            }, 3000);
+                        if (!confirmed) {
+                            // User chose to keep current timer, scroll to it
+                            scrollToActiveTimer(currentState.track);
+                            return;
+                        }
+                    }
+                }
+
+                const response = await fetch('/api/timer/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        track: track,
+                        topic: getTopicName(track),
+                        duration: minutes
+                    })
+                });
+
+                if (response.ok) {
+                    // Timer started successfully, sync will update display
+                    await syncTimerState();
+
+                    // Scroll to timer
+                    const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+                    if (pomodoroSection) {
+                        pomodoroSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                } else {
+                    alert('Error starting timer. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error starting timer:', error);
+                alert('Network error starting timer. Please try again.');
+            }
+        }
+
+        function scrollToActiveTimer(track) {
+            const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+            if (pomodoroSection && pomodoroSection.style.display !== 'none') {
+                pomodoroSection.scrollIntoView({ behavior: 'smooth' });
+                // Add a brief highlight effect
+                pomodoroSection.style.backgroundColor = '#fff3cd';
+                setTimeout(() => {
+                    pomodoroSection.style.backgroundColor = '';
+                }, 2000);
+            }
+        }
+
+        async function pauseTimer(track) {
+            try {
+                const response = await fetch('/api/timer/pause', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    // Timer paused successfully, sync will update display
+                    await syncTimerState();
+                } else {
+                    alert('Error pausing timer. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error pausing timer:', error);
+                alert('Network error pausing timer. Please try again.');
+            }
+        }
+
+        async function stopTimer(track) {
+            try {
+                const response = await fetch('/api/timer/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    // Timer stopped successfully, sync will update display
+                    await syncTimerState();
+                } else {
+                    alert('Error stopping timer. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error stopping timer:', error);
+                alert('Network error stopping timer. Please try again.');
+            }
+        }
+
+        function getTopicName(track) {
+            // Extract topic name from the page
+            const topicElement = document.querySelector(`#${track}-topic h3`);
+            if (topicElement) {
+                const text = topicElement.textContent;
+                // Extract topic name after the prefix (e.g., "💻 Coding: Topic Name")
+                const colonIndex = text.indexOf(':');
+                if (colonIndex !== -1) {
+                    return text.substring(colonIndex + 1).trim();
+                }
+            }
+            return 'Unknown Topic';
         }
 
         // Helper function to determine completion timing status
-        function getCompletionTimingStatus(track) {
-            const timer = pomodoroTimers[track];
-            if (!timer) {
-                // No timer was started - return null
-                return null;
+        async function getCompletionTimingStatus(track) {
+            try {
+                const response = await fetch('/api/timer/state');
+                if (response.ok) {
+                    const state = await response.json();
+                    if (!state.active || state.track !== track) {
+                        return null; // No timer for this track
+                    }
+                    if (state.remaining <= 0) {
+                        return false; // Timer expired - completed over time
+                    }
+                    return true; // Timer still running - completed early
+                }
+            } catch (error) {
+                console.error('Error checking timer status:', error);
             }
-            if (timer.expired) {
-                // Timer ran out - completed over time
-                return false;
-            }
-            // Timer was running but not expired - completed on time (early)
-            return true;
+            return null;
         }
 
         // Function for finishing early with timer
         async function finishEarlyAndMarkComplete(track, topic) {
             console.log(`finishEarlyAndMarkComplete called with track: ${track}, topic: ${topic}`);
 
-            // Stop the timer first and clean up state
-            if (pomodoroTimers[track]) {
-                console.log(`Stopping timer for ${track}`);
-                clearInterval(pomodoroTimers[track].interval);
-                // Properly reset the timer state to prevent conflicts
-                pomodoroTimers[track].interval = null;
-                pomodoroTimers[track].isPaused = false;
-                // Don't mark as expired since they finished early
-            } else {
-                console.log(`No timer found for ${track}`);
-            }
-
-            console.log(`Calling markComplete for ${track}`);
-            // Call the regular markComplete function which will handle timing status
             try {
+                // Stop the timer first
+                await stopTimer(track);
+
+                // Call the regular markComplete function which will handle timing status
                 await markComplete(topic, track, 'topic');
                 console.log(`markComplete completed successfully for ${track}`);
             } catch (error) {
-                console.error(`Error in markComplete for ${track}:`, error);
+                console.error(`Error in finishEarlyAndMarkComplete for ${track}:`, error);
             }
         }
     </script>

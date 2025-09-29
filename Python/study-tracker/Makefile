@@ -39,7 +39,7 @@ install: $(VENV_DIR)
 # Run the application
 run: $(VENV_DIR)
 	@echo "🚀 Starting Study Tracker..."
-	@echo "📖 Open http://localhost:5000 in your browser"
+	@echo "📖 Open http://localhost:5555 in your browser"
 	@echo "⏹️  Press Ctrl+C to stop"
 	@echo ""
 	$(PYTHON) app.py
@@ -61,7 +61,7 @@ clean:
 # Development mode with auto-reload
 dev: $(VENV_DIR)
 	@echo "🔧 Starting in development mode..."
-	@echo "📖 Open http://localhost:5000 in your browser"
+	@echo "📖 Open http://localhost:5555 in your browser"
 	@echo "🔄 Auto-reload enabled"
 	FLASK_ENV=development $(PYTHON) app.py
 
