@@ -53,7 +53,12 @@
         .time-estimate { color: #666; font-size: 0.9em; }
         .detailed-content { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
         .detailed-content pre { white-space: pre-wrap; margin: 0; font-family: inherit; }
-        .problems-section, .resources-section, .concepts-section { margin: 15px 0; }
+        .problems-section, .resources-section, .concepts-section, .practice-section { margin: 15px 0; }
+        .practice-section { background: #fff9e6; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .question-category { margin: 15px 0; }
+        .question-category h5 { color: #856404; margin-bottom: 10px; }
+        .question-category ul { padding-left: 20px; }
+        .question-category li { margin: 8px 0; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
         .problem-item, .resource-item { margin: 10px 0; padding: 10px; border: 1px solid #e9ecef; border-radius: 5px; background: #f8f9fa; }
         .problem-link, .resource-link { color: #007bff; text-decoration: none; font-size: 16px; }
         .problem-link:hover, .resource-link:hover { text-decoration: underline; }
@@ -180,7 +185,7 @@
         {% endif %}
 
         {% if system_design_topic %}
-        <div class="topic {% if system_design_topic_completed %}completed-section{% endif %}" id="system-design-topic">
+        <div class="topic {% if system_design_topic_completed %}completed-section{% endif %}" id="system_design-topic">
             <h3>🏗️ System Design: {{ system_design_topic.topic }}</h3>
             <p><strong>Activity:</strong> {{ system_design_topic.activity }}</p>
 
@@ -205,6 +210,46 @@
             <div class="detailed-content">
                 <h4>📖 Detailed Guide:</h4>
                 <pre>{{ system_design_topic.detailed_content }}</pre>
+            </div>
+            {% endif %}
+
+            {% if system_design_topic.practice_questions %}
+            <div class="practice-section">
+                <h4>🎯 Practice Questions:</h4>
+                <p><em>Test your understanding by answering these questions after studying the materials:</em></p>
+
+                {% if system_design_topic.practice_questions.estimation %}
+                <div class="question-category">
+                    <h5>📊 Estimation Questions:</h5>
+                    <ul>
+                        {% for question in system_design_topic.practice_questions.estimation %}
+                        <li>{{ question }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if system_design_topic.practice_questions.concepts %}
+                <div class="question-category">
+                    <h5>💡 Concept Questions:</h5>
+                    <ul>
+                        {% for question in system_design_topic.practice_questions.concepts %}
+                        <li>{{ question }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if system_design_topic.practice_questions.tradeoffs %}
+                <div class="question-category">
+                    <h5>⚖️ Trade-off Questions:</h5>
+                    <ul>
+                        {% for question in system_design_topic.practice_questions.tradeoffs %}
+                        <li>{{ question }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
             </div>
             {% endif %}
 
@@ -242,7 +287,7 @@
             {% else %}
             <div class="rating">
                 <label>Rating (1-5):</label>
-                <select id="system-design-rating">
+                <select id="system_design-rating">
                     <option value="1">1 - Very Hard</option>
                     <option value="2">2 - Hard</option>
                     <option value="3" selected>3 - Medium</option>
@@ -250,11 +295,11 @@
                     <option value="5">5 - Very Easy</option>
                 </select>
             </div>
-            <textarea id="system-design-notes" class="notes" placeholder="Notes and reflections..."></textarea>
+            <textarea id="system_design-notes" class="notes" placeholder="Notes and reflections..."></textarea>
             <button class="complete-btn" id="system_design-complete-btn" onclick="markComplete('{{ system_design_topic.topic }}', 'system_design', 'topic')">
                 ✅ Mark Complete
             </button>
-            <button class="complete-btn" id="system_design-finish-early-btn" style="display: none; background: #28a745;" onclick="finishEarlyAndMarkComplete('system_design', '{{ system_design_topic.topic }}')" title="Complete this topic before the timer expires. Shows you finished within the estimated time - great for interview skills!">
+            <button class="complete-btn" id="system_design-finish-early-btn" style="display: none; background: #28a745;" onclick="console.log('Button clicked!'); finishEarlyAndMarkComplete('system_design', '{{ system_design_topic.topic }}')" title="Complete this topic before the timer expires. Shows you finished within the estimated time - great for interview skills!">
                 ⏱️ Finish Early & Mark Complete
             </button>
             {% endif %}
@@ -291,6 +336,7 @@
 
     <script>
         async function markComplete(topic, track, type, reviewIndex = null) {
+            console.log(`markComplete called with topic: ${topic}, track: ${track}, type: ${type}`);
             let rating, notes;
 
             let elementId;
@@ -298,8 +344,19 @@
                 elementId = `${track}-topic`;
                 const ratingSelect = document.getElementById(`${track}-rating`);
                 const notesTextarea = document.getElementById(`${track}-notes`);
+
+                console.log(`Looking for elements: ${track}-rating, ${track}-notes`);
+                console.log(`Rating element found: ${ratingSelect ? 'YES' : 'NO'}`);
+                console.log(`Notes element found: ${notesTextarea ? 'YES' : 'NO'}`);
+
+                if (!ratingSelect || !notesTextarea) {
+                    console.error(`Missing form elements for ${track}`);
+                    return;
+                }
+
                 rating = parseInt(ratingSelect.value);
                 notes = notesTextarea.value;
+                console.log(`Rating: ${rating}, Notes: ${notes}`);
             } else if (type === 'review') {
                 elementId = `review-${reviewIndex}`;
                 const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
@@ -310,8 +367,23 @@
 
             // Disable the section immediately to prevent double-submission
             const element = document.getElementById(elementId);
+            console.log(`Looking for element: ${elementId}`);
+            console.log(`Element found: ${element ? 'YES' : 'NO'}`);
+
+            if (!element) {
+                console.error(`Could not find element with ID: ${elementId}`);
+                return;
+            }
+
             element.style.pointerEvents = 'none';
             const button = element.querySelector('.complete-btn');
+            console.log(`Button found: ${button ? 'YES' : 'NO'}`);
+
+            if (!button) {
+                console.error(`Could not find .complete-btn within element ${elementId}`);
+                return;
+            }
+
             button.textContent = '⏳ Saving...';
             button.style.background = '#6c757d';
 
@@ -545,17 +617,28 @@
 
         // Function for finishing early with timer
         async function finishEarlyAndMarkComplete(track, topic) {
+            console.log(`finishEarlyAndMarkComplete called with track: ${track}, topic: ${topic}`);
+
             // Stop the timer first and clean up state
             if (pomodoroTimers[track]) {
+                console.log(`Stopping timer for ${track}`);
                 clearInterval(pomodoroTimers[track].interval);
                 // Properly reset the timer state to prevent conflicts
                 pomodoroTimers[track].interval = null;
                 pomodoroTimers[track].isPaused = false;
                 // Don't mark as expired since they finished early
+            } else {
+                console.log(`No timer found for ${track}`);
             }
 
+            console.log(`Calling markComplete for ${track}`);
             // Call the regular markComplete function which will handle timing status
-            await markComplete(topic, track, 'topic');
+            try {
+                await markComplete(topic, track, 'topic');
+                console.log(`markComplete completed successfully for ${track}`);
+            } catch (error) {
+                console.error(`Error in markComplete for ${track}:`, error);
+            }
         }
     </script>
 </body>

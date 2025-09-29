@@ -24,6 +24,19 @@ weeks:
         - title: "High Scalability Blog"
           url: "https://highscalability.com/"
           description: "Real-world scalability case studies"
+      practice_questions:
+        estimation:
+          - "Calculate QPS for 10M DAU with 50 requests per user per day"
+          - "How much storage needed for 1M users posting 5 photos daily (2MB each)?"
+          - "Bandwidth required for 100K concurrent video streams at 1080p (5Mbps each)?"
+        concepts:
+          - "When would you choose vertical scaling vs horizontal scaling?"
+          - "What are 3 common bottlenecks that prevent system scaling?"
+          - "How do you determine if your system needs to scale?"
+        tradeoffs:
+          - "List 3 pros and 3 cons of horizontal scaling"
+          - "Why might vertical scaling be preferred for databases?"
+          - "What metrics would you monitor to detect scaling needs?"
       time_estimate: 45
 
     - day: 2
@@ -52,6 +65,18 @@ weeks:
         - title: "NGINX Load Balancing"
           url: "https://nginx.org/en/docs/http/load_balancing.html"
           description: "Software load balancing implementation"
+      practice_questions:
+        estimation:
+          - "How many load balancers needed for 50K RPS with 10K RPS per LB capacity?"
+          - "Calculate latency impact of adding a load balancer (assume 2ms overhead)"
+        concepts:
+          - "When would you use L4 vs L7 load balancing?"
+          - "Which algorithm would you choose for servers with different capacities?"
+          - "How do health checks prevent routing to failed servers?"
+        tradeoffs:
+          - "Compare Round Robin vs Least Connections algorithms"
+          - "Pros/cons of hardware vs software load balancers"
+          - "When would you need session affinity and what are the drawbacks?"
       time_estimate: 45
 
     - day: 3
