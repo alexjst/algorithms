@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Study Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .navigation {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-link {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-link:hover {
+            background-color: #f1f3f4;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .analytics-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .analytics-section.full-width {
+            grid-column: 1 / -1;
+        }
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .calendar-heatmap {
+            margin: 20px 0;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(53, 1fr);
+            gap: 2px;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .calendar-day {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            border: 1px solid #e1e4e8;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .calendar-day:hover {
+            border-color: #000;
+        }
+        .calendar-day.level-0 { background-color: #ebedf0; }
+        .calendar-day.level-1 { background-color: #c6e48b; }
+        .calendar-day.level-2 { background-color: #7bc96f; }
+        .calendar-day.level-3 { background-color: #239a3b; }
+        .calendar-day.level-4 { background-color: #196127; }
+        .calendar-legend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        .legend-day {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        .chart-container.small {
+            height: 300px;
+        }
+        .performance-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .performance-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+        .performance-item.weak {
+            border-left-color: #dc3545;
+        }
+        .performance-item.medium {
+            border-left-color: #ffc107;
+        }
+        .performance-topic {
+            flex: 1;
+            font-weight: 500;
+        }
+        .performance-rating {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .performance-rating.weak { color: #dc3545; }
+        .performance-rating.medium { color: #856404; }
+        .performance-rating.strong { color: #155724; }
+        .insights-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 20px 0;
+        }
+        .insight-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+        .recent-timer-trend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .trend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #ddd;
+        }
+        .trend-date {
+            font-size: 12px;
+            color: #666;
+            min-width: 80px;
+        }
+        .trend-track {
+            font-weight: 600;
+            min-width: 120px;
+        }
+        .trend-topic {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            padding: 0 10px;
+        }
+        .trend-status {
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+        .trend-status.on-time {
+            background: #d4edda;
+            color: #155724;
+        }
+        .trend-status.over-time {
+            background: #fff3cd;
+            color: #856404;
+        }
+        @media (max-width: 768px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-overview {
+                grid-template-columns: 1fr 1fr;
+            }
+            .calendar-grid {
+                grid-template-columns: repeat(26, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Learning Analytics</h1>
+        <p>Visualize your progress, identify patterns, and optimize your study strategy</p>
+    </div>
+
+    <div class="navigation">
+        <a href="/" class="nav-link">📅 Dashboard</a>
+        <a href="/history" class="nav-link">📊 History</a>
+        <a href="/preview" class="nav-link">🔮 Preview</a>
+        <a href="/practice" class="nav-link">🎯 Practice</a>
+        <a href="/analytics" class="nav-link" style="background-color: #f1f3f4;">📈 Analytics</a>
+        <a href="/config" class="nav-link">⚙️ Config</a>
+        <a href="/help" class="nav-link">❓ Help</a>
+    </div>
+
+    <!-- Overall Statistics -->
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-number">{{ overall_stats.current_streak }}</div>
+            <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ overall_stats.total_topics }}</div>
+            <div class="stat-label">Topics Completed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ overall_stats.total_reviews }}</div>
+            <div class="stat-label">Reviews Done</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ overall_stats.active_days }}</div>
+            <div class="stat-label">Active Days</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ overall_stats.avg_daily_activity }}</div>
+            <div class="stat-label">Avg Daily Activity</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ review_analytics.success_rate }}%</div>
+            <div class="stat-label">Review Success Rate</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ timer_analytics.on_time_rate }}%</div>
+            <div class="stat-label">On-Time Completion</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ timer_analytics.total_timed_sessions }}</div>
+            <div class="stat-label">Timed Sessions</div>
+        </div>
+    </div>
+
+    <div class="analytics-grid">
+        <!-- Calendar Heatmap -->
+        <div class="analytics-section full-width">
+            <h3>📅 Study Consistency (GitHub-style)</h3>
+            <div class="calendar-heatmap">
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Calendar days will be generated by JavaScript -->
+                </div>
+                <div class="calendar-legend">
+                    <span>Less</span>
+                    <div class="legend-day level-0"></div>
+                    <div class="legend-day level-1"></div>
+                    <div class="legend-day level-2"></div>
+                    <div class="legend-day level-3"></div>
+                    <div class="legend-day level-4"></div>
+                    <span>More</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance by Topic -->
+        <div class="analytics-section">
+            <h3>🎯 Performance by Topic</h3>
+            {% if topic_performance %}
+            <div class="performance-list">
+                {% for topic in topic_performance %}
+                <div class="performance-item {% if topic.average_rating <= 2.5 %}weak{% elif topic.average_rating <= 3.5 %}medium{% endif %}">
+                    <div class="performance-topic">{{ topic.topic }}</div>
+                    <div class="performance-rating {% if topic.average_rating <= 2.5 %}weak{% elif topic.average_rating <= 3.5 %}medium{% else %}strong{% endif %}">
+                        {{ topic.average_rating }}/5 ({{ topic.total_attempts }}x)
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>Complete some topics to see performance analysis!</p>
+            {% endif %}
+        </div>
+
+        <!-- Review Success Rate -->
+        <div class="analytics-section">
+            <h3>🔄 Review Success Analysis</h3>
+            <div class="chart-container small">
+                <canvas id="reviewChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Learning Trends -->
+        <div class="analytics-section">
+            <h3>📈 Weekly Learning Trend</h3>
+            <div class="chart-container small">
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Track Distribution -->
+        <div class="analytics-section">
+            <h3>📚 Study Focus Distribution</h3>
+            <div class="chart-container small">
+                <canvas id="distributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Timer Performance Analytics -->
+        <div class="analytics-section">
+            <h3>⏱️ Timer Performance</h3>
+            <div class="chart-container small">
+                <canvas id="timerChart"></canvas>
+            </div>
+            {% if timer_analytics.total_timed_sessions > 0 %}
+            <div class="chart-details">
+                <p><strong>Overall:</strong> {{ timer_analytics.on_time_count }} on-time out of {{ timer_analytics.total_timed_sessions }} sessions</p>
+                <p><strong>Coding:</strong> {{ timer_analytics.by_track.coding.rate }}% ({{ timer_analytics.by_track.coding.total }} sessions)</p>
+                <p><strong>System Design:</strong> {{ timer_analytics.by_track.system_design.rate }}% ({{ timer_analytics.by_track.system_design.total }} sessions)</p>
+            </div>
+            {% else %}
+            <div class="chart-details">
+                <p><em>No timed sessions yet. Start using the Pomodoro timer to track your performance!</em></p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Timer Trend -->
+        <div class="analytics-section">
+            <h3>📊 Recent Timer Performance</h3>
+            {% if timer_analytics.recent_trend %}
+            <div class="recent-timer-trend">
+                {% for session in timer_analytics.recent_trend %}
+                <div class="trend-item">
+                    <span class="trend-date">{{ session.date }}</span>
+                    <span class="trend-track">{{ session.track | title }}</span>
+                    <span class="trend-topic">{{ session.topic }}</span>
+                    <span class="trend-status {{ 'on-time' if session.on_time else 'over-time' }}">
+                        {{ '⏱️ On Time' if session.on_time else '⏰ Over Time' }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p><em>No timed sessions yet. Use the Pomodoro timer to see your performance trends!</em></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Insights Section -->
+    <div class="insights-section">
+        <h3>💡 Personalized Insights</h3>
+        <div id="insights-container">
+            <!-- Insights will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Calendar heatmap data from server
+        const calendarData = {{ calendar_data | tojsonfilter }};
+        const topicPerformance = {{ topic_performance | tojsonfilter }};
+        const reviewAnalytics = {{ review_analytics | tojsonfilter }};
+        const learningTrends = {{ learning_trends | tojsonfilter }};
+        const overallStats = {{ overall_stats | tojsonfilter }};
+        const timerAnalytics = {{ timer_analytics | tojsonfilter }};
+
+        // Generate calendar heatmap
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+
+            calendarData.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = `calendar-day level-${getActivityLevel(day.count)}`;
+                dayElement.title = `${day.date}: ${day.count} activities (${day.completions} topics, ${day.reviews} reviews)`;
+
+                calendarGrid.appendChild(dayElement);
+            });
+        }
+
+        function getActivityLevel(count) {
+            if (count === 0) return 0;
+            if (count === 1) return 1;
+            if (count === 2) return 2;
+            if (count === 3) return 3;
+            return 4;
+        }
+
+        // Review Success Chart
+        function createReviewChart() {
+            const ctx = document.getElementById('reviewChart').getContext('2d');
+
+            const intervalLabels = Object.keys(reviewAnalytics.by_interval || {});
+            const successRates = intervalLabels.map(interval =>
+                reviewAnalytics.by_interval[interval].success_rate
+            );
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: intervalLabels,
+                    datasets: [{
+                        label: 'Success Rate (%)',
+                        data: successRates,
+                        backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Learning Trends Chart
+        function createTrendsChart() {
+            const ctx = document.getElementById('trendsChart').getContext('2d');
+
+            const labels = learningTrends.weekly_progress.map(week => week.period);
+            const data = learningTrends.weekly_progress.map(week => week.count);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Topics Completed',
+                        data: data,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Track Distribution Chart
+        function createDistributionChart() {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+
+            const labels = Object.keys(overallStats.track_distribution || {});
+            const data = Object.values(overallStats.track_distribution || {});
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 205, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Timer Performance Chart
+        function createTimerChart() {
+            const ctx = document.getElementById('timerChart').getContext('2d');
+
+            if (timerAnalytics.total_timed_sessions === 0) {
+                // Show placeholder text for no data
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.fillText('No timed sessions yet', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['On Time', 'Over Time'],
+                    datasets: [{
+                        data: [timerAnalytics.on_time_count, timerAnalytics.over_time_count],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',  // Green for on-time
+                            'rgba(255, 193, 7, 0.8)'   // Yellow for over-time
+                        ],
+                        borderColor: [
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(255, 193, 7, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: `${timerAnalytics.on_time_rate}% On-Time Rate`
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generate personalized insights
+        function generateInsights() {
+            const container = document.getElementById('insights-container');
+            const insights = [];
+
+            // Streak insights
+            if (overallStats.current_streak >= 7) {
+                insights.push(`🔥 Amazing! You're on a ${overallStats.current_streak}-day streak. Consistency is key to mastering interview skills!`);
+            } else if (overallStats.current_streak >= 3) {
+                insights.push(`✨ Good momentum with your ${overallStats.current_streak}-day streak! Keep it up to build a strong habit.`);
+            } else {
+                insights.push(`💪 Focus on building consistency. Try to study a little each day to build momentum.`);
+            }
+
+            // Performance insights
+            if (topicPerformance.length > 0) {
+                const weakTopics = topicPerformance.filter(t => t.average_rating <= 2.5);
+                if (weakTopics.length > 0) {
+                    insights.push(`🎯 Focus area: You have ${weakTopics.length} topics with ratings ≤2.5. Use the "Practice Weakest Topics" feature!`);
+                }
+
+                const strongTopics = topicPerformance.filter(t => t.average_rating >= 4.5);
+                if (strongTopics.length > 0) {
+                    insights.push(`🌟 Strengths: You're excelling at ${strongTopics.length} topics with ratings ≥4.5. Great work!`);
+                }
+            }
+
+            // Review insights
+            if (reviewAnalytics.success_rate >= 80) {
+                insights.push(`🧠 Excellent memory retention! ${reviewAnalytics.success_rate}% review success rate shows effective learning.`);
+            } else if (reviewAnalytics.success_rate >= 60) {
+                insights.push(`📚 Good retention with ${reviewAnalytics.success_rate}% review success. Consider taking more detailed notes.`);
+            } else if (reviewAnalytics.total_reviews > 0) {
+                insights.push(`⚠️ Review success rate is ${reviewAnalytics.success_rate}%. Try spacing out your initial learning more.`);
+            }
+
+            // Activity insights
+            if (overallStats.avg_daily_activity >= 2) {
+                insights.push(`⚡ High intensity! You're averaging ${overallStats.avg_daily_activity} activities per day. Excellent dedication!`);
+            }
+
+            // Timer performance insights
+            if (timerAnalytics.total_timed_sessions > 0) {
+                if (timerAnalytics.on_time_rate >= 80) {
+                    insights.push(`⏱️ Excellent time management! You complete ${timerAnalytics.on_time_rate}% of timed sessions on schedule. You're interview-ready!`);
+                } else if (timerAnalytics.on_time_rate >= 60) {
+                    insights.push(`⏰ Good progress! You complete ${timerAnalytics.on_time_rate}% of timed sessions on time. Practice more to boost your speed!`);
+                } else if (timerAnalytics.on_time_rate >= 40) {
+                    insights.push(`📈 Room for improvement! You complete ${timerAnalytics.on_time_rate}% of timed sessions on time. Focus on efficiency and time pressure practice.`);
+                } else {
+                    insights.push(`🎯 Time management challenge! Consider breaking problems into smaller steps and practicing under time pressure more frequently.`);
+                }
+
+                // Track-specific insights
+                if (timerAnalytics.by_track.coding.total > 0 && timerAnalytics.by_track.system_design.total > 0) {
+                    const codingRate = timerAnalytics.by_track.coding.rate;
+                    const designRate = timerAnalytics.by_track.system_design.rate;
+                    if (Math.abs(codingRate - designRate) > 20) {
+                        if (codingRate > designRate) {
+                            insights.push(`💻 Your coding speed (${codingRate}%) is much better than system design (${designRate}%). Focus on system design practice!`);
+                        } else {
+                            insights.push(`🏗️ Your system design speed (${designRate}%) is much better than coding (${codingRate}%). Focus on coding practice!`);
+                        }
+                    }
+                }
+            } else {
+                insights.push(`⏱️ Try the Pomodoro timer feature! It helps simulate interview time pressure and track your efficiency.`);
+            }
+
+            // Display insights
+            insights.forEach(insight => {
+                const insightDiv = document.createElement('div');
+                insightDiv.className = 'insight-item';
+                insightDiv.textContent = insight;
+                container.appendChild(insightDiv);
+            });
+
+            if (insights.length === 0) {
+                container.innerHTML = '<div class="insight-item">🚀 Complete more topics to unlock personalized insights!</div>';
+            }
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            generateCalendar();
+            if (reviewAnalytics.total_reviews > 0) {
+                createReviewChart();
+            }
+            if (learningTrends.weekly_progress.length > 0) {
+                createTrendsChart();
+            }
+            if (Object.keys(overallStats.track_distribution || {}).length > 0) {
+                createDistributionChart();
+            }
+            createTimerChart();
+            generateInsights();
+        });
+    </script>
+</body>
+</html>

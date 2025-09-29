@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tracker Configuration</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .config-section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        input[type="date"], input[type="checkbox"] {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input[type="date"] {
+            width: 200px;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 8px;
+        }
+        .btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background: #218838;
+        }
+        .navigation {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-link {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-link:hover {
+            background-color: #f1f3f4;
+        }
+        .current-status {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        .track-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .track-config {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚙️ Study Tracker Configuration</h1>
+        <p>Customize your study plan settings and start dates</p>
+    </div>
+
+    <div class="navigation">
+        <a href="/" class="nav-link">📅 Dashboard</a>
+        <a href="/history" class="nav-link">📊 History</a>
+        <a href="/preview" class="nav-link">🔮 Preview</a>
+        <a href="/practice" class="nav-link">🎯 Practice</a>
+        <a href="/analytics" class="nav-link">📈 Analytics</a>
+        <a href="/config" class="nav-link" style="background-color: #f1f3f4;">⚙️ Config</a>
+        <a href="/help" class="nav-link">❓ Help</a>
+    </div>
+
+    <div class="config-section">
+        <h2>📚 Current Study Plan Status</h2>
+        <div class="current-status">
+            <p><strong>Coding Track:</strong>
+                {% if config.study_plan.coding.active %}
+                    ✅ Active, started on {{ config.study_plan.coding.start_date }}
+                {% else %}
+                    ⏸️ Paused
+                {% endif %}
+            </p>
+            <p><strong>System Design Track:</strong>
+                {% if config.study_plan.system_design.active %}
+                    ✅ Active, started on {{ config.study_plan.system_design.start_date }}
+                {% else %}
+                    ⏸️ Paused
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="config-section">
+        <h2>🎯 Update Study Plan Settings</h2>
+        <form action="/update_config" method="POST">
+            <div class="track-config">
+                <div>
+                    <h3>💻 Coding Track</h3>
+                    <div class="form-group">
+                        <label for="coding_start_date">Start Date:</label>
+                        <input type="date" id="coding_start_date" name="coding_start_date"
+                               value="{{ config.study_plan.coding.start_date }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="coding_active"
+                                   {% if config.study_plan.coding.active %}checked{% endif %}>
+                            Track is active
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3>🏗️ System Design Track</h3>
+                    <div class="form-group">
+                        <label for="system_design_start_date">Start Date:</label>
+                        <input type="date" id="system_design_start_date" name="system_design_start_date"
+                               value="{{ config.study_plan.system_design.start_date }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="system_design_active"
+                                   {% if config.study_plan.system_design.active %}checked{% endif %}>
+                            Track is active
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">💾 Save Configuration</button>
+        </form>
+    </div>
+
+    <div class="config-section">
+        <h2>💡 Configuration Tips</h2>
+        <ul>
+            <li><strong>Start Date:</strong> Set when you want to begin each track. You can start them on different dates.</li>
+            <li><strong>Active Status:</strong> Uncheck to pause a track temporarily without losing progress.</li>
+            <li><strong>Flexibility:</strong> You can restart or reschedule tracks anytime by changing the start date.</li>
+            <li><strong>Independent Tracks:</strong> Coding and system design tracks run independently.</li>
+        </ul>
+    </div>
+</body>
+</html>

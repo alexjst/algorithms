@@ -1077,6 +1077,192 @@ After each practice session, evaluate:
 \textbf{Remember}: System design interviews are about demonstrating your thought process, not finding the "perfect" solution. Show how you approach complex problems, make trade-offs, and design systems that can evolve with changing requirements.
 \end{tradeoffbox}
 
+\newpage
+\section{Scientific Spaced Repetition Schedule for System Design}
+
+\textbf{Optimal Learning and Review Cadence for Maximum Retention}
+
+This schedule follows cognitive science principles with review intervals at 1 day, 3 days, 7 days, and 14 days to maximize long-term retention of system design concepts.
+
+\subsection{Week 1: Foundation Concepts}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|p{3cm}|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Day} & \textbf{New Learning} & \textbf{Learning Activity} & \textbf{Review (Spaced Intervals)} & \textbf{Done} \\
+\hline
+Day 1 & Scalability & Read fundamentals, practice estimation & -- & $\square$ \\
+\hline
+Day 2 & Load Balancing & Learn types, draw diagrams & Scalability (1-day) & $\square$ \\
+\hline
+Day 3 & Caching & Strategies, cache levels & Load Balancing (1-day) & $\square$ \\
+\hline
+Day 4 & Databases & RDBMS vs NoSQL basics & Scalability (3-day), Caching (1-day) & $\square$ \\
+\hline
+Day 5 & Consistency & ACID, eventual consistency & Load Balancing (3-day), Databases (1-day) & $\square$ \\
+\hline
+Day 6 & CAP Theorem & Trade-offs, examples & Caching (3-day), Consistency (1-day) & $\square$ \\
+\hline
+Day 7 & Week 1 Review & Design URL shortener & Databases (3-day), CAP Theorem (1-day) & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Week 2: Communication \& Data Flow}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|p{3cm}|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Day} & \textbf{New Learning} & \textbf{Learning Activity} & \textbf{Review (Spaced Intervals)} & \textbf{Done} \\
+\hline
+Day 8 & Message Queues & Async communication patterns & Scalability (7-day), Consistency (3-day), Week 1 Review (1-day) & $\square$ \\
+\hline
+Day 9 & API Design & REST, GraphQL principles & Load Balancing (7-day), Message Queues (1-day) & $\square$ \\
+\hline
+Day 10 & Microservices & Architecture patterns & Caching (7-day), API Design (1-day) & $\square$ \\
+\hline
+Day 11 & Service Discovery & Registration, health checks & Databases (7-day), Microservices (1-day) & $\square$ \\
+\hline
+Day 12 & Data Partitioning & Horizontal vs vertical & Consistency (7-day), Service Discovery (1-day) & $\square$ \\
+\hline
+Day 13 & Replication & Master-slave, multi-master & CAP Theorem (7-day), Data Partitioning (1-day) & $\square$ \\
+\hline
+Day 14 & Week 2 Review & Design chat system & Week 1 Review (7-day), Replication (1-day) & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Week 3: Storage \& Processing}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|p{3cm}|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Day} & \textbf{New Learning} & \textbf{Learning Activity} & \textbf{Review (Spaced Intervals)} & \textbf{Done} \\
+\hline
+Day 15 & Database Sharding & Sharding strategies & Message Queues (7-day), Week 2 Review (1-day) & $\square$ \\
+\hline
+Day 16 & CDN & Content delivery networks & API Design (7-day), Database Sharding (1-day) & $\square$ \\
+\hline
+Day 17 & Search Systems & Indexing, ranking & Microservices (7-day), CDN (1-day) & $\square$ \\
+\hline
+Day 18 & Big Data Processing & Batch vs stream processing & Service Discovery (7-day), Search Systems (1-day) & $\square$ \\
+\hline
+Day 19 & Map-Reduce & Distributed computing & Data Partitioning (7-day), Big Data Processing (1-day) & $\square$ \\
+\hline
+Day 20 & NoSQL Deep Dive & Document, key-value, graph DBs & Replication (7-day), Map-Reduce (1-day) & $\square$ \\
+\hline
+Day 21 & Week 3 Review & Design social media feed & Scalability (14-day), NoSQL Deep Dive (1-day) & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Week 4: Advanced Concepts \& Integration}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|p{3cm}|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Day} & \textbf{New Learning} & \textbf{Learning Activity} & \textbf{Review (Spaced Intervals)} & \textbf{Done} \\
+\hline
+Day 22 & Security & Authentication, authorization & Load Balancing (14-day), Database Sharding (7-day), Week 3 Review (1-day) & $\square$ \\
+\hline
+Day 23 & Monitoring & Metrics, logging, alerting & Caching (14-day), CDN (7-day), Security (1-day) & $\square$ \\
+\hline
+Day 24 & Rate Limiting & Token bucket, sliding window & Databases (14-day), Search Systems (7-day), Monitoring (1-day) & $\square$ \\
+\hline
+Day 25 & Distributed Systems & Consensus, Paxos, Raft & Consistency (14-day), Big Data Processing (7-day), Rate Limiting (1-day) & $\square$ \\
+\hline
+Day 26 & System Integration & End-to-end design patterns & CAP Theorem (14-day), Map-Reduce (7-day), Distributed Systems (1-day) & $\square$ \\
+\hline
+Day 27 & Mock Interview 1 & Design ride-sharing system & Week 1 Review (14-day), NoSQL Deep Dive (7-day), System Integration (1-day) & $\square$ \\
+\hline
+Day 28 & Mock Interview 2 & Design video streaming platform & Week 2 Review (14-day), identify and review weak areas & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Daily Review Strategy}
+
+\begin{itemize}
+\item \textbf{1-Day Review:} Quick concept recap and key terminology (5-10 minutes)
+\item \textbf{3-Day Review:} Draw architecture diagrams from memory (15-20 minutes)
+\item \textbf{7-Day Review:} Explain concept to someone else or practice estimation (25-30 minutes)
+\item \textbf{14-Day Review:} Apply concept in system design scenario or compare trade-offs (35-40 minutes)
+\end{itemize}
+
+\textbf{Total Daily Time Investment:} 60-90 minutes (30-45 min new learning + 30-45 min reviews)
+
+\subsection{Progress Tracking Worksheets}
+
+\subsubsection{Weekly Notes}
+
+\textbf{Week 1 Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1.5cm}
+\end{minipage}}
+
+\textbf{Week 2 Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1.5cm}
+\end{minipage}}
+
+\textbf{Week 3 Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1.5cm}
+\end{minipage}}
+
+\textbf{Week 4 Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1.5cm}
+\end{minipage}}
+
+\subsubsection{System Design Practice Log}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{2cm}|p{4cm}|p{3cm}|p{3cm}|c|}
+\hline
+\textbf{Date} & \textbf{System Designed} & \textbf{Time Taken} & \textbf{Key Learnings} & \textbf{Rating} \\
+\hline
+& & & & /10 \\
+\hline
+& & & & /10 \\
+\hline
+& & & & /10 \\
+\hline
+& & & & /10 \\
+\hline
+& & & & /10 \\
+\hline
+& & & & /10 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Weekly Reflection}
+
+\textbf{What system design concepts clicked this week?}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1cm}
+\end{minipage}}
+
+\textbf{Which concepts need more practice?}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1cm}
+\end{minipage}}
+
+\textbf{Next week's focus areas:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1cm}
+\end{minipage}}
+
 \vspace{1cm}
 \begin{center}
 \textbf{\Large Success Formula: Fundamentals + Practice + Communication}\\

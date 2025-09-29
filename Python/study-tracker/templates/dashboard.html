@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Study Tracker - Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background: #f0f8ff; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .section { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .topic { background: #f9f9f9; padding: 10px; margin: 5px 0; border-radius: 3px; }
+        .review { background: #fff3cd; padding: 10px; margin: 5px 0; border-radius: 3px; }
+        .complete-btn { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+        .complete-btn:hover { background: #218838; }
+        .rating { margin: 5px 0; }
+        .notes { width: 100%; height: 60px; margin: 5px 0; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
+        .nav a:hover { text-decoration: underline; }
+        .time-estimate { color: #666; font-size: 0.9em; }
+        .detailed-content { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
+        .detailed-content pre { white-space: pre-wrap; margin: 0; font-family: inherit; }
+        .problems-section, .resources-section, .concepts-section { margin: 15px 0; }
+        .problem-item, .resource-item { margin: 10px 0; padding: 10px; border: 1px solid #e9ecef; border-radius: 5px; background: #f8f9fa; }
+        .problem-link, .resource-link { color: #007bff; text-decoration: none; font-size: 16px; }
+        .problem-link:hover, .resource-link:hover { text-decoration: underline; }
+        .difficulty { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-left: 10px; }
+        .difficulty-easy { background: #d4edda; color: #155724; }
+        .difficulty-medium { background: #fff3cd; color: #856404; }
+        .difficulty-hard { background: #f8d7da; color: #721c24; }
+        .problem-desc, .resource-desc { color: #666; margin: 5px 0 0 0; font-size: 14px; }
+        .concepts-section ul { margin: 10px 0; }
+        .concepts-section li { margin: 5px 0; }
+        .completed-section { opacity: 0.6; pointer-events: none; }
+        .completed-section .complete-btn { background: #6c757d; }
+        .completed-message { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; }
+        .pomodoro-section { background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #ffc107; display: none; }
+        .pomodoro-timer { font-size: 28px; font-weight: bold; color: #856404; text-align: center; margin: 10px 0; }
+        .timer-btn { background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 5px; margin: 5px; cursor: pointer; font-size: 14px; }
+        .timer-btn:hover { background: #218838; }
+        .timer-btn.pause { background: #ffc107; color: #212529; }
+        .timer-btn.pause:hover { background: #e0a800; }
+        .timer-btn.stop { background: #dc3545; }
+        .timer-btn.stop:hover { background: #c82333; }
+        .start-timer-btn { background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-left: 10px; cursor: pointer; font-size: 14px; }
+        .start-timer-btn:hover { background: #138496; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">📅 Dashboard</a>
+        <a href="/history">📊 History</a>
+        <a href="/preview">🔮 Preview</a>
+        <a href="/practice">🎯 Practice</a>
+        <a href="/analytics">📈 Analytics</a>
+        <a href="/config">⚙️ Config</a>
+        <a href="/help">❓ Help</a>
+    </div>
+
+    <div class="header">
+        <h1>📚 Study Tracker - Day {{ current_day }}</h1>
+        <p><strong>Date:</strong> {{ today }}</p>
+        <p><strong>Estimated Time:</strong> {{ total_time }} minutes</p>
+    </div>
+
+    <div class="section">
+        <h2>🧠 Today's Learning</h2>
+
+        {% if coding_topic %}
+        <div class="topic {% if coding_topic_completed %}completed-section{% endif %}" id="coding-topic">
+            <h3>💻 Coding: {{ coding_topic.topic }}</h3>
+            <p><strong>Activity:</strong> {{ coding_topic.activity }}</p>
+
+            {% if not coding_topic_completed %}
+            <p class="time-estimate">⏱️ {{ coding_topic.time_estimate }} minutes
+                <button class="start-timer-btn" onclick="startPomodoro('coding', {{ coding_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
+                    🍅 Start Timer
+                </button>
+            </p>
+
+            <div class="pomodoro-section" id="coding-pomodoro">
+                <h4>🍅 Focus Session</h4>
+                <div class="pomodoro-timer" id="coding-timer">{{ coding_topic.time_estimate }}:00</div>
+                <div style="text-align: center;">
+                    <button class="timer-btn" onclick="pauseTimer('coding')" id="coding-pause-btn">⏸️ Pause</button>
+                    <button class="timer-btn stop" onclick="stopTimer('coding')">⏹️ Stop</button>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if coding_topic.detailed_content %}
+            <div class="detailed-content">
+                <h4>📖 Detailed Guide:</h4>
+                <pre>{{ coding_topic.detailed_content }}</pre>
+            </div>
+            {% endif %}
+
+            {% if coding_topic.problems %}
+            <div class="problems-section">
+                <h4>🎯 Practice Problems:</h4>
+                {% for problem in coding_topic.problems %}
+                <div class="problem-item">
+                    <strong><a href="{{ problem.url }}" target="_blank" class="problem-link">
+                        #{{ problem.number }} - {{ problem.title }}
+                    </a></strong>
+                    <span class="difficulty difficulty-{{ problem.difficulty.lower() }}">{{ problem.difficulty }}</span>
+                    <p class="problem-desc">{{ problem.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if coding_topic_completed %}
+            <div class="completed-message">
+                <h4>✅ {{ coding_topic.topic }} Complete!</h4>
+                <p>Rating: {{ coding_completion_data.rating }}/5 | Notes: {{ coding_completion_data.notes or 'No notes' }}</p>
+                <p><em>Great job! Keep up the momentum! 🚀</em></p>
+            </div>
+            {% else %}
+            <div class="rating">
+                <label>Rating (1-5):</label>
+                <select id="coding-rating">
+                    <option value="1">1 - Very Hard</option>
+                    <option value="2">2 - Hard</option>
+                    <option value="3" selected>3 - Medium</option>
+                    <option value="4">4 - Easy</option>
+                    <option value="5">5 - Very Easy</option>
+                </select>
+            </div>
+            <textarea id="coding-notes" class="notes" placeholder="Notes and reflections..."></textarea>
+            <button class="complete-btn" id="coding-complete-btn" onclick="markComplete('{{ coding_topic.topic }}', 'coding', 'topic')">
+                ✅ Mark Complete
+            </button>
+            <button class="complete-btn" id="coding-finish-early-btn" style="display: none; background: #28a745;" onclick="finishEarlyAndMarkComplete('coding', '{{ coding_topic.topic }}')" title="Complete this topic before the timer expires. Shows you finished within the estimated time - great for interview skills!">
+                ⏱️ Finish Early & Mark Complete
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if system_design_topic %}
+        <div class="topic {% if system_design_topic_completed %}completed-section{% endif %}" id="system-design-topic">
+            <h3>🏗️ System Design: {{ system_design_topic.topic }}</h3>
+            <p><strong>Activity:</strong> {{ system_design_topic.activity }}</p>
+
+            {% if not system_design_topic_completed %}
+            <p class="time-estimate">⏱️ {{ system_design_topic.time_estimate }} minutes
+                <button class="start-timer-btn" onclick="startPomodoro('system_design', {{ system_design_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
+                    🍅 Start Timer
+                </button>
+            </p>
+
+            <div class="pomodoro-section" id="system_design-pomodoro">
+                <h4>🍅 Focus Session</h4>
+                <div class="pomodoro-timer" id="system_design-timer">{{ system_design_topic.time_estimate }}:00</div>
+                <div style="text-align: center;">
+                    <button class="timer-btn" onclick="pauseTimer('system_design')" id="system_design-pause-btn">⏸️ Pause</button>
+                    <button class="timer-btn stop" onclick="stopTimer('system_design')">⏹️ Stop</button>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if system_design_topic.detailed_content %}
+            <div class="detailed-content">
+                <h4>📖 Detailed Guide:</h4>
+                <pre>{{ system_design_topic.detailed_content }}</pre>
+            </div>
+            {% endif %}
+
+            {% if system_design_topic.resources %}
+            <div class="resources-section">
+                <h4>📚 Study Resources:</h4>
+                {% for resource in system_design_topic.resources %}
+                <div class="resource-item">
+                    <strong><a href="{{ resource.url }}" target="_blank" class="resource-link">
+                        {{ resource.title }}
+                    </a></strong>
+                    <p class="resource-desc">{{ resource.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if system_design_topic.concepts %}
+            <div class="concepts-section">
+                <h4>🔑 Key Concepts:</h4>
+                <ul>
+                {% for concept in system_design_topic.concepts %}
+                    <li>{{ concept }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if system_design_topic_completed %}
+            <div class="completed-message">
+                <h4>✅ {{ system_design_topic.topic }} Complete!</h4>
+                <p>Rating: {{ system_design_completion_data.rating }}/5 | Notes: {{ system_design_completion_data.notes or 'No notes' }}</p>
+                <p><em>Great job! Keep up the momentum! 🚀</em></p>
+            </div>
+            {% else %}
+            <div class="rating">
+                <label>Rating (1-5):</label>
+                <select id="system-design-rating">
+                    <option value="1">1 - Very Hard</option>
+                    <option value="2">2 - Hard</option>
+                    <option value="3" selected>3 - Medium</option>
+                    <option value="4">4 - Easy</option>
+                    <option value="5">5 - Very Easy</option>
+                </select>
+            </div>
+            <textarea id="system-design-notes" class="notes" placeholder="Notes and reflections..."></textarea>
+            <button class="complete-btn" id="system_design-complete-btn" onclick="markComplete('{{ system_design_topic.topic }}', 'system_design', 'topic')">
+                ✅ Mark Complete
+            </button>
+            <button class="complete-btn" id="system_design-finish-early-btn" style="display: none; background: #28a745;" onclick="finishEarlyAndMarkComplete('system_design', '{{ system_design_topic.topic }}')" title="Complete this topic before the timer expires. Shows you finished within the estimated time - great for interview skills!">
+                ⏱️ Finish Early & Mark Complete
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if due_reviews %}
+    <div class="section">
+        <h2>🔄 Due Reviews</h2>
+        {% for review in due_reviews %}
+        <div class="review" id="review-{{ loop.index }}">
+            <h4>{{ review.track | title }}: {{ review.topic }} ({{ review.review_type }} review)</h4>
+            <p>Originally completed: {{ review.scheduled_date }}</p>
+
+            <div class="rating">
+                <label>How well do you remember? (1-5):</label>
+                <select id="review-rating-{{ loop.index }}">
+                    <option value="1">1 - Completely forgot</option>
+                    <option value="2">2 - Vague memory</option>
+                    <option value="3" selected>3 - Some memory</option>
+                    <option value="4">4 - Good memory</option>
+                    <option value="5">5 - Perfect recall</option>
+                </select>
+            </div>
+            <textarea id="review-notes-{{ loop.index }}" class="notes" placeholder="Review notes..."></textarea>
+            <button class="complete-btn" onclick="markComplete('{{ review.topic }}', '{{ review.track }}', 'review', {{ loop.index }})">
+                ✅ Review Complete
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script>
+        async function markComplete(topic, track, type, reviewIndex = null) {
+            let rating, notes;
+
+            let elementId;
+            if (type === 'topic') {
+                elementId = `${track}-topic`;
+                const ratingSelect = document.getElementById(`${track}-rating`);
+                const notesTextarea = document.getElementById(`${track}-notes`);
+                rating = parseInt(ratingSelect.value);
+                notes = notesTextarea.value;
+            } else if (type === 'review') {
+                elementId = `review-${reviewIndex}`;
+                const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
+                const notesTextarea = document.getElementById(`review-notes-${reviewIndex}`);
+                rating = parseInt(ratingSelect.value);
+                notes = notesTextarea.value;
+            }
+
+            // Disable the section immediately to prevent double-submission
+            const element = document.getElementById(elementId);
+            element.style.pointerEvents = 'none';
+            const button = element.querySelector('.complete-btn');
+            button.textContent = '⏳ Saving...';
+            button.style.background = '#6c757d';
+
+            try {
+                const response = await fetch('/complete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        topic: topic,
+                        track: track,
+                        type: type,
+                        rating: rating,
+                        notes: notes,
+                        completed_on_time: getCompletionTimingStatus(track)
+                    })
+                });
+
+                if (response.ok) {
+                    // Replace the form with a completion message
+                    const completionMessage = document.createElement('div');
+                    completionMessage.className = 'completed-message';
+                    completionMessage.innerHTML = `
+                        <h4>✅ ${topic} Complete!</h4>
+                        <p>Rating: ${rating}/5 | Notes: ${notes || 'No notes'}</p>
+                        <p><em>Great job! Keep up the momentum! 🚀</em></p>
+                    `;
+
+                    // Hide input elements and show completion message
+                    const ratingDiv = element.querySelector('.rating');
+                    const notesTextarea = element.querySelector('.notes');
+                    const button = element.querySelector('.complete-btn');
+
+                    if (ratingDiv) ratingDiv.style.display = 'none';
+                    if (notesTextarea) notesTextarea.style.display = 'none';
+                    if (button) button.style.display = 'none';
+
+                    element.appendChild(completionMessage);
+                    element.classList.add('completed-section');
+                } else {
+                    // Re-enable on error
+                    element.style.pointerEvents = 'auto';
+                    button.textContent = '✅ Mark Complete';
+                    button.style.background = '#28a745';
+                    alert('❌ Error saving completion. Please try again.');
+                }
+            } catch (error) {
+                // Re-enable on error
+                const element = document.getElementById(elementId);
+                element.style.pointerEvents = 'auto';
+                const button = element.querySelector('.complete-btn');
+                button.textContent = '✅ Mark Complete';
+                button.style.background = '#28a745';
+                alert('❌ Network error. Please check your connection and try again.');
+                console.error(error);
+            }
+        }
+
+        // Pomodoro Timer functionality
+        let pomodoroTimers = {};
+
+        function startPomodoro(track, minutes) {
+            const timeInSeconds = minutes * 60;
+            const timerDisplay = document.getElementById(`${track}-timer`);
+            const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+            const startButton = document.querySelector(`#${track}-topic .start-timer-btn`);
+            const pauseButton = document.getElementById(`${track}-pause-btn`);
+
+            // Show timer section and hide start button
+            pomodoroSection.style.display = 'block';
+            startButton.style.display = 'none';
+
+            // Initialize timer with expired state
+            pomodoroTimers[track] = {
+                timeLeft: timeInSeconds,
+                isPaused: false,
+                interval: null,
+                expired: false
+            };
+
+            // Update button visibility - hide normal complete, show finish early
+            const completeBtn = document.getElementById(`${track}-complete-btn`);
+            const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
+            if (completeBtn) completeBtn.style.display = 'none';
+            if (finishEarlyBtn) finishEarlyBtn.style.display = 'inline-block';
+
+            // Start countdown
+            startCountdown(track);
+
+            // Scroll to timer
+            pomodoroSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function startCountdown(track) {
+            const timer = pomodoroTimers[track];
+            if (!timer) return;
+
+            timer.interval = setInterval(() => {
+                if (timer.isPaused) return;
+
+                const minutes = Math.floor(timer.timeLeft / 60);
+                const seconds = timer.timeLeft % 60;
+                const timerDisplay = document.getElementById(`${track}-timer`);
+
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timer.timeLeft <= 0) {
+                    completePomodoro(track);
+                    return;
+                }
+
+                timer.timeLeft--;
+            }, 1000);
+        }
+
+        function pauseTimer(track) {
+            const timer = pomodoroTimers[track];
+            const pauseButton = document.getElementById(`${track}-pause-btn`);
+
+            if (!timer) return;
+
+            timer.isPaused = !timer.isPaused;
+
+            if (timer.isPaused) {
+                pauseButton.innerHTML = '▶️ Resume';
+                pauseButton.className = 'timer-btn';
+            } else {
+                pauseButton.innerHTML = '⏸️ Pause';
+                pauseButton.className = 'timer-btn pause';
+            }
+        }
+
+        function stopTimer(track) {
+            const timer = pomodoroTimers[track];
+            if (!timer) return;
+
+            clearInterval(timer.interval);
+            delete pomodoroTimers[track];
+
+            // Hide timer section and show start button
+            const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+            const startButton = document.querySelector(`#${track}-topic .start-timer-btn`);
+
+            pomodoroSection.style.display = 'none';
+            startButton.style.display = 'inline-block';
+
+            // Reset button visibility to original state
+            const completeBtn = document.getElementById(`${track}-complete-btn`);
+            const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
+            if (completeBtn) completeBtn.style.display = 'inline-block';
+            if (finishEarlyBtn) finishEarlyBtn.style.display = 'none';
+
+            // Reset pause button
+            const pauseButton = document.getElementById(`${track}-pause-btn`);
+            pauseButton.innerHTML = '⏸️ Pause';
+            pauseButton.className = 'timer-btn pause';
+        }
+
+        function completePomodoro(track) {
+            clearInterval(pomodoroTimers[track].interval);
+
+            // Mark timer as expired
+            pomodoroTimers[track].expired = true;
+
+            const timerDisplay = document.getElementById(`${track}-timer`);
+            timerDisplay.textContent = "00:00";
+            timerDisplay.style.color = '#28a745';
+
+            // Update button visibility - hide finish early, show normal complete
+            const completeBtn = document.getElementById(`${track}-complete-btn`);
+            const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
+            if (completeBtn) completeBtn.style.display = 'inline-block';
+            if (finishEarlyBtn) finishEarlyBtn.style.display = 'none';
+
+            // Show completion notification
+            alert(`🎉 Pomodoro complete! Great focus session on ${track.replace('_', ' ')}!`);
+
+            // Auto-hide timer after a moment
+            setTimeout(() => {
+                stopTimer(track);
+            }, 3000);
+        }
+
+        // Helper function to determine completion timing status
+        function getCompletionTimingStatus(track) {
+            const timer = pomodoroTimers[track];
+            if (!timer) {
+                // No timer was started - return null
+                return null;
+            }
+            if (timer.expired) {
+                // Timer ran out - completed over time
+                return false;
+            }
+            // Timer was running but not expired - completed on time (early)
+            return true;
+        }
+
+        // Function for finishing early with timer
+        async function finishEarlyAndMarkComplete(track, topic) {
+            // Stop the timer first
+            if (pomodoroTimers[track]) {
+                clearInterval(pomodoroTimers[track].interval);
+                // Don't mark as expired since they finished early
+            }
+
+            // Call the regular markComplete function which will handle timing status
+            await markComplete(topic, track, 'topic');
+        }
+    </script>
+</body>
+</html>

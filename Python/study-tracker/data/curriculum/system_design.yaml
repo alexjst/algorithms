@@ -1,0 +1,958 @@
+track: "system_design"
+description: "28-day system design interview preparation with spaced repetition"
+weeks:
+  week1:
+    - day: 1
+      topic: "Scalability Fundamentals"
+      activity: "Learn horizontal vs vertical scaling, capacity planning, and load estimation techniques."
+      detailed_content: |
+        Scalability Concepts:
+        - Horizontal scaling: Add more servers (scale out)
+        - Vertical scaling: Add more power to existing servers (scale up)
+        - Load estimation: Calculate QPS, storage, bandwidth needs
+        - Performance metrics: Latency, throughput, availability
+
+        Key principles:
+        - Design for scale from day one
+        - Identify bottlenecks early
+        - Plan for 10x growth
+        - Monitor key metrics continuously
+      resources:
+        - title: "Designing Data-Intensive Applications - Chapter 1"
+          url: "https://dataintensive.net/"
+          description: "Fundamental concepts of scalable systems"
+        - title: "High Scalability Blog"
+          url: "https://highscalability.com/"
+          description: "Real-world scalability case studies"
+      time_estimate: 45
+
+    - day: 2
+      topic: "Load Balancing"
+      activity: "Master different load balancing techniques, algorithms, and when to use each type."
+      detailed_content: |
+        Load Balancer Types:
+        - L4 (Transport): Routes based on IP/port
+        - L7 (Application): Routes based on content/headers
+
+        Algorithms:
+        - Round Robin: Distribute requests evenly
+        - Weighted Round Robin: Based on server capacity
+        - Least Connections: Route to server with fewest active connections
+        - IP Hash: Consistent routing based on client IP
+
+        Implementation:
+        - Hardware vs Software load balancers
+        - Health checks and failover
+        - Session affinity considerations
+        - Global vs local load balancing
+      resources:
+        - title: "AWS Application Load Balancer Guide"
+          url: "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/"
+          description: "Practical load balancing concepts"
+        - title: "NGINX Load Balancing"
+          url: "https://nginx.org/en/docs/http/load_balancing.html"
+          description: "Software load balancing implementation"
+      time_estimate: 45
+
+    - day: 3
+      topic: "Caching Strategies"
+      activity: "Learn caching patterns, cache levels, and eviction policies for system performance."
+      detailed_content: |
+        Cache Patterns:
+        - Cache-aside: Application manages cache
+        - Write-through: Write to cache and DB simultaneously
+        - Write-behind: Write to cache first, DB later
+        - Refresh-ahead: Proactively refresh before expiration
+
+        Cache Levels:
+        - Browser cache
+        - CDN/Edge cache
+        - Reverse proxy cache
+        - Application cache
+        - Database cache
+
+        Eviction Policies:
+        - LRU (Least Recently Used)
+        - LFU (Least Frequently Used)
+        - FIFO (First In, First Out)
+        - TTL (Time To Live)
+      resources:
+        - title: "Redis Caching Patterns"
+          url: "https://redis.io/docs/manual/patterns/"
+          description: "Common caching implementation patterns"
+        - title: "Memcached vs Redis"
+          url: "https://aws.amazon.com/elasticache/redis-vs-memcached/"
+          description: "Choosing the right cache technology"
+      time_estimate: 45
+
+    - day: 4
+      topic: "Database Fundamentals"
+      activity: "Understand RDBMS vs NoSQL trade-offs, ACID properties, and consistency models."
+      detailed_content: |
+        RDBMS Characteristics:
+        - ACID properties (Atomicity, Consistency, Isolation, Durability)
+        - Strong consistency
+        - Complex queries with JOINs
+        - Vertical scaling limitations
+
+        NoSQL Types:
+        - Document stores (MongoDB): Flexible schema
+        - Key-value stores (DynamoDB): Simple, fast access
+        - Column-family (Cassandra): Wide column storage
+        - Graph databases (Neo4j): Relationship-focused
+
+        Trade-offs:
+        - Consistency vs Availability
+        - Query flexibility vs Performance
+        - Schema flexibility vs Data integrity
+        - Horizontal vs Vertical scaling
+      resources:
+        - title: "MongoDB vs PostgreSQL"
+          url: "https://www.mongodb.com/compare/mongodb-postgresql"
+          description: "Document vs relational database comparison"
+        - title: "NoSQL Database Types"
+          url: "https://aws.amazon.com/nosql/"
+          description: "Overview of NoSQL database categories"
+      time_estimate: 45
+
+    - day: 5
+      topic: "Consistency Models"
+      activity: "Master strong vs eventual consistency, understand trade-offs in distributed systems."
+      detailed_content: |
+        Consistency Levels:
+        - Strong consistency: All nodes see same data simultaneously
+        - Eventual consistency: Nodes will converge to same state
+        - Weak consistency: No guarantees about when data converges
+
+        Consistency Patterns:
+        - Read-after-write: User sees their own writes immediately
+        - Session consistency: Consistency within user session
+        - Monotonic read: User won't see older versions after newer ones
+        - Monotonic write: User's writes applied in order
+
+        Implementation Techniques:
+        - Quorum reads/writes
+        - Vector clocks
+        - Conflict resolution strategies
+        - Multi-version concurrency control
+      resources:
+        - title: "Consistency Models Explained"
+          url: "https://jepsen.io/consistency"
+          description: "Detailed explanation of consistency models"
+        - title: "DynamoDB Consistency"
+          url: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html"
+          description: "Practical consistency implementation"
+      time_estimate: 45
+
+    - day: 6
+      topic: "CAP Theorem"
+      activity: "Understand Consistency, Availability, Partition tolerance trade-offs with real examples."
+      detailed_content: |
+        CAP Theorem States:
+        You can only guarantee 2 of 3:
+        - Consistency: All nodes return same data
+        - Availability: System remains operational
+        - Partition Tolerance: System continues despite network failures
+
+        Real-world Examples:
+        - CP Systems: MongoDB, Redis (sacrifice availability)
+        - AP Systems: Cassandra, DynamoDB (sacrifice consistency)
+        - CA Systems: Traditional RDBMS (sacrifice partition tolerance)
+
+        Design Implications:
+        - Network partitions are inevitable in distributed systems
+        - Must choose between consistency and availability
+        - Different parts of system can make different choices
+        - PACELC theorem extends CAP with latency considerations
+      resources:
+        - title: "CAP Theorem Explained"
+          url: "https://www.ibm.com/topics/cap-theorem"
+          description: "Comprehensive CAP theorem guide"
+        - title: "PACELC Theorem"
+          url: "https://en.wikipedia.org/wiki/PACELC_theorem"
+          description: "Extension of CAP theorem with latency"
+      time_estimate: 45
+
+    - day: 7
+      topic: "Week 1 Integration - URL Shortener Design"
+      activity: "Apply Week 1 concepts to design a complete URL shortener system like bit.ly"
+      detailed_content: |
+        Design Requirements:
+        - Functional: Shorten URLs, redirect to original, custom aliases
+        - Non-functional: 100M URLs/day, 100:1 read/write ratio, 99.9% availability
+
+        System Components:
+        1. Load balancer for traffic distribution
+        2. Application servers for business logic
+        3. Cache layer for popular URLs
+        4. Database for URL storage
+        5. Analytics service for metrics
+
+        Key Design Decisions:
+        - Base62 encoding for short URLs
+        - Database sharding strategy
+        - Cache warming and eviction
+        - Rate limiting implementation
+        - Monitoring and alerting setup
+
+        Capacity Planning:
+        - Storage: 100M * 365 * 5 years = 182B URLs
+        - Bandwidth: 100M writes * 500 bytes = 50GB/day
+        - Cache size: 20% of daily reads = 20M URLs in cache
+      resources:
+        - title: "System Design: URL Shortener"
+          url: "https://www.educative.io/courses/grokking-system-design-fundamentals/url-shortener"
+          description: "Complete URL shortener design walkthrough"
+      time_estimate: 90
+
+  week2:
+    - day: 8
+      topic: "Message Queues & Async Communication"
+      activity: "Learn message queuing patterns, pub/sub systems, and async processing architectures."
+      detailed_content: |
+        Message Queue Patterns:
+        - Point-to-point: One producer, one consumer
+        - Publish/Subscribe: One producer, multiple consumers
+        - Request/Reply: Synchronous-like async communication
+        - Message routing: Topic-based, content-based routing
+
+        Delivery Guarantees:
+        - At-most-once: Messages may be lost, never duplicated
+        - At-least-once: Messages delivered, may be duplicated
+        - Exactly-once: Messages delivered exactly once (expensive)
+
+        Popular Systems:
+        - Apache Kafka: High-throughput, distributed streaming
+        - RabbitMQ: Reliable message broker with routing
+        - Amazon SQS: Managed queue service
+        - Apache Pulsar: Multi-tenant, geo-replicated messaging
+      resources:
+        - title: "Kafka vs RabbitMQ"
+          url: "https://aws.amazon.com/compare/the-difference-between-rabbitmq-and-kafka/"
+          description: "Message queue technology comparison"
+        - title: "Message Queue Patterns"
+          url: "https://www.enterpriseintegrationpatterns.com/patterns/messaging/"
+          description: "Enterprise messaging patterns"
+      time_estimate: 45
+
+    - day: 9
+      topic: "API Design Best Practices"
+      activity: "Master REST principles, GraphQL concepts, API versioning, and rate limiting strategies."
+      detailed_content: |
+        RESTful API Design:
+        - Use HTTP methods correctly (GET, POST, PUT, DELETE)
+        - Resource-based URLs (/users/123/orders)
+        - Stateless communication
+        - Proper HTTP status codes
+        - HATEOAS for discoverability
+
+        API Versioning Strategies:
+        - URL versioning: /v1/users, /v2/users
+        - Header versioning: Accept: application/vnd.api+json;version=1
+        - Query parameter: /users?version=1
+        - Content negotiation: Different media types
+
+        Rate Limiting:
+        - Token bucket: Allow bursts, smooth rate
+        - Fixed window: Simple, can have thundering herd
+        - Sliding window: More accurate, complex implementation
+        - Distributed rate limiting with Redis
+      resources:
+        - title: "REST API Best Practices"
+          url: "https://restfulapi.net/"
+          description: "Comprehensive REST API design guide"
+        - title: "GraphQL vs REST"
+          url: "https://www.apollographql.com/blog/graphql/basics/graphql-vs-rest/"
+          description: "API paradigm comparison"
+      time_estimate: 45
+
+    - day: 10
+      topic: "Microservices Architecture"
+      activity: "Learn service decomposition strategies, inter-service communication, and data management."
+      detailed_content: |
+        Service Decomposition:
+        - Domain-driven design principles
+        - Business capability boundaries
+        - Data ownership per service
+        - Avoid distributed monoliths
+
+        Communication Patterns:
+        - Synchronous: HTTP/REST, gRPC
+        - Asynchronous: Message queues, event streaming
+        - Service mesh for cross-cutting concerns
+        - Circuit breaker pattern for resilience
+
+        Data Management:
+        - Database per service
+        - Saga pattern for distributed transactions
+        - Event sourcing for audit trails
+        - CQRS for read/write separation
+
+        Challenges:
+        - Distributed system complexity
+        - Network latency and failures
+        - Data consistency across services
+        - Operational overhead
+      resources:
+        - title: "Microservices Patterns"
+          url: "https://microservices.io/patterns/microservices.html"
+          description: "Microservice architecture patterns"
+        - title: "Building Microservices Book"
+          url: "https://samnewman.io/books/building_microservices/"
+          description: "Comprehensive microservices guide"
+      time_estimate: 45
+
+    - day: 11
+      topic: "Service Discovery & Health Monitoring"
+      activity: "Implement service registration, discovery mechanisms, and health check patterns."
+      detailed_content: |
+        Service Discovery Patterns:
+        - Client-side discovery: Client queries service registry
+        - Server-side discovery: Load balancer queries registry
+        - Service registry: Consul, Eureka, etcd
+        - DNS-based discovery: SRV records
+
+        Health Check Types:
+        - Shallow: Basic connectivity check
+        - Deep: Check dependencies and resources
+        - Passive: Monitor actual traffic
+        - Active: Synthetic monitoring requests
+
+        Circuit Breaker Pattern:
+        - Closed: Normal operation
+        - Open: Fail fast when service is down
+        - Half-open: Test if service recovered
+        - Hystrix, resilience4j implementations
+
+        Monitoring Strategy:
+        - Service-level health endpoints
+        - Dependency health aggregation
+        - Graceful degradation planning
+        - Alerting and escalation policies
+      resources:
+        - title: "Service Discovery Patterns"
+          url: "https://microservices.io/patterns/service-registry.html"
+          description: "Service discovery implementation patterns"
+        - title: "Circuit Breaker Pattern"
+          url: "https://martinfowler.com/bliki/CircuitBreaker.html"
+          description: "Fault tolerance pattern explanation"
+      time_estimate: 45
+
+    - day: 12
+      topic: "Data Partitioning Strategies"
+      activity: "Master horizontal and vertical partitioning, sharding keys, and rebalancing techniques."
+      detailed_content: |
+        Partitioning Types:
+        - Horizontal (Sharding): Split rows across multiple databases
+        - Vertical: Split columns across different systems
+        - Functional: Split by feature or service boundary
+
+        Sharding Strategies:
+        - Range-based: Partition by data ranges
+        - Hash-based: Use hash function for distribution
+        - Directory-based: Lookup service for shard location
+        - Consistent hashing: Minimize reshuffling during changes
+
+        Sharding Key Selection:
+        - High cardinality for even distribution
+        - Avoid hotspots and skewed access patterns
+        - Consider query patterns and data locality
+        - Balance read and write distribution
+
+        Challenges:
+        - Cross-shard queries
+        - Rebalancing data during scale events
+        - Maintaining referential integrity
+        - Operational complexity
+      resources:
+        - title: "Database Sharding Explained"
+          url: "https://aws.amazon.com/what-is/database-sharding/"
+          description: "Comprehensive sharding guide"
+        - title: "Consistent Hashing"
+          url: "https://en.wikipedia.org/wiki/Consistent_hashing"
+          description: "Hash-based partitioning technique"
+      time_estimate: 45
+
+    - day: 13
+      topic: "Database Replication"
+      activity: "Learn master-slave, master-master replication, conflict resolution, and failover strategies."
+      detailed_content: |
+        Replication Patterns:
+        - Master-Slave: One write node, multiple read replicas
+        - Master-Master: Multiple write nodes with bidirectional sync
+        - Chain replication: Sequential replica updates
+        - Tree replication: Hierarchical replica structure
+
+        Replication Methods:
+        - Synchronous: Wait for replica confirmation (strong consistency)
+        - Asynchronous: Don't wait for replicas (better performance)
+        - Semi-synchronous: Hybrid approach with configurable behavior
+
+        Conflict Resolution:
+        - Last-write-wins: Simple but may lose data
+        - Vector clocks: Track causality between updates
+        - Operational transformation: Merge concurrent edits
+        - Application-level resolution: Custom business logic
+
+        Failover Strategies:
+        - Automatic failover with health monitoring
+        - Manual failover for critical decisions
+        - Promote replica to new master
+        - Handle split-brain scenarios
+      resources:
+        - title: "Database Replication Strategies"
+          url: "https://en.wikipedia.org/wiki/Replication_(database)"
+          description: "Database replication concepts"
+        - title: "MySQL Replication"
+          url: "https://dev.mysql.com/doc/refman/8.0/en/replication.html"
+          description: "Practical replication implementation"
+      time_estimate: 45
+
+    - day: 14
+      topic: "Week 2 Integration - Chat System Design"
+      activity: "Design a real-time chat system applying microservices, messaging, and data partitioning."
+      detailed_content: |
+        System Requirements:
+        - Functional: Send/receive messages, online presence, group chats
+        - Non-functional: 50M DAU, <100ms latency, 99.99% availability
+        - Scale: 1B messages/day, real-time delivery
+
+        Architecture Components:
+        1. API Gateway for request routing
+        2. User service for authentication/profiles
+        3. Chat service for message handling
+        4. Notification service for push notifications
+        5. Presence service for online status
+        6. WebSocket connections for real-time communication
+
+        Key Design Decisions:
+        - WebSocket vs HTTP long polling
+        - Message storage and partitioning strategy
+        - Group chat scalability (fan-out strategies)
+        - Online presence tracking
+        - Message delivery guarantees
+        - Push notification handling for offline users
+
+        Data Models:
+        - User partitioning by user_id
+        - Message partitioning by chat_id + timestamp
+        - Presence data in Redis with TTL
+        - Message ordering and deduplication
+      resources:
+        - title: "WhatsApp System Design"
+          url: "https://www.educative.io/courses/grokking-system-design-fundamentals/whatsapp"
+          description: "Real-world chat system architecture"
+      time_estimate: 90
+
+  week3:
+    - day: 15
+      topic: "Advanced Database Sharding"
+      activity: "Deep dive into sharding implementation, resharding strategies, and cross-shard operations."
+      detailed_content: |
+        Advanced Sharding Concepts:
+        - Shard key evolution and migration
+        - Hot shard detection and mitigation
+        - Cross-shard transaction handling
+        - Global secondary indexes
+
+        Resharding Strategies:
+        - Pre-splitting: Create more shards than needed
+        - Live migration: Move data without downtime
+        - Consistent hashing rings for automatic rebalancing
+        - Double-writing during migration periods
+
+        Cross-shard Queries:
+        - Scatter-gather pattern
+        - Materialized views for common queries
+        - Denormalization for query efficiency
+        - Two-phase commit for distributed transactions
+
+        Monitoring and Operations:
+        - Shard performance metrics
+        - Data distribution monitoring
+        - Query pattern analysis
+        - Capacity planning per shard
+      resources:
+        - title: "Vitess: Scaling MySQL"
+          url: "https://vitess.io/docs/overview/"
+          description: "Production sharding system"
+        - title: "Sharding Pinterest"
+          url: "https://medium.com/@Pinterest_Engineering/sharding-pinterest-how-we-scaled-our-mysql-fleet-3f341e96ca6f"
+          description: "Real-world sharding case study"
+      time_estimate: 45
+
+    - day: 16
+      topic: "Content Delivery Networks (CDN)"
+      activity: "Learn CDN architecture, cache invalidation strategies, and global content distribution."
+      detailed_content: |
+        CDN Architecture:
+        - Edge locations for global content distribution
+        - Origin servers for authoritative content
+        - POP (Point of Presence) hierarchy
+        - Anycast routing for optimal performance
+
+        Cache Strategies:
+        - Static content: Images, CSS, JS files
+        - Dynamic content: API responses, personalized content
+        - Cache-control headers and TTL management
+        - Conditional requests and ETags
+
+        Invalidation Methods:
+        - Time-based expiration (TTL)
+        - Tag-based invalidation
+        - Purge APIs for immediate invalidation
+        - Version-based cache busting
+
+        Performance Optimization:
+        - Compression (gzip, brotli)
+        - Image optimization and format selection
+        - HTTP/2 and HTTP/3 support
+        - Edge computing and serverless functions
+      resources:
+        - title: "CloudFlare CDN Guide"
+          url: "https://www.cloudflare.com/learning/cdn/what-is-a-cdn/"
+          description: "CDN concepts and implementation"
+        - title: "AWS CloudFront"
+          url: "https://docs.aws.amazon.com/cloudfront/"
+          description: "Production CDN service documentation"
+      time_estimate: 45
+
+    - day: 17
+      topic: "Search Systems & Information Retrieval"
+      activity: "Build search engines with indexing, ranking algorithms, and relevance scoring."
+      detailed_content: |
+        Search Architecture:
+        - Crawling and document ingestion
+        - Text processing and tokenization
+        - Inverted index construction
+        - Query processing and execution
+
+        Indexing Strategies:
+        - Inverted indexes for full-text search
+        - Forward indexes for document retrieval
+        - Incremental indexing for real-time updates
+        - Distributed indexing across multiple nodes
+
+        Ranking Algorithms:
+        - TF-IDF (Term Frequency-Inverse Document Frequency)
+        - PageRank for web search
+        - BM25 for relevance scoring
+        - Machine learning ranking models
+
+        Search Features:
+        - Auto-complete and suggestions
+        - Faceted search and filtering
+        - Fuzzy matching and spell correction
+        - Personalization and user context
+
+        Popular Systems:
+        - Elasticsearch: Distributed search and analytics
+        - Solr: Enterprise search platform
+        - Amazon CloudSearch: Managed search service
+      resources:
+        - title: "Elasticsearch Guide"
+          url: "https://www.elastic.co/guide/en/elasticsearch/reference/current/"
+          description: "Production search system documentation"
+        - title: "Building Search Systems"
+          url: "https://www.manning.com/books/relevant-search"
+          description: "Search relevance and ranking techniques"
+      time_estimate: 45
+
+    - day: 18
+      topic: "Big Data Processing Systems"
+      activity: "Learn batch vs stream processing, MapReduce paradigm, and distributed computing frameworks."
+      detailed_content: |
+        Processing Paradigms:
+        - Batch processing: Process large datasets offline
+        - Stream processing: Process data in real-time
+        - Lambda architecture: Combine batch and stream processing
+        - Kappa architecture: Unified stream processing
+
+        MapReduce Framework:
+        - Map phase: Transform and filter data
+        - Shuffle phase: Group data by key
+        - Reduce phase: Aggregate grouped data
+        - Fault tolerance through data replication
+
+        Stream Processing:
+        - Event time vs processing time
+        - Windowing for bounded computations
+        - Watermarks for late data handling
+        - Exactly-once processing guarantees
+
+        Popular Frameworks:
+        - Apache Hadoop: Distributed storage and processing
+        - Apache Spark: Unified analytics engine
+        - Apache Flink: Stream processing framework
+        - Apache Kafka Streams: Stream processing library
+      resources:
+        - title: "Hadoop Ecosystem"
+          url: "https://hadoop.apache.org/docs/stable/"
+          description: "Distributed computing framework"
+        - title: "Stream Processing Concepts"
+          url: "https://kafka.apache.org/documentation/streams/"
+          description: "Real-time data processing patterns"
+      time_estimate: 45
+
+    - day: 19
+      topic: "NoSQL Database Deep Dive"
+      activity: "Compare document, key-value, column-family, and graph databases with use cases."
+      detailed_content: |
+        Document Stores (MongoDB, CouchDB):
+        - Flexible schema for evolving data models
+        - Rich query capabilities with indexes
+        - Horizontal scaling through sharding
+        - Use cases: Content management, catalogs, user profiles
+
+        Key-Value Stores (Redis, DynamoDB):
+        - Simple get/put operations
+        - High performance and low latency
+        - Limited query capabilities
+        - Use cases: Caching, session storage, gaming leaderboards
+
+        Column-Family (Cassandra, HBase):
+        - Wide column storage model
+        - Excellent write performance
+        - Tunable consistency levels
+        - Use cases: Time-series data, logging, sensor data
+
+        Graph Databases (Neo4j, Amazon Neptune):
+        - Relationships as first-class citizens
+        - Graph traversal queries
+        - ACID transactions on graph operations
+        - Use cases: Social networks, recommendation engines, fraud detection
+
+        Selection Criteria:
+        - Data model fit
+        - Consistency requirements
+        - Scale and performance needs
+        - Operational complexity
+      resources:
+        - title: "NoSQL Database Comparison"
+          url: "https://aws.amazon.com/nosql/"
+          description: "AWS NoSQL database overview"
+        - title: "MongoDB vs Cassandra"
+          url: "https://www.mongodb.com/compare/mongodb-vs-cassandra"
+          description: "Document vs column-family comparison"
+      time_estimate: 45
+
+    - day: 20
+      topic: "Week 3 Integration - Social Media Feed Design"
+      activity: "Design a social media feed system with advanced data processing and search capabilities."
+      detailed_content: |
+        System Requirements:
+        - Functional: Post creation, timeline generation, search, recommendations
+        - Non-functional: 1B users, 100M posts/day, <200ms timeline load
+        - Features: Text/image posts, likes, comments, following/followers
+
+        Architecture Components:
+        1. User service for profiles and relationships
+        2. Post service for content creation and storage
+        3. Timeline service for feed generation
+        4. Search service for content discovery
+        5. Recommendation service for personalized content
+        6. Media service for image/video processing
+        7. CDN for global content delivery
+
+        Key Design Decisions:
+        - Pull vs Push vs Hybrid feed generation
+        - Hot celebrity user handling
+        - Content ranking and personalization algorithms
+        - Real-time vs batch processing for recommendations
+        - Global search index management
+        - Media storage and processing pipeline
+
+        Data Models:
+        - User graph storage (following relationships)
+        - Post storage with content and metadata
+        - Timeline cache for active users
+        - Search index for content discovery
+        - Analytics data for recommendation training
+      resources:
+        - title: "Instagram System Design"
+          url: "https://www.educative.io/courses/grokking-system-design-fundamentals/instagram"
+          description: "Social media platform architecture"
+      time_estimate: 90
+
+  week4:
+    - day: 22
+      topic: "Security & Authentication"
+      activity: "Implement authentication, authorization, encryption, and security best practices."
+      detailed_content: |
+        Authentication Methods:
+        - Username/password with secure hashing (bcrypt, Argon2)
+        - Multi-factor authentication (MFA)
+        - OAuth 2.0 for third-party integration
+        - JWT tokens for stateless authentication
+        - SSO and SAML for enterprise systems
+
+        Authorization Patterns:
+        - Role-based access control (RBAC)
+        - Attribute-based access control (ABAC)
+        - Permission-based systems
+        - Resource-level access controls
+
+        Security Measures:
+        - HTTPS/TLS for data in transit
+        - Encryption at rest for sensitive data
+        - API rate limiting and DDoS protection
+        - Input validation and SQL injection prevention
+        - CORS policies for web security
+
+        Security Architecture:
+        - Defense in depth strategy
+        - Security monitoring and logging
+        - Incident response procedures
+        - Regular security audits and penetration testing
+      resources:
+        - title: "OWASP Top 10"
+          url: "https://owasp.org/www-project-top-ten/"
+          description: "Web application security risks"
+        - title: "OAuth 2.0 Guide"
+          url: "https://oauth.net/2/"
+          description: "Authorization framework specification"
+      time_estimate: 45
+
+    - day: 23
+      topic: "Monitoring & Observability"
+      activity: "Build comprehensive monitoring with metrics, logging, tracing, and alerting systems."
+      detailed_content: |
+        Three Pillars of Observability:
+        - Metrics: Numerical data about system performance
+        - Logs: Detailed records of system events
+        - Traces: Request flow through distributed systems
+
+        Metrics and KPIs:
+        - SLIs (Service Level Indicators): Actual service performance
+        - SLOs (Service Level Objectives): Target performance levels
+        - SLAs (Service Level Agreements): Contractual performance commitments
+        - Error rates, latency percentiles, throughput
+
+        Logging Strategy:
+        - Structured logging with consistent format
+        - Log aggregation across distributed services
+        - Log retention and storage policies
+        - Correlation IDs for request tracing
+
+        Distributed Tracing:
+        - OpenTelemetry for standardized instrumentation
+        - Jaeger, Zipkin for trace collection and analysis
+        - Performance bottleneck identification
+        - Dependency mapping and service topology
+
+        Alerting:
+        - Threshold-based and anomaly detection alerts
+        - Alert fatigue prevention
+        - Escalation policies and on-call procedures
+        - Runbook automation
+      resources:
+        - title: "Prometheus Monitoring"
+          url: "https://prometheus.io/docs/"
+          description: "Open-source monitoring system"
+        - title: "Observability Engineering"
+          url: "https://www.oreilly.com/library/view/observability-engineering/9781492076438/"
+          description: "Comprehensive observability guide"
+      time_estimate: 45
+
+    - day: 24
+      topic: "Rate Limiting & Traffic Management"
+      activity: "Implement rate limiting algorithms, DDoS protection, and traffic shaping strategies."
+      detailed_content: |
+        Rate Limiting Algorithms:
+        - Token bucket: Allow bursts, smooth long-term rate
+        - Leaky bucket: Smooth output rate
+        - Fixed window counter: Simple but can have spikes
+        - Sliding window log: Accurate but memory intensive
+        - Sliding window counter: Balance accuracy and efficiency
+
+        Implementation Strategies:
+        - Application-level rate limiting
+        - API gateway rate limiting
+        - Distributed rate limiting with Redis
+        - Per-user vs per-IP rate limiting
+
+        DDoS Protection:
+        - Network-level filtering
+        - Application-level protection
+        - Geo-blocking and IP reputation
+        - CAPTCHA challenges for suspicious traffic
+
+        Traffic Management:
+        - Circuit breakers for downstream service protection
+        - Bulkhead pattern for resource isolation
+        - Graceful degradation during overload
+        - Priority queuing for critical requests
+      resources:
+        - title: "Rate Limiting Patterns"
+          url: "https://cloud.google.com/architecture/rate-limiting-strategies-techniques"
+          description: "Rate limiting implementation strategies"
+        - title: "DDoS Protection Guide"
+          url: "https://aws.amazon.com/shield/ddos-attack-protection/"
+          description: "DDoS mitigation techniques"
+      time_estimate: 45
+
+    - day: 25
+      topic: "Distributed Systems Consensus"
+      activity: "Learn consensus algorithms (Paxos, Raft), leader election, and distributed coordination."
+      detailed_content: |
+        Consensus Problem:
+        - Agreement on single value in distributed system
+        - Handling node failures and network partitions
+        - Safety (never return incorrect result)
+        - Liveness (eventually return result)
+
+        Raft Consensus Algorithm:
+        - Leader election process
+        - Log replication mechanism
+        - Safety guarantees and proofs
+        - Simpler than Paxos, easier to understand
+
+        Paxos Algorithm:
+        - Multi-Paxos for sequence of values
+        - Roles: Proposers, Acceptors, Learners
+        - Two-phase protocol: Prepare and Accept
+        - Byzantine fault tolerance variants
+
+        Practical Applications:
+        - Distributed databases (etcd, Consul)
+        - Configuration management
+        - Service discovery
+        - Leader election in distributed services
+
+        CAP Theorem Implications:
+        - Partition tolerance requirement
+        - Consistency vs availability trade-offs
+        - Network partition handling strategies
+      resources:
+        - title: "Raft Consensus"
+          url: "https://raft.github.io/"
+          description: "Understandable consensus algorithm"
+        - title: "etcd Documentation"
+          url: "https://etcd.io/docs/"
+          description: "Production consensus system"
+      time_estimate: 45
+
+    - day: 26
+      topic: "System Integration & Architecture Patterns"
+      activity: "Integrate all learned concepts into cohesive system architectures and design patterns."
+      detailed_content: |
+        Architecture Patterns:
+        - Layered architecture: Separation of concerns
+        - Microservices: Service-oriented decomposition
+        - Event-driven: Loose coupling through events
+        - CQRS: Command query responsibility segregation
+        - Hexagonal: Ports and adapters pattern
+
+        Integration Patterns:
+        - API composition for data aggregation
+        - Database per service with event sourcing
+        - Saga pattern for distributed transactions
+        - Backend for Frontend (BFF) pattern
+        - Strangler Fig for legacy system migration
+
+        System Boundaries:
+        - Domain-driven design principles
+        - Bounded contexts and ubiquitous language
+        - Service interfaces and contracts
+        - Data consistency boundaries
+
+        Quality Attributes:
+        - Scalability: Horizontal and vertical scaling
+        - Reliability: Fault tolerance and recovery
+        - Performance: Latency and throughput optimization
+        - Security: Defense in depth
+        - Maintainability: Code organization and testing
+      resources:
+        - title: "Software Architecture Patterns"
+          url: "https://www.oreilly.com/library/view/software-architecture-patterns/9781491971437/"
+          description: "Common architecture patterns"
+        - title: "Building Evolutionary Architectures"
+          url: "https://www.thoughtworks.com/insights/books/building-evolutionary-architectures"
+          description: "Adaptable system design"
+      time_estimate: 45
+
+    - day: 27
+      topic: "Mock Interview 1 - Ride Sharing System"
+      activity: "Design Uber/Lyft system with real-time matching, pricing, and location tracking."
+      detailed_content: |
+        Interview Format:
+        - 45 minutes total design session
+        - Requirements gathering (5 min)
+        - High-level design (15 min)
+        - Detailed design (20 min)
+        - Scale and optimization (5 min)
+
+        System Requirements:
+        - Functional: Driver/rider matching, trip tracking, payments, ratings
+        - Non-functional: 1M drivers, 10M riders, real-time location updates
+        - Geographic: Global service with city-level operations
+
+        Key Components:
+        1. User management (drivers and riders)
+        2. Location service for real-time tracking
+        3. Matching service for driver-rider pairing
+        4. Trip service for ride lifecycle management
+        5. Payment service for billing and transactions
+        6. Notification service for real-time updates
+
+        Design Challenges:
+        - Real-time location updates at scale
+        - Efficient driver-rider matching algorithms
+        - Dynamic pricing based on supply/demand
+        - Trip state management and fault tolerance
+        - Global deployment with local regulations
+
+        Practice Areas:
+        - Geospatial data structures (QuadTree, Geohashing)
+        - Real-time data processing
+        - Machine learning for ETA and pricing
+        - Payment processing and financial compliance
+      resources:
+        - title: "Uber System Design"
+          url: "https://www.educative.io/courses/grokking-system-design-fundamentals/uber"
+          description: "Comprehensive ride-sharing system design"
+      time_estimate: 90
+
+    - day: 28
+      topic: "Mock Interview 2 - Video Streaming Platform"
+      activity: "Design Netflix/YouTube system with video processing, CDN, and recommendation engine."
+      detailed_content: |
+        Final Assessment Format:
+        - 45 minutes comprehensive design session
+        - Demonstrate mastery of all learned concepts
+        - Handle complex trade-offs and optimizations
+        - Show deep understanding of scale challenges
+
+        System Requirements:
+        - Functional: Video upload, processing, streaming, recommendations
+        - Non-functional: 1B users, 1M hours watched/day, global distribution
+        - Features: Multiple quality levels, offline downloads, live streaming
+
+        Core Components:
+        1. Video ingestion and processing pipeline
+        2. Content delivery network (CDN) for global streaming
+        3. Metadata service for video information
+        4. User service for profiles and preferences
+        5. Recommendation engine for personalized content
+        6. Search service for content discovery
+        7. Analytics service for usage tracking
+
+        Advanced Challenges:
+        - Video encoding and adaptive bitrate streaming
+        - Global CDN optimization and cache strategies
+        - Real-time recommendation system at scale
+        - Content copyright and moderation systems
+        - Live streaming infrastructure
+        - Mobile vs web optimization strategies
+
+        Evaluation Criteria:
+        - System design depth and breadth
+        - Trade-off analysis and justification
+        - Scale estimation and capacity planning
+        - Technology selection reasoning
+        - Communication clarity and structure
+      resources:
+        - title: "Netflix System Design"
+          url: "https://www.educative.io/courses/grokking-system-design-fundamentals/netflix"
+          description: "Video streaming platform architecture"
+      time_estimate: 90

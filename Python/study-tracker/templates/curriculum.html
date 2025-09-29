@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curriculum Editor - Study Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .navigation {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-link {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-link:hover {
+            background-color: #f1f3f4;
+        }
+        .curriculum-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .track-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .track-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .add-topic-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .add-topic-btn:hover {
+            background: #218838;
+        }
+        .topics-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .topic-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+        .topic-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+        .topic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .topic-title {
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        .topic-day {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .topic-activity {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .topic-time {
+            color: #28a745;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .topic-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .edit-btn, .delete-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .edit-btn {
+            background: #ffc107;
+            color: #212529;
+        }
+        .edit-btn:hover {
+            background: #e0a800;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #007bff 0%, #6f42c1 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body {
+            padding: 25px;
+        }
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .close:hover {
+            opacity: 0.7;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .dynamic-list {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        .dynamic-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: flex-start;
+        }
+        .dynamic-item input, .dynamic-item textarea {
+            flex: 1;
+            margin: 0;
+        }
+        .remove-item-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            min-width: 60px;
+        }
+        .add-item-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .save-btn, .cancel-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
+        .cancel-btn:hover {
+            background: #5a6268;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #c3e6cb;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #f5c6cb;
+        }
+        @media (max-width: 768px) {
+            .curriculum-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛠️ Curriculum Editor</h1>
+        <p>Customize your learning content and add new topics, problems, and resources</p>
+    </div>
+
+    <div class="navigation">
+        <a href="/" class="nav-link">📅 Dashboard</a>
+        <a href="/history" class="nav-link">📊 History</a>
+        <a href="/preview" class="nav-link">🔮 Preview</a>
+        <a href="/practice" class="nav-link">🎯 Practice</a>
+        <a href="/analytics" class="nav-link">📈 Analytics</a>
+        <a href="/curriculum" class="nav-link" style="background-color: #f1f3f4;">🛠️ Curriculum</a>
+        <a href="/config" class="nav-link">⚙️ Config</a>
+        <a href="/help" class="nav-link">❓ Help</a>
+    </div>
+
+    <div class="curriculum-grid">
+        <!-- Coding Track -->
+        <div class="track-section">
+            <div class="track-header">
+                <h2>💻 Coding Curriculum</h2>
+                <div>
+                    <button class="add-topic-btn" onclick="openModal('coding')" title="Add a new custom coding topic to your curriculum. You can specify problems, difficulty, and detailed learning content.">
+                        ➕ Add Topic
+                    </button>
+                    <button class="reset-btn" onclick="resetToDefault('coding')" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;" title="Reset the coding curriculum to the original 28-day program. Creates a backup of your current customizations.">
+                        🔄 Reset to Default
+                    </button>
+                </div>
+            </div>
+            <div class="topics-list" id="coding-topics">
+                <div class="loading">Loading topics...</div>
+            </div>
+        </div>
+
+        <!-- System Design Track -->
+        <div class="track-section">
+            <div class="track-header">
+                <h2>🏗️ System Design Curriculum</h2>
+                <div>
+                    <button class="add-topic-btn" onclick="openModal('system_design')" title="Add a new custom system design topic to your curriculum. You can specify resources, concepts, and detailed learning guides.">
+                        ➕ Add Topic
+                    </button>
+                    <button class="reset-btn" onclick="resetToDefault('system_design')" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;" title="Reset the system design curriculum to the original 28-day program. Creates a backup of your current customizations.">
+                        🔄 Reset to Default
+                    </button>
+                </div>
+            </div>
+            <div class="topics-list" id="system_design-topics">
+                <div class="loading">Loading topics...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Topic Editor Modal -->
+    <div id="topicModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Topic</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="topicForm">
+                    <input type="hidden" id="editingTrack" value="">
+                    <input type="hidden" id="editingDay" value="">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="topicName">Topic Name *</label>
+                            <input type="text" id="topicName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="timeEstimate">Time Estimate (minutes) *</label>
+                            <input type="number" id="timeEstimate" value="45" min="15" max="180" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dayNumber">Day Number (optional for editing)</label>
+                            <input type="number" id="dayNumber" min="1" max="999" placeholder="Auto-assigned for new topics">
+                        </div>
+                        <div class="form-group">
+                            <!-- Empty column for layout balance -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="activity">Learning Activity *</label>
+                        <input type="text" id="activity" placeholder="e.g., Learn and practice, Read fundamentals, etc." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detailedContent">Detailed Content Guide</label>
+                        <textarea id="detailedContent" placeholder="Provide detailed explanation, concepts, and implementation tips..."></textarea>
+                    </div>
+
+                    <!-- Coding-specific fields -->
+                    <div id="codingFields" style="display: none;">
+                        <div class="form-group">
+                            <label>Practice Problems</label>
+                            <div class="dynamic-list" id="problemsList">
+                                <!-- Problems will be added dynamically -->
+                            </div>
+                            <button type="button" class="add-item-btn" onclick="addProblem()">➕ Add Problem</button>
+                        </div>
+                    </div>
+
+                    <!-- System Design-specific fields -->
+                    <div id="systemDesignFields" style="display: none;">
+                        <div class="form-group">
+                            <label>Study Resources</label>
+                            <div class="dynamic-list" id="resourcesList">
+                                <!-- Resources will be added dynamically -->
+                            </div>
+                            <button type="button" class="add-item-btn" onclick="addResource()">➕ Add Resource</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Key Concepts</label>
+                            <div class="dynamic-list" id="conceptsList">
+                                <!-- Concepts will be added dynamically -->
+                            </div>
+                            <button type="button" class="add-item-btn" onclick="addConcept()">➕ Add Concept</button>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button type="submit" class="save-btn">💾 Save Topic</button>
+                        <button type="button" class="cancel-btn" onclick="closeModal()">❌ Cancel</button>
+                    </div>
+                </form>
+
+                <div id="modalMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTrack = '';
+        let currentEditingDay = null;
+
+        // Load curriculum data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTopics('coding');
+            loadTopics('system_design');
+        });
+
+        async function loadTopics(track) {
+            try {
+                const response = await fetch(`/api/curriculum/${track}`);
+                const curriculum = await response.json();
+
+                const container = document.getElementById(`${track}-topics`);
+                container.innerHTML = '';
+
+                // Collect all topics from all weeks
+                const allTopics = [];
+                for (const [weekName, days] of Object.entries(curriculum.weeks)) {
+                    allTopics.push(...days);
+                }
+
+                // Sort by day number
+                allTopics.sort((a, b) => (a.day || 0) - (b.day || 0));
+
+                allTopics.forEach(topic => {
+                    const topicElement = createTopicElement(track, topic);
+                    container.appendChild(topicElement);
+                });
+
+                if (allTopics.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No topics yet. Add your first topic!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading topics:', error);
+                document.getElementById(`${track}-topics`).innerHTML = '<p style="color: #dc3545; text-align: center;">Error loading topics</p>';
+            }
+        }
+
+        function createTopicElement(track, topic) {
+            const div = document.createElement('div');
+            div.className = 'topic-item';
+            div.innerHTML = `
+                <div class="topic-header">
+                    <h4 class="topic-title">${topic.topic}</h4>
+                    <span class="topic-day">Day ${topic.day}</span>
+                </div>
+                <div class="topic-activity">${topic.activity}</div>
+                <div class="topic-time">⏱️ ${topic.time_estimate} minutes</div>
+                <div class="topic-actions">
+                    <button class="edit-btn" onclick="editTopic('${track}', ${topic.day})">✏️ Edit</button>
+                    <button class="delete-btn" onclick="deleteTopic('${track}', ${topic.day})">🗑️ Delete</button>
+                </div>
+            `;
+            return div;
+        }
+
+        function openModal(track, editingDay = null) {
+            currentTrack = track;
+            currentEditingDay = editingDay;
+
+            document.getElementById('editingTrack').value = track;
+            document.getElementById('editingDay').value = editingDay || '';
+
+            // Show/hide track-specific fields
+            if (track === 'coding') {
+                document.getElementById('codingFields').style.display = 'block';
+                document.getElementById('systemDesignFields').style.display = 'none';
+            } else {
+                document.getElementById('codingFields').style.display = 'none';
+                document.getElementById('systemDesignFields').style.display = 'block';
+            }
+
+            // Set modal title
+            const title = editingDay ? `Edit ${track === 'coding' ? 'Coding' : 'System Design'} Topic` : `Add New ${track === 'coding' ? 'Coding' : 'System Design'} Topic`;
+            document.getElementById('modal-title').textContent = title;
+
+            // Reset form
+            document.getElementById('topicForm').reset();
+            document.getElementById('modalMessage').innerHTML = '';
+
+            // Clear dynamic fields
+            document.getElementById('problemsList').innerHTML = '';
+            document.getElementById('resourcesList').innerHTML = '';
+            document.getElementById('conceptsList').innerHTML = '';
+
+            // If editing, load existing data
+            if (editingDay) {
+                loadTopicForEditing(track, editingDay);
+            }
+
+            document.getElementById('topicModal').style.display = 'block';
+        }
+
+        async function loadTopicForEditing(track, day) {
+            try {
+                const response = await fetch(`/api/curriculum/${track}`);
+                const curriculum = await response.json();
+
+                // Find the topic
+                let topic = null;
+                for (const [weekName, days] of Object.entries(curriculum.weeks)) {
+                    topic = days.find(t => t.day === day);
+                    if (topic) break;
+                }
+
+                if (!topic) {
+                    showMessage('error', 'Topic not found');
+                    return;
+                }
+
+                // Populate form fields
+                document.getElementById('topicName').value = topic.topic || '';
+                document.getElementById('activity').value = topic.activity || '';
+                document.getElementById('timeEstimate').value = topic.time_estimate || 45;
+                document.getElementById('dayNumber').value = topic.day || '';
+                document.getElementById('detailedContent').value = topic.detailed_content || '';
+
+                // Populate track-specific fields
+                if (track === 'coding' && topic.problems) {
+                    topic.problems.forEach(problem => {
+                        addProblem(problem);
+                    });
+                } else if (track === 'system_design') {
+                    if (topic.resources) {
+                        topic.resources.forEach(resource => {
+                            addResource(resource);
+                        });
+                    }
+                    if (topic.concepts) {
+                        topic.concepts.forEach(concept => {
+                            addConcept(concept);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading topic for editing:', error);
+                showMessage('error', 'Error loading topic data');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('topicModal').style.display = 'none';
+        }
+
+        function addProblem(problem = null) {
+            const container = document.getElementById('problemsList');
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Problem Title" value="${problem?.title || ''}" data-field="title">
+                <input type="number" placeholder="Number" value="${problem?.number || ''}" data-field="number" style="max-width: 100px;">
+                <select data-field="difficulty">
+                    <option value="Easy" ${problem?.difficulty === 'Easy' ? 'selected' : ''}>Easy</option>
+                    <option value="Medium" ${problem?.difficulty === 'Medium' ? 'selected' : ''}>Medium</option>
+                    <option value="Hard" ${problem?.difficulty === 'Hard' ? 'selected' : ''}>Hard</option>
+                </select>
+                <input type="url" placeholder="LeetCode URL" value="${problem?.url || ''}" data-field="url">
+                <textarea placeholder="Description" data-field="description" style="min-height: 60px;">${problem?.description || ''}</textarea>
+                <button type="button" class="remove-item-btn" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function addResource(resource = null) {
+            const container = document.getElementById('resourcesList');
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Resource Title" value="${resource?.title || ''}" data-field="title">
+                <input type="url" placeholder="URL" value="${resource?.url || ''}" data-field="url">
+                <textarea placeholder="Description" data-field="description" style="min-height: 60px;">${resource?.description || ''}</textarea>
+                <button type="button" class="remove-item-btn" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function addConcept(concept = null) {
+            const container = document.getElementById('conceptsList');
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Key Concept" value="${typeof concept === 'string' ? concept : ''}" data-field="concept">
+                <button type="button" class="remove-item-btn" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            container.appendChild(div);
+        }
+
+        async function editTopic(track, day) {
+            openModal(track, day);
+        }
+
+        async function deleteTopic(track, day) {
+            if (!confirm('Are you sure you want to delete this topic? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/curriculum/${track}/topic/${day}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadTopics(track); // Reload and re-sort topics
+                    showMessage('success', 'Topic deleted successfully');
+                } else {
+                    const error = await response.json();
+                    showMessage('error', error.error || 'Error deleting topic');
+                }
+            } catch (error) {
+                console.error('Error deleting topic:', error);
+                showMessage('error', 'Network error while deleting topic');
+            }
+        }
+
+        // Form submission
+        document.getElementById('topicForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const track = document.getElementById('editingTrack').value;
+            const editingDay = document.getElementById('editingDay').value;
+
+            const formData = {
+                day: parseInt(document.getElementById('dayNumber').value),
+                topic: document.getElementById('topicName').value,
+                activity: document.getElementById('activity').value,
+                time_estimate: parseInt(document.getElementById('timeEstimate').value),
+                detailed_content: document.getElementById('detailedContent').value
+            };
+
+            // Collect track-specific data
+            if (track === 'coding') {
+                formData.problems = [];
+                document.querySelectorAll('#problemsList .dynamic-item').forEach(item => {
+                    const problem = {};
+                    item.querySelectorAll('[data-field]').forEach(field => {
+                        const fieldName = field.getAttribute('data-field');
+                        problem[fieldName] = field.value;
+                    });
+                    if (problem.title) formData.problems.push(problem);
+                });
+            } else {
+                formData.resources = [];
+                formData.concepts = [];
+
+                document.querySelectorAll('#resourcesList .dynamic-item').forEach(item => {
+                    const resource = {};
+                    item.querySelectorAll('[data-field]').forEach(field => {
+                        const fieldName = field.getAttribute('data-field');
+                        resource[fieldName] = field.value;
+                    });
+                    if (resource.title) formData.resources.push(resource);
+                });
+
+                document.querySelectorAll('#conceptsList .dynamic-item').forEach(item => {
+                    const concept = item.querySelector('[data-field="concept"]').value;
+                    if (concept) formData.concepts.push(concept);
+                });
+            }
+
+            try {
+                let url, method;
+                if (editingDay) {
+                    url = `/api/curriculum/${track}/topic/${editingDay}`;
+                    method = 'PUT';
+                } else {
+                    url = `/api/curriculum/${track}/topic`;
+                    method = 'POST';
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    closeModal();
+                    await loadTopics(track); // Reload and re-sort topics
+                    showMessage('success', editingDay ? 'Topic updated successfully' : 'Topic added successfully');
+                } else {
+                    const error = await response.json();
+                    showMessage('error', error.error || 'Error saving topic');
+                }
+            } catch (error) {
+                console.error('Error saving topic:', error);
+                showMessage('error', 'Network error while saving topic');
+            }
+        });
+
+        function showMessage(type, message) {
+            const messageDiv = document.getElementById('modalMessage');
+            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            messageDiv.textContent = message;
+
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        async function resetToDefault(track) {
+            const trackName = track === 'coding' ? 'Coding' : 'System Design';
+
+            if (!confirm(`⚠️ Are you sure you want to reset ${trackName} curriculum to default?\n\nThis will:\n• Replace all current topics with the original curriculum\n• Create a backup of your current curriculum\n• Cannot be undone (except from backup)\n\nContinue?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/curriculum/${track}/reset`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await loadTopics(track); // Reload topics
+                    alert(`✅ ${result.message}\n\n🔖 Backup created: ${result.backup_created}`);
+                } else {
+                    alert(`❌ Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error resetting curriculum:', error);
+                alert('❌ Network error while resetting curriculum');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('topicModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

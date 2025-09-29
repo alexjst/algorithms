@@ -137,6 +137,12 @@ Union-Find & Connected components, cycles & Graph connectivity, MST \\
 \hline
 Trie & Prefix matching, word games & Autocomplete, word search \\
 \hline
+Intervals & Overlapping ranges, scheduling & Meeting rooms, merge intervals \\
+\hline
+Matrix Traversal & 2D grid problems, connected components & Islands, flood fill \\
+\hline
+Tree Construction & Build tree from traversals & Preorder/inorder, serialize \\
+\hline
 \end{tabular}
 \end{table}
 
@@ -296,6 +302,9 @@ def bfs_shortest_path(graph, start, target):
 
 \subsubsection{Opposite Ends Template}
 \begin{lstlisting}
+# Problem: Two Sum II - Input Array Is Sorted
+# Given a sorted array, find two numbers that add up to target
+# Return indices of the two numbers (assume exactly one solution exists)
 def two_sum_sorted(nums, target):
     left, right = 0, len(nums) - 1
 
@@ -311,6 +320,9 @@ def two_sum_sorted(nums, target):
 
     return []
 
+# Problem: Valid Palindrome
+# Given a string, determine if it's a palindrome (reads same forwards/backwards)
+# Consider only alphanumeric characters and ignore case
 def is_palindrome(s):
     left, right = 0, len(s) - 1
 
@@ -322,6 +334,8 @@ def is_palindrome(s):
 
     return True
 
+# Problem: Reverse Array
+# Reverse an array in-place using two pointers
 def reverse_array(arr):
     left, right = 0, len(arr) - 1
 
@@ -333,6 +347,8 @@ def reverse_array(arr):
 
 \subsubsection{Fast and Slow Pointers}
 \begin{lstlisting}
+# Problem: Linked List Cycle (Floyd's Cycle Detection)
+# Detect if a linked list has a cycle using fast/slow pointers
 def has_cycle(head):
     if not head or not head.next:
         return False
@@ -348,6 +364,8 @@ def has_cycle(head):
 
     return False
 
+# Problem: Middle of the Linked List
+# Find the middle node of a linked list
 def find_middle(head):
     slow = fast = head
 
@@ -357,6 +375,8 @@ def find_middle(head):
 
     return slow
 
+# Problem: Remove Nth Node From End of List
+# Remove the nth node from the end of a linked list
 def remove_nth_from_end(head, n):
     dummy = ListNode(0)
     dummy.next = head
@@ -386,6 +406,8 @@ def remove_nth_from_end(head, n):
 
 \subsubsection{Fixed Size Window}
 \begin{lstlisting}
+# Problem: Maximum Sum Subarray of Size K
+# Find the maximum sum of any contiguous subarray of size k
 def max_sum_subarray(nums, k):
     if len(nums) < k:
         return 0
@@ -417,6 +439,8 @@ def find_averages(nums, k):
 
 \subsubsection{Variable Size Window}
 \begin{lstlisting}
+# Problem: Longest Substring with At Most K Distinct Characters
+# Find the length of the longest substring with at most k distinct characters
 def longest_substring_k_distinct(s, k):
     if k == 0:
         return 0
@@ -485,6 +509,8 @@ def min_window_substring(s, t):
 
 \subsubsection{Standard Binary Search}
 \begin{lstlisting}
+# Problem: Binary Search
+# Find target value in a sorted array, return index or -1 if not found
 def binary_search(nums, target):
     left, right = 0, len(nums) - 1
 
@@ -608,6 +634,8 @@ def search_rotated_sorted_array(nums, target):
 
 \subsubsection{1D DP Template}
 \begin{lstlisting}
+# Problem: Fibonacci Number
+# Calculate the nth Fibonacci number using dynamic programming
 def fibonacci(n):
     if n <= 1:
         return n
@@ -709,7 +737,7 @@ def min_path_sum(grid):
 
 \begin{patternbox}{Backtracking - Explore All Possibilities}
 \textbf{Use Case:} Permutations, combinations, N-Queens, Sudoku\\
-\textbf{Time:} Exponential O(2^n) or O(n!)\\
+\textbf{Time:} Exponential O($2^n$) or O($n!$)\\
 \textbf{Space:} O(depth) for recursion stack
 \end{patternbox}
 
@@ -931,7 +959,7 @@ class MedianFinder:
 
 \begin{patternbox}{Union-Find - Connected Components}
 \textbf{Use Case:} Graph connectivity, cycle detection, MST\\
-\textbf{Time:} O(α(n)) amortized per operation\\
+\textbf{Time:} O($\alpha(n)$) amortized per operation\\
 \textbf{Space:} O(n) for parent and rank arrays
 \end{patternbox}
 
@@ -1176,7 +1204,241 @@ def topological_sort_dfs(graph):
     return result[::-1]  # Reverse for correct order
 \end{lstlisting}
 
-\subsection{12. Special Algorithms}
+\subsection{12. Interval Problems}
+
+\begin{patternbox}{Interval Problems - Merge and Insert Intervals}
+\textbf{Use Case:} Meeting rooms, overlapping intervals, scheduling\\
+\textbf{Time:} O(n log n) for sorting, O(n) for merging\\
+\textbf{Space:} O(n) for result storage
+\end{patternbox}
+
+\begin{lstlisting}
+# Problem: Merge Intervals
+# Given collection of intervals, merge overlapping intervals
+def merge_intervals(intervals):
+    if not intervals:
+        return []
+
+    # Sort by start time
+    intervals.sort(key=lambda x: x[0])
+    merged = [intervals[0]]
+
+    for current in intervals[1:]:
+        last = merged[-1]
+
+        # Overlapping intervals
+        if current[0] <= last[1]:
+            # Merge by updating end time
+            last[1] = max(last[1], current[1])
+        else:
+            # Non-overlapping, add to result
+            merged.append(current)
+
+    return merged
+
+# Problem: Insert Interval
+# Insert new interval and merge if necessary
+def insert_interval(intervals, new_interval):
+    result = []
+    i = 0
+    n = len(intervals)
+
+    # Add all intervals before new_interval
+    while i < n and intervals[i][1] < new_interval[0]:
+        result.append(intervals[i])
+        i += 1
+
+    # Merge overlapping intervals
+    while i < n and intervals[i][0] <= new_interval[1]:
+        new_interval[0] = min(new_interval[0], intervals[i][0])
+        new_interval[1] = max(new_interval[1], intervals[i][1])
+        i += 1
+
+    result.append(new_interval)
+
+    # Add remaining intervals
+    while i < n:
+        result.append(intervals[i])
+        i += 1
+
+    return result
+
+# Problem: Meeting Rooms II
+# Find minimum number of meeting rooms needed
+def min_meeting_rooms(intervals):
+    if not intervals:
+        return 0
+
+    # Separate start and end times
+    starts = sorted([interval[0] for interval in intervals])
+    ends = sorted([interval[1] for interval in intervals])
+
+    rooms = 0
+    end_ptr = 0
+
+    for start in starts:
+        # If meeting starts after another ends, reuse room
+        if start >= ends[end_ptr]:
+            end_ptr += 1
+        else:
+            # Need new room
+            rooms += 1
+
+    return rooms
+\end{lstlisting}
+
+\subsection{13. Matrix Traversal}
+
+\begin{patternbox}{Matrix Problems - 2D Grid Traversal}
+\textbf{Use Case:} Island problems, path finding, flood fill\\
+\textbf{Time:} O(m*n) where m,n are matrix dimensions\\
+\textbf{Space:} O(m*n) for visited array or recursion stack
+\end{patternbox}
+
+\begin{lstlisting}
+# Problem: Number of Islands
+# Count connected components of '1's in 2D grid
+def num_islands(grid):
+    if not grid or not grid[0]:
+        return 0
+
+    m, n = len(grid), len(grid[0])
+    count = 0
+
+    def dfs(i, j):
+        # Boundary check and water check
+        if (i < 0 or i >= m or j < 0 or j >= n or
+            grid[i][j] != '1'):
+            return
+
+        # Mark as visited
+        grid[i][j] = '0'
+
+        # Explore 4 directions
+        for di, dj in [(0,1), (1,0), (0,-1), (-1,0)]:
+            dfs(i + di, j + dj)
+
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == '1':
+                dfs(i, j)
+                count += 1
+
+    return count
+
+# Problem: Rotting Oranges (Multi-source BFS)
+# Find time for all oranges to rot
+def oranges_rotting(grid):
+    from collections import deque
+
+    m, n = len(grid), len(grid[0])
+    queue = deque()
+    fresh = 0
+
+    # Find all rotten oranges and count fresh ones
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == 2:
+                queue.append((i, j))
+            elif grid[i][j] == 1:
+                fresh += 1
+
+    if fresh == 0:
+        return 0
+
+    time = 0
+    directions = [(0,1), (1,0), (0,-1), (-1,0)]
+
+    while queue:
+        time += 1
+        size = len(queue)
+
+        for _ in range(size):
+            x, y = queue.popleft()
+
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+
+                if (0 <= nx < m and 0 <= ny < n and
+                    grid[nx][ny] == 1):
+                    grid[nx][ny] = 2
+                    fresh -= 1
+                    queue.append((nx, ny))
+
+    return time - 1 if fresh == 0 else -1
+\end{lstlisting}
+
+\subsection{14. Tree Construction}
+
+\begin{patternbox}{Tree Construction - Build Trees from Traversals}
+\textbf{Use Case:} Construct tree from preorder/inorder, serialize/deserialize\\
+\textbf{Time:} O(n) with hashmap optimization\\
+\textbf{Space:} O(n) for hashmap and recursion stack
+\end{patternbox}
+
+\begin{lstlisting}
+# Problem: Construct Binary Tree from Preorder and Inorder
+# Build tree given preorder and inorder traversal arrays
+def build_tree_preorder_inorder(preorder, inorder):
+    if not preorder or not inorder:
+        return None
+
+    # Build hashmap for O(1) inorder lookups
+    inorder_map = {val: i for i, val in enumerate(inorder)}
+    self.preorder_idx = 0
+
+    def build(left, right):
+        if left > right:
+            return None
+
+        # Root is current preorder element
+        root_val = preorder[self.preorder_idx]
+        self.preorder_idx += 1
+        root = TreeNode(root_val)
+
+        # Find root position in inorder
+        root_idx = inorder_map[root_val]
+
+        # Build left subtree first (preorder property)
+        root.left = build(left, root_idx - 1)
+        root.right = build(root_idx + 1, right)
+
+        return root
+
+    return build(0, len(inorder) - 1)
+
+# Problem: Serialize and Deserialize Binary Tree
+# Convert tree to string and back
+def serialize(root):
+    def preorder(node):
+        if not node:
+            result.append("null")
+            return
+
+        result.append(str(node.val))
+        preorder(node.left)
+        preorder(node.right)
+
+    result = []
+    preorder(root)
+    return ",".join(result)
+
+def deserialize(data):
+    def build():
+        val = next(values)
+        if val == "null":
+            return None
+
+        node = TreeNode(int(val))
+        node.left = build()
+        node.right = build()
+        return node
+
+    values = iter(data.split(","))
+    return build()
+\end{lstlisting}
+
+\subsection{15. Special Algorithms}
 
 \subsubsection{Kadane's Algorithm - Maximum Subarray}
 \begin{lstlisting}
@@ -1332,7 +1594,7 @@ def find_all_duplicates(nums):
 \item O(n) - Single pass through array, BFS/DFS
 \item O(n log n) - Merge sort, heap sort
 \item O(n²) - Nested loops, bubble sort
-\item O(2^n) - Recursive algorithms without memoization
+\item O($2^n$) - Recursive algorithms without memoization
 \end{itemize}
 \end{complexitybox}
 
@@ -1603,5 +1865,391 @@ Advanced Data Structures & 5 & 10 & 5 \\
 \textbf{\Large Remember: Consistency beats intensity.}\\
 \textbf{\Large Practice these templates daily until they become automatic!}
 \end{center}
+
+\newpage
+\appendix
+\section{Daily Progress Tracking Worksheets}
+
+\subsection{Template Mastery Progress Tracker}
+
+\begin{center}
+\textbf{\Large Week \_\_\_\_ Progress Tracker}\\
+\textbf{Date Range: \_\_\_\_\_\_\_\_\_\_ to \_\_\_\_\_\_\_\_\_\_}
+\end{center}
+
+\subsubsection{Daily Template Practice (Write from Memory)}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{4cm}|c|c|c|c|c|c|c|}
+\hline
+\textbf{Template} & \textbf{Mon} & \textbf{Tue} & \textbf{Wed} & \textbf{Thu} & \textbf{Fri} & \textbf{Sat} & \textbf{Sun} \\
+\hline
+DFS Recursive & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+DFS Iterative & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+BFS Standard & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+Two Pointers (Opposite) & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+Two Pointers (Fast/Slow) & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+Sliding Window (Fixed) & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+Sliding Window (Variable) & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+Binary Search & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+Binary Search (First/Last) & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+1D DP Template & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+2D DP Template & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+Backtracking Template & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Goal:} Check $\square$ if you can write the template from memory in under 2 minutes
+
+\subsubsection{Problem Solving Progress}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3cm}|p{5cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\textbf{Date} & \textbf{Problem Name} & \textbf{Pattern} & \textbf{Difficulty} & \textbf{Time (min)} \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_ & Easy/Med/Hard & \_\_\_\_\_ \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\subsection{4-Week Study Schedule Tracker}
+
+\subsubsection{Week 1: Foundation Patterns}
+\textbf{Focus:} Two Pointers, Sliding Window, DFS, BFS, Binary Search
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{2cm}|p{4cm}|p{6cm}|c|}
+\hline
+\textbf{Day} & \textbf{Primary Focus} & \textbf{Goals} & \textbf{Done} \\
+\hline
+Day 1-2 & Two Pointers \& Sliding Window & Master templates, solve: Two Sum II, Container With Most Water & $\square$ \\
+\hline
+Day 3-4 & DFS \& BFS & Recursive/iterative approaches, solve: Binary Tree Traversals & $\square$ \\
+\hline
+Day 5-7 & Binary Search & Standard and modified, solve: Search in Rotated Array & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Week 1 Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1.5cm}
+\end{minipage}}
+
+\subsubsection{Week 2: Dynamic Programming \& Backtracking}
+\textbf{Focus:} 1D \& 2D DP, Backtracking patterns
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{2cm}|p{4cm}|p{6cm}|c|}
+\hline
+\textbf{Day} & \textbf{Primary Focus} & \textbf{Goals} & \textbf{Done} \\
+\hline
+Day 8-10 & Dynamic Programming & 1D/2D templates, solve: Climbing Stairs, Unique Paths & $\square$ \\
+\hline
+Day 11-14 & Backtracking & Template mastery, solve: Permutations, N-Queens & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Week 2 Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1.5cm}
+\end{minipage}}
+
+\subsubsection{Week 3: Advanced Data Structures}
+\textbf{Focus:} Heaps, Union-Find, Trie, Intervals, Matrix
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{2cm}|p{4cm}|p{6cm}|c|}
+\hline
+\textbf{Day} & \textbf{Primary Focus} & \textbf{Goals} & \textbf{Done} \\
+\hline
+Day 15-17 & Heap Operations & Min/max heap applications, solve: Top K Elements & $\square$ \\
+\hline
+Day 18-19 & Union-Find & Path compression, solve: Number of Islands & $\square$ \\
+\hline
+Day 20-21 & Trie \& Intervals & Build from scratch, solve: Merge Intervals & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Week 3 Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1.5cm}
+\end{minipage}}
+
+\subsubsection{Week 4: Special Algorithms \& Integration}
+\textbf{Focus:} Special algorithms, pattern combinations, mock interviews
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{2cm}|p{4cm}|p{6cm}|c|}
+\hline
+\textbf{Day} & \textbf{Primary Focus} & \textbf{Goals} & \textbf{Done} \\
+\hline
+Day 22-24 & Special Algorithms & Kadane's, Prefix Sum, Monotonic Stack & $\square$ \\
+\hline
+Day 25-26 & Topological Sort & Kahn's algorithm, solve: Course Schedule & $\square$ \\
+\hline
+Day 27-28 & Integration \& Mocks & Combine patterns, timed practice sessions & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Week 4 Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1.5cm}
+\end{minipage}}
+
+\newpage
+
+\subsection{Scientific Spaced Repetition Schedule}
+
+\textbf{Optimal Learning and Review Cadence for Maximum Retention}
+
+This schedule follows cognitive science principles with review intervals at 1 day, 3 days, 7 days, and 14 days to maximize long-term retention.
+
+\subsubsection{Week 1: Foundation Building}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|p{3cm}|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Day} & \textbf{New Learning} & \textbf{Learning Activity} & \textbf{Review (Spaced Intervals)} & \textbf{Done} \\
+\hline
+Day 1 & Two Pointers & Learn template, solve: Two Sum II & -- & $\square$ \\
+\hline
+Day 2 & Sliding Window & Learn template, solve: Longest Substring & Two Pointers (1-day) & $\square$ \\
+\hline
+Day 3 & Binary Search & Learn template, solve: Search in Rotated Array & Sliding Window (1-day) & $\square$ \\
+\hline
+Day 4 & DFS Fundamentals & Learn tree/graph traversal & Two Pointers (3-day), Binary Search (1-day) & $\square$ \\
+\hline
+Day 5 & BFS Fundamentals & Learn level-order traversal & Sliding Window (3-day), DFS (1-day) & $\square$ \\
+\hline
+Day 6 & Dynamic Programming & Learn basic DP patterns & Binary Search (3-day), BFS (1-day) & $\square$ \\
+\hline
+Day 7 & Week 1 Integration & Combine learned patterns & DFS (3-day), DP (1-day) & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Week 2: Pattern Reinforcement}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|p{3cm}|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Day} & \textbf{New Learning} & \textbf{Learning Activity} & \textbf{Review (Spaced Intervals)} & \textbf{Done} \\
+\hline
+Day 8 & Advanced DFS & Backtracking, path finding & Two Pointers (7-day), BFS (3-day), DP (1-day) & $\square$ \\
+\hline
+Day 9 & Advanced DP & 2D DP, optimization & Sliding Window (7-day), Advanced DFS (1-day) & $\square$ \\
+\hline
+Day 10 & Greedy Algorithms & Local optimal choices & Binary Search (7-day), Advanced DP (1-day) & $\square$ \\
+\hline
+Day 11 & Backtracking & Permutations, combinations & DFS (7-day), Greedy (1-day) & $\square$ \\
+\hline
+Day 12 & Advanced Backtracking & N-Queens, Sudoku patterns & BFS (7-day), Backtracking (1-day) & $\square$ \\
+\hline
+Day 13 & Interval Problems & Merge, overlap detection & DP (7-day), Advanced Backtracking (1-day) & $\square$ \\
+\hline
+Day 14 & Week 2 Integration & Complex problem combinations & Week 1 Integration (7-day), Intervals (1-day) & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Week 3: Advanced Structures}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|p{3cm}|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Day} & \textbf{New Learning} & \textbf{Learning Activity} & \textbf{Review (Spaced Intervals)} & \textbf{Done} \\
+\hline
+Day 15 & Heap Operations & Min/max heaps, K problems & Advanced DFS (7-day), Week 2 Integration (1-day) & $\square$ \\
+\hline
+Day 16 & Priority Queues & Advanced heap applications & Advanced DP (7-day), Heaps (1-day) & $\square$ \\
+\hline
+Day 17 & Union-Find & Path compression, optimization & Greedy (7-day), Priority Queues (1-day) & $\square$ \\
+\hline
+Day 18 & Trie Operations & Prefix trees, word problems & Backtracking (7-day), Union-Find (1-day) & $\square$ \\
+\hline
+Day 19 & Advanced Trie & Auto-complete, word search & Advanced Backtracking (7-day), Trie (1-day) & $\square$ \\
+\hline
+Day 20 & Matrix Traversal & 2D patterns, connectivity & Intervals (7-day), Advanced Trie (1-day) & $\square$ \\
+\hline
+Day 21 & Week 3 Integration & Advanced data structure combos & Two Pointers (14-day), Matrix (1-day) & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Week 4: Mastery and Integration}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|p{3cm}|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Day} & \textbf{New Learning} & \textbf{Learning Activity} & \textbf{Review (Spaced Intervals)} & \textbf{Done} \\
+\hline
+Day 22 & Special Algorithms & Kadane's, KMP, Manacher's & Sliding Window (14-day), Heaps (7-day), Week 3 Integration (1-day) & $\square$ \\
+\hline
+Day 23 & Monotonic Stack & Next greater, histogram problems & Binary Search (14-day), Priority Queues (7-day), Special Algorithms (1-day) & $\square$ \\
+\hline
+Day 24 & Topological Sort & Kahn's algorithm, dependencies & DFS (14-day), Union-Find (7-day), Monotonic Stack (1-day) & $\square$ \\
+\hline
+Day 25 & Graph Algorithms & Shortest path, MST & BFS (14-day), Trie (7-day), Topological Sort (1-day) & $\square$ \\
+\hline
+Day 26 & Advanced Graph & Strongly connected components & DP (14-day), Advanced Trie (7-day), Graph Algorithms (1-day) & $\square$ \\
+\hline
+Day 27 & Mock Interview 1 & Timed practice, pattern recognition & Week 1 Integration (14-day), Matrix (7-day), Advanced Graph (1-day) & $\square$ \\
+\hline
+Day 28 & Mock Interview 2 & Final assessment, weak areas & All patterns that showed weakness in Mock 1 & $\square$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Daily Review Strategy}
+
+\begin{itemize}
+\item \textbf{1-Day Review:} Quick template rewriting (5-10 minutes)
+\item \textbf{3-Day Review:} Solve 1 easy problem using the pattern (15-20 minutes)
+\item \textbf{7-Day Review:} Solve 1 medium problem, focus on edge cases (25-30 minutes)
+\item \textbf{14-Day Review:} Solve 1 challenging problem or combo pattern (35-40 minutes)
+\end{itemize}
+
+\textbf{Total Daily Time Investment:} 90-120 minutes (30-45 min new learning + 60-75 min reviews)
+
+\newpage
+
+\subsection{Daily Routine Checklist}
+
+\begin{center}
+\textbf{\Large Daily Practice Checklist}\\
+\textbf{Date: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_}
+\end{center}
+
+\subsubsection{Morning Routine (30 minutes)}
+\begin{itemize}
+\item[$\square$] \textbf{Template Writing (10 min):} Write 3 random templates from memory
+  \begin{itemize}
+  \item Template 1: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Time: \_\_\_\_\_ min
+  \item Template 2: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Time: \_\_\_\_\_ min
+  \item Template 3: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Time: \_\_\_\_\_ min
+  \end{itemize}
+\item[$\square$] \textbf{Pattern Recognition (10 min):} Look at problem titles and identify patterns
+\item[$\square$] \textbf{Complexity Analysis (10 min):} Review time/space complexity for each pattern
+\end{itemize}
+
+\subsubsection{Evening Session (60-90 minutes)}
+\begin{itemize}
+\item[$\square$] \textbf{Problem Solving (45-60 min):} 2-3 problems focusing on current week's patterns
+  \begin{itemize}
+  \item Problem 1: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+  \item Problem 2: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+  \item Problem 3: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+  \end{itemize}
+\item[$\square$] \textbf{Template Review (15-30 min):} Review and rewrite struggled templates
+\end{itemize}
+
+\subsubsection{Weekly Reflection}
+\textbf{What went well this week?}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1cm}
+\end{minipage}}
+
+\textbf{What needs improvement?}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1cm}
+\end{minipage}}
+
+\textbf{Next week's focus:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{1cm}
+\end{minipage}}
+
+\newpage
+
+\subsection{Mock Interview Tracker}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{2cm}|p{3cm}|p{4cm}|p{2cm}|p{3cm}|}
+\hline
+\textbf{Date} & \textbf{Problem} & \textbf{Pattern Used} & \textbf{Time} & \textbf{Notes/Improvements} \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \\
+\hline
+\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \_\_\_\_\_ & \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Interview Readiness Checklist}
+
+\textbf{Before Your Real Interview:}
+\begin{itemize}
+\item[$\square$] Can write all 12 main templates from memory in under 2 minutes each
+\item[$\square$] Completed at least 100 problems across all difficulty levels
+\item[$\square$] Can identify correct pattern within 30 seconds of reading problem
+\item[$\square$] Solve medium problems consistently in 15-20 minutes
+\item[$\square$] Explain time/space complexity confidently for all solutions
+\item[$\square$] Completed at least 5 timed mock interview sessions
+\item[$\square$] Comfortable with edge cases and boundary conditions
+\item[$\square$] Can clearly communicate approach before coding
+\end{itemize}
+
+\textbf{Final Preparation Notes:}\\
+\fbox{\begin{minipage}{0.9\textwidth}
+\vspace{2cm}
+\end{minipage}}
 
 \end{document}

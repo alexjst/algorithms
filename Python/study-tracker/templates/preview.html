@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Study Tracker - Preview</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background: #f0f8ff; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .section { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .day { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
+        .topic { background: #ffffff; padding: 10px; margin: 5px 0; border-radius: 3px; border: 1px solid #e9ecef; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
+        .nav a:hover { text-decoration: underline; }
+        .time-estimate { color: #666; font-size: 0.9em; }
+        .no-topic { color: #999; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">📅 Dashboard</a>
+        <a href="/history">📊 History</a>
+        <a href="/preview">🔮 Preview</a>
+        <a href="/practice">🎯 Practice</a>
+        <a href="/analytics">📈 Analytics</a>
+        <a href="/config">⚙️ Config</a>
+        <a href="/help">❓ Help</a>
+    </div>
+
+    <div class="header">
+        <h1>🔮 Upcoming Schedule Preview</h1>
+        <p>See what's coming up in the next few days</p>
+    </div>
+
+    <div class="section">
+        <h2>📅 Next 3 Days</h2>
+
+        {% if preview_days %}
+            {% for day_info in preview_days %}
+            <div class="day">
+                <h3>Day {{ day_info.day }} - {{ day_info.date }}</h3>
+
+                <div class="topic">
+                    <h4>💻 Coding</h4>
+                    {% if day_info.coding %}
+                        <p><strong>{{ day_info.coding.topic }}</strong></p>
+                        <p>{{ day_info.coding.activity }}</p>
+                        <p class="time-estimate">⏱️ {{ day_info.coding.time_estimate }} minutes</p>
+                        {% if day_info.coding.problems %}
+                        <p><strong>Problems:</strong> {{ day_info.coding.problems | join(', ') }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="no-topic">No coding topic scheduled</p>
+                    {% endif %}
+                </div>
+
+                <div class="topic">
+                    <h4>🏗️ System Design</h4>
+                    {% if day_info.system_design %}
+                        <p><strong>{{ day_info.system_design.topic }}</strong></p>
+                        <p>{{ day_info.system_design.activity }}</p>
+                        <p class="time-estimate">⏱️ {{ day_info.system_design.time_estimate }} minutes</p>
+                        {% if day_info.system_design.concepts %}
+                        <p><strong>Concepts:</strong> {{ day_info.system_design.concepts | join(', ') }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="no-topic">No system design topic scheduled</p>
+                    {% endif %}
+                </div>
+
+                <p class="time-estimate">
+                    <strong>Total estimated time: {{ (day_info.coding.time_estimate if day_info.coding else 0) + (day_info.system_design.time_estimate if day_info.system_design else 0) }} minutes</strong>
+                </p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>📚 You're at the end of the 28-day program! Congratulations! 🎉</p>
+            <p>Consider:</p>
+            <ul>
+                <li>Reviewing your weakest topics</li>
+                <li>Doing more mock interviews</li>
+                <li>Practicing company-specific problems</li>
+            </ul>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>💡 Planning Tips</h2>
+        <ul>
+            <li><strong>Block your calendar</strong> for the estimated time each day</li>
+            <li><strong>Prepare materials</strong> - have LeetCode open, notebooks ready</li>
+            <li><strong>Plan reviews</strong> - you'll have spaced repetition reviews mixed in</li>
+            <li><strong>Stay consistent</strong> - daily practice builds the strongest foundation</li>
+        </ul>
+    </div>
+</body>
+</html>
