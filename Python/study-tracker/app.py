@@ -1116,7 +1116,8 @@ def start_timer():
         data = request.get_json()
         track = data.get('track')
         topic = data.get('topic')
-        duration = data.get('duration', 25 * 60)  # Default 25 minutes in seconds
+        duration_minutes = data.get('duration', 25)  # Duration in minutes
+        duration = duration_minutes * 60  # Convert to seconds
 
         # Stop any existing timer
         timer_state = load_timer_state()

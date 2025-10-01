@@ -452,8 +452,8 @@
         // Initialize timer state sync when page loads
         document.addEventListener('DOMContentLoaded', function() {
             syncTimerState();
-            // Sync every 2 seconds to keep tabs in sync
-            setInterval(syncTimerState, 2000);
+            // Sync every 1 second to keep tabs in sync
+            setInterval(syncTimerState, 1000);
         });
 
         async function syncTimerState() {
@@ -495,8 +495,9 @@
 
             // Update timer display
             if (state.remaining > 0) {
-                const minutes = Math.floor(state.remaining / 60);
-                const seconds = state.remaining % 60;
+                const totalSeconds = Math.floor(state.remaining);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
                 const timeText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 timerDisplay.textContent = timeText;
                 timerDisplay.style.color = '';
