@@ -81,26 +81,56 @@ weeks:
 
     - day: 3
       topic: "Caching Strategies"
-      activity: "Learn caching patterns, cache levels, and eviction policies for system performance."
+      activity: "Learn caching patterns, cache levels, eviction policies, and invalidation strategies for system performance."
       detailed_content: |
         Cache Patterns:
-        - Cache-aside: Application manages cache
-        - Write-through: Write to cache and DB simultaneously
-        - Write-behind: Write to cache first, DB later
+        - Cache-aside (Lazy Loading): Application manages cache, read miss triggers DB read + cache write
+        - Write-through: Write to cache and DB simultaneously (synchronous, strong consistency)
+        - Write-behind (Write-back): Write to cache first, DB later (asynchronous, better performance)
+        - Write-around: Write directly to DB, bypass cache (prevents cache pollution from infrequent writes)
         - Refresh-ahead: Proactively refresh before expiration
 
         Cache Levels:
-        - Browser cache
-        - CDN/Edge cache
-        - Reverse proxy cache
-        - Application cache
-        - Database cache
+        - Browser cache: Client-side storage (HTML5 localStorage, sessionStorage)
+        - CDN/Edge cache: Geographic distribution for static content
+        - Reverse proxy cache: Server-side cache (Nginx, Varnish)
+        - Application cache: In-memory cache within application (Redis, Memcached)
+        - Database cache: Query result cache, buffer pools
 
         Eviction Policies:
-        - LRU (Least Recently Used)
-        - LFU (Least Frequently Used)
-        - FIFO (First In, First Out)
-        - TTL (Time To Live)
+        - LRU (Least Recently Used): Best for temporal locality
+        - LFU (Least Frequently Used): Best for frequency-based access
+        - FIFO (First In, First Out): Simple but less effective
+        - TTL (Time To Live): Time-based expiration
+        - Random: Simple, surprisingly effective for large caches
+
+        Cache Invalidation Strategies:
+        - TTL-based expiration: Automatic expiration after fixed time
+        - Manual invalidation: Explicit cache deletion on data updates
+        - Tag-based invalidation: Group related cache entries for bulk invalidation
+        - Event-driven invalidation: Invalidate based on system events
+        - Write-through invalidation: Remove stale data during writes
+
+        Memcached vs Redis:
+        Memcached:
+        - Simple key-value store with string keys and binary values
+        - Supports complex data structures only through client-side serialization
+        - Multi-threaded, faster for simple operations
+        - No persistence, pure in-memory cache
+        - Simpler deployment and operation
+
+        Redis:
+        - Rich data types: strings, lists, sets, sorted sets, hashes, bitmaps, streams
+        - Server-side operations on data structures (LPUSH, SADD, HINCRBY)
+        - Single-threaded (6.0+ has I/O threading)
+        - Optional persistence (RDB snapshots, AOF logs)
+        - Advanced features: pub/sub, Lua scripting, clustering, replication
+
+        Cache Warming and Cold Start:
+        - Cache warming: Pre-populate cache with likely-to-be-accessed data
+        - Lazy loading vs eager loading trade-offs
+        - Cache priming strategies during deployment
+        - Handling thundering herd problem during cold starts
       resources:
         - title: "Redis Caching Patterns"
           url: "https://redis.io/docs/manual/patterns/"
@@ -108,6 +138,26 @@ weeks:
         - title: "Memcached vs Redis"
           url: "https://aws.amazon.com/elasticache/redis-vs-memcached/"
           description: "Choosing the right cache technology"
+        - title: "Cache Invalidation Strategies"
+          url: "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html"
+          description: "Practical cache invalidation techniques"
+      practice_questions:
+        estimation:
+          - "Cache hit ratio is 80% with 10ms cache lookup and 100ms DB query. What's average response time?"
+          - "1M cache entries, 1KB each. Using LRU, how much memory needed? What if 20% are hot data?"
+          - "API serves 1000 RPS. Cache TTL is 60s. How many cache misses per minute for new data?"
+        concepts:
+          - "When would you choose write-through vs write-behind caching?"
+          - "How do you handle cache invalidation in a distributed system?"
+          - "What's the thundering herd problem and how do you solve it?"
+          - "When would you use Redis over Memcached?"
+          - "How do you prevent cache stampede during high traffic?"
+        tradeoffs:
+          - "Compare cache-aside vs write-through patterns for a read-heavy vs write-heavy system"
+          - "TTL-based vs event-driven cache invalidation: pros and cons"
+          - "Multi-level caching benefits vs complexity overhead"
+          - "Redis persistence options: RDB vs AOF trade-offs"
+          - "Distributed cache vs local cache: when to use each?"
       time_estimate: 45
 
     - day: 4
