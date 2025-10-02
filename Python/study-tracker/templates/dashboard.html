@@ -677,7 +677,20 @@
 
         async function pauseTimer(track) {
             try {
-                const response = await fetch('/api/timer/pause', {
+                // First get current timer state to determine if we should pause or resume
+                const stateResponse = await fetch('/api/timer/state');
+                if (!stateResponse.ok) {
+                    alert('Error getting timer state. Please try again.');
+                    return;
+                }
+
+                const currentState = await stateResponse.json();
+
+                // Determine which endpoint to call based on current state
+                const endpoint = currentState.paused ? '/api/timer/resume' : '/api/timer/pause';
+                const action = currentState.paused ? 'resuming' : 'pausing';
+
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -685,14 +698,14 @@
                 });
 
                 if (response.ok) {
-                    // Timer paused successfully, sync will update display
+                    // Timer action successful, sync will update display
                     await syncTimerState();
                 } else {
-                    alert('Error pausing timer. Please try again.');
+                    alert(`Error ${action} timer. Please try again.`);
                 }
             } catch (error) {
-                console.error('Error pausing timer:', error);
-                alert('Network error pausing timer. Please try again.');
+                console.error('Error with timer:', error);
+                alert('Network error with timer. Please try again.');
             }
         }
 
