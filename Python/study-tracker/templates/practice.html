@@ -230,6 +230,13 @@
             <div class="filter-section">
                 <h3>🎛️ Filters</h3>
                 <div class="filter-group">
+                    <label for="coding-source">Source:</label>
+                    <select id="coding-source">
+                        <option value="curriculum">Curriculum (51 problems)</option>
+                        <option value="leetcode">LeetCode (3000+ problems)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
                     <label for="coding-difficulty">Difficulty:</label>
                     <select id="coding-difficulty">
                         <option value="all">All Difficulties</option>
@@ -339,6 +346,7 @@
         let timerInterval;
 
         async function getRandomCodingProblem() {
+            const source = document.getElementById('coding-source').value;
             const difficulty = document.getElementById('coding-difficulty').value;
             const topic = document.getElementById('coding-topic').value;
 
@@ -348,6 +356,7 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         track: 'coding',
+                        source: source,
                         difficulty: difficulty,
                         topic: topic
                     })
@@ -430,6 +439,14 @@
             const contentDiv = document.getElementById('practice-content');
             let html = `<h3>${data.track === 'coding' ? '💻' : '🏗️'} ${data.topic}</h3>`;
 
+            // Show source and availability info for LeetCode
+            if (data.source === 'leetcode') {
+                html += `<div class="source-info" style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>🔗 Source:</strong> LeetCode API<br>
+                    <strong>📊 Available:</strong> ${data.total_available || 'Many'} free problems matching your filters
+                </div>`;
+            }
+
             if (data.activity) {
                 html += `<p><strong>Activity:</strong> ${data.activity}</p>`;
             }
@@ -447,9 +464,16 @@
                                 #${problem.number} - ${problem.title}
                             </a>
                             <span class="difficulty difficulty-${problem.difficulty.toLowerCase()}">${problem.difficulty}</span>
-                            <p>${problem.description}</p>
-                        </div>
-                    `;
+                            <p>${problem.description}</p>`;
+
+                    // Show topics for LeetCode problems
+                    if (problem.topics && problem.topics.length > 0) {
+                        html += `<div class="topics" style="margin-top: 8px;">
+                            <strong>Topics:</strong> ${problem.topics.join(', ')}
+                        </div>`;
+                    }
+
+                    html += `</div>`;
                 });
                 html += '</div>';
             }

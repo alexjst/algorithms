@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timedelta
 import os
 import random
+import requests
 
 app = Flask(__name__)
 
@@ -12,6 +13,36 @@ def tojsonfilter(value):
     return json.dumps(value)
 
 app.jinja_env.filters['tojsonfilter'] = tojsonfilter
+
+# LeetCode API Configuration
+LEETCODE_API_BASE = "https://alfa-leetcode-api.onrender.com"
+
+# Mapping from curriculum topics to LeetCode tags
+TOPIC_TO_LEETCODE_TAGS = {
+    "Two Pointers": ["two-pointers"],
+    "Sliding Window": ["sliding-window"],
+    "Binary Search": ["binary-search"],
+    "DFS Fundamentals": ["depth-first-search", "tree", "binary-tree"],
+    "BFS Fundamentals": ["breadth-first-search", "tree", "binary-tree"],
+    "Dynamic Programming": ["dynamic-programming"],
+    "Advanced DFS": ["depth-first-search", "tree", "graph"],
+    "Advanced DP": ["dynamic-programming"],
+    "Greedy Algorithms": ["greedy"],
+    "Backtracking": ["backtracking"],
+    "Advanced Backtracking": ["backtracking"],
+    "Interval Problems": ["array", "sorting"],
+    "Heap Operations": ["heap-priority-queue"],
+    "Priority Queues": ["heap-priority-queue"],
+    "Union-Find": ["union-find"],
+    "Trie Operations": ["trie"],
+    "Advanced Trie": ["trie"],
+    "Matrix Traversal": ["matrix", "array"],
+    "Special Algorithms": ["math", "bit-manipulation"],
+    "Monotonic Stack": ["stack", "monotonic-stack"],
+    "Topological Sort": ["topological-sort", "graph"],
+    "Graph Algorithms": ["graph"],
+    "Advanced Graph": ["graph"]
+}
 
 # Configuration
 DATA_DIR = "data"
@@ -872,6 +903,15 @@ def random_problem():
 
 def get_random_coding_problem(filters):
     """Get a random coding problem with filters"""
+    source = filters.get('source', 'curriculum')  # 'curriculum' or 'leetcode'
+
+    if source == 'leetcode':
+        return get_random_leetcode_problem(filters)
+    else:
+        return get_random_curriculum_problem(filters)
+
+def get_random_curriculum_problem(filters):
+    """Get a random coding problem from curriculum with filters"""
     difficulty = filters.get('difficulty', 'all')
     topic = filters.get('topic', 'all')
 
@@ -924,6 +964,78 @@ def get_random_coding_problem(filters):
         'detailed_content': selected_day.get('detailed_content', '') if selected_day else '',
         'problems': [selected_problem]
     })
+
+def get_random_leetcode_problem(filters):
+    """Get a random coding problem from LeetCode API with filters"""
+    difficulty = filters.get('difficulty', 'all')
+    topic = filters.get('topic', 'all')
+
+    try:
+        # Build LeetCode API query parameters
+        params = {}
+
+        # Map curriculum topic to LeetCode tags
+        leetcode_tags = []
+        if topic != 'all':
+            leetcode_tags = TOPIC_TO_LEETCODE_TAGS.get(topic, [])
+            if leetcode_tags:
+                params['tags'] = '+'.join(leetcode_tags)
+
+        # Map difficulty
+        if difficulty != 'all':
+            params['difficulty'] = difficulty.upper()
+
+        # Set limit to get more options
+        params['limit'] = 50
+
+        # Make API request
+        response = requests.get(f"{LEETCODE_API_BASE}/problems", params=params, timeout=10)
+        response.raise_for_status()
+
+        data = response.json()
+        problems = data.get('problemsetQuestionList', [])
+
+        if not problems:
+            return jsonify({'error': 'No problems found matching criteria'}), 404
+
+        # Filter out premium problems
+        free_problems = [p for p in problems if not p.get('isPaidOnly', False)]
+
+        if not free_problems:
+            return jsonify({'error': 'No free problems found matching criteria'}), 404
+
+        # Select random problem
+        selected_problem = random.choice(free_problems)
+
+        # Format response to match curriculum format
+        formatted_problem = {
+            'number': selected_problem.get('questionFrontendId', ''),
+            'title': selected_problem.get('title', ''),
+            'url': f"https://leetcode.com/problems/{selected_problem.get('titleSlug', '')}/",
+            'difficulty': selected_problem.get('difficulty', '').title(),
+            'description': f"Acceptance Rate: {selected_problem.get('acRate', 0):.1f}%",
+            'topics': [tag.get('name', '') for tag in selected_problem.get('topicTags', [])],
+            'source': 'leetcode'
+        }
+
+        # Get topic info from curriculum if available
+        topic_name = topic if topic != 'all' else 'LeetCode Practice'
+        topic_activity = f"Practice {topic_name} problems from LeetCode's extensive library"
+
+        return jsonify({
+            'track': 'coding',
+            'topic': f"{topic_name} (LeetCode)",
+            'activity': topic_activity,
+            'detailed_content': f"This problem is from LeetCode's collection. Topics: {', '.join(formatted_problem['topics'])}",
+            'problems': [formatted_problem],
+            'source': 'leetcode',
+            'total_available': len(free_problems)
+        })
+
+    except requests.RequestException as e:
+        return jsonify({'error': f'Failed to fetch LeetCode problems: {str(e)}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Error processing LeetCode data: {str(e)}'}), 500
 
 def get_random_system_design(filters):
     """Get a random system design topic with filters"""

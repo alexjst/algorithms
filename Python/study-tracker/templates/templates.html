@@ -258,22 +258,29 @@
     dfs_recursive(root.left)
     dfs_recursive(root.right)
 
-# Problem: Collect all root-to-leaf paths in binary tree
+# Problem: Binary Tree Paths (LeetCode 257)
+# Given a binary tree, return all root-to-leaf paths.
+# Each path should be represented as a string of node values separated by "->"
 # Time: O(n), Space: O(h) where h is height
-def dfs_collect_paths(root, path=[], all_paths=[]):
-    if not root:
-        return
+def dfs_collect_paths(root):
+    all_paths = []
 
-    path.append(root.val)
+    def dfs(node, path):
+        if not node:
+            return
 
-    # Leaf node - save path
-    if not root.left and not root.right:
-        all_paths.append(path[:])  # Copy path
+        path.append(node.val)
 
-    dfs_collect_paths(root.left, path, all_paths)
-    dfs_collect_paths(root.right, path, all_paths)
+        # Leaf node - save path
+        if not node.left and not node.right:
+            all_paths.append(path[:])  # Copy path
 
-    path.pop()  # Backtrack
+        dfs(node.left, path)
+        dfs(node.right, path)
+
+        path.pop()  # Backtrack
+
+    dfs(root, [])
     return all_paths</pre>
             </div>
         </div>
@@ -296,7 +303,9 @@ def dfs_collect_paths(root, path=[], all_paths=[]):
         if node.left:
             stack.append(node.left)
 
-# Problem: Traverse graph using DFS, avoid cycles
+# Problem: Clone Graph (LeetCode 133)
+# Given a reference to a node in a connected undirected graph, return a deep copy of the graph.
+# Each node contains a value and a list of neighbors.
 # Time: O(V + E), Space: O(V)
 def dfs_graph(graph, start):
     visited = set()
@@ -338,7 +347,9 @@ def dfs_graph(graph, start):
             <div class="code-template">
 <pre>from collections import deque
 
-# Problem: Level-order traversal (BFS) of binary tree
+# Problem: Binary Tree Level Order Traversal (LeetCode 102)
+# Given the root of a binary tree, return the level order traversal of its nodes' values
+# (i.e., from left to right, level by level, returned as a list of lists)
 # Time: O(n), Space: O(w) where w is max width
 def bfs_level_order(root):
     if not root:
@@ -409,7 +420,11 @@ def bfs_level_order(root):
         <div class="template-variant">
             <div class="variant-title">Opposite Ends Template</div>
             <div class="code-template">
-<pre>def two_sum_sorted(nums, target):
+<pre># Problem: Two Sum II - Input Array Is Sorted (LeetCode 167)
+# Given a 1-indexed array of integers that is already sorted in non-decreasing order,
+# find two numbers such that they add up to a specific target number.
+# Return the indices of the two numbers (1-indexed) as an integer array of length 2.
+def two_sum_sorted(nums, target):
     left, right = 0, len(nums) - 1
 
     while left < right:
@@ -424,7 +439,10 @@ def bfs_level_order(root):
 
     return []
 
-# Problem: Check if string is palindrome
+# Problem: Valid Palindrome (LeetCode 125)
+# Given a string s, return true if it is a palindrome, or false otherwise.
+# A phrase is a palindrome if, after converting all uppercase letters to lowercase
+# and removing all non-alphanumeric characters, it reads the same forward and backward.
 # Time: O(n), Space: O(1)
 def is_palindrome(s):
     left, right = 0, len(s) - 1
@@ -442,7 +460,9 @@ def is_palindrome(s):
         <div class="template-variant">
             <div class="variant-title">Fast and Slow Pointers</div>
             <div class="code-template">
-<pre># Problem: Detect cycle in linked list (Floyd's algorithm)
+<pre># Problem: Linked List Cycle (LeetCode 141)
+# Given head, the head of a linked list, determine if the linked list has a cycle in it.
+# Use Floyd's Cycle Detection Algorithm (tortoise and hare)
 # Time: O(n), Space: O(1)
 def has_cycle(head):
     if not head or not head.next:
@@ -511,7 +531,9 @@ def remove_nth_from_end(head, n):
         <div class="template-variant">
             <div class="variant-title">Fixed Size Window</div>
             <div class="code-template">
-<pre># Problem: Find maximum sum of k consecutive elements
+<pre># Problem: Maximum Sum Subarray of Size K
+# Given an array of integers and a number k, find the maximum sum of any contiguous subarray of size k
+# This is a classic sliding window problem with fixed window size
 # Time: O(n), Space: O(1)
 def max_sum_subarray(nums, k):
     if len(nums) < k:
@@ -533,7 +555,11 @@ def max_sum_subarray(nums, k):
         <div class="template-variant">
             <div class="variant-title">Variable Size Window</div>
             <div class="code-template">
-<pre>def longest_substring_k_distinct(s, k):
+<pre># Problem: Longest Substring with At Most K Distinct Characters (LeetCode 340)
+# Given a string s and an integer k, return the length of the longest substring
+# that contains at most k distinct characters
+# Time: O(n), Space: O(k) for the character count map
+def longest_substring_k_distinct(s, k):
     if k == 0:
         return 0
 
@@ -580,7 +606,11 @@ def max_sum_subarray(nums, k):
         <div class="template-variant">
             <div class="variant-title">Standard Binary Search</div>
             <div class="code-template">
-<pre>def binary_search(nums, target):
+<pre># Problem: Binary Search (LeetCode 704)
+# Given an array of integers nums which is sorted in ascending order,
+# and an integer target, write a function to search target in nums.
+# If target exists, then return its index. Otherwise, return -1.
+def binary_search(nums, target):
     left, right = 0, len(nums) - 1
 
     while left <= right:
@@ -617,7 +647,9 @@ def max_sum_subarray(nums, k):
 
     return result
 
-# Problem: Find last occurrence of target in sorted array
+# Problem: Find First and Last Position of Element in Sorted Array (LeetCode 34)
+# Given an array of integers nums sorted in non-decreasing order,
+# find the starting and ending position of a given target value.
 # Time: O(log n), Space: O(1)
 def find_last_occurrence(nums, target):
     left, right = 0, len(nums) - 1
@@ -658,7 +690,9 @@ def search_range(nums, target):
 
     return left
 
-# Problem: Search in rotated sorted array
+# Problem: Search in Rotated Sorted Array (LeetCode 33)
+# Given the array nums after the possible rotation and an integer target,
+# return the index of target if it is in nums, or -1 if it is not in nums.
 # Time: O(log n), Space: O(1)
 def search_rotated_sorted_array(nums, target):
     left, right = 0, len(nums) - 1
@@ -722,7 +756,10 @@ def search_rotated_sorted_array(nums, target):
     return dp[n]
 
 # Space optimized
-# Problem: Calculate nth Fibonacci number (optimized)
+# Problem: Fibonacci Number (LeetCode 509)
+# The Fibonacci numbers form a sequence where each number is the sum of the two preceding ones.
+# F(0) = 0, F(1) = 1, F(n) = F(n - 1) + F(n - 2) for n > 1.
+# Space-optimized version using only two variables instead of an array.
 # Time: O(n), Space: O(1)
 def fibonacci_optimized(n):
     if n <= 1:
@@ -837,27 +874,40 @@ def min_path_sum(grid):
         <div class="template-variant">
             <div class="variant-title">General Backtracking Template</div>
             <div class="code-template">
-<pre>def backtrack_template(candidates, target, path=[], result=[]):
-    # Base case - solution found
-    if is_valid_solution(path, target):
-        result.append(path[:])  # Make a copy
-        return
+<pre>def backtrack_template(candidates, target):
+    result = []
 
-    # Explore all possibilities
-    for i, candidate in enumerate(candidates):
-        # Skip invalid candidates
-        if not is_valid_candidate(candidate, path):
-            continue
+    def is_valid_solution(path, target):
+        # Define your validation logic here
+        return len(path) == target  # Example condition
 
-        # Make choice
-        path.append(candidate)
+    def is_valid_candidate(candidate, path):
+        # Define your candidate validation logic here
+        return True  # Example condition
 
-        # Recurse with remaining candidates
-        backtrack_template(candidates[i+1:], target, path, result)
+    def backtrack(start, path):
+        # Base case - solution found
+        if is_valid_solution(path, target):
+            result.append(path[:])  # Make a copy
+            return
 
-        # Undo choice (backtrack)
-        path.pop()
+        # Explore all possibilities
+        for i in range(start, len(candidates)):
+            candidate = candidates[i]
+            # Skip invalid candidates
+            if not is_valid_candidate(candidate, path):
+                continue
 
+            # Make choice
+            path.append(candidate)
+
+            # Recurse with remaining candidates
+            backtrack(i + 1, path)
+
+            # Undo choice (backtrack)
+            path.pop()
+
+    backtrack(0, [])
     return result</pre>
             </div>
         </div>
@@ -888,7 +938,9 @@ def min_path_sum(grid):
         <div class="template-variant">
             <div class="variant-title">Subsets and Combinations</div>
             <div class="code-template">
-<pre># Problem: Generate all subsets of array
+<pre># Problem: Subsets (LeetCode 78)
+# Given an integer array nums of unique elements, return all possible subsets (the power set).
+# The solution set must not contain duplicate subsets. Return the solution in any order.
 # Time: O(2^n), Space: O(2^n)
 def generate_subsets(nums):
     def backtrack(start, path):
@@ -975,6 +1027,9 @@ def letter_combinations(digits):
             <div class="code-template">
 <pre>import heapq
 
+# Problem: Kth Largest Element in an Array (LeetCode 215)
+# Given an integer array nums and an integer k, return the kth largest element in the array.
+# Note that it is the kth largest element in the sorted order, not the kth distinct element.
 def find_kth_largest(nums, k):
     # Use min heap of size k
     min_heap = []
@@ -998,25 +1053,31 @@ def find_k_largest_elements(nums, k):
 
     return sorted(min_heap, reverse=True)
 
-# For max heap, negate values
-def max_heap_operations():
+# For max heap, negate values (Python heapq is min heap by default)
+def max_heap_operations(values):
     max_heap = []
 
-    # Insert (negate for max heap)
-    heapq.heappush(max_heap, -value)
+    # Insert values (negate for max heap behavior)
+    for value in values:
+        heapq.heappush(max_heap, -value)
 
-    # Extract max (negate result)
-    max_val = -heapq.heappop(max_heap)
+    results = []
+    while max_heap:
+        # Extract max (negate result to get original value)
+        max_val = -heapq.heappop(max_heap)
+        results.append(max_val)
 
-    # Peek max
-    max_val = -max_heap[0]</pre>
+    return results</pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Advanced Heap Applications</div>
             <div class="code-template">
-<pre>def merge_k_sorted_lists(lists):
+<pre># Problem: Merge k Sorted Lists (LeetCode 23)
+# You are given an array of k linked-lists lists, each linked-list is sorted in ascending order.
+# Merge all the linked-lists into one sorted linked-list and return it.
+def merge_k_sorted_lists(lists):
     import heapq
 
     min_heap = []
@@ -1039,6 +1100,9 @@ def max_heap_operations():
 
     return dummy.next
 
+# Problem: Top K Frequent Elements (LeetCode 347)
+# Given an integer array nums and an integer k, return the k most frequent elements.
+# You may return the answer in any order.
 def top_k_frequent_elements(nums, k):
     from collections import Counter
     import heapq
@@ -1400,7 +1464,11 @@ def topological_sort_kahn(num_courses, prerequisites):
         <div class="template-variant">
             <div class="variant-title">Merge Intervals</div>
             <div class="code-template">
-<pre>def merge_intervals(intervals):
+<pre># Problem: Merge Intervals (LeetCode 56)
+# Given an array of intervals where intervals[i] = [starti, endi],
+# merge all overlapping intervals, and return an array of the non-overlapping intervals
+# that cover all the intervals in the input.
+def merge_intervals(intervals):
     if not intervals:
         return []
 
@@ -1496,7 +1564,11 @@ def insert_interval(intervals, new_interval):
         <div class="template-variant">
             <div class="variant-title">Number of Islands (DFS)</div>
             <div class="code-template">
-<pre>def num_islands(grid):
+<pre># Problem: Number of Islands (LeetCode 200)
+# Given an m x n 2D binary grid which represents a map of '1's (land) and '0's (water),
+# return the number of islands. An island is surrounded by water and is formed by
+# connecting adjacent lands horizontally or vertically.
+def num_islands(grid):
     if not grid or not grid[0]:
         return 0
 
@@ -1598,15 +1670,15 @@ def insert_interval(intervals, new_interval):
 
     # Build hashmap for O(1) inorder lookups
     inorder_map = {val: i for i, val in enumerate(inorder)}
-    self.preorder_idx = 0
+    preorder_idx = [0]  # Use list to allow modification in nested function
 
     def build(left, right):
         if left > right:
             return None
 
         # Root is current preorder element
-        root_val = preorder[self.preorder_idx]
-        self.preorder_idx += 1
+        root_val = preorder[preorder_idx[0]]
+        preorder_idx[0] += 1
         root = TreeNode(root_val)
 
         # Find root position in inorder
@@ -1677,7 +1749,10 @@ def deserialize(data):
         <div class="template-variant">
             <div class="variant-title">Kadane's Algorithm - Maximum Subarray</div>
             <div class="code-template">
-<pre>def max_subarray_sum(nums):
+<pre># Problem: Maximum Subarray (LeetCode 53)
+# Given an integer array nums, find the contiguous subarray (containing at least one number)
+# which has the largest sum and return its sum. This uses Kadane's Algorithm.
+def max_subarray_sum(nums):
     if not nums:
         return 0
 
@@ -1723,6 +1798,9 @@ def max_subarray_with_indices(nums):
         # Sum from index i to j (inclusive)
         return self.prefix[j + 1] - self.prefix[i]
 
+# Problem: Subarray Sum Equals K (LeetCode 560)
+# Given an array of integers nums and an integer k, return the total number of
+# continuous subarrays whose sum equals to k.
 def subarray_sum_equals_k(nums, k):
     count = 0
     prefix_sum = 0
@@ -1741,7 +1819,11 @@ def subarray_sum_equals_k(nums, k):
         <div class="template-variant">
             <div class="variant-title">Monotonic Stack</div>
             <div class="code-template">
-<pre>def next_greater_element(nums):
+<pre># Problem: Next Greater Element I (LeetCode 496)
+# Given two distinct arrays nums1 and nums2, return an array where each element
+# is the next greater element for the corresponding element in nums1.
+# This is a simplified version showing the core monotonic stack technique.
+def next_greater_element(nums):
     result = [-1] * len(nums)
     stack = []  # Store indices
 
@@ -1753,6 +1835,10 @@ def subarray_sum_equals_k(nums, k):
 
     return result
 
+# Problem: Daily Temperatures (LeetCode 739)
+# Given an array of integers temperatures representing daily temperatures,
+# return an array answer such that answer[i] is the number of days you have to wait
+# after the ith day to get a warmer temperature.
 def daily_temperatures(temperatures):
     result = [0] * len(temperatures)
     stack = []
@@ -1878,7 +1964,7 @@ def find_all_duplicates(nums):
             });
         });
 
-        // Search function
+        // Enhanced search function with fuzzy matching
         function performSearch(query) {
             const searchTerm = query.toLowerCase().trim();
 
@@ -1892,9 +1978,16 @@ def find_all_duplicates(nums):
             }
 
             let visibleCount = 0;
+            const searchTerms = searchTerm.split(' ').filter(term => term.length > 0);
 
             allPatterns.forEach(pattern => {
-                if (pattern.searchText.includes(searchTerm)) {
+                // Check if all search terms are found (AND operation)
+                const matchesAll = searchTerms.every(term =>
+                    pattern.searchText.includes(term) ||
+                    pattern.title.toLowerCase().includes(term)
+                );
+
+                if (matchesAll) {
                     pattern.element.classList.remove('hidden');
                     visibleCount++;
                 } else {
@@ -1902,7 +1995,11 @@ def find_all_duplicates(nums):
                 }
             });
 
-            searchResultsInfo.textContent = `Found ${visibleCount} patterns matching "${query}"`;
+            if (visibleCount === 0) {
+                searchResultsInfo.textContent = `No patterns found matching "${query}". Try different keywords like "array", "tree", "graph", "sort", etc.`;
+            } else {
+                searchResultsInfo.textContent = `Found ${visibleCount} pattern${visibleCount === 1 ? '' : 's'} matching "${query}"`;
+            }
         }
 
         // Add event listener for real-time search
