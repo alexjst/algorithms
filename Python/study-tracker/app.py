@@ -122,6 +122,186 @@ def get_due_reviews(date_str):
 
     return due_reviews
 
+def get_topic_problems(topic, track):
+    """Get practice problems for a specific topic"""
+    curriculum = load_curriculum(track)
+
+    # Search through all weeks and days to find the matching topic
+    for week_name, days in curriculum['weeks'].items():
+        for day_info in days:
+            if day_info.get('topic') == topic:
+                return day_info.get('problems', [])
+
+    return []
+
+def get_system_design_practice_questions(topic, track):
+    """Get practice questions for a system design topic"""
+    if track != 'system_design':
+        return {}
+
+    curriculum = load_curriculum(track)
+
+    # Search through all weeks and days to find the matching topic
+    for week_name, days in curriculum['weeks'].items():
+        for day_info in days:
+            if day_info.get('topic') == topic:
+                practice_questions = day_info.get('practice_questions', {})
+                return {
+                    'estimation': practice_questions.get('estimation', []),
+                    'concepts': practice_questions.get('concepts', []),
+                    'tradeoffs': practice_questions.get('tradeoffs', []),
+                    'scenarios': practice_questions.get('scenarios', [])
+                }
+
+    return {}
+
+def select_review_questions(topic, track, review_type):
+    """Select appropriate questions for a review session based on type and difficulty"""
+    if track != 'system_design':
+        return []
+
+    all_questions = get_system_design_practice_questions(topic, track)
+
+    # Define question counts based on review type
+    question_counts = {
+        '1-day': {'estimation': 1, 'concepts': 1, 'scenarios': 1},   # 3 questions, quick review
+        '3-day': {'estimation': 2, 'concepts': 2, 'tradeoffs': 1},  # 5 questions, moderate review
+        '7-day': {'estimation': 2, 'concepts': 2, 'tradeoffs': 1, 'scenarios': 1},  # 6 questions, comprehensive
+        '14-day': {'estimation': 3, 'concepts': 3, 'tradeoffs': 2, 'scenarios': 2}  # 10 questions, full assessment
+    }
+
+    import random
+    selected_questions = []
+    counts = question_counts.get(review_type, question_counts['3-day'])
+
+    for question_type, count in counts.items():
+        available_questions = all_questions.get(question_type, [])
+        if available_questions:
+            # Randomly select questions of this type
+            selected = random.sample(available_questions, min(count, len(available_questions)))
+            for question_text in selected:
+                selected_questions.append({
+                    'type': question_type,
+                    'question': question_text,
+                    'id': f"{question_type}_{len(selected_questions)}"
+                })
+
+    return selected_questions
+
+def get_time_benchmarks(problems):
+    """Calculate time benchmarks for problems based on difficulty"""
+    # Base time expectations in minutes
+    base_times = {
+        'Easy': 17.5,    # 15-20 minutes
+        'Medium': 30,    # 25-35 minutes
+        'Hard': 50,      # 40-60 minutes
+        'Mixed': 35      # Average for mixed problems
+    }
+
+    total_base_time = 0
+    for problem in problems:
+        difficulty = problem.get('difficulty', 'Medium')
+        total_base_time += base_times.get(difficulty, base_times['Medium'])
+
+    # Rating performance multipliers
+    return {
+        'total_base_minutes': total_base_time,
+        'rating_benchmarks': {
+            5: {'max_minutes': total_base_time * 0.7, 'description': 'Perfect (60-70% of base time)'},
+            4: {'max_minutes': total_base_time * 1.0, 'description': 'Good (80-100% of base time)'},
+            3: {'max_minutes': total_base_time * 1.5, 'description': 'Okay (100-150% of base time)'},
+            2: {'max_minutes': total_base_time * 2.5, 'description': 'Poor (150-250% of base time)'},
+            1: {'max_minutes': float('inf'), 'description': 'Forgot (250%+ or unable to solve)'}
+        }
+    }
+
+def calculate_performance_rating(actual_minutes, benchmarks):
+    """Calculate suggested rating based on performance time"""
+    for rating in [5, 4, 3, 2, 1]:
+        if actual_minutes <= benchmarks['rating_benchmarks'][rating]['max_minutes']:
+            return rating
+    return 1  # Fallback
+
+def get_system_design_benchmarks(questions, review_type):
+    """Calculate time benchmarks for system design questions"""
+    # Base time per question type (minutes)
+    base_times = {
+        'estimation': 5,    # Quick calculations
+        'concepts': 8,      # Thoughtful explanations
+        'tradeoffs': 10,    # Comparative analysis
+        'scenarios': 15     # System design scenarios
+    }
+
+    total_base_time = 0
+    for question in questions:
+        question_type = question.get('type', 'concepts')
+        total_base_time += base_times.get(question_type, base_times['concepts'])
+
+    # Adjust total time based on review type complexity
+    complexity_multipliers = {
+        '1-day': 0.8,   # Quick refresher
+        '3-day': 1.0,   # Standard pace
+        '7-day': 1.2,   # More thorough
+        '14-day': 1.5   # Comprehensive review
+    }
+
+    multiplier = complexity_multipliers.get(review_type, 1.0)
+    total_base_time = total_base_time * multiplier
+
+    # Rating performance thresholds
+    return {
+        'total_base_minutes': total_base_time,
+        'question_count': len(questions),
+        'rating_benchmarks': {
+            5: {'max_minutes': total_base_time * 0.7, 'description': 'Expert (≤70% of base time)'},
+            4: {'max_minutes': total_base_time * 1.0, 'description': 'Good (≤100% of base time)'},
+            3: {'max_minutes': total_base_time * 1.5, 'description': 'Moderate (≤150% of base time)'},
+            2: {'max_minutes': total_base_time * 2.0, 'description': 'Struggled (≤200% of base time)'},
+            1: {'max_minutes': float('inf'), 'description': 'Incomplete (200%+ or unable to complete)'}
+        }
+    }
+
+def calculate_system_design_rating(session_data, benchmarks):
+    """Calculate suggested rating based on system design practice performance"""
+    time_minutes = session_data.get('total_time', 0)
+    answers = session_data.get('answers', {})
+    questions = session_data.get('questions', [])
+
+    # Time performance score (0-1)
+    time_score = 1.0
+    for rating in [5, 4, 3, 2, 1]:
+        if time_minutes <= benchmarks['rating_benchmarks'][rating]['max_minutes']:
+            time_score = rating / 5.0
+            break
+
+    # Answer completeness score (0-1)
+    completeness_score = 0.0
+    if questions:
+        answered_count = len([q for q in questions if answers.get(q['id'], '').strip()])
+        completeness_score = answered_count / len(questions)
+
+    # Self-assessment modifier from user's own evaluation
+    self_assessment = session_data.get('self_assessment', {})
+    coverage_score = 0.0
+    if self_assessment:
+        covered_concepts = len([k for k, v in self_assessment.items() if v])
+        total_concepts = len(self_assessment)
+        coverage_score = covered_concepts / total_concepts if total_concepts > 0 else 0.5
+
+    # Combined score with weights
+    final_score = (
+        time_score * 0.3 +           # 30% time performance
+        completeness_score * 0.4 +   # 40% answer completeness
+        coverage_score * 0.3         # 30% concept coverage
+    )
+
+    # Convert to 1-5 rating
+    if final_score >= 0.9: return 5
+    elif final_score >= 0.75: return 4
+    elif final_score >= 0.6: return 3
+    elif final_score >= 0.4: return 2
+    else: return 1
+
 def schedule_reviews(topic, track, completed_date):
     """Schedule spaced repetition reviews for a completed topic"""
     reviews_data = load_json_data(REVIEWS_FILE)
@@ -236,8 +416,33 @@ def dashboard():
                 system_design_topic_completed = True
                 system_design_completion_data = completion
 
-    # Get due reviews
+    # Get due reviews and enhance with problems and benchmarks
     due_reviews = get_due_reviews(today)
+
+    # Enhance each review with practice problems and time benchmarks
+    for review in due_reviews:
+        if review['track'] == 'coding':
+            # Coding reviews: use LeetCode problems
+            problems = get_topic_problems(review['topic'], review['track'])
+            review['problems'] = problems
+            review['practice_questions'] = None
+            if problems:
+                review['benchmarks'] = get_time_benchmarks(problems)
+            else:
+                review['benchmarks'] = None
+        elif review['track'] == 'system_design':
+            # System design reviews: use practice questions
+            practice_questions = select_review_questions(review['topic'], review['track'], review['review_type'])
+            review['practice_questions'] = practice_questions
+            review['problems'] = None
+            if practice_questions:
+                review['benchmarks'] = get_system_design_benchmarks(practice_questions, review['review_type'])
+            else:
+                review['benchmarks'] = None
+        else:
+            review['problems'] = None
+            review['practice_questions'] = None
+            review['benchmarks'] = None
 
     # Calculate total time estimate
     total_time = 0
@@ -297,7 +502,11 @@ def mark_complete():
         schedule_reviews(topic, track, today)
 
     elif item_type == 'review':
-        # Mark review as complete
+        # Mark review as complete with optional timing data
+        practice_time = data.get('practice_time')  # Total practice time in minutes
+        problem_times = data.get('problem_times', [])  # Individual problem solve times
+        suggested_rating = data.get('suggested_rating')  # Auto-calculated rating
+
         reviews_data = load_json_data(REVIEWS_FILE)
         for review in reviews_data.get('scheduled_reviews', []):
             if (review['topic'] == topic and
@@ -307,10 +516,94 @@ def mark_complete():
                 review['completed_date'] = today
                 review['rating'] = rating
                 review['notes'] = notes
+
+                # Add performance timing data if available
+                if practice_time:
+                    review['practice_time'] = practice_time
+                if problem_times:
+                    review['problem_times'] = problem_times
+                if suggested_rating:
+                    review['suggested_rating'] = suggested_rating
+
+                # Add system design specific data
+                session_data = data.get('session_data')
+                if session_data:
+                    review['session_data'] = session_data
                 break
         save_json_data(REVIEWS_FILE, reviews_data)
 
     return jsonify({'status': 'success'})
+
+@app.route('/api/review-practice', methods=['POST'])
+def get_review_practice_data():
+    """Get practice problems and benchmarks for a review topic"""
+    data = request.get_json()
+    topic = data.get('topic')
+    track = data.get('track')
+
+    if not topic or not track:
+        return jsonify({'error': 'Topic and track are required'}), 400
+
+    problems = get_topic_problems(topic, track)
+    if not problems:
+        return jsonify({'error': 'No problems found for this topic'}), 404
+
+    benchmarks = get_time_benchmarks(problems)
+
+    return jsonify({
+        'topic': topic,
+        'track': track,
+        'problems': problems,
+        'benchmarks': benchmarks
+    })
+
+@app.route('/api/system-design-practice', methods=['POST'])
+def get_system_design_practice_data():
+    """Get practice questions and benchmarks for a system design review topic"""
+    data = request.get_json()
+    topic = data.get('topic')
+    track = data.get('track')
+    review_type = data.get('review_type', '3-day')
+
+    if not topic or track != 'system_design':
+        return jsonify({'error': 'Valid system design topic required'}), 400
+
+    practice_questions = select_review_questions(topic, track, review_type)
+    if not practice_questions:
+        return jsonify({'error': 'No practice questions found for this topic'}), 404
+
+    benchmarks = get_system_design_benchmarks(practice_questions, review_type)
+
+    return jsonify({
+        'topic': topic,
+        'track': track,
+        'review_type': review_type,
+        'questions': practice_questions,
+        'benchmarks': benchmarks
+    })
+
+@app.route('/api/calculate-system-design-rating', methods=['POST'])
+def calculate_sd_rating():
+    """Calculate suggested rating based on system design practice session"""
+    data = request.get_json()
+    session_data = data.get('session_data', {})
+    benchmarks = data.get('benchmarks', {})
+
+    if not session_data or not benchmarks:
+        return jsonify({'error': 'Session data and benchmarks required'}), 400
+
+    suggested_rating = calculate_system_design_rating(session_data, benchmarks)
+
+    return jsonify({
+        'suggested_rating': suggested_rating,
+        'performance_summary': {
+            'total_time': session_data.get('total_time', 0),
+            'questions_answered': len([q for q in session_data.get('questions', [])
+                                     if session_data.get('answers', {}).get(q['id'], '').strip()]),
+            'total_questions': len(session_data.get('questions', [])),
+            'benchmark_time': benchmarks.get('total_base_minutes', 0)
+        }
+    })
 
 @app.route('/history')
 def history():

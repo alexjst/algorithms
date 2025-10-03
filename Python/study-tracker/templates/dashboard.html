@@ -317,6 +317,107 @@
             <h4>{{ review.track | title }}: {{ review.topic }} ({{ review.review_type }} review)</h4>
             <p>Originally completed: {{ review.scheduled_date }}</p>
 
+            {% if review.problems or review.practice_questions %}
+            <div class="review-practice-section" id="practice-section-{{ loop.index }}" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                {% if review.track == 'coding' %}
+                <h5>🎯 Practice Problems</h5>
+                {% else %}
+                <h5>🎯 Practice Questions</h5>
+                {% endif %}
+
+                {% if review.benchmarks %}
+                <div class="time-benchmarks" style="margin: 10px 0; font-size: 14px; color: #666;">
+                    <strong>Time Benchmarks:</strong>
+                    Base time: {{ "%.0f"|format(review.benchmarks.total_base_minutes) }} min |
+                    Rating 5: ≤{{ "%.0f"|format(review.benchmarks.rating_benchmarks[5].max_minutes) }} min |
+                    Rating 4: ≤{{ "%.0f"|format(review.benchmarks.rating_benchmarks[4].max_minutes) }} min |
+                    Rating 3: ≤{{ "%.0f"|format(review.benchmarks.rating_benchmarks[3].max_minutes) }} min
+                </div>
+                {% endif %}
+
+                <div class="practice-controls" style="margin: 10px 0;">
+                    {% if review.track == 'coding' %}
+                    <button class="practice-btn" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; margin-right: 10px;"
+                            onclick="startReviewPractice({{ loop.index }}, '{{ review.topic }}', '{{ review.track }}')">
+                        🏃 Start Review Practice
+                    </button>
+                    {% else %}
+                    <button class="practice-btn" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; margin-right: 10px;"
+                            onclick="startSystemDesignPractice({{ loop.index }}, '{{ review.topic }}', '{{ review.track }}', '{{ review.review_type }}')">
+                        🏃 Start System Design Practice
+                    </button>
+                    {% endif %}
+                    <span class="practice-timer" id="practice-timer-{{ loop.index }}" style="font-weight: bold; display: none;">⏱️ 00:00</span>
+                    <button class="practice-btn" id="stop-practice-{{ loop.index }}" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; display: none;"
+                            onclick="stopReviewPractice({{ loop.index }})">
+                        ⏹️ Stop Practice
+                    </button>
+                </div>
+
+                {% if review.track == 'coding' %}
+                <div class="problems-list" id="problems-list-{{ loop.index }}">
+                    {% for problem in review.problems %}
+                    <div class="problem-item" style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px; border: 1px solid #ddd;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <a href="{{ problem.url }}" target="_blank" class="problem-link" style="color: #007bff; text-decoration: none;">
+                                #{{ problem.number }} - {{ problem.title }}
+                            </a>
+                            <span class="difficulty difficulty-{{ problem.difficulty.lower() }}" style="padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+                                {{ problem.difficulty }}
+                            </span>
+                        </div>
+                        <p style="margin: 4px 0; color: #666; font-size: 14px;">{{ problem.description }}</p>
+                        <div class="problem-timer-section" id="problem-timer-{{ loop.index }}-{{ loop.index0 }}" style="display: none; margin-top: 8px;">
+                            <button class="complete-problem-btn" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 12px;"
+                                    onclick="markProblemComplete({{ loop.index }}, {{ loop.index0 }})">
+                                ✅ Mark Problem Complete
+                            </button>
+                            <span class="problem-time" style="margin-left: 10px; font-size: 12px; color: #666;">Time: <span id="problem-time-{{ loop.index }}-{{ loop.index0 }}">0 min</span></span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="questions-list" id="questions-list-{{ loop.index }}">
+                    {% for question in review.practice_questions %}
+                    <div class="question-item" style="margin: 12px 0; padding: 12px; background: white; border-radius: 4px; border: 1px solid #ddd;">
+                        <div class="question-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span class="question-type" style="background: #{{ 'e3f2fd' if question.type == 'estimation' else 'fff3e0' if question.type == 'concepts' else 'f3e5f5' if question.type == 'tradeoffs' else 'e8f5e8' }}; color: #{{ '1976d2' if question.type == 'estimation' else 'f57c00' if question.type == 'concepts' else '7b1fa2' if question.type == 'tradeoffs' else '388e3c' }}; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase;">
+                                {{ question.type }}
+                            </span>
+                            <span class="question-number" style="color: #666; font-size: 12px;">Q{{ loop.index0 + 1 }}</span>
+                        </div>
+                        <div class="question-text" style="margin: 8px 0; font-weight: 500; color: #333;">
+                            {{ question.question }}
+                        </div>
+                        <div class="answer-section" id="answer-section-{{ loop.index }}-{{ loop.index0 }}" style="display: none; margin-top: 12px;">
+                            <textarea id="answer-{{ loop.index }}-{{ loop.index0 }}"
+                                    style="width: 100%; min-height: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
+                                    placeholder="Enter your answer here..."></textarea>
+                            <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+                                <button class="mark-answered-btn" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; font-size: 12px;"
+                                        onclick="markQuestionAnswered({{ loop.index }}, {{ loop.index0 }})">
+                                    ✅ Mark Answered
+                                </button>
+                                <span class="answer-time" style="font-size: 12px; color: #666;">Time: <span id="answer-time-{{ loop.index }}-{{ loop.index0 }}">0 min</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="practice-summary" id="practice-summary-{{ loop.index }}" style="display: none; margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+                    <h6>🎯 Practice Summary</h6>
+                    <p>Total Time: <span id="total-practice-time-{{ loop.index }}">0</span> minutes</p>
+                    <p>Suggested Rating: <strong id="suggested-rating-{{ loop.index }}">-</strong></p>
+                    <div style="margin: 8px 0;">
+                        <label style="font-size: 14px;">Adjust your rating if needed:</label>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <div class="rating">
                 <label>How well do you remember? (1-5):</label>
                 <select id="review-rating-{{ loop.index }}">
@@ -326,9 +427,10 @@
                     <option value="4">4 - Good memory</option>
                     <option value="5">5 - Perfect recall</option>
                 </select>
+                <span id="rating-suggestion-{{ loop.index }}" style="margin-left: 10px; color: #007bff; font-weight: bold; display: none;"></span>
             </div>
             <textarea id="review-notes-{{ loop.index }}" class="notes" placeholder="Review notes..."></textarea>
-            <button class="complete-btn" onclick="markComplete('{{ review.topic }}', '{{ review.track }}', 'review', {{ loop.index }})">
+            <button class="complete-btn" onclick="markCompleteWithPracticeData('{{ review.topic }}', '{{ review.track }}', 'review', {{ loop.index }})">
                 ✅ Review Complete
             </button>
         </div>
@@ -338,6 +440,11 @@
 
     <script>
         async function markComplete(topic, track, type, reviewIndex = null) {
+            // For reviews, delegate to the enhanced function
+            if (type === 'review') {
+                return markCompleteWithPracticeData(topic, track, type, reviewIndex);
+            }
+
             console.log(`markComplete called with topic: ${topic}, track: ${track}, type: ${type}`);
             let rating, notes;
 
@@ -359,12 +466,6 @@
                 rating = parseInt(ratingSelect.value);
                 notes = notesTextarea.value;
                 console.log(`Rating: ${rating}, Notes: ${notes}`);
-            } else if (type === 'review') {
-                elementId = `review-${reviewIndex}`;
-                const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
-                const notesTextarea = document.getElementById(`review-notes-${reviewIndex}`);
-                rating = parseInt(ratingSelect.value);
-                notes = notesTextarea.value;
             }
 
             // Disable the section immediately to prevent double-submission
@@ -777,6 +878,407 @@
                 console.log(`markComplete completed successfully for ${track}`);
             } catch (error) {
                 console.error(`Error in finishEarlyAndMarkComplete for ${track}:`, error);
+            }
+        }
+
+        // Review Practice Timer System
+        let reviewPracticeTimers = {}; // Track active practice sessions
+        let systemDesignSessions = {}; // Track system design practice sessions
+        let problemStartTimes = {}; // Track individual problem start times
+        let completedProblems = {}; // Track completed problems per review
+
+        function startReviewPractice(reviewIndex, topic, track) {
+            console.log(`Starting review practice for ${topic} (${track})`);
+
+            // Initialize tracking for this review
+            if (!reviewPracticeTimers[reviewIndex]) {
+                reviewPracticeTimers[reviewIndex] = {
+                    startTime: Date.now(),
+                    interval: null,
+                    topic: topic,
+                    track: track,
+                    totalMinutes: 0
+                };
+                completedProblems[reviewIndex] = [];
+            }
+
+            // Show practice controls
+            document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'inline';
+            document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'inline';
+
+            // Show individual problem timers
+            const problemTimers = document.querySelectorAll(`#practice-section-${reviewIndex} .problem-timer-section`);
+            problemTimers.forEach(timer => {
+                timer.style.display = 'block';
+            });
+
+            // Start the main timer
+            reviewPracticeTimers[reviewIndex].interval = setInterval(() => {
+                updateReviewPracticeTimer(reviewIndex);
+            }, 1000);
+
+            // Disable the start button
+            event.target.disabled = true;
+            event.target.textContent = '🏃 Practice In Progress...';
+        }
+
+        function updateReviewPracticeTimer(reviewIndex) {
+            const timer = reviewPracticeTimers[reviewIndex];
+            if (!timer) return;
+
+            const elapsed = Date.now() - timer.startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+
+            document.getElementById(`practice-timer-${reviewIndex}`).textContent =
+                `⏱️ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            timer.totalMinutes = minutes + (seconds / 60);
+        }
+
+        function markProblemComplete(reviewIndex, problemIndex) {
+            console.log(`Marking problem ${problemIndex} complete for review ${reviewIndex}`);
+
+            const problemKey = `${reviewIndex}-${problemIndex}`;
+
+            if (!problemStartTimes[problemKey]) {
+                // If no start time recorded, use current time as start (assume they just started)
+                problemStartTimes[problemKey] = Date.now();
+            }
+
+            const elapsed = Date.now() - problemStartTimes[problemKey];
+            const minutes = Math.round(elapsed / 60000);
+
+            // Update the problem time display
+            document.getElementById(`problem-time-${reviewIndex}-${problemIndex}`).textContent = `${minutes} min`;
+
+            // Mark as completed
+            if (!completedProblems[reviewIndex]) {
+                completedProblems[reviewIndex] = [];
+            }
+            completedProblems[reviewIndex].push({
+                problemIndex: problemIndex,
+                timeMinutes: minutes
+            });
+
+            // Disable the button
+            event.target.disabled = true;
+            event.target.textContent = '✅ Completed';
+            event.target.style.background = '#6c757d';
+
+            console.log(`Problem completed in ${minutes} minutes`);
+        }
+
+        function stopReviewPractice(reviewIndex) {
+            const timer = reviewPracticeTimers[reviewIndex];
+            if (!timer) return;
+
+            // Stop the timer
+            clearInterval(timer.interval);
+
+            // Calculate final results
+            const totalMinutes = Math.round(timer.totalMinutes);
+
+            // Get benchmark data from the page (we'll need to pass this from the backend)
+            const benchmarkElements = document.querySelector(`#practice-section-${reviewIndex} .time-benchmarks`);
+            let suggestedRating = 3; // Default
+
+            // Simple rating calculation based on completion
+            const problemCount = completedProblems[reviewIndex] ? completedProblems[reviewIndex].length : 0;
+            const totalProblems = document.querySelectorAll(`#practice-section-${reviewIndex} .problem-item`).length;
+
+            if (problemCount === totalProblems) {
+                // All problems completed - base rating on time
+                if (totalMinutes <= 30) suggestedRating = 5;
+                else if (totalMinutes <= 45) suggestedRating = 4;
+                else if (totalMinutes <= 70) suggestedRating = 3;
+                else if (totalMinutes <= 100) suggestedRating = 2;
+                else suggestedRating = 1;
+            } else {
+                // Not all problems completed
+                const completionRate = problemCount / totalProblems;
+                if (completionRate >= 0.8) suggestedRating = 3;
+                else if (completionRate >= 0.5) suggestedRating = 2;
+                else suggestedRating = 1;
+            }
+
+            // Show practice summary
+            document.getElementById(`practice-summary-${reviewIndex}`).style.display = 'block';
+            document.getElementById(`total-practice-time-${reviewIndex}`).textContent = totalMinutes;
+            document.getElementById(`suggested-rating-${reviewIndex}`).textContent = `${suggestedRating} (${getRatingDescription(suggestedRating)})`;
+
+            // Update the rating dropdown and show suggestion
+            const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
+            ratingSelect.value = suggestedRating;
+
+            const suggestionSpan = document.getElementById(`rating-suggestion-${reviewIndex}`);
+            suggestionSpan.textContent = `(Suggested: ${suggestedRating})`;
+            suggestionSpan.style.display = 'inline';
+
+            // Hide practice controls
+            document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'none';
+            document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'none';
+
+            // Re-enable start button
+            const startButton = document.querySelector(`button[onclick*="startReviewPractice(${reviewIndex}"]`);
+            if (startButton) {
+                startButton.disabled = false;
+                startButton.textContent = '🏃 Start Review Practice';
+            }
+
+            console.log(`Review practice completed: ${totalMinutes} minutes, suggested rating: ${suggestedRating}`);
+        }
+
+        function getRatingDescription(rating) {
+            const descriptions = {
+                5: 'Perfect recall',
+                4: 'Good memory',
+                3: 'Some memory',
+                2: 'Vague memory',
+                1: 'Completely forgot'
+            };
+            return descriptions[rating] || 'Unknown';
+        }
+
+        // System Design Practice Functions
+        async function startSystemDesignPractice(reviewIndex, topic, track, reviewType) {
+            console.log(`Starting system design practice for ${topic} (${reviewType})`);
+
+            try {
+                // Fetch practice questions and benchmarks
+                const response = await fetch('/api/system-design-practice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic: topic,
+                        track: track,
+                        review_type: reviewType
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load practice questions');
+                }
+
+                const data = await response.json();
+
+                // Initialize session tracking
+                systemDesignSessions[reviewIndex] = {
+                    startTime: Date.now(),
+                    interval: null,
+                    topic: topic,
+                    track: track,
+                    reviewType: reviewType,
+                    questions: data.questions,
+                    benchmarks: data.benchmarks,
+                    answers: {},
+                    questionStartTimes: {},
+                    totalMinutes: 0
+                };
+
+                // Show practice controls
+                document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'inline';
+                document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'inline';
+
+                // Show answer sections for all questions
+                const answerSections = document.querySelectorAll(`#practice-section-${reviewIndex} .answer-section`);
+                answerSections.forEach(section => {
+                    section.style.display = 'block';
+                });
+
+                // Start the main timer
+                systemDesignSessions[reviewIndex].interval = setInterval(() => {
+                    updateSystemDesignTimer(reviewIndex);
+                }, 1000);
+
+                // Disable the start button
+                event.target.disabled = true;
+                event.target.textContent = '🏃 Practice In Progress...';
+
+                console.log(`System design practice started with ${data.questions.length} questions`);
+
+            } catch (error) {
+                console.error('Error starting system design practice:', error);
+                alert('Failed to start practice session. Please try again.');
+            }
+        }
+
+        function updateSystemDesignTimer(reviewIndex) {
+            const session = systemDesignSessions[reviewIndex];
+            if (!session) return;
+
+            const elapsed = Date.now() - session.startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+
+            document.getElementById(`practice-timer-${reviewIndex}`).textContent =
+                `⏱️ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            session.totalMinutes = minutes + (seconds / 60);
+        }
+
+        function markQuestionAnswered(reviewIndex, questionIndex) {
+            const session = systemDesignSessions[reviewIndex];
+            if (!session) return;
+
+            const questionKey = `${reviewIndex}-${questionIndex}`;
+            const answerTextarea = document.getElementById(`answer-${reviewIndex}-${questionIndex}`);
+            const answer = answerTextarea.value.trim();
+
+            if (!answer) {
+                alert('Please enter an answer before marking as complete.');
+                return;
+            }
+
+            // Record the answer
+            const questionId = session.questions[questionIndex]?.id || questionKey;
+            session.answers[questionId] = answer;
+
+            // Calculate time for this question
+            if (!session.questionStartTimes[questionKey]) {
+                session.questionStartTimes[questionKey] = Date.now();
+            }
+
+            const elapsed = Date.now() - session.questionStartTimes[questionKey];
+            const minutes = Math.round(elapsed / 60000);
+
+            // Update display
+            document.getElementById(`answer-time-${reviewIndex}-${questionIndex}`).textContent = `${minutes} min`;
+
+            // Disable the button
+            event.target.disabled = true;
+            event.target.textContent = '✅ Answered';
+            event.target.style.background = '#6c757d';
+
+            console.log(`Question ${questionIndex + 1} answered in ${minutes} minutes`);
+        }
+
+        async function stopSystemDesignPractice(reviewIndex) {
+            const session = systemDesignSessions[reviewIndex];
+            if (!session) return;
+
+            // Stop the timer
+            clearInterval(session.interval);
+
+            // Prepare session data for rating calculation
+            const sessionData = {
+                total_time: Math.round(session.totalMinutes),
+                answers: session.answers,
+                questions: session.questions,
+                self_assessment: {} // Will be filled by user if needed
+            };
+
+            try {
+                // Calculate suggested rating
+                const response = await fetch('/api/calculate-system-design-rating', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_data: sessionData,
+                        benchmarks: session.benchmarks
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const suggestedRating = result.suggested_rating;
+
+                    // Show practice summary
+                    document.getElementById(`practice-summary-${reviewIndex}`).style.display = 'block';
+                    document.getElementById(`total-practice-time-${reviewIndex}`).textContent = sessionData.total_time;
+                    document.getElementById(`suggested-rating-${reviewIndex}`).textContent =
+                        `${suggestedRating} (${getRatingDescription(suggestedRating)})`;
+
+                    // Update the rating dropdown and show suggestion
+                    const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
+                    ratingSelect.value = suggestedRating;
+
+                    const suggestionSpan = document.getElementById(`rating-suggestion-${reviewIndex}`);
+                    suggestionSpan.textContent = `(Suggested: ${suggestedRating})`;
+                    suggestionSpan.style.display = 'inline';
+
+                    // Store session data for completion
+                    session.sessionData = sessionData;
+
+                    console.log(`System design practice completed: ${sessionData.total_time} minutes, suggested rating: ${suggestedRating}`);
+                } else {
+                    console.error('Failed to calculate rating');
+                }
+
+            } catch (error) {
+                console.error('Error calculating rating:', error);
+            }
+
+            // Hide practice controls
+            document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'none';
+            document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'none';
+
+            // Re-enable start button
+            const startButton = document.querySelector(`button[onclick*="startSystemDesignPractice(${reviewIndex}"]`);
+            if (startButton) {
+                startButton.disabled = false;
+                startButton.textContent = '🏃 Start System Design Practice';
+            }
+        }
+
+        // Enhanced markComplete function to include practice data
+        async function markCompleteWithPracticeData(topic, track, type, reviewIndex = null) {
+            // Get base completion data
+            let rating, notes;
+            let practiceData = null;
+
+            if (type === 'review' && reviewIndex !== null) {
+                const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
+                const notesTextarea = document.getElementById(`review-notes-${reviewIndex}`);
+                rating = parseInt(ratingSelect.value);
+                notes = notesTextarea.value;
+
+                // Include practice data if available
+                const timer = reviewPracticeTimers[reviewIndex];
+                if (timer && completedProblems[reviewIndex]) {
+                    practiceData = {
+                        practice_time: Math.round(timer.totalMinutes),
+                        problem_times: completedProblems[reviewIndex],
+                        suggested_rating: parseInt(document.getElementById(`suggested-rating-${reviewIndex}`).textContent.charAt(0))
+                    };
+                }
+            }
+
+            // Prepare request data
+            const requestData = {
+                topic: topic,
+                track: track,
+                type: type,
+                rating: rating,
+                notes: notes
+            };
+
+            // Add practice data if available
+            if (practiceData) {
+                Object.assign(requestData, practiceData);
+            }
+
+            // Make the completion request
+            try {
+                const response = await fetch('/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (response.ok) {
+                    console.log('Review completed successfully with practice data');
+                    // Clean up practice data
+                    if (reviewIndex !== null) {
+                        delete reviewPracticeTimers[reviewIndex];
+                        delete completedProblems[reviewIndex];
+                    }
+                    location.reload(); // Refresh to update the dashboard
+                } else {
+                    console.error('Failed to complete review');
+                }
+            } catch (error) {
+                console.error('Error completing review:', error);
             }
         }
     </script>

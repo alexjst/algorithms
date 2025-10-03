@@ -136,6 +136,16 @@
         .problem-link:hover {
             text-decoration: underline;
         }
+        .mixed-problem-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .problem-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
         .difficulty {
             padding: 4px 12px;
             border-radius: 12px;
@@ -458,13 +468,29 @@
             if (data.problems) {
                 html += '<div class="problems-section"><h4>🎯 Problems:</h4>';
                 data.problems.forEach(problem => {
-                    html += `
-                        <div class="problem-item">
+                    html += `<div class="problem-item">`;
+
+                    // Handle special "mixed" problems differently
+                    if (problem.number === 'mixed') {
+                        html += `
+                            <div class="mixed-problem-header">
+                                <span class="problem-title">#${problem.number} - ${problem.title}</span>
+                                <button onclick="generateMixedProblems()" class="practice-btn" style="margin-left: 15px; padding: 8px 16px; font-size: 14px;">
+                                    🎲 Generate Mixed Problems
+                                </button>
+                            </div>
+                            <span class="difficulty difficulty-${problem.difficulty.toLowerCase()}">${problem.difficulty}</span>
+                            <p>${problem.description}</p>
+                            <div id="mixed-problems-container" style="margin-top: 15px;"></div>`;
+                    } else {
+                        // Regular problem with URL link
+                        html += `
                             <a href="${problem.url}" target="_blank" class="problem-link">
                                 #${problem.number} - ${problem.title}
                             </a>
                             <span class="difficulty difficulty-${problem.difficulty.toLowerCase()}">${problem.difficulty}</span>
                             <p>${problem.description}</p>`;
+                    }
 
                     // Show topics for LeetCode problems
                     if (problem.topics && problem.topics.length > 0) {
@@ -534,6 +560,66 @@
                 timerInterval = null;
             }
             document.getElementById('timer-section').style.display = 'none';
+        }
+
+        async function generateMixedProblems() {
+            const container = document.getElementById('mixed-problems-container');
+            container.innerHTML = '<p>🔄 Generating mixed problems...</p>';
+
+            try {
+                // Define different problem categories to mix
+                const categories = ['Two Pointers', 'Sliding Window', 'Binary Search', 'DFS Fundamentals', 'BFS Fundamentals', 'DP Fundamentals'];
+                const difficulties = ['Easy', 'Medium'];
+
+                const problems = [];
+
+                // Generate 3-4 problems from different categories
+                const numProblems = Math.floor(Math.random() * 2) + 3; // 3 or 4 problems
+
+                for (let i = 0; i < numProblems; i++) {
+                    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+                    const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+
+                    const response = await fetch('/api/random-problem', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            track: 'coding',
+                            topic: randomCategory,
+                            difficulty: randomDifficulty,
+                            source: 'leetcode' // Use LeetCode for variety
+                        })
+                    });
+
+                    if (response.ok) {
+                        const problem = await response.json();
+                        problems.push(problem);
+                    }
+                }
+
+                // Display the generated problems
+                let html = '<h5>🎯 Generated Mixed Problems:</h5>';
+                problems.forEach((problem, index) => {
+                    html += `
+                        <div class="problem-item" style="background: #f8f9fa; margin: 10px 0; padding: 15px; border-radius: 8px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <a href="${problem.url}" target="_blank" class="problem-link">
+                                    Problem ${index + 1}: ${problem.title}
+                                </a>
+                                <span class="difficulty difficulty-${problem.difficulty.toLowerCase()}">${problem.difficulty}</span>
+                            </div>
+                            <p style="margin: 8px 0;">${problem.description}</p>
+                            ${problem.topics ? `<div style="margin-top: 8px;"><strong>Topics:</strong> ${problem.topics.join(', ')}</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                container.innerHTML = '<p style="color: #dc3545;">❌ Error generating problems. Please try again.</p>';
+                console.error('Error generating mixed problems:', error);
+            }
         }
     </script>
 </body>
