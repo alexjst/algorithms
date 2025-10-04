@@ -666,10 +666,35 @@
             }
         }
 
-        // Make function globally accessible
+        // Immediately assign to global scope with debugging
+        console.log('Assigning startPomodoro to window...');
         window.startPomodoro = startPomodoro;
+        console.log('startPomodoro assigned to window:', typeof window.startPomodoro);
+        console.log('window.startPomodoro function:', window.startPomodoro);
 
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up timer buttons...');
+
+            // Set up timer button event listeners programmatically as backup
+            const timerButtons = document.querySelectorAll('.start-timer-btn');
+            console.log('Found timer buttons:', timerButtons.length);
+
+            timerButtons.forEach(button => {
+                // Remove existing onclick to avoid conflicts
+                button.removeAttribute('onclick');
+
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const track = this.closest('[id$="-topic"]').id.replace('-topic', '');
+                    const timeText = this.parentElement.textContent;
+                    const minutesMatch = timeText.match(/(\d+)\s+minutes?/);
+                    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 25;
+
+                    console.log('Timer button clicked:', {track, minutes});
+                    startPomodoro(track, minutes);
+                });
+            });
+
             syncTimerState();
             // Start with 2-second intervals
             startTimerSync();
