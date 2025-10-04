@@ -252,11 +252,26 @@ weeks:
         - Counting ways
         - Decision problems with constraints
       problems:
-        - number: "mixed"
-          title: "Practice Problems"
-          url: "Review and solve 3-4 problems mixing different patterns"
-          difficulty: "Mixed"
-          description: "Combine multiple techniques in single problems"
+        - number: "11"
+          title: "Container With Most Water"
+          url: "https://leetcode.com/problems/container-with-most-water/"
+          difficulty: "Medium"
+          description: "Two pointers + optimization: Find max area between vertical lines"
+        - number: "424"
+          title: "Longest Repeating Character Replacement"
+          url: "https://leetcode.com/problems/longest-repeating-character-replacement/"
+          difficulty: "Medium"
+          description: "Sliding window + hash map: Replace k chars to get longest repeating substring"
+        - number: "162"
+          title: "Find Peak Element"
+          url: "https://leetcode.com/problems/find-peak-element/"
+          difficulty: "Medium"
+          description: "Binary search: Find peak in array where neighbor elements are smaller"
+        - number: "5"
+          title: "Longest Palindromic Substring"
+          url: "https://leetcode.com/problems/longest-palindromic-substring/"
+          difficulty: "Medium"
+          description: "Multiple approaches: Two pointers or DP to find longest palindrome"
       time_estimate: 60
 
   week2:
@@ -535,11 +550,26 @@ weeks:
         - Greedy preprocessing for DP
         - Multiple algorithms for different phases
       problems:
-        - number: "mixed"
-          title: "Complex Integration Problems"
-          url: "Focus on problems requiring multiple advanced techniques"
+        - number: "51"
+          title: "N-Queens"
+          url: "https://leetcode.com/problems/n-queens/"
           difficulty: "Hard"
-          description: "Practice 3-4 hard problems combining learned concepts"
+          description: "Backtracking classic: Place N queens on N×N board with no attacks"
+        - number: "72"
+          title: "Edit Distance"
+          url: "https://leetcode.com/problems/edit-distance/"
+          difficulty: "Hard"
+          description: "Advanced DP: Minimum operations to transform one string to another"
+        - number: "45"
+          title: "Jump Game II"
+          url: "https://leetcode.com/problems/jump-game-ii/"
+          difficulty: "Medium"
+          description: "Greedy + DP: Minimum jumps to reach end of array"
+        - number: "212"
+          title: "Word Search II"
+          url: "https://leetcode.com/problems/word-search-ii/"
+          difficulty: "Hard"
+          description: "Backtracking + Trie: Find words in 2D grid efficiently"
       time_estimate: 60
 
   week3:
@@ -885,11 +915,26 @@ weeks:
            - Scalability
            - API design
       problems:
-        - number: "mixed"
-          title: "System Design & Data Structure Problems"
-          url: "Focus on problems requiring multiple data structures"
+        - number: "146"
+          title: "LRU Cache"
+          url: "https://leetcode.com/problems/lru-cache/"
+          difficulty: "Medium"
+          description: "Design data structure: Hash map + doubly linked list for O(1) operations"
+        - number: "355"
+          title: "Design Twitter"
+          url: "https://leetcode.com/problems/design-twitter/"
+          difficulty: "Medium"
+          description: "System design: Hash map + heap for user timelines and news feed"
+        - number: "642"
+          title: "Design Search Autocomplete System"
+          url: "https://leetcode.com/problems/design-search-autocomplete-system/"
           difficulty: "Hard"
-          description: "LRU Cache, Twitter timeline, Autocomplete system"
+          description: "Complex design: Trie + heap + hash map for real-time autocomplete"
+        - number: "23"
+          title: "Merge k Sorted Lists"
+          url: "https://leetcode.com/problems/merge-k-sorted-lists/"
+          difficulty: "Hard"
+          description: "Advanced heap usage: Efficiently merge multiple sorted lists"
       time_estimate: 60
 
   week4:
