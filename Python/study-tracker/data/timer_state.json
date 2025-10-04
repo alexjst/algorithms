@@ -1,12 +1,13 @@
 {
   "active": false,
   "paused": false,
-  "start_time": "2025-09-29T11:21:30.057327",
+  "start_time": "2025-10-03T15:50:05.854397",
   "pause_time": null,
-  "duration": 25,
+  "duration": 3600,
   "remaining": 0,
-  "track": "coding",
-  "topic": "Binary Search Trees",
-  "last_updated": "2025-09-29T11:21:55.884310",
-  "completed": true
+  "track": "system_design",
+  "topic": "CAP Theorem",
+  "last_updated": "2025-10-03T16:50:06.355407",
+  "completed": true,
+  "total_pause_duration": 0
 }

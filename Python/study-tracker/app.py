@@ -341,7 +341,8 @@ def load_timer_state():
             'remaining': None,
             'track': None,
             'topic': None,
-            'last_updated': None
+            'last_updated': None,
+            'total_pause_duration': 0
         }
 
 def save_timer_state(timer_state):
@@ -353,6 +354,10 @@ def save_timer_state(timer_state):
 def get_current_timer_state():
     """Get current timer state with real-time calculations"""
     timer_state = load_timer_state()
+
+    # Migrate old timer states to include total_pause_duration
+    if 'total_pause_duration' not in timer_state:
+        timer_state['total_pause_duration'] = 0
 
     if not timer_state['active']:
         return timer_state
@@ -367,16 +372,9 @@ def get_current_timer_state():
         start_time = datetime.fromisoformat(timer_state['start_time'])
         elapsed = (now - start_time).total_seconds()
 
-        if timer_state['pause_time']:
-            # Account for pause duration
-            pause_start = datetime.fromisoformat(timer_state['pause_time'])
-            if timer_state['paused']:
-                # Currently paused
-                elapsed -= (now - pause_start).total_seconds()
-            else:
-                # Was paused but now resumed
-                pause_duration = (pause_start - start_time).total_seconds() if 'resume_time' in timer_state else 0
-                elapsed -= pause_duration
+        # Subtract any pause duration if timer was paused
+        if timer_state.get('total_pause_duration'):
+            elapsed -= timer_state['total_pause_duration']
 
         remaining = max(0, timer_state['duration'] - elapsed)
         timer_state['remaining'] = remaining
@@ -1537,7 +1535,8 @@ def start_timer():
             'remaining': duration,
             'track': track,
             'topic': topic,
-            'completed': False
+            'completed': False,
+            'total_pause_duration': 0
         })
 
         save_timer_state(timer_state)
@@ -1574,16 +1573,15 @@ def resume_timer():
         if not timer_state['active'] or not timer_state['paused']:
             return jsonify({'error': 'No paused timer to resume'}), 400
 
-        # Calculate how long we were paused
+        # Calculate how long we were paused and add to total
         if timer_state['pause_time']:
             pause_start = datetime.fromisoformat(timer_state['pause_time'])
             pause_duration = (datetime.now() - pause_start).total_seconds()
 
-            # Adjust start time to account for pause
-            if timer_state['start_time']:
-                start_time = datetime.fromisoformat(timer_state['start_time'])
-                new_start_time = start_time + timedelta(seconds=pause_duration)
-                timer_state['start_time'] = new_start_time.isoformat()
+            # Add to cumulative pause duration
+            if 'total_pause_duration' not in timer_state:
+                timer_state['total_pause_duration'] = 0
+            timer_state['total_pause_duration'] += pause_duration
 
         timer_state['paused'] = False
         timer_state['pause_time'] = None
