@@ -908,13 +908,17 @@
 
             // Show individual problem timers
             const problemTimers = document.querySelectorAll(`#practice-section-${reviewIndex} .problem-timer-section`);
-            problemTimers.forEach(timer => {
+            problemTimers.forEach((timer, problemIndex) => {
                 timer.style.display = 'block';
+                // Start timing each problem immediately
+                const problemKey = `${reviewIndex}-${problemIndex}`;
+                problemStartTimes[problemKey] = Date.now();
             });
 
             // Start the main timer
             reviewPracticeTimers[reviewIndex].interval = setInterval(() => {
                 updateReviewPracticeTimer(reviewIndex);
+                updateIndividualProblemTimers(reviewIndex);
             }, 1000);
 
             // Disable the start button
@@ -936,20 +940,44 @@
             timer.totalMinutes = minutes + (seconds / 60);
         }
 
+        function updateIndividualProblemTimers(reviewIndex) {
+            const problemTimers = document.querySelectorAll(`#practice-section-${reviewIndex} .problem-timer-section`);
+            problemTimers.forEach((timer, problemIndex) => {
+                const problemKey = `${reviewIndex}-${problemIndex}`;
+                const startTime = problemStartTimes[problemKey];
+                if (!startTime) return;
+
+                // Only update if problem not yet completed
+                const completeButton = timer.querySelector('.complete-problem-btn');
+                if (completeButton && !completeButton.disabled) {
+                    const elapsed = Date.now() - startTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+
+                    const timeDisplay = document.getElementById(`problem-time-${reviewIndex}-${problemIndex}`);
+                    if (timeDisplay) {
+                        timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }
+            });
+        }
+
         function markProblemComplete(reviewIndex, problemIndex) {
             console.log(`Marking problem ${problemIndex} complete for review ${reviewIndex}`);
 
             const problemKey = `${reviewIndex}-${problemIndex}`;
 
-            if (!problemStartTimes[problemKey]) {
-                // If no start time recorded, use current time as start (assume they just started)
+            // Use existing start time (should already be set when practice started)
+            const startTime = problemStartTimes[problemKey];
+            if (!startTime) {
+                console.warn(`No start time found for problem ${problemKey}, using current time`);
                 problemStartTimes[problemKey] = Date.now();
             }
 
             const elapsed = Date.now() - problemStartTimes[problemKey];
             const minutes = Math.round(elapsed / 60000);
 
-            // Update the problem time display
+            // Update the problem time display to final time
             document.getElementById(`problem-time-${reviewIndex}-${problemIndex}`).textContent = `${minutes} min`;
 
             // Mark as completed
@@ -1258,6 +1286,17 @@
                 Object.assign(requestData, practiceData);
             }
 
+            // Disable the review section to prevent double-submission
+            const reviewElement = document.getElementById(`review-${reviewIndex}`);
+            if (reviewElement) {
+                reviewElement.style.pointerEvents = 'none';
+                const button = reviewElement.querySelector('.complete-btn');
+                if (button) {
+                    button.textContent = '⏳ Saving...';
+                    button.style.background = '#6c757d';
+                }
+            }
+
             // Make the completion request
             try {
                 const response = await fetch('/complete', {
@@ -1268,17 +1307,99 @@
 
                 if (response.ok) {
                     console.log('Review completed successfully with practice data');
+
+                    // Show completion summary instead of immediate reload
+                    showReviewCompletionSummary(reviewIndex, topic, track, rating, notes, practiceData);
+
                     // Clean up practice data
                     if (reviewIndex !== null) {
                         delete reviewPracticeTimers[reviewIndex];
                         delete completedProblems[reviewIndex];
                     }
-                    location.reload(); // Refresh to update the dashboard
                 } else {
                     console.error('Failed to complete review');
+                    // Re-enable on error
+                    if (reviewElement) {
+                        reviewElement.style.pointerEvents = 'auto';
+                        const button = reviewElement.querySelector('.complete-btn');
+                        if (button) {
+                            button.textContent = '✅ Review Complete';
+                            button.style.background = '#28a745';
+                        }
+                    }
+                    alert('❌ Error saving completion. Please try again.');
                 }
             } catch (error) {
                 console.error('Error completing review:', error);
+                // Re-enable on error
+                if (reviewElement) {
+                    reviewElement.style.pointerEvents = 'auto';
+                    const button = reviewElement.querySelector('.complete-btn');
+                    if (button) {
+                        button.textContent = '✅ Review Complete';
+                        button.style.background = '#28a745';
+                    }
+                }
+                alert('❌ Network error. Please check your connection and try again.');
+            }
+        }
+
+        function showReviewCompletionSummary(reviewIndex, topic, track, rating, notes, practiceData) {
+            const reviewElement = document.getElementById(`review-${reviewIndex}`);
+            if (!reviewElement) return;
+
+            // Create completion summary
+            let summaryHTML = `
+                <div class="completed-message" style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                    <h4>✅ ${track.charAt(0).toUpperCase() + track.slice(1)}: ${topic} Review Complete!</h4>
+                    <p><strong>Rating:</strong> ${rating}/5 (${getRatingDescription(rating)})</p>
+                    ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
+            `;
+
+            // Add practice summary if available
+            if (practiceData) {
+                summaryHTML += `
+                    <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+                        <h5>🎯 Practice Session Results:</h5>
+                        <p><strong>Total Practice Time:</strong> ${practiceData.practice_time} minutes</p>
+                        <p><strong>Problems Completed:</strong> ${practiceData.problem_times.length}</p>
+                `;
+
+                if (practiceData.problem_times.length > 0) {
+                    summaryHTML += '<p><strong>Individual Problem Times:</strong></p><ul>';
+                    practiceData.problem_times.forEach((problem, idx) => {
+                        summaryHTML += `<li>Problem ${idx + 1}: ${problem.timeMinutes} min</li>`;
+                    });
+                    summaryHTML += '</ul>';
+                }
+                summaryHTML += '</div>';
+            }
+
+            summaryHTML += `
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button onclick="location.reload()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                            🔄 Refresh Dashboard
+                        </button>
+                        <button onclick="hideCompletionSummary(${reviewIndex})" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                            ❌ Dismiss
+                        </button>
+                    </div>
+                    <p style="margin-top: 10px;"><em>Great job! Keep up the momentum! 🚀</em></p>
+                </div>
+            `;
+
+            // Hide the form elements and show summary
+            const formElements = reviewElement.querySelectorAll('.rating, .notes, .complete-btn, .review-practice-section');
+            formElements.forEach(el => el.style.display = 'none');
+
+            reviewElement.insertAdjacentHTML('beforeend', summaryHTML);
+        }
+
+        function hideCompletionSummary(reviewIndex) {
+            const reviewElement = document.getElementById(`review-${reviewIndex}`);
+            if (reviewElement) {
+                // Just hide the entire review element
+                reviewElement.style.display = 'none';
             }
         }
     </script>
