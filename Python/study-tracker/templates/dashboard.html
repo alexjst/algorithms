@@ -121,7 +121,7 @@
 
             {% if not coding_topic_completed %}
             <p class="time-estimate">⏱️ {{ coding_topic.time_estimate }} minutes
-                <button class="start-timer-btn" onclick="console.log('Button clicked!'); try { startPomodoro('coding', {{ coding_topic.time_estimate }}); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
+                <button class="start-timer-btn" onclick="startPomodoro('coding', {{ coding_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
                     🍅 Start Timer
                 </button>
             </p>
@@ -193,7 +193,7 @@
 
             {% if not system_design_topic_completed %}
             <p class="time-estimate">⏱️ {{ system_design_topic.time_estimate }} minutes
-                <button class="start-timer-btn" onclick="console.log('System Design Button clicked!'); try { startPomodoro('system_design', {{ system_design_topic.time_estimate }}); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
+                <button class="start-timer-btn" onclick="startPomodoro('system_design', {{ system_design_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
                     🍅 Start Timer
                 </button>
             </p>
@@ -554,6 +554,81 @@
         let syncInterval = null;
         let serverUnavailable = false;
 
+        // Define startPomodoro function globally at the top
+        async function startPomodoro(track, minutes) {
+            console.log(`Starting Pomodoro for track: ${track}, minutes: ${minutes}`);
+
+            // Check if server is available
+            if (serverUnavailable) {
+                alert('Timer feature unavailable: Server connection lost. Please refresh the page.');
+                return;
+            }
+
+            try {
+                // First check if there's already an active timer
+                const stateResponse = await fetch('/api/timer/state');
+                if (stateResponse.ok) {
+                    const currentState = await stateResponse.json();
+
+                    // If there's an active timer for a different track/topic, ask for confirmation
+                    if (currentState.active && currentState.track !== track) {
+                        const remainingMins = Math.floor(currentState.remaining / 60);
+                        const remainingSecs = Math.floor(currentState.remaining % 60);
+                        const timeLeft = `${remainingMins}:${remainingSecs.toString().padStart(2, '0')}`;
+
+                        const currentTopicName = currentState.topic || 'Unknown Topic';
+                        const newTopicName = getTopicName(track);
+
+                        const confirmed = confirm(
+                            `⚠️ You already have an active timer running!\n\n` +
+                            `Current: ${currentState.track.replace('_', ' ')} - "${currentTopicName}"\n` +
+                            `Time remaining: ${timeLeft}\n\n` +
+                            `Do you want to stop it and start a new timer for:\n` +
+                            `"${newTopicName}" (${minutes} minutes)?\n\n` +
+                            `Click OK to replace, Cancel to keep current timer.`
+                        );
+
+                        if (!confirmed) {
+                            // User chose to keep current timer, scroll to it
+                            scrollToActiveTimer(currentState.track);
+                            return;
+                        }
+                    }
+                }
+
+                const response = await fetch('/api/timer/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        track: track,
+                        topic: getTopicName(track),
+                        duration: minutes
+                    })
+                });
+
+                if (response.ok) {
+                    // Timer started successfully, sync will update display
+                    await syncTimerState();
+
+                    // Scroll to timer
+                    const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+                    if (pomodoroSection) {
+                        pomodoroSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                } else {
+                    alert('Error starting timer. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error starting timer:', error);
+                alert('Network error starting timer. Please try again.');
+            }
+        }
+
+        // Make function globally accessible
+        window.startPomodoro = startPomodoro;
+
         document.addEventListener('DOMContentLoaded', function() {
             syncTimerState();
             // Start with 2-second intervals
@@ -755,77 +830,6 @@
                 if (finishEarlyBtn) finishEarlyBtn.style.display = 'none';
             }
             currentTrack = null;
-        }
-
-        async function startPomodoro(track, minutes) {
-            console.log(`Starting Pomodoro for track: ${track}, minutes: ${minutes}`);
-
-            // Check if server is available
-            if (serverUnavailable) {
-                alert('Timer feature unavailable: Server connection lost. Please refresh the page.');
-                return;
-            }
-
-            try {
-                // First check if there's already an active timer
-                const stateResponse = await fetch('/api/timer/state');
-                if (stateResponse.ok) {
-                    const currentState = await stateResponse.json();
-
-                    // If there's an active timer for a different track/topic, ask for confirmation
-                    if (currentState.active && currentState.track !== track) {
-                        const remainingMins = Math.floor(currentState.remaining / 60);
-                        const remainingSecs = Math.floor(currentState.remaining % 60);
-                        const timeLeft = `${remainingMins}:${remainingSecs.toString().padStart(2, '0')}`;
-
-                        const currentTopicName = currentState.topic || 'Unknown Topic';
-                        const newTopicName = getTopicName(track);
-
-                        const confirmed = confirm(
-                            `⚠️ You already have an active timer running!\n\n` +
-                            `Current: ${currentState.track.replace('_', ' ')} - "${currentTopicName}"\n` +
-                            `Time remaining: ${timeLeft}\n\n` +
-                            `Do you want to stop it and start a new timer for:\n` +
-                            `"${newTopicName}" (${minutes} minutes)?\n\n` +
-                            `Click OK to replace, Cancel to keep current timer.`
-                        );
-
-                        if (!confirmed) {
-                            // User chose to keep current timer, scroll to it
-                            scrollToActiveTimer(currentState.track);
-                            return;
-                        }
-                    }
-                }
-
-                const response = await fetch('/api/timer/start', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        track: track,
-                        topic: getTopicName(track),
-                        duration: minutes
-                    })
-                });
-
-                if (response.ok) {
-                    // Timer started successfully, sync will update display
-                    await syncTimerState();
-
-                    // Scroll to timer
-                    const pomodoroSection = document.getElementById(`${track}-pomodoro`);
-                    if (pomodoroSection) {
-                        pomodoroSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                } else {
-                    alert('Error starting timer. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error starting timer:', error);
-                alert('Network error starting timer. Please try again.');
-            }
         }
 
         function scrollToActiveTimer(track) {
@@ -1580,11 +1584,6 @@
             }
         }
 
-        // Debug: Test if startPomodoro function is accessible
-        console.log('startPomodoro function available:', typeof startPomodoro);
-
-        // Make startPomodoro globally accessible in case of scope issues
-        window.startPomodoro = startPomodoro;
     </script>
 </body>
 </html>
