@@ -564,13 +564,25 @@ def get_system_design_practice_data():
     topic = data.get('topic')
     track = data.get('track')
     review_type = data.get('review_type', '3-day')
+    use_cached = data.get('use_cached', False)  # Whether to use cached questions if available
 
     if not topic or track != 'system_design':
         return jsonify({'error': 'Valid system design topic required'}), 400
 
-    practice_questions = select_review_questions(topic, track, review_type)
+    # Create a unique key for this practice session
+    session_key = f"{track}_{topic}_{review_type}".replace(' ', '_')
+
+    practice_questions = None
+
+    # If use_cached is True, try to get cached questions first
+    if use_cached:
+        practice_questions = data.get('cached_questions')
+
+    # If no cached questions, generate new ones
     if not practice_questions:
-        return jsonify({'error': 'No practice questions found for this topic'}), 404
+        practice_questions = select_review_questions(topic, track, review_type)
+        if not practice_questions:
+            return jsonify({'error': 'No practice questions found for this topic'}), 404
 
     benchmarks = get_system_design_benchmarks(practice_questions, review_type)
 
@@ -579,7 +591,8 @@ def get_system_design_practice_data():
         'track': track,
         'review_type': review_type,
         'questions': practice_questions,
-        'benchmarks': benchmarks
+        'benchmarks': benchmarks,
+        'session_key': session_key
     })
 
 @app.route('/api/calculate-system-design-rating', methods=['POST'])

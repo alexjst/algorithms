@@ -558,7 +558,31 @@
             syncTimerState();
             // Start with 2-second intervals
             startTimerSync();
+            // Clean up old practice sessions from localStorage
+            cleanupOldPracticeSessions();
         });
+
+        function cleanupOldPracticeSessions() {
+            const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            const now = Date.now();
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('practice_session_')) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        if (data.timestamp && (now - data.timestamp) > MAX_AGE) {
+                            localStorage.removeItem(key);
+                            console.log('Cleaned up old practice session:', key);
+                        }
+                    } catch (e) {
+                        // Invalid data, remove it
+                        localStorage.removeItem(key);
+                        console.log('Removed invalid practice session data:', key);
+                    }
+                }
+            }
+        }
 
         function startTimerSync() {
             if (syncInterval) clearInterval(syncInterval);
@@ -1131,15 +1155,30 @@
             console.log(`Starting system design practice for ${topic} (${reviewType})`);
 
             try {
+                // Create session key for this practice session
+                const sessionKey = `${track}_${topic}_${reviewType}`.replace(/\s+/g, '_');
+
+                // Check if we have cached questions for this session
+                const cachedData = localStorage.getItem(`practice_session_${sessionKey}`);
+                let requestBody = {
+                    topic: topic,
+                    track: track,
+                    review_type: reviewType,
+                    use_cached: false
+                };
+
+                if (cachedData) {
+                    const parsedData = JSON.parse(cachedData);
+                    requestBody.use_cached = true;
+                    requestBody.cached_questions = parsedData.questions;
+                    console.log('Using cached questions for', sessionKey);
+                }
+
                 // Fetch practice questions and benchmarks
                 const response = await fetch('/api/system-design-practice', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        topic: topic,
-                        track: track,
-                        review_type: reviewType
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {
@@ -1147,6 +1186,16 @@
                 }
 
                 const data = await response.json();
+
+                // Save questions to localStorage if they're newly generated
+                if (!cachedData) {
+                    const sessionData = {
+                        questions: data.questions,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem(`practice_session_${sessionKey}`, JSON.stringify(sessionData));
+                    console.log('Saved new questions to localStorage for', sessionKey);
+                }
 
                 // Initialize session tracking
                 systemDesignSessions[reviewIndex] = {
@@ -1159,7 +1208,8 @@
                     benchmarks: data.benchmarks,
                     answers: {},
                     questionStartTimes: {},
-                    totalMinutes: 0
+                    totalMinutes: 0,
+                    sessionKey: sessionKey
                 };
 
                 // Show practice controls
@@ -1353,6 +1403,13 @@
             document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'none';
             document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'none';
 
+            // Clean up localStorage for this session when practice is stopped
+            const session = systemDesignSessions[reviewIndex];
+            if (session && session.sessionKey) {
+                localStorage.removeItem(`practice_session_${session.sessionKey}`);
+                console.log('Cleared localStorage for stopped session:', session.sessionKey);
+            }
+
             // Re-enable start button
             const startButton = document.querySelector(`button[onclick*="startSystemDesignPractice(${reviewIndex}"]`);
             if (startButton) {
@@ -1420,6 +1477,13 @@
                 if (response.ok) {
                     console.log('Review completed successfully with practice data');
 
+                    // Clean up localStorage for system design sessions
+                    const systemDesignSession = systemDesignSessions[reviewIndex];
+                    if (systemDesignSession && systemDesignSession.sessionKey) {
+                        localStorage.removeItem(`practice_session_${systemDesignSession.sessionKey}`);
+                        console.log('Cleared localStorage for completed session:', systemDesignSession.sessionKey);
+                    }
+
                     // Show completion summary instead of immediate reload
                     showReviewCompletionSummary(reviewIndex, topic, track, rating, notes, practiceData);
 
@@ -1427,6 +1491,7 @@
                     if (reviewIndex !== null) {
                         delete reviewPracticeTimers[reviewIndex];
                         delete completedProblems[reviewIndex];
+                        delete systemDesignSessions[reviewIndex];
                     }
                 } else {
                     console.error('Failed to complete review');

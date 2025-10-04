@@ -6,7 +6,9 @@
       "review_type": "1-day",
       "due_date": "2025-09-29",
       "scheduled_date": "2025-09-28",
-      "completed_date": null
+      "completed_date": "2025-09-29",
+      "rating": 3,
+      "notes": "Floyed fast and slow pointers for cycle detection.\nleft, right pointer of an array, idiom is \"left, right = 0, len(nums)-1\". 2 sums will move have 3 branches and move right toward left and move left toward right."
     },
     {
       "topic": "Two Pointers",
@@ -14,7 +16,9 @@
       "review_type": "3-day",
       "due_date": "2025-10-01",
       "scheduled_date": "2025-09-28",
-      "completed_date": null
+      "completed_date": "2025-10-01",
+      "rating": 3,
+      "notes": "left right pointers,yes 2 sum. recall the this is different from sliding windo."
     },
     {
       "topic": "Two Pointers",
@@ -38,7 +42,9 @@
       "review_type": "1-day",
       "due_date": "2025-09-29",
       "scheduled_date": "2025-09-28",
-      "completed_date": null
+      "completed_date": "2025-09-29",
+      "rating": 2,
+      "notes": "horizontal scaling vs vertical scaling.\n"
     },
     {
       "topic": "Scalability Fundamentals",
@@ -46,7 +52,9 @@
       "review_type": "3-day",
       "due_date": "2025-10-01",
       "scheduled_date": "2025-09-28",
-      "completed_date": null
+      "completed_date": "2025-10-01",
+      "rating": 3,
+      "notes": "horizontal, vertical\nload balancing, consistent hashing\ncaching: different layers\nCAP theorem. consistency, availability, partition tolerance.\ndata sharding."
     },
     {
       "topic": "Scalability Fundamentals",
@@ -62,6 +70,279 @@
       "review_type": "14-day",
       "due_date": "2025-10-12",
       "scheduled_date": "2025-09-28",
+      "completed_date": null
+    },
+    {
+      "topic": "Binary Search",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-02",
+      "scheduled_date": "2025-10-01",
+      "completed_date": "2025-10-02",
+      "rating": 4,
+      "notes": ""
+    },
+    {
+      "topic": "Binary Search",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-04",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "Binary Search",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-08",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "Binary Search",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-15",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "Caching Strategies",
+      "track": "system_design",
+      "review_type": "1-day",
+      "due_date": "2025-10-02",
+      "scheduled_date": "2025-10-01",
+      "completed_date": "2025-10-02",
+      "rating": 3,
+      "notes": "LRU, LFU (least frequently used), TTL, FIFO, random-delete.\nDifferent layers of caches (local/client, server, distributed cache, CDN)\nmemcached vs redis: simple vs complex features (persistence, distributed cluster, replica, complex data structures, message broker).\nWhen application use cache:\n  - cache-aside: hit cache first and then db -> write to cache\n  - write-through: write the db and cache at the same time, write is successful only when both succeed\n  - write-around: just db and not cache"
+    },
+    {
+      "topic": "Caching Strategies",
+      "track": "system_design",
+      "review_type": "3-day",
+      "due_date": "2025-10-04",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "Caching Strategies",
+      "track": "system_design",
+      "review_type": "7-day",
+      "due_date": "2025-10-08",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "Caching Strategies",
+      "track": "system_design",
+      "review_type": "14-day",
+      "due_date": "2025-10-15",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "DFS Fundamentals",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-02",
+      "scheduled_date": "2025-10-01",
+      "completed_date": "2025-10-02",
+      "rating": 3,
+      "notes": "I'll just go with counting connected components:\n\nvisited=set()\ncount = 0\ndef get_num_components():\n  for node in graph: #adj list\n    if node not in visited:\n      dfs(graph, node, visited)\n      count += 1\n  return count\n\ndef dfs(graph, node, visited):\n  visited.add(node)\n  for neighbor in graph[node]:\n    if neighbor not in visited:\n      dfs(graph, neighbor, visited)\n"
+    },
+    {
+      "topic": "DFS Fundamentals",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-04",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "DFS Fundamentals",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-08",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "DFS Fundamentals",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-15",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "Database Fundamentals",
+      "track": "system_design",
+      "review_type": "1-day",
+      "due_date": "2025-10-02",
+      "scheduled_date": "2025-10-01",
+      "completed_date": "2025-10-02",
+      "rating": 3,
+      "notes": "sql vs nonsql\nnosql includes: document, column family, time serious, key-value\ncap, strong consistency; envtual consistency\nsharding, replica\n"
+    },
+    {
+      "topic": "Database Fundamentals",
+      "track": "system_design",
+      "review_type": "3-day",
+      "due_date": "2025-10-04",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "Database Fundamentals",
+      "track": "system_design",
+      "review_type": "7-day",
+      "due_date": "2025-10-08",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "Database Fundamentals",
+      "track": "system_design",
+      "review_type": "14-day",
+      "due_date": "2025-10-15",
+      "scheduled_date": "2025-10-01",
+      "completed_date": null
+    },
+    {
+      "topic": "BFS Fundamentals",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-03",
+      "scheduled_date": "2025-10-02",
+      "completed_date": "2025-10-03",
+      "rating": 4,
+      "notes": "Good, use dequeue and a level array.\nRemember array[::-1] is a copy of the reversed array.",
+      "practice_time": 13,
+      "problem_times": [
+        {
+          "problemIndex": 0,
+          "timeMinutes": 0
+        }
+      ]
+    },
+    {
+      "topic": "BFS Fundamentals",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-05",
+      "scheduled_date": "2025-10-02",
+      "completed_date": null
+    },
+    {
+      "topic": "BFS Fundamentals",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-09",
+      "scheduled_date": "2025-10-02",
+      "completed_date": null
+    },
+    {
+      "topic": "BFS Fundamentals",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-16",
+      "scheduled_date": "2025-10-02",
+      "completed_date": null
+    },
+    {
+      "topic": "Consistency Models",
+      "track": "system_design",
+      "review_type": "1-day",
+      "due_date": "2025-10-03",
+      "scheduled_date": "2025-10-02",
+      "completed_date": null
+    },
+    {
+      "topic": "Consistency Models",
+      "track": "system_design",
+      "review_type": "3-day",
+      "due_date": "2025-10-05",
+      "scheduled_date": "2025-10-02",
+      "completed_date": null
+    },
+    {
+      "topic": "Consistency Models",
+      "track": "system_design",
+      "review_type": "7-day",
+      "due_date": "2025-10-09",
+      "scheduled_date": "2025-10-02",
+      "completed_date": null
+    },
+    {
+      "topic": "Consistency Models",
+      "track": "system_design",
+      "review_type": "14-day",
+      "due_date": "2025-10-16",
+      "scheduled_date": "2025-10-02",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-04",
+      "scheduled_date": "2025-10-03",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-06",
+      "scheduled_date": "2025-10-03",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-10",
+      "scheduled_date": "2025-10-03",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-17",
+      "scheduled_date": "2025-10-03",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-04",
+      "scheduled_date": "2025-10-03",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-06",
+      "scheduled_date": "2025-10-03",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-10",
+      "scheduled_date": "2025-10-03",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-17",
+      "scheduled_date": "2025-10-03",
       "completed_date": null
     }
   ]

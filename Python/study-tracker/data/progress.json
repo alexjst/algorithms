@@ -17,6 +17,78 @@
       "notes": "Not quite concrete what to learn and practice and remember to excel in my interview.",
       "completed_on_time": null,
       "timestamp": "2025-09-28T23:02:49.537454"
+    },
+    {
+      "date": "2025-10-01",
+      "track": "coding",
+      "topic": "Binary Search",
+      "rating": 2,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-01T00:50:14.612607"
+    },
+    {
+      "date": "2025-10-01",
+      "track": "system_design",
+      "topic": "Caching Strategies",
+      "rating": 3,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-01T01:00:14.036629"
+    },
+    {
+      "date": "2025-10-01",
+      "track": "coding",
+      "topic": "DFS Fundamentals",
+      "rating": 3,
+      "notes": "I used to be very familiar with number of islands. not now. It feels tricky now whie ",
+      "completed_on_time": null,
+      "timestamp": "2025-10-01T22:25:33.276674"
+    },
+    {
+      "date": "2025-10-01",
+      "track": "system_design",
+      "topic": "Database Fundamentals",
+      "rating": 3,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-01T22:27:01.394367"
+    },
+    {
+      "date": "2025-10-02",
+      "track": "coding",
+      "topic": "BFS Fundamentals",
+      "rating": 3,
+      "notes": "Remember list.reverse() is in-place and the return value is not the list itself but 'None'. To get the reverse order of a list, use list[::-1].",
+      "completed_on_time": null,
+      "timestamp": "2025-10-02T08:59:32.812784"
+    },
+    {
+      "date": "2025-10-02",
+      "track": "system_design",
+      "topic": "Consistency Models",
+      "rating": 3,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-02T10:02:48.323343"
+    },
+    {
+      "date": "2025-10-03",
+      "track": "coding",
+      "topic": "Dynamic Programming",
+      "rating": 3,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-03T08:31:37.113839"
+    },
+    {
+      "date": "2025-10-03",
+      "track": "coding",
+      "topic": "Dynamic Programming",
+      "rating": 3,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-03T08:39:41.773549"
     }
   ]
 }
