@@ -922,8 +922,11 @@
             }, 1000);
 
             // Disable the start button
-            event.target.disabled = true;
-            event.target.textContent = '🏃 Practice In Progress...';
+            const startButton = document.querySelector(`button[onclick*="startReviewPractice(${reviewIndex}"]`);
+            if (startButton) {
+                startButton.disabled = true;
+                startButton.textContent = '🏃 Practice In Progress...';
+            }
         }
 
         function updateReviewPracticeTimer(reviewIndex) {
@@ -990,9 +993,12 @@
             });
 
             // Disable the button
-            event.target.disabled = true;
-            event.target.textContent = '✅ Completed';
-            event.target.style.background = '#6c757d';
+            const completeButton = document.querySelector(`#problem-timer-${reviewIndex}-${problemIndex} .complete-problem-btn`);
+            if (completeButton) {
+                completeButton.disabled = true;
+                completeButton.textContent = '✅ Completed';
+                completeButton.style.background = '#6c757d';
+            }
 
             console.log(`Problem completed in ${minutes} minutes`);
         }
@@ -1120,8 +1126,11 @@
                 }, 1000);
 
                 // Disable the start button
-                event.target.disabled = true;
-                event.target.textContent = '🏃 Practice In Progress...';
+                const startButton = document.querySelector(`button[onclick*="startSystemDesignPractice(${reviewIndex}"]`);
+                if (startButton) {
+                    startButton.disabled = true;
+                    startButton.textContent = '🏃 Practice In Progress...';
+                }
 
                 console.log(`System design practice started with ${data.questions.length} questions`);
 
@@ -1174,9 +1183,12 @@
             document.getElementById(`answer-time-${reviewIndex}-${questionIndex}`).textContent = `${minutes} min`;
 
             // Disable the button
-            event.target.disabled = true;
-            event.target.textContent = '✅ Answered';
-            event.target.style.background = '#6c757d';
+            const answerButton = document.querySelector(`#answer-section-${reviewIndex}-${questionIndex} .mark-answered-btn`);
+            if (answerButton) {
+                answerButton.disabled = true;
+                answerButton.textContent = '✅ Answered';
+                answerButton.style.background = '#6c757d';
+            }
 
             console.log(`Question ${questionIndex + 1} answered in ${minutes} minutes`);
         }
