@@ -1717,6 +1717,18 @@ def get_advancement_info():
                     topic_completed = True
                     break
 
+        can_advance = topic_completed and next_day <= 28
+
+        # Determine reason if advancement is not possible
+        reason = None
+        if not can_advance:
+            if current_day >= 28:
+                reason = "You've reached the final day (28) of the curriculum."
+            elif not topic_completed:
+                reason = f"Complete today's {track.replace('_', ' ')} topic first to unlock advancement."
+            else:
+                reason = "Advancement not available at this time."
+
         return jsonify({
             'success': True,
             'track': track,
@@ -1726,7 +1738,8 @@ def get_advancement_info():
             'next_topic': next_topic,
             'days_ahead': days_ahead,
             'topic_completed': topic_completed,
-            'can_advance': topic_completed and next_day <= 28,
+            'can_advance': can_advance,
+            'reason': reason,
             'at_final_day': current_day >= 28
         })
 
