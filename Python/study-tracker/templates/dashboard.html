@@ -1166,15 +1166,19 @@
                 document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'inline';
                 document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'inline';
 
-                // Show answer sections for all questions
+                // Show answer sections for all questions and start timing each one
                 const answerSections = document.querySelectorAll(`#practice-section-${reviewIndex} .answer-section`);
-                answerSections.forEach(section => {
+                answerSections.forEach((section, questionIndex) => {
                     section.style.display = 'block';
+                    // Start timing each question immediately
+                    const questionKey = `${reviewIndex}-${questionIndex}`;
+                    systemDesignSessions[reviewIndex].questionStartTimes[questionKey] = Date.now();
                 });
 
                 // Start the main timer
                 systemDesignSessions[reviewIndex].interval = setInterval(() => {
                     updateSystemDesignTimer(reviewIndex);
+                    updateIndividualQuestionTimers(reviewIndex);
                 }, 1000);
 
                 // Disable the start button
@@ -1206,12 +1210,48 @@
             session.totalMinutes = minutes + (seconds / 60);
         }
 
-        function markQuestionAnswered(reviewIndex, questionIndex) {
+        function updateIndividualQuestionTimers(reviewIndex) {
             const session = systemDesignSessions[reviewIndex];
             if (!session) return;
 
+            const answerSections = document.querySelectorAll(`#practice-section-${reviewIndex} .answer-section`);
+            answerSections.forEach((section, questionIndex) => {
+                const questionKey = `${reviewIndex}-${questionIndex}`;
+                const startTime = session.questionStartTimes[questionKey];
+                if (!startTime) return;
+
+                // Only update if question not yet answered
+                const answerButton = section.querySelector('.mark-answered-btn');
+                if (answerButton && !answerButton.disabled) {
+                    const elapsed = Date.now() - startTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+
+                    const timeDisplay = document.getElementById(`answer-time-${reviewIndex}-${questionIndex}`);
+                    if (timeDisplay) {
+                        timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }
+            });
+        }
+
+        function markQuestionAnswered(reviewIndex, questionIndex) {
+            console.log(`markQuestionAnswered called with reviewIndex: ${reviewIndex}, questionIndex: ${questionIndex}`);
+
+            const session = systemDesignSessions[reviewIndex];
+            if (!session) {
+                console.error(`No session found for reviewIndex: ${reviewIndex}`);
+                return;
+            }
+
             const questionKey = `${reviewIndex}-${questionIndex}`;
             const answerTextarea = document.getElementById(`answer-${reviewIndex}-${questionIndex}`);
+
+            if (!answerTextarea) {
+                console.error(`No textarea found with ID: answer-${reviewIndex}-${questionIndex}`);
+                return;
+            }
+
             const answer = answerTextarea.value.trim();
 
             if (!answer) {
@@ -1223,16 +1263,23 @@
             const questionId = session.questions[questionIndex]?.id || questionKey;
             session.answers[questionId] = answer;
 
-            // Calculate time for this question
-            if (!session.questionStartTimes[questionKey]) {
+            // Calculate time for this question (should already be started)
+            const startTime = session.questionStartTimes[questionKey];
+            if (!startTime) {
+                console.warn(`No start time found for question ${questionKey}, using current time`);
                 session.questionStartTimes[questionKey] = Date.now();
             }
 
             const elapsed = Date.now() - session.questionStartTimes[questionKey];
             const minutes = Math.round(elapsed / 60000);
 
-            // Update display
-            document.getElementById(`answer-time-${reviewIndex}-${questionIndex}`).textContent = `${minutes} min`;
+            // Update display to final time
+            const timeDisplay = document.getElementById(`answer-time-${reviewIndex}-${questionIndex}`);
+            if (timeDisplay) {
+                timeDisplay.textContent = `${minutes} min`;
+            } else {
+                console.error(`No time display found with ID: answer-time-${reviewIndex}-${questionIndex}`);
+            }
 
             // Disable the button
             const answerButton = document.querySelector(`#answer-section-${reviewIndex}-${questionIndex} .mark-answered-btn`);
@@ -1240,9 +1287,10 @@
                 answerButton.disabled = true;
                 answerButton.textContent = '✅ Answered';
                 answerButton.style.background = '#6c757d';
+                console.log(`Question ${questionIndex + 1} answered in ${minutes} minutes`);
+            } else {
+                console.error(`No answer button found with selector: #answer-section-${reviewIndex}-${questionIndex} .mark-answered-btn`);
             }
-
-            console.log(`Question ${questionIndex + 1} answered in ${minutes} minutes`);
         }
 
         async function stopSystemDesignPractice(reviewIndex) {
