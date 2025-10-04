@@ -583,18 +583,24 @@
         // Define startPomodoro function globally at the top
         async function startPomodoro(track, minutes) {
             console.log(`Starting Pomodoro for track: ${track}, minutes: ${minutes}`);
+            console.log(`serverUnavailable flag: ${serverUnavailable}`);
 
             // Check if server is available
             if (serverUnavailable) {
+                console.log('Server unavailable, blocking timer start');
                 alert('Timer feature unavailable: Server connection lost. Please refresh the page.');
                 return;
             }
 
+            console.log('Server available, proceeding with timer start...');
             try {
                 // First check if there's already an active timer
+                console.log('Checking current timer state...');
                 const stateResponse = await fetch('/api/timer/state');
+                console.log('State response received:', stateResponse.status);
                 if (stateResponse.ok) {
                     const currentState = await stateResponse.json();
+                    console.log('Current timer state:', currentState);
 
                     // If there's an active timer for a different track/topic, ask for confirmation
                     if (currentState.active && currentState.track !== track) {
@@ -622,6 +628,11 @@
                     }
                 }
 
+                console.log('Starting timer API call...');
+                const topicName = getTopicName(track);
+                console.log('Topic name:', topicName);
+                console.log('Request body:', {track, topic: topicName, duration: minutes});
+
                 const response = await fetch('/api/timer/start', {
                     method: 'POST',
                     headers: {
@@ -629,12 +640,15 @@
                     },
                     body: JSON.stringify({
                         track: track,
-                        topic: getTopicName(track),
+                        topic: topicName,
                         duration: minutes
                     })
                 });
 
+                console.log('Timer start response:', response.status);
                 if (response.ok) {
+                    const result = await response.json();
+                    console.log('Timer started successfully:', result);
                     // Timer started successfully, sync will update display
                     await syncTimerState();
 
