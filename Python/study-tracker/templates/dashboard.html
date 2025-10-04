@@ -163,6 +163,19 @@
                 <h4>✅ {{ coding_topic.topic }} Complete!</h4>
                 <p>Rating: {{ coding_completion_data.rating }}/5 | Notes: {{ coding_completion_data.notes or 'No notes' }}</p>
                 <p><em>Great job! Keep up the momentum! 🚀</em></p>
+
+                <!-- Acceleration UI -->
+                <div id="coding-acceleration" class="acceleration-section" style="margin-top: 15px;">
+                    <div id="coding-advance-check">
+                        <button class="advance-check-btn" onclick="checkAdvancement('coding')"
+                                style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                            🚀 Ready for more?
+                        </button>
+                    </div>
+                    <div id="coding-advance-option" style="display: none;">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
             </div>
             {% else %}
             <div class="rating">
@@ -285,6 +298,19 @@
                 <h4>✅ {{ system_design_topic.topic }} Complete!</h4>
                 <p>Rating: {{ system_design_completion_data.rating }}/5 | Notes: {{ system_design_completion_data.notes or 'No notes' }}</p>
                 <p><em>Great job! Keep up the momentum! 🚀</em></p>
+
+                <!-- Acceleration UI -->
+                <div id="system_design-acceleration" class="acceleration-section" style="margin-top: 15px;">
+                    <div id="system_design-advance-check">
+                        <button class="advance-check-btn" onclick="checkAdvancement('system_design')"
+                                style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                            🚀 Ready for more?
+                        </button>
+                    </div>
+                    <div id="system_design-advance-option" style="display: none;">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
             </div>
             {% else %}
             <div class="rating">
@@ -1582,6 +1608,98 @@
                 // Just hide the entire review element
                 reviewElement.style.display = 'none';
             }
+        }
+
+        // Acceleration feature functions
+        async function checkAdvancement(track) {
+            try {
+                const response = await fetch('/api/get-advancement-info?track=' + track);
+                const data = await response.json();
+
+                if (data.success) {
+                    const checkDiv = document.getElementById(`${track}-advance-check`);
+                    const optionDiv = document.getElementById(`${track}-advance-option`);
+
+                    if (data.can_advance) {
+                        // Show advancement option
+                        checkDiv.style.display = 'none';
+                        optionDiv.style.display = 'block';
+                        optionDiv.innerHTML = `
+                            <div style="background: #e8f5e8; padding: 12px; border-radius: 8px; border: 1px solid #28a745;">
+                                <p style="margin: 0 0 10px 0; color: #155724; font-weight: bold;">
+                                    🎉 Great progress! You've completed Day ${data.current_day}.
+                                </p>
+                                <p style="margin: 0 0 15px 0; color: #155724;">
+                                    Ready to advance to Day ${data.next_day}? This will unlock tomorrow's content today!
+                                </p>
+                                <button onclick="advanceDay('${track}')"
+                                        style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                                    ⚡ Advance to Day ${data.next_day}
+                                </button>
+                                <button onclick="cancelAdvancement('${track}')"
+                                        style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                    Cancel
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        // Show message explaining why advancement is not available
+                        checkDiv.style.display = 'none';
+                        optionDiv.style.display = 'block';
+                        optionDiv.innerHTML = `
+                            <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffc107;">
+                                <p style="margin: 0 0 10px 0; color: #856404; font-weight: bold;">
+                                    📅 Day ${data.current_day} Status
+                                </p>
+                                <p style="margin: 0 0 15px 0; color: #856404;">
+                                    ${data.reason}
+                                </p>
+                                <button onclick="cancelAdvancement('${track}')"
+                                        style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                                    Close
+                                </button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    alert('Error checking advancement status: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error checking advancement:', error);
+                alert('Error checking advancement status. Please try again.');
+            }
+        }
+
+        async function advanceDay(track) {
+            try {
+                const response = await fetch('/api/advance-day', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ track: track })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`🚀 Advanced to Day ${data.new_day}! The page will now refresh to show your new content.`);
+                    window.location.reload();
+                } else {
+                    alert('Error advancing day: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error advancing day:', error);
+                alert('Error advancing day. Please try again.');
+            }
+        }
+
+        function cancelAdvancement(track) {
+            const checkDiv = document.getElementById(`${track}-advance-check`);
+            const optionDiv = document.getElementById(`${track}-advance-option`);
+
+            checkDiv.style.display = 'block';
+            optionDiv.style.display = 'none';
         }
 
     </script>

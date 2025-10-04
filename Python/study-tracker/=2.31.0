@@ -1,0 +1,14 @@
+Looking in indexes: https://pypi.org/simple/, https://pypi.org/simple, https://artifactory.rbx.com/api/pypi/pypi-all/simple
+Collecting requests
+  Downloading https://artifactory.rbx.com/api/pypi/pypi-all/packages/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl (64 kB)
+Collecting charset_normalizer<4,>=2 (from requests)
+  Downloading https://artifactory.rbx.com/api/pypi/pypi-all/packages/packages/e9/5e/14c94999e418d9b87682734589404a25854d5f5d0408df68bc15b6ff54bb/charset_normalizer-3.4.3-cp312-cp312-macosx_10_13_universal2.whl (205 kB)
+Collecting idna<4,>=2.5 (from requests)
+  Downloading https://artifactory.rbx.com/api/pypi/pypi-all/packages/packages/76/c6/c88e154df9c4e1a2a66ccf0005a88dfb2650c1dffb6f5ce603dfbd452ce3/idna-3.10-py3-none-any.whl (70 kB)
+Collecting urllib3<3,>=1.21.1 (from requests)
+  Downloading https://artifactory.rbx.com/api/pypi/pypi-all/packages/packages/a7/c2/fe1e52489ae3122415c51f387e221dd0773709bad6c6cdaa599e8a2c5185/urllib3-2.5.0-py3-none-any.whl (129 kB)
+Collecting certifi>=2017.4.17 (from requests)
+  Downloading https://artifactory.rbx.com/api/pypi/pypi-all/packages/packages/e5/48/1549795ba7742c948d2ad169c1c8cdbae65bc450d6cd753d124b17c8cd32/certifi-2025.8.3-py3-none-any.whl (161 kB)
+Installing collected packages: urllib3, idna, charset_normalizer, certifi, requests
+
+Successfully installed certifi-2025.8.3 charset_normalizer-3.4.3 idna-3.10 requests-2.32.5 urllib3-2.5.0

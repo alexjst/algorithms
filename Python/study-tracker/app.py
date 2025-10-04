@@ -92,13 +92,17 @@ def save_json_data(filename, data):
         json.dump(data, f, indent=2)
 
 def get_day_number(track):
-    """Calculate current day number (1-28) based on configured start date for track"""
+    """Calculate current day number (1-28) based on configured start date for track and acceleration"""
     config = load_config()
-    start_date_str = config['study_plan'][track]['start_date']
+    track_config = config['study_plan'][track]
+    start_date_str = track_config['start_date']
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
 
+    # Get acceleration offset (defaults to 0 for backward compatibility)
+    acceleration_days = track_config.get('acceleration_days', 0)
+
     today = datetime.now().date()
-    days_elapsed = (today - start_date).days + 1
+    days_elapsed = (today - start_date).days + 1 + acceleration_days
     return max(1, min(28, days_elapsed))
 
 def get_topic_for_day(track, day):
@@ -1627,6 +1631,105 @@ def stop_timer():
 
         save_timer_state(timer_state)
         return jsonify({'success': True, 'timer_state': timer_state})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/advance-day', methods=['POST'])
+def advance_day():
+    """Advance to the next day for a specific track"""
+    try:
+        data = request.get_json()
+        track = data.get('track')
+
+        if not track or track not in ['coding', 'system_design']:
+            return jsonify({'error': 'Valid track required (coding or system_design)'}), 400
+
+        # Load current config
+        config = load_config()
+
+        # Get current day number before advancement
+        current_day = get_day_number(track)
+
+        # Check if we're already at day 28
+        if current_day >= 28:
+            return jsonify({'error': f'Already at final day (28) for {track}'}), 400
+
+        # Increment acceleration days
+        config['study_plan'][track]['acceleration_days'] = config['study_plan'][track].get('acceleration_days', 0) + 1
+
+        # Save updated config
+        save_json_data(CONFIG_FILE, config)
+
+        # Get new day information
+        new_day = get_day_number(track)
+        new_topic = get_topic_for_day(track, new_day)
+
+        # Calculate how many days ahead of schedule
+        start_date = datetime.strptime(config['study_plan'][track]['start_date'], '%Y-%m-%d').date()
+        natural_day = (datetime.now().date() - start_date).days + 1
+        days_ahead = max(0, new_day - natural_day)
+
+        return jsonify({
+            'success': True,
+            'track': track,
+            'previous_day': current_day,
+            'new_day': new_day,
+            'new_topic': new_topic,
+            'days_ahead': days_ahead,
+            'message': f'Advanced to Day {new_day}: {new_topic["topic"] if new_topic else "Complete!"}'
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/get-advancement-info', methods=['GET'])
+def get_advancement_info():
+    """Get information about current day and advancement possibilities"""
+    try:
+        track = request.args.get('track')
+
+        if not track or track not in ['coding', 'system_design']:
+            return jsonify({'error': 'Valid track required'}), 400
+
+        config = load_config()
+        current_day = get_day_number(track)
+        current_topic = get_topic_for_day(track, current_day)
+
+        # Calculate next day info
+        next_day = min(28, current_day + 1)
+        next_topic = get_topic_for_day(track, next_day) if next_day <= 28 else None
+
+        # Calculate days ahead of natural schedule
+        start_date = datetime.strptime(config['study_plan'][track]['start_date'], '%Y-%m-%d').date()
+        natural_day = (datetime.now().date() - start_date).days + 1
+        days_ahead = max(0, current_day - natural_day)
+
+        # Check if today's topic is completed
+        today = datetime.now().date().strftime('%Y-%m-%d')
+        progress_data = load_json_data(PROGRESS_FILE)
+        topic_completed = False
+
+        if current_topic:
+            for completion in progress_data.get('completions', []):
+                if (completion['date'] == today and
+                    completion['track'] == track and
+                    completion['topic'] == current_topic['topic']):
+                    topic_completed = True
+                    break
+
+        return jsonify({
+            'success': True,
+            'track': track,
+            'current_day': current_day,
+            'current_topic': current_topic,
+            'next_day': next_day,
+            'next_topic': next_topic,
+            'days_ahead': days_ahead,
+            'topic_completed': topic_completed,
+            'can_advance': topic_completed and next_day <= 28,
+            'at_final_day': current_day >= 28
+        })
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
