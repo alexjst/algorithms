@@ -213,7 +213,7 @@ def get_time_benchmarks(problems):
             4: {'max_minutes': total_base_time * 1.0, 'description': 'Good (80-100% of base time)'},
             3: {'max_minutes': total_base_time * 1.5, 'description': 'Okay (100-150% of base time)'},
             2: {'max_minutes': total_base_time * 2.5, 'description': 'Poor (150-250% of base time)'},
-            1: {'max_minutes': float('inf'), 'description': 'Forgot (250%+ or unable to solve)'}
+            1: {'max_minutes': 999999, 'description': 'Forgot (250%+ or unable to solve)'}
         }
     }
 
@@ -259,7 +259,7 @@ def get_system_design_benchmarks(questions, review_type):
             4: {'max_minutes': total_base_time * 1.0, 'description': 'Good (≤100% of base time)'},
             3: {'max_minutes': total_base_time * 1.5, 'description': 'Moderate (≤150% of base time)'},
             2: {'max_minutes': total_base_time * 2.0, 'description': 'Struggled (≤200% of base time)'},
-            1: {'max_minutes': float('inf'), 'description': 'Incomplete (200%+ or unable to complete)'}
+            1: {'max_minutes': 999999, 'description': 'Incomplete (200%+ or unable to complete)'}
         }
     }
 
