@@ -146,10 +146,12 @@ def get_system_design_practice_questions(topic, track):
         for day_info in days:
             if day_info.get('topic') == topic:
                 practice_questions = day_info.get('practice_questions', {})
+
+                # Handle both old and new question formats
                 return {
-                    'estimation': practice_questions.get('estimation', []),
-                    'concepts': practice_questions.get('concepts', []),
-                    'tradeoffs': practice_questions.get('tradeoffs', []),
+                    'estimation': practice_questions.get('estimation', practice_questions.get('capacity_estimation', [])),
+                    'concepts': practice_questions.get('concepts', practice_questions.get('conceptual', [])),
+                    'tradeoffs': practice_questions.get('tradeoffs', practice_questions.get('architecture_decisions', [])),
                     'scenarios': practice_questions.get('scenarios', [])
                 }
 

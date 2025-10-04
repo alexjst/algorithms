@@ -314,7 +314,7 @@
         <h2>🔄 Due Reviews</h2>
         {% for review in due_reviews %}
         <div class="review" id="review-{{ loop.index }}">
-            <h4>{{ review.track | title }}: {{ review.topic }} ({{ review.review_type }} review)</h4>
+            <h4>{{ review.track.replace('_', ' ') | title }}: {{ review.topic }} ({{ review.review_type }} review)</h4>
             <p>Originally completed: {{ review.scheduled_date }}</p>
 
             {% if review.problems or review.practice_questions %}
