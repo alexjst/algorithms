@@ -121,7 +121,7 @@
 
             {% if not coding_topic_completed %}
             <p class="time-estimate">⏱️ {{ coding_topic.time_estimate }} minutes
-                <button class="start-timer-btn" onclick="startPomodoro('coding', {{ coding_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
+                <button class="start-timer-btn" onclick="console.log('Button clicked!'); try { startPomodoro('coding', {{ coding_topic.time_estimate }}); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
                     🍅 Start Timer
                 </button>
             </p>
@@ -193,7 +193,7 @@
 
             {% if not system_design_topic_completed %}
             <p class="time-estimate">⏱️ {{ system_design_topic.time_estimate }} minutes
-                <button class="start-timer-btn" onclick="startPomodoro('system_design', {{ system_design_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
+                <button class="start-timer-btn" onclick="console.log('System Design Button clicked!'); try { startPomodoro('system_design', {{ system_design_topic.time_estimate }}); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" title="Start a focused Pomodoro timer for this topic. Tracks whether you finish within the estimated time for interview preparation.">
                     🍅 Start Timer
                 </button>
             </p>
@@ -1579,6 +1579,12 @@
                 reviewElement.style.display = 'none';
             }
         }
+
+        // Debug: Test if startPomodoro function is accessible
+        console.log('startPomodoro function available:', typeof startPomodoro);
+
+        // Make startPomodoro globally accessible in case of scope issues
+        window.startPomodoro = startPomodoro;
     </script>
 </body>
 </html>
