@@ -551,11 +551,26 @@
         let currentTrack = null;
 
         // Initialize timer state sync when page loads
+        let syncInterval = null;
+        let serverUnavailable = false;
+
         document.addEventListener('DOMContentLoaded', function() {
             syncTimerState();
-            // Sync every 1 second to keep tabs in sync
-            setInterval(syncTimerState, 1000);
+            // Start with 2-second intervals
+            startTimerSync();
         });
+
+        function startTimerSync() {
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(syncTimerState, 2000);
+        }
+
+        function stopTimerSync() {
+            if (syncInterval) {
+                clearInterval(syncInterval);
+                syncInterval = null;
+            }
+        }
 
         async function syncTimerState() {
             try {
@@ -563,9 +578,28 @@
                 if (response.ok) {
                     const state = await response.json();
                     updateTimerDisplay(state);
+
+                    // Server is back online
+                    if (serverUnavailable) {
+                        console.log('Timer sync: Server connection restored');
+                        serverUnavailable = false;
+                    }
+                } else {
+                    // Server responded but with an error
+                    console.warn('Timer state API returned error:', response.status);
                 }
             } catch (error) {
-                console.error('Error syncing timer state:', error);
+                // Network error - server might not be running
+                if (error instanceof TypeError && error.message.includes('fetch')) {
+                    if (!serverUnavailable) {
+                        console.warn('Timer sync: Server not reachable, timer features disabled');
+                        serverUnavailable = true;
+                        // Disable timer functionality gracefully
+                        hideAllTimers();
+                    }
+                } else {
+                    console.error('Error syncing timer state:', error);
+                }
             }
         }
 
@@ -702,6 +736,12 @@
         async function startPomodoro(track, minutes) {
             console.log(`Starting Pomodoro for track: ${track}, minutes: ${minutes}`);
 
+            // Check if server is available
+            if (serverUnavailable) {
+                alert('Timer feature unavailable: Server connection lost. Please refresh the page.');
+                return;
+            }
+
             try {
                 // First check if there's already an active timer
                 const stateResponse = await fetch('/api/timer/state');
@@ -777,6 +817,12 @@
         }
 
         async function pauseTimer(track) {
+            // Check if server is available
+            if (serverUnavailable) {
+                alert('Timer feature unavailable: Server connection lost. Please refresh the page.');
+                return;
+            }
+
             try {
                 // First get current timer state to determine if we should pause or resume
                 const stateResponse = await fetch('/api/timer/state');
@@ -811,6 +857,12 @@
         }
 
         async function stopTimer(track) {
+            // Check if server is available
+            if (serverUnavailable) {
+                alert('Timer feature unavailable: Server connection lost. Please refresh the page.');
+                return;
+            }
+
             try {
                 const response = await fetch('/api/timer/stop', {
                     method: 'POST',
