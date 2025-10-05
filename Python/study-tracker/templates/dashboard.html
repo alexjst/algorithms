@@ -1204,69 +1204,102 @@
         }
 
         function stopReviewPractice(reviewIndex) {
+            console.log(`stopReviewPractice called for review ${reviewIndex}`);
+
             const timer = reviewPracticeTimers[reviewIndex];
-            if (!timer) return;
+            const session = systemDesignSessions[reviewIndex];
 
-            // Stop the timer
-            clearInterval(timer.interval);
-
-            // Calculate final results
-            const totalMinutes = Math.round(timer.totalMinutes);
-
-            // Get benchmark data from the page (we'll need to pass this from the backend)
-            const benchmarkElements = document.querySelector(`#practice-section-${reviewIndex} .time-benchmarks`);
-            let suggestedRating = 3; // Default
-
-            // Simple rating calculation based on completion
-            const problemCount = completedProblems[reviewIndex] ? completedProblems[reviewIndex].length : 0;
-            const totalProblems = document.querySelectorAll(`#practice-section-${reviewIndex} .problem-item`).length;
-
-            if (problemCount === totalProblems) {
-                // All problems completed - base rating on time
-                if (totalMinutes <= 30) suggestedRating = 5;
-                else if (totalMinutes <= 45) suggestedRating = 4;
-                else if (totalMinutes <= 70) suggestedRating = 3;
-                else if (totalMinutes <= 100) suggestedRating = 2;
-                else suggestedRating = 1;
+            if (timer) {
+                console.log('Stopping coding review practice');
+                stopCodingReviewPractice(reviewIndex, timer);
+            } else if (session) {
+                console.log('Stopping system design practice');
+                stopSystemDesignPractice(reviewIndex);
             } else {
-                // Not all problems completed
-                const completionRate = problemCount / totalProblems;
-                if (completionRate >= 0.8) suggestedRating = 3;
-                else if (completionRate >= 0.5) suggestedRating = 2;
-                else suggestedRating = 1;
+                console.error(`No active session found for review ${reviewIndex}`);
+                alert('No active practice session found. The session may have already been stopped.');
             }
+        }
 
-            // Show practice summary
-            document.getElementById(`practice-summary-${reviewIndex}`).style.display = 'block';
-            document.getElementById(`total-practice-time-${reviewIndex}`).textContent = totalMinutes;
-            document.getElementById(`suggested-rating-${reviewIndex}`).textContent = `${suggestedRating} (${getRatingDescription(suggestedRating)})`;
+        function stopCodingReviewPractice(reviewIndex, timer) {
+            try {
+                // Stop the timer
+                clearInterval(timer.interval);
 
-            // Update the rating dropdown and show suggestion
-            const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
-            ratingSelect.value = suggestedRating;
+                // Calculate final results
+                const totalMinutes = Math.round(timer.totalMinutes);
+                console.log(`Total practice time: ${totalMinutes} minutes`);
 
-            const suggestionSpan = document.getElementById(`rating-suggestion-${reviewIndex}`);
-            suggestionSpan.textContent = `(Suggested: ${suggestedRating})`;
-            suggestionSpan.style.display = 'inline';
+                // Simple rating calculation based on completion
+                const problemCount = completedProblems[reviewIndex] ? completedProblems[reviewIndex].length : 0;
+                const totalProblems = document.querySelectorAll(`#practice-section-${reviewIndex} .problem-item`).length;
+                console.log(`Completed ${problemCount} of ${totalProblems} problems`);
 
-            // Hide practice controls
-            document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'none';
-            document.getElementById(`pause-practice-${reviewIndex}`).style.display = 'none';
-            document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'none';
+                let suggestedRating = 3; // Default
+                if (problemCount === totalProblems) {
+                    // All problems completed - base rating on time
+                    if (totalMinutes <= 30) suggestedRating = 5;
+                    else if (totalMinutes <= 45) suggestedRating = 4;
+                    else if (totalMinutes <= 70) suggestedRating = 3;
+                    else if (totalMinutes <= 100) suggestedRating = 2;
+                    else suggestedRating = 1;
+                } else {
+                    // Not all problems completed
+                    const completionRate = problemCount / totalProblems;
+                    if (completionRate >= 0.8) suggestedRating = 3;
+                    else if (completionRate >= 0.5) suggestedRating = 2;
+                    else suggestedRating = 1;
+                }
 
-            // Reset pause button state
-            const pauseButton = document.getElementById(`pause-practice-${reviewIndex}`);
-            pauseButton.innerHTML = '⏸️ Pause';
-            pauseButton.style.background = '#ffc107';
+                // Show practice summary
+                const summaryElement = document.getElementById(`practice-summary-${reviewIndex}`);
+                if (summaryElement) {
+                    summaryElement.style.display = 'block';
 
-            // Re-enable start button
-            const startButton = document.querySelector(`button[onclick*="startReviewPractice(${reviewIndex}"]`);
-            if (startButton) {
-                startButton.disabled = false;
-                startButton.textContent = '🏃 Start Review Practice';
+                    const timeElement = document.getElementById(`total-practice-time-${reviewIndex}`);
+                    if (timeElement) timeElement.textContent = totalMinutes;
+
+                    const ratingElement = document.getElementById(`suggested-rating-${reviewIndex}`);
+                    if (ratingElement) ratingElement.textContent = `${suggestedRating} (${getRatingDescription(suggestedRating)})`;
+                }
+
+                // Update the rating dropdown and show suggestion
+                const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
+                if (ratingSelect) {
+                    ratingSelect.value = suggestedRating;
+                }
+
+                const suggestionSpan = document.getElementById(`rating-suggestion-${reviewIndex}`);
+                if (suggestionSpan) {
+                    suggestionSpan.textContent = `(Suggested: ${suggestedRating})`;
+                    suggestionSpan.style.display = 'inline';
+                }
+
+                // Hide practice controls
+                const timerElement = document.getElementById(`practice-timer-${reviewIndex}`);
+                const pauseElement = document.getElementById(`pause-practice-${reviewIndex}`);
+                const stopElement = document.getElementById(`stop-practice-${reviewIndex}`);
+
+                if (timerElement) timerElement.style.display = 'none';
+                if (pauseElement) {
+                    pauseElement.style.display = 'none';
+                    pauseElement.innerHTML = '⏸️ Pause';
+                    pauseElement.style.background = '#ffc107';
+                }
+                if (stopElement) stopElement.style.display = 'none';
+
+                // Re-enable start button
+                const startButton = document.querySelector(`button[onclick*="startReviewPractice(${reviewIndex}"]`);
+                if (startButton) {
+                    startButton.disabled = false;
+                    startButton.textContent = '🏃 Start Review Practice';
+                }
+
+                console.log(`Review practice stopped: ${totalMinutes} minutes, suggested rating: ${suggestedRating}`);
+            } catch (error) {
+                console.error('Error stopping coding review practice:', error);
+                alert('Error stopping practice session. Please refresh the page.');
             }
-
-            console.log(`Review practice completed: ${totalMinutes} minutes, suggested rating: ${suggestedRating}`);
         }
 
         function getRatingDescription(rating) {
@@ -1484,82 +1517,109 @@
         }
 
         async function stopSystemDesignPractice(reviewIndex) {
+            console.log(`stopSystemDesignPractice called for review ${reviewIndex}`);
+
             const session = systemDesignSessions[reviewIndex];
-            if (!session) return;
-
-            // Stop the timer
-            clearInterval(session.interval);
-
-            // Prepare session data for rating calculation
-            const sessionData = {
-                total_time: Math.round(session.totalMinutes),
-                answers: session.answers,
-                questions: session.questions,
-                self_assessment: {} // Will be filled by user if needed
-            };
+            if (!session) {
+                console.error(`No active system design session found for review ${reviewIndex}`);
+                alert('No active practice session found. The session may have already been stopped.');
+                return;
+            }
 
             try {
-                // Calculate suggested rating
-                const response = await fetch('/api/calculate-system-design-rating', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        session_data: sessionData,
-                        benchmarks: session.benchmarks
-                    })
-                });
+                // Stop the timer
+                clearInterval(session.interval);
+                console.log('Timer interval cleared');
 
-                if (response.ok) {
-                    const result = await response.json();
-                    const suggestedRating = result.suggested_rating;
+                // Prepare session data for rating calculation
+                const sessionData = {
+                    total_time: Math.round(session.totalMinutes),
+                    answers: session.answers,
+                    questions: session.questions,
+                    self_assessment: {} // Will be filled by user if needed
+                };
+                console.log(`Total practice time: ${sessionData.total_time} minutes`);
 
-                    // Show practice summary
-                    document.getElementById(`practice-summary-${reviewIndex}`).style.display = 'block';
-                    document.getElementById(`total-practice-time-${reviewIndex}`).textContent = sessionData.total_time;
-                    document.getElementById(`suggested-rating-${reviewIndex}`).textContent =
-                        `${suggestedRating} (${getRatingDescription(suggestedRating)})`;
+                try {
+                    // Calculate suggested rating
+                    const response = await fetch('/api/calculate-system-design-rating', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            session_data: sessionData,
+                            benchmarks: session.benchmarks
+                        })
+                    });
 
-                    // Update the rating dropdown and show suggestion
-                    const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
-                    ratingSelect.value = suggestedRating;
+                    if (response.ok) {
+                        const result = await response.json();
+                        const suggestedRating = result.suggested_rating;
 
-                    const suggestionSpan = document.getElementById(`rating-suggestion-${reviewIndex}`);
-                    suggestionSpan.textContent = `(Suggested: ${suggestedRating})`;
-                    suggestionSpan.style.display = 'inline';
+                        // Show practice summary
+                        const summaryElement = document.getElementById(`practice-summary-${reviewIndex}`);
+                        if (summaryElement) summaryElement.style.display = 'block';
 
-                    // Store session data for completion
-                    session.sessionData = sessionData;
+                        const timeElement = document.getElementById(`total-practice-time-${reviewIndex}`);
+                        if (timeElement) timeElement.textContent = sessionData.total_time;
 
-                    console.log(`System design practice completed: ${sessionData.total_time} minutes, suggested rating: ${suggestedRating}`);
-                } else {
-                    console.error('Failed to calculate rating');
+                        const ratingElement = document.getElementById(`suggested-rating-${reviewIndex}`);
+                        if (ratingElement) {
+                            ratingElement.textContent = `${suggestedRating} (${getRatingDescription(suggestedRating)})`;
+                        }
+
+                        // Update the rating dropdown and show suggestion
+                        const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
+                        if (ratingSelect) ratingSelect.value = suggestedRating;
+
+                        const suggestionSpan = document.getElementById(`rating-suggestion-${reviewIndex}`);
+                        if (suggestionSpan) {
+                            suggestionSpan.textContent = `(Suggested: ${suggestedRating})`;
+                            suggestionSpan.style.display = 'inline';
+                        }
+
+                        // Store session data for completion
+                        session.sessionData = sessionData;
+
+                        console.log(`System design practice completed: ${sessionData.total_time} minutes, suggested rating: ${suggestedRating}`);
+                    } else {
+                        console.error('Failed to calculate rating:', response.status, response.statusText);
+                    }
+
+                } catch (error) {
+                    console.error('Error calculating rating:', error);
                 }
 
+                // Hide practice controls
+                const timerElement = document.getElementById(`practice-timer-${reviewIndex}`);
+                const pauseElement = document.getElementById(`pause-practice-${reviewIndex}`);
+                const stopElement = document.getElementById(`stop-practice-${reviewIndex}`);
+
+                if (timerElement) timerElement.style.display = 'none';
+                if (pauseElement) {
+                    pauseElement.style.display = 'none';
+                    pauseElement.innerHTML = '⏸️ Pause';
+                    pauseElement.style.background = '#ffc107';
+                }
+                if (stopElement) stopElement.style.display = 'none';
+
+                // Clean up localStorage for this session when practice is stopped
+                if (session && session.sessionKey) {
+                    localStorage.removeItem(`practice_session_${session.sessionKey}`);
+                    console.log('Cleared localStorage for stopped session:', session.sessionKey);
+                }
+
+                // Re-enable start button
+                const startButton = document.querySelector(`button[onclick*="startSystemDesignPractice(${reviewIndex}"]`);
+                if (startButton) {
+                    startButton.disabled = false;
+                    startButton.textContent = '🏃 Start System Design Practice';
+                }
+
+                console.log('System design practice stopped successfully');
+
             } catch (error) {
-                console.error('Error calculating rating:', error);
-            }
-
-            // Hide practice controls
-            document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'none';
-            document.getElementById(`pause-practice-${reviewIndex}`).style.display = 'none';
-            document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'none';
-
-            // Reset pause button state
-            const pauseButton = document.getElementById(`pause-practice-${reviewIndex}`);
-            pauseButton.innerHTML = '⏸️ Pause';
-            pauseButton.style.background = '#ffc107';
-
-            // Clean up localStorage for this session when practice is stopped
-            if (session && session.sessionKey) {
-                localStorage.removeItem(`practice_session_${session.sessionKey}`);
-                console.log('Cleared localStorage for stopped session:', session.sessionKey);
-            }
-
-            // Re-enable start button
-            const startButton = document.querySelector(`button[onclick*="startSystemDesignPractice(${reviewIndex}"]`);
-            if (startButton) {
-                startButton.disabled = false;
-                startButton.textContent = '🏃 Start System Design Practice';
+                console.error('Error stopping system design practice:', error);
+                alert('Error stopping practice session. Please refresh the page.');
             }
         }
 
