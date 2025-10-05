@@ -386,7 +386,8 @@
                 </div>
 
                 {% if review.track == 'coding' %}
-                <div class="problems-list" id="problems-list-{{ loop.index }}">
+                {% set review_index = loop.index %}
+                <div class="problems-list" id="problems-list-{{ review_index }}">
                     {% for problem in review.problems %}
                     <div class="problem-item" style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px; border: 1px solid #ddd;">
                         <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -398,18 +399,19 @@
                             </span>
                         </div>
                         <p style="margin: 4px 0; color: #666; font-size: 14px;">{{ problem.description }}</p>
-                        <div class="problem-timer-section" id="problem-timer-{{ loop.index }}-{{ loop.index0 }}" style="display: none; margin-top: 8px;">
+                        <div class="problem-timer-section" id="problem-timer-{{ review_index }}-{{ loop.index0 }}" style="display: none; margin-top: 8px;">
                             <button class="complete-problem-btn" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 12px;"
-                                    onclick="markProblemComplete({{ loop.index }}, {{ loop.index0 }})">
+                                    onclick="markProblemComplete({{ review_index }}, {{ loop.index0 }})">
                                 ✅ Mark Problem Complete
                             </button>
-                            <span class="problem-time" style="margin-left: 10px; font-size: 12px; color: #666;">Time: <span id="problem-time-{{ loop.index }}-{{ loop.index0 }}">0 min</span></span>
+                            <span class="problem-time" style="margin-left: 10px; font-size: 12px; color: #666;">Time: <span id="problem-time-{{ review_index }}-{{ loop.index0 }}">0 min</span></span>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="questions-list" id="questions-list-{{ loop.index }}">
+                {% set review_index = loop.index %}
+                <div class="questions-list" id="questions-list-{{ review_index }}">
                     {% for question in review.practice_questions %}
                     <div class="question-item" style="margin: 12px 0; padding: 12px; background: white; border-radius: 4px; border: 1px solid #ddd;">
                         <div class="question-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
@@ -421,16 +423,16 @@
                         <div class="question-text" style="margin: 8px 0; font-weight: 500; color: #333;">
                             {{ question.question }}
                         </div>
-                        <div class="answer-section" id="answer-section-{{ loop.index }}-{{ loop.index0 }}" style="display: none; margin-top: 12px;">
-                            <textarea id="answer-{{ loop.index }}-{{ loop.index0 }}"
+                        <div class="answer-section" id="answer-section-{{ review_index }}-{{ loop.index0 }}" style="display: none; margin-top: 12px;">
+                            <textarea id="answer-{{ review_index }}-{{ loop.index0 }}"
                                     style="width: 100%; min-height: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
                                     placeholder="Enter your answer here..."></textarea>
                             <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
                                 <button class="mark-answered-btn" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; font-size: 12px;"
-                                        onclick="markQuestionAnswered({{ loop.index }}, {{ loop.index0 }})">
+                                        onclick="markQuestionAnswered({{ review_index }}, {{ loop.index0 }})">
                                     ✅ Mark Answered
                                 </button>
-                                <span class="answer-time" style="font-size: 12px; color: #666;">Time: <span id="answer-time-{{ loop.index }}-{{ loop.index0 }}">0 min</span></span>
+                                <span class="answer-time" style="font-size: 12px; color: #666;">Time: <span id="answer-time-{{ review_index }}-{{ loop.index0 }}">0 min</span></span>
                             </div>
                         </div>
                     </div>
