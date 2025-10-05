@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Study Tracker - Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -673,28 +674,9 @@
         // Timer state variables and functions defined at top
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, setting up timer buttons...');
+            console.log('DOM loaded, initializing timer system...');
 
-            // Set up timer button event listeners programmatically as backup
-            const timerButtons = document.querySelectorAll('.start-timer-btn');
-            console.log('Found timer buttons:', timerButtons.length);
-
-            timerButtons.forEach(button => {
-                // Remove existing onclick to avoid conflicts
-                button.removeAttribute('onclick');
-
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const track = this.closest('[id$="-topic"]').id.replace('-topic', '');
-                    const timeText = this.parentElement.textContent;
-                    const minutesMatch = timeText.match(/(\d+)\s+minutes?/);
-                    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 25;
-
-                    console.log('Timer button clicked:', {track, minutes});
-                    startPomodoro(track, minutes);
-                });
-            });
-
+            // Initialize timer state and sync
             syncTimerState();
             // Start with 2-second intervals
             startTimerSync();
@@ -1473,7 +1455,6 @@
             document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'none';
 
             // Clean up localStorage for this session when practice is stopped
-            const session = systemDesignSessions[reviewIndex];
             if (session && session.sessionKey) {
                 localStorage.removeItem(`practice_session_${session.sessionKey}`);
                 console.log('Cleared localStorage for stopped session:', session.sessionKey);
