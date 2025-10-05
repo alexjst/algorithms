@@ -156,7 +156,20 @@
       "review_type": "3-day",
       "due_date": "2025-10-04",
       "scheduled_date": "2025-10-01",
-      "completed_date": null
+      "completed_date": "2025-10-04",
+      "rating": 4,
+      "notes": "",
+      "problem_times": [
+        {
+          "problemIndex": 0,
+          "timeMinutes": 0
+        },
+        {
+          "problemIndex": 1,
+          "timeMinutes": 0
+        }
+      ],
+      "suggested_rating": 5
     },
     {
       "topic": "DFS Fundamentals",
@@ -287,7 +300,9 @@
       "review_type": "1-day",
       "due_date": "2025-10-04",
       "scheduled_date": "2025-10-03",
-      "completed_date": null
+      "completed_date": "2025-10-04",
+      "rating": 4,
+      "notes": ""
     },
     {
       "topic": "Dynamic Programming",
@@ -318,30 +333,6 @@
       "track": "coding",
       "review_type": "1-day",
       "due_date": "2025-10-04",
-      "scheduled_date": "2025-10-03",
-      "completed_date": null
-    },
-    {
-      "topic": "Dynamic Programming",
-      "track": "coding",
-      "review_type": "3-day",
-      "due_date": "2025-10-06",
-      "scheduled_date": "2025-10-03",
-      "completed_date": null
-    },
-    {
-      "topic": "Dynamic Programming",
-      "track": "coding",
-      "review_type": "7-day",
-      "due_date": "2025-10-10",
-      "scheduled_date": "2025-10-03",
-      "completed_date": null
-    },
-    {
-      "topic": "Dynamic Programming",
-      "track": "coding",
-      "review_type": "14-day",
-      "due_date": "2025-10-17",
       "scheduled_date": "2025-10-03",
       "completed_date": null
     },

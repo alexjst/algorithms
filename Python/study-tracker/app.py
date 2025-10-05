@@ -119,10 +119,17 @@ def get_due_reviews(date_str):
     """Get all reviews due on a specific date"""
     reviews_data = load_json_data(REVIEWS_FILE)
     due_reviews = []
+    seen_reviews = set()  # Track unique reviews by (topic, track, review_type)
 
     for review in reviews_data.get('scheduled_reviews', []):
         if review['due_date'] == date_str and not review.get('completed_date'):
-            due_reviews.append(review)
+            # Create unique key for deduplication
+            review_key = (review['topic'], review['track'], review['review_type'])
+
+            # Only add if not already seen
+            if review_key not in seen_reviews:
+                due_reviews.append(review)
+                seen_reviews.add(review_key)
 
     return due_reviews
 
@@ -318,15 +325,28 @@ def schedule_reviews(topic, track, completed_date):
 
     for interval in REVIEW_INTERVALS:
         review_date = base_date + timedelta(days=interval)
-        review = {
-            'topic': topic,
-            'track': track,
-            'review_type': f'{interval}-day',
-            'due_date': review_date.strftime('%Y-%m-%d'),
-            'scheduled_date': completed_date,
-            'completed_date': None
-        }
-        reviews_data['scheduled_reviews'].append(review)
+        review_type = f'{interval}-day'
+
+        # Check if this review already exists (deduplication)
+        review_exists = any(
+            r['topic'] == topic and
+            r['track'] == track and
+            r['review_type'] == review_type and
+            r['due_date'] == review_date.strftime('%Y-%m-%d') and
+            not r.get('completed_date')
+            for r in reviews_data['scheduled_reviews']
+        )
+
+        if not review_exists:
+            review = {
+                'topic': topic,
+                'track': track,
+                'review_type': review_type,
+                'due_date': review_date.strftime('%Y-%m-%d'),
+                'scheduled_date': completed_date,
+                'completed_date': None
+            }
+            reviews_data['scheduled_reviews'].append(review)
 
     save_json_data(REVIEWS_FILE, reviews_data)
 
