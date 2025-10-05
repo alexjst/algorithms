@@ -98,6 +98,15 @@
       "notes": "3",
       "completed_on_time": null,
       "timestamp": "2025-10-04T20:28:42.836857"
+    },
+    {
+      "date": "2025-10-04",
+      "track": "system_design",
+      "topic": "Week 1 Integration - URL Shortener Design",
+      "rating": 3,
+      "notes": "Base 62 encoding: 0-9, A-Z, a-z encoding\nDesign TinyURL: done",
+      "completed_on_time": null,
+      "timestamp": "2025-10-04T21:37:17.450122"
     }
   ]
 }

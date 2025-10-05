@@ -375,6 +375,10 @@
                     </button>
                     {% endif %}
                     <span class="practice-timer" id="practice-timer-{{ loop.index }}" style="font-weight: bold; display: none;">⏱️ 00:00</span>
+                    <button class="practice-btn" id="pause-practice-{{ loop.index }}" style="background: #ffc107; color: #212529; border: none; padding: 8px 16px; border-radius: 5px; margin-right: 5px; display: none;"
+                            onclick="togglePauseReviewPractice({{ loop.index }})">
+                        ⏸️ Pause
+                    </button>
                     <button class="practice-btn" id="stop-practice-{{ loop.index }}" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; display: none;"
                             onclick="stopReviewPractice({{ loop.index }})">
                         ⏹️ Stop Practice
@@ -1024,13 +1028,17 @@
                     interval: null,
                     topic: topic,
                     track: track,
-                    totalMinutes: 0
+                    totalMinutes: 0,
+                    paused: false,
+                    pausedTime: 0,
+                    pauseStartTime: null
                 };
                 completedProblems[reviewIndex] = [];
             }
 
             // Show practice controls
             document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'inline';
+            document.getElementById(`pause-practice-${reviewIndex}`).style.display = 'inline';
             document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'inline';
 
             // Show individual problem timers
@@ -1060,7 +1068,10 @@
             const timer = reviewPracticeTimers[reviewIndex];
             if (!timer) return;
 
-            const elapsed = Date.now() - timer.startTime;
+            // Don't update if paused
+            if (timer.paused) return;
+
+            const elapsed = Date.now() - timer.startTime - timer.pausedTime;
             const minutes = Math.floor(elapsed / 60000);
             const seconds = Math.floor((elapsed % 60000) / 1000);
 
@@ -1070,7 +1081,64 @@
             timer.totalMinutes = minutes + (seconds / 60);
         }
 
+        function togglePauseReviewPractice(reviewIndex) {
+            const timer = reviewPracticeTimers[reviewIndex];
+            const session = systemDesignSessions[reviewIndex];
+
+            // Handle coding reviews
+            if (timer) {
+                if (timer.paused) {
+                    // Resume
+                    timer.paused = false;
+                    timer.pausedTime += Date.now() - timer.pauseStartTime;
+                    timer.pauseStartTime = null;
+
+                    // Update button
+                    const pauseButton = document.getElementById(`pause-practice-${reviewIndex}`);
+                    pauseButton.innerHTML = '⏸️ Pause';
+                    pauseButton.style.background = '#ffc107';
+                } else {
+                    // Pause
+                    timer.paused = true;
+                    timer.pauseStartTime = Date.now();
+
+                    // Update button
+                    const pauseButton = document.getElementById(`pause-practice-${reviewIndex}`);
+                    pauseButton.innerHTML = '▶️ Resume';
+                    pauseButton.style.background = '#28a745';
+                }
+            }
+
+            // Handle system design sessions
+            if (session) {
+                if (session.paused) {
+                    // Resume
+                    session.paused = false;
+                    session.pausedTime += Date.now() - session.pauseStartTime;
+                    session.pauseStartTime = null;
+
+                    // Update button
+                    const pauseButton = document.getElementById(`pause-practice-${reviewIndex}`);
+                    pauseButton.innerHTML = '⏸️ Pause';
+                    pauseButton.style.background = '#ffc107';
+                } else {
+                    // Pause
+                    session.paused = true;
+                    session.pauseStartTime = Date.now();
+
+                    // Update button
+                    const pauseButton = document.getElementById(`pause-practice-${reviewIndex}`);
+                    pauseButton.innerHTML = '▶️ Resume';
+                    pauseButton.style.background = '#28a745';
+                }
+            }
+        }
+
         function updateIndividualProblemTimers(reviewIndex) {
+            const session = reviewPracticeTimers[reviewIndex];
+            // Don't update if paused
+            if (session && session.paused) return;
+
             const problemTimers = document.querySelectorAll(`#practice-section-${reviewIndex} .problem-timer-section`);
             problemTimers.forEach((timer, problemIndex) => {
                 const problemKey = `${reviewIndex}-${problemIndex}`;
@@ -1080,7 +1148,8 @@
                 // Only update if problem not yet completed
                 const completeButton = timer.querySelector('.complete-problem-btn');
                 if (completeButton && !completeButton.disabled) {
-                    const elapsed = Date.now() - startTime;
+                    const pausedTime = session ? session.pausedTime : 0;
+                    const elapsed = Date.now() - startTime - pausedTime;
                     const minutes = Math.floor(elapsed / 60000);
                     const seconds = Math.floor((elapsed % 60000) / 1000);
 
@@ -1096,6 +1165,7 @@
             console.log(`Marking problem ${problemIndex} complete for review ${reviewIndex}`);
 
             const problemKey = `${reviewIndex}-${problemIndex}`;
+            const session = reviewPracticeTimers[reviewIndex];
 
             // Use existing start time (should already be set when practice started)
             const startTime = problemStartTimes[problemKey];
@@ -1104,7 +1174,8 @@
                 problemStartTimes[problemKey] = Date.now();
             }
 
-            const elapsed = Date.now() - problemStartTimes[problemKey];
+            const pausedTime = session ? session.pausedTime : 0;
+            const elapsed = Date.now() - problemStartTimes[problemKey] - pausedTime;
             const minutes = Math.round(elapsed / 60000);
 
             // Update the problem time display to final time
@@ -1178,7 +1249,13 @@
 
             // Hide practice controls
             document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'none';
+            document.getElementById(`pause-practice-${reviewIndex}`).style.display = 'none';
             document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'none';
+
+            // Reset pause button state
+            const pauseButton = document.getElementById(`pause-practice-${reviewIndex}`);
+            pauseButton.innerHTML = '⏸️ Pause';
+            pauseButton.style.background = '#ffc107';
 
             // Re-enable start button
             const startButton = document.querySelector(`button[onclick*="startReviewPractice(${reviewIndex}"]`);
@@ -1260,11 +1337,15 @@
                     answers: {},
                     questionStartTimes: {},
                     totalMinutes: 0,
-                    sessionKey: sessionKey
+                    sessionKey: sessionKey,
+                    paused: false,
+                    pausedTime: 0,
+                    pauseStartTime: null
                 };
 
                 // Show practice controls
                 document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'inline';
+                document.getElementById(`pause-practice-${reviewIndex}`).style.display = 'inline';
                 document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'inline';
 
                 // Show answer sections for all questions and start timing each one
@@ -1301,7 +1382,10 @@
             const session = systemDesignSessions[reviewIndex];
             if (!session) return;
 
-            const elapsed = Date.now() - session.startTime;
+            // Don't update if paused
+            if (session.paused) return;
+
+            const elapsed = Date.now() - session.startTime - session.pausedTime;
             const minutes = Math.floor(elapsed / 60000);
             const seconds = Math.floor((elapsed % 60000) / 1000);
 
@@ -1315,6 +1399,9 @@
             const session = systemDesignSessions[reviewIndex];
             if (!session) return;
 
+            // Don't update if paused
+            if (session.paused) return;
+
             const answerSections = document.querySelectorAll(`#practice-section-${reviewIndex} .answer-section`);
             answerSections.forEach((section, questionIndex) => {
                 const questionKey = `${reviewIndex}-${questionIndex}`;
@@ -1324,7 +1411,7 @@
                 // Only update if question not yet answered
                 const answerButton = section.querySelector('.mark-answered-btn');
                 if (answerButton && !answerButton.disabled) {
-                    const elapsed = Date.now() - startTime;
+                    const elapsed = Date.now() - startTime - session.pausedTime;
                     const minutes = Math.floor(elapsed / 60000);
                     const seconds = Math.floor((elapsed % 60000) / 1000);
 
@@ -1371,7 +1458,7 @@
                 session.questionStartTimes[questionKey] = Date.now();
             }
 
-            const elapsed = Date.now() - session.questionStartTimes[questionKey];
+            const elapsed = Date.now() - session.questionStartTimes[questionKey] - session.pausedTime;
             const minutes = Math.round(elapsed / 60000);
 
             // Update display to final time
@@ -1452,7 +1539,13 @@
 
             // Hide practice controls
             document.getElementById(`practice-timer-${reviewIndex}`).style.display = 'none';
+            document.getElementById(`pause-practice-${reviewIndex}`).style.display = 'none';
             document.getElementById(`stop-practice-${reviewIndex}`).style.display = 'none';
+
+            // Reset pause button state
+            const pauseButton = document.getElementById(`pause-practice-${reviewIndex}`);
+            pauseButton.innerHTML = '⏸️ Pause';
+            pauseButton.style.background = '#ffc107';
 
             // Clean up localStorage for this session when practice is stopped
             if (session && session.sessionKey) {
