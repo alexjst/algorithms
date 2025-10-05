@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Study Tracker - History</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -101,7 +102,7 @@
         {% if recent_completions %}
             {% for completion in recent_completions %}
             <div class="completion">
-                <h4>{{ completion.track | title }}: {{ completion.topic }}</h4>
+                <h4>{{ completion.track.replace('_', ' ') | title }}: {{ completion.topic }}</h4>
                 <p><strong>Date:</strong> {{ completion.date }}</p>
                 <p class="rating"><strong>Rating:</strong> {{ completion.rating }}/5</p>
                 {% if completion.completed_on_time == true %}
@@ -124,7 +125,7 @@
         {% if completed_reviews %}
             {% for review in completed_reviews %}
             <div class="review-completion">
-                <h4>{{ review.track | title }}: {{ review.topic }}</h4>
+                <h4>{{ review.track.replace('_', ' ') | title }}: {{ review.topic }}</h4>
                 <p><strong>Review Type:</strong> {{ review.review_type }}</p>
                 <p><strong>Completed:</strong> {{ review.completed_date }}</p>
                 <p><strong>Originally Learned:</strong> {{ review.scheduled_date }}</p>
