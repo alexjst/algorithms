@@ -89,6 +89,15 @@
       "notes": "",
       "completed_on_time": null,
       "timestamp": "2025-10-03T08:39:41.773549"
+    },
+    {
+      "date": "2025-10-04",
+      "track": "coding",
+      "topic": "Week 1 Fundamentals Integration",
+      "rating": 3,
+      "notes": "3",
+      "completed_on_time": null,
+      "timestamp": "2025-10-04T20:28:42.836857"
     }
   ]
 }
