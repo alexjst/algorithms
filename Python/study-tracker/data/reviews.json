@@ -399,6 +399,38 @@
       "due_date": "2025-10-18",
       "scheduled_date": "2025-10-04",
       "completed_date": null
+    },
+    {
+      "topic": "DFS Fundamentals",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-06",
+      "scheduled_date": "2025-10-05",
+      "completed_date": null
+    },
+    {
+      "topic": "DFS Fundamentals",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-08",
+      "scheduled_date": "2025-10-05",
+      "completed_date": null
+    },
+    {
+      "topic": "DFS Fundamentals",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-12",
+      "scheduled_date": "2025-10-05",
+      "completed_date": null
+    },
+    {
+      "topic": "DFS Fundamentals",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-19",
+      "scheduled_date": "2025-10-05",
+      "completed_date": null
     }
   ]
 }
