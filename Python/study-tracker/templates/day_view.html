@@ -3,6 +3,12 @@
 <head>
     <title>Study Tracker - Day {{ day_number }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -105,7 +111,8 @@
         }
         .time-estimate { color: #666; font-size: 0.9em; }
         .detailed-content { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
-        .detailed-content pre { white-space: pre-wrap; margin: 0; font-family: inherit; }
+        .detailed-content pre { white-space: pre-wrap; margin: 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; background: #ffffff; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .detailed-content code { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; }
         .problems-section, .resources-section, .concepts-section, .practice-section { margin: 15px 0; }
         .practice-section { background: #fff9e6; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; }
         .question-category { margin: 15px 0; }
@@ -569,6 +576,9 @@
         let syncInterval = null;
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize syntax highlighting for code blocks
+            hljs.highlightAll();
+
             syncTimerState();
             startTimerSync();
         });
