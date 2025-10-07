@@ -5,22 +5,58 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 
     <!-- Syntax Highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="highlight-light">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="highlight-dark" disabled>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
 
     <style>
+        /* Theme CSS Variables */
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f9f9f9;
+            --bg-header: #f0f8ff;
+            --bg-review: #fff3cd;
+            --text-primary: #212529;
+            --text-secondary: #666;
+            --border-color: #ddd;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --nav-hover: #f1f3f5;
+            --nav-active-bg: #e7f3ff;
+            --nav-active-color: #007bff;
+            --code-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --bg-header: #2c3e50;
+            --bg-review: #4a4a2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: #444;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --nav-hover: #3a3a3a;
+            --nav-active-bg: #1e3a5f;
+            --nav-active-color: #66b3ff;
+            --code-bg: #2d2d2d;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f8f9fa;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .header { background: #f0f8ff; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-        .section { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        .topic { background: #f9f9f9; padding: 10px; margin: 5px 0; border-radius: 3px; }
-        .review { background: #fff3cd; padding: 10px; margin: 5px 0; border-radius: 3px; }
+        .header { background: var(--bg-header); padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .section { border: 1px solid var(--border-color); padding: 15px; margin: 10px 0; border-radius: 5px; background: var(--bg-secondary); }
+        .topic { background: var(--bg-tertiary); padding: 10px; margin: 5px 0; border-radius: 3px; }
+        .review { background: var(--bg-review); padding: 10px; margin: 5px 0; border-radius: 3px; }
         .complete-btn { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
         .complete-btn:hover { background: #218838; }
         .rating { margin: 5px 0; }
@@ -29,19 +65,19 @@
         .nav-container {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap; /* Allows wrapping on very small screens */
-            background-color: #ffffff;
+            flex-wrap: wrap;
+            background-color: var(--bg-secondary);
             padding: 10px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 15px var(--shadow);
             margin-bottom: 30px;
         }
         .nav-link {
-            display: flex; /* Aligns icon and text */
+            display: flex;
             align-items: center;
-            white-space: nowrap; /* Prevents icon and text from breaking lines */
+            white-space: nowrap;
             text-decoration: none;
-            color: #495057;
+            color: var(--text-primary);
             padding: 10px 20px;
             margin: 5px;
             border-radius: 8px;
@@ -49,18 +85,34 @@
             transition: all 0.3s ease;
         }
         .nav-link:hover {
-            background-color: #f1f3f5;
-            color: #007bff;
+            background-color: var(--nav-hover);
+            color: var(--nav-active-color);
         }
         .nav-link.active {
-            background-color: #e7f3ff;
-            color: #007bff;
-            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+            background-color: var(--nav-active-bg);
+            color: var(--nav-active-color);
+            box-shadow: 0 2px 8px var(--shadow);
         }
-        .time-estimate { color: #666; font-size: 0.9em; }
-        .detailed-content { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
-        .detailed-content pre { white-space: pre-wrap; margin: 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; background: #ffffff; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover {
+            background-color: var(--nav-hover);
+            transform: scale(1.05);
+        }
+        .time-estimate { color: var(--text-secondary); font-size: 0.9em; }
+        .detailed-content { background: var(--bg-tertiary); padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
+        .detailed-content pre { white-space: pre-wrap; margin: 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; background: var(--code-bg); padding: 10px; border-radius: 4px; overflow-x: auto; }
         .detailed-content code { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; }
+        .notes, .rating select { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); }
         .problems-section, .resources-section, .concepts-section, .practice-section { margin: 15px 0; }
         .practice-section { background: #fff9e6; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; }
         .question-category { margin: 15px 0; }
@@ -113,12 +165,13 @@
         <a href="/system-design" class="nav-link {% if active_page == 'system-design' %}active{% endif %}" title="System Design Templates">🏗️ System Design</a>
         <a href="/config" class="nav-link {% if active_page == 'config' %}active{% endif %}" title="Configure Your Plan">⚙️ Config</a>
         <a href="/help" class="nav-link {% if active_page == 'help' %}active{% endif %}" title="Get Help">❓ Help</a>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode">🌙</button>
     </div>
 
     <!-- Day Selector -->
     <div style="text-align: center; margin-bottom: 20px;">
-        <label for="day-selector" style="font-weight: bold; margin-right: 10px;">Jump to Day:</label>
-        <select id="day-selector" style="padding: 8px 12px; font-size: 14px; border: 2px solid #007bff; border-radius: 5px; background: white; cursor: pointer;" onchange="window.location.href='/day/' + this.value">
+        <label for="day-selector" style="font-weight: bold; margin-right: 10px; color: var(--text-primary);">Jump to Day:</label>
+        <select id="day-selector" style="padding: 8px 12px; font-size: 14px; border: 2px solid #007bff; border-radius: 5px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer;" onchange="window.location.href='/day/' + this.value">
             <option value="">-- Select Day --</option>
             {% for d in range(1, 29) %}
                 <option value="{{ d }}">Day {{ d }}{% if d == current_day %} (Today){% endif %}</option>
@@ -697,8 +750,56 @@
 
         // Timer state variables and functions defined at top
 
+        // Theme Toggle Functionality
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            updateHighlightTheme(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+            updateHighlightTheme(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+                themeToggle.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            }
+        }
+
+        function updateHighlightTheme(theme) {
+            const lightHighlight = document.getElementById('highlight-light');
+            const darkHighlight = document.getElementById('highlight-dark');
+
+            if (theme === 'dark') {
+                if (lightHighlight) lightHighlight.disabled = true;
+                if (darkHighlight) darkHighlight.disabled = false;
+            } else {
+                if (lightHighlight) lightHighlight.disabled = false;
+                if (darkHighlight) darkHighlight.disabled = true;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing timer system...');
+
+            // Initialize theme first
+            initTheme();
+
+            // Add theme toggle event listener
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', toggleTheme);
+            }
 
             // Initialize syntax highlighting for code blocks
             hljs.highlightAll();

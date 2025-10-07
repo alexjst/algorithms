@@ -6,78 +6,130 @@
     <title>System Design Templates - Study Tracker</title>
 
     <!-- Syntax Highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="highlight-light">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="highlight-dark" disabled>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
 
     <style>
+        /* Theme CSS Variables */
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --bg-concept: #e3f2fd;
+            --bg-framework: #e8f5e8;
+            --bg-scale: #fff3e0;
+            --bg-tradeoff: #f5f5f5;
+            --bg-highlight: #fff9c4;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --text-tertiary: #2980b9;
+            --border-concept: #2196f3;
+            --border-framework: #4caf50;
+            --border-scale: #ff9800;
+            --border-tradeoff: #757575;
+            --border-primary: #3498db;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --nav-hover: #f1f3f5;
+            --nav-active-bg: #e7f3ff;
+            --nav-active-color: #007bff;
+            --nav-text: #495057;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --bg-concept: #2c3e50;
+            --bg-framework: #2e4d2e;
+            --bg-scale: #4a3f2d;
+            --bg-tradeoff: #3a3a3a;
+            --bg-highlight: #4a4a2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --text-tertiary: #66b3ff;
+            --border-concept: #3498db;
+            --border-framework: #4caf50;
+            --border-scale: #ff9800;
+            --border-tradeoff: #888;
+            --border-primary: #66b3ff;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --nav-hover: #3a3a3a;
+            --nav-active-bg: #1e3a5f;
+            --nav-active-color: #66b3ff;
+            --nav-text: #e0e0e0;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f7fa;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px var(--shadow);
             padding: 30px;
         }
         h1 {
-            color: #2c3e50;
+            color: var(--text-primary);
             text-align: center;
             margin-bottom: 30px;
             font-size: 2.5em;
-            border-bottom: 3px solid #3498db;
+            border-bottom: 3px solid var(--border-primary);
             padding-bottom: 15px;
         }
         h2 {
-            color: #34495e;
-            border-left: 4px solid #3498db;
+            color: var(--text-secondary);
+            border-left: 4px solid var(--border-primary);
             padding-left: 15px;
             margin-top: 40px;
             margin-bottom: 20px;
         }
         h3 {
-            color: #2980b9;
+            color: var(--text-tertiary);
             margin-top: 25px;
             margin-bottom: 15px;
         }
         .concept-box {
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
+            background: var(--bg-concept);
+            border: 2px solid var(--border-concept);
             border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
         }
         .framework-box {
-            background: #e8f5e8;
-            border: 2px solid #4caf50;
+            background: var(--bg-framework);
+            border: 2px solid var(--border-framework);
             border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
         }
         .scale-box {
-            background: #fff3e0;
-            border: 2px solid #ff9800;
+            background: var(--bg-scale);
+            border: 2px solid var(--border-scale);
             border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
         }
         .tradeoff-box {
-            background: #f5f5f5;
-            border: 2px solid #757575;
+            background: var(--bg-tradeoff);
+            border: 2px solid var(--border-tradeoff);
             border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
         }
         .pattern-section {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
             border-radius: 8px;
             padding: 20px;
             margin: 15px 0;
@@ -94,7 +146,7 @@
             white-space: pre-wrap;
         }
         .highlight {
-            background: #fff9c4;
+            background: var(--bg-highlight);
             padding: 2px 4px;
             border-radius: 3px;
         }
@@ -153,6 +205,26 @@
         .back-link:hover {
             background: #2980b9;
         }
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--border-primary);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-left: 15px;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover {
+            background-color: var(--bg-tertiary);
+            transform: scale(1.05);
+        }
+        .header-controls {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         .design-example {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -175,7 +247,10 @@
 </head>
 <body>
     <div class="container">
-        <a href="../dashboard" class="back-link">← Back to Dashboard</a>
+        <div class="header-controls">
+            <a href="../dashboard" class="back-link">← Back to Dashboard</a>
+            <button class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode">🌙</button>
+        </div>
 
         <h1>🏗️ System Design Templates</h1>
 
@@ -994,5 +1069,8 @@ Feeds Table (for push model):
             });
         });
     </script>
+
+    <!-- Theme Toggle Functionality -->
+    <script src="/static/theme.js"></script>
 </body>
 </html>
