@@ -26,7 +26,21 @@
       "review_type": "7-day",
       "due_date": "2025-10-05",
       "scheduled_date": "2025-09-28",
-      "completed_date": null
+      "completed_date": "2025-10-05",
+      "rating": 4,
+      "notes": "",
+      "practice_time": 32,
+      "problem_times": [
+        {
+          "problemIndex": 0,
+          "timeMinutes": 31
+        },
+        {
+          "problemIndex": 1,
+          "timeMinutes": 31
+        }
+      ],
+      "suggested_rating": 4
     },
     {
       "topic": "Two Pointers",
@@ -430,6 +444,38 @@
       "review_type": "14-day",
       "due_date": "2025-10-19",
       "scheduled_date": "2025-10-05",
+      "completed_date": null
+    },
+    {
+      "topic": "BFS & Graph/Matrix Traversal",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-08",
+      "scheduled_date": "2025-10-07",
+      "completed_date": null
+    },
+    {
+      "topic": "BFS & Graph/Matrix Traversal",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-10",
+      "scheduled_date": "2025-10-07",
+      "completed_date": null
+    },
+    {
+      "topic": "BFS & Graph/Matrix Traversal",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-14",
+      "scheduled_date": "2025-10-07",
+      "completed_date": null
+    },
+    {
+      "topic": "BFS & Graph/Matrix Traversal",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-21",
+      "scheduled_date": "2025-10-07",
       "completed_date": null
     }
   ]
