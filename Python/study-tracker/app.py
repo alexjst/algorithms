@@ -491,6 +491,94 @@ def dashboard():
                          total_time=total_time,
                          active_page='dashboard')
 
+@app.route('/day/<int:day_number>')
+def day_view(day_number):
+    """View a specific day's content (1-28) for review and completion"""
+    # Validate day number
+    if day_number < 1 or day_number > 28:
+        return redirect(url_for('dashboard'))
+
+    # Get topics for this specific day
+    coding_topic = get_topic_for_day('coding', day_number)
+    system_design_topic = get_topic_for_day('system_design', day_number)
+
+    # Check if topics are completed (on ANY date, not just that day)
+    progress_data = load_json_data(PROGRESS_FILE)
+    coding_topic_completed = False
+    system_design_topic_completed = False
+    coding_completion_data = None
+    system_design_completion_data = None
+
+    for completion in progress_data.get('completions', []):
+        if completion['track'] == 'coding' and coding_topic and completion['topic'] == coding_topic['topic']:
+            coding_topic_completed = True
+            coding_completion_data = completion
+        elif completion['track'] == 'system_design' and system_design_topic and completion['topic'] == system_design_topic['topic']:
+            system_design_topic_completed = True
+            system_design_completion_data = completion
+
+    # Calculate the calendar date for this day based on start dates
+    config = load_config()
+    coding_start = datetime.strptime(config['study_plan']['coding']['start_date'], '%Y-%m-%d').date()
+    system_design_start = datetime.strptime(config['study_plan']['system_design']['start_date'], '%Y-%m-%d').date()
+
+    # Use the earlier start date for display
+    earliest_start = min(coding_start, system_design_start)
+    day_date = (earliest_start + timedelta(days=day_number - 1)).strftime('%Y-%m-%d')
+
+    # Get reviews that were due on this day
+    due_reviews = get_due_reviews(day_date)
+
+    # Enhance each review with practice problems and time benchmarks
+    for review in due_reviews:
+        if review['track'] == 'coding':
+            problems = get_topic_problems(review['topic'], review['track'])
+            review['problems'] = problems
+            review['practice_questions'] = None
+            if problems:
+                review['benchmarks'] = get_time_benchmarks(problems)
+            else:
+                review['benchmarks'] = None
+        elif review['track'] == 'system_design':
+            practice_questions = select_review_questions(review['topic'], review['track'], review['review_type'])
+            review['practice_questions'] = practice_questions
+            review['problems'] = None
+            if practice_questions:
+                review['benchmarks'] = get_system_design_benchmarks(practice_questions, review['review_type'])
+            else:
+                review['benchmarks'] = None
+        else:
+            review['problems'] = None
+            review['practice_questions'] = None
+            review['benchmarks'] = None
+
+    # Calculate total time estimate
+    total_time = 0
+    if coding_topic and not coding_topic_completed:
+        total_time += coding_topic.get('time_estimate', 45)
+    if system_design_topic and not system_design_topic_completed:
+        total_time += system_design_topic.get('time_estimate', 45)
+    total_time += len(due_reviews) * 10
+
+    # Get current day numbers for both tracks
+    current_coding_day = get_day_number('coding')
+    current_system_design_day = get_day_number('system_design')
+
+    return render_template('day_view.html',
+                         day_number=day_number,
+                         day_date=day_date,
+                         coding_topic=coding_topic,
+                         system_design_topic=system_design_topic,
+                         coding_topic_completed=coding_topic_completed,
+                         system_design_topic_completed=system_design_topic_completed,
+                         coding_completion_data=coding_completion_data,
+                         system_design_completion_data=system_design_completion_data,
+                         due_reviews=due_reviews,
+                         total_time=total_time,
+                         current_coding_day=current_coding_day,
+                         current_system_design_day=current_system_design_day,
+                         active_page='day_view')
+
 @app.route('/complete', methods=['POST'])
 def mark_complete():
     """Mark a topic or review as complete"""

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Study Tracker - Day {{ day_number }}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header { background: #f0f8ff; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .day-navigator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .day-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-arrow {
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .nav-arrow:hover { background: #0056b3; }
+        .nav-arrow:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .day-selector {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            background: white;
+        }
+        .day-info {
+            text-align: center;
+            flex: 1;
+        }
+        .day-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .badge-past { background: #d1ecf1; color: #0c5460; }
+        .badge-today { background: #d4edda; color: #155724; }
+        .badge-future { background: #fff3cd; color: #856404; }
+        .section { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .topic { background: #f9f9f9; padding: 10px; margin: 5px 0; border-radius: 3px; }
+        .review { background: #fff3cd; padding: 10px; margin: 5px 0; border-radius: 3px; }
+        .complete-btn { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+        .complete-btn:hover { background: #218838; }
+        .rating { margin: 5px 0; }
+        .notes { width: 100%; height: 60px; margin: 5px 0; }
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            text-decoration: none;
+            color: #495057;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: #f1f3f5;
+            color: #007bff;
+        }
+        .nav-link.active {
+            background-color: #e7f3ff;
+            color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+        }
+        .time-estimate { color: #666; font-size: 0.9em; }
+        .detailed-content { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
+        .detailed-content pre { white-space: pre-wrap; margin: 0; font-family: inherit; }
+        .problems-section, .resources-section, .concepts-section, .practice-section { margin: 15px 0; }
+        .practice-section { background: #fff9e6; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .question-category { margin: 15px 0; }
+        .question-category h5 { color: #856404; margin-bottom: 10px; }
+        .question-category ul { padding-left: 20px; }
+        .question-category li { margin: 8px 0; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+        .problem-item, .resource-item { margin: 10px 0; padding: 10px; border: 1px solid #e9ecef; border-radius: 5px; background: #f8f9fa; }
+        .problem-link, .resource-link { color: #007bff; text-decoration: none; font-size: 16px; }
+        .problem-link:hover, .resource-link:hover { text-decoration: underline; }
+        .difficulty { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-left: 10px; }
+        .difficulty-easy { background: #d4edda; color: #155724; }
+        .difficulty-medium { background: #fff3cd; color: #856404; }
+        .difficulty-hard { background: #f8d7da; color: #721c24; }
+        .problem-desc, .resource-desc { color: #666; margin: 5px 0 0 0; font-size: 14px; }
+        .concepts-section ul { margin: 10px 0; }
+        .concepts-section li { margin: 5px 0; }
+        .completed-section { opacity: 0.6; pointer-events: none; }
+        .completed-section .complete-btn { background: #6c757d; }
+        .completed-message { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; }
+        .pomodoro-section { background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #ffc107; display: none; }
+        .pomodoro-timer { font-size: 28px; font-weight: bold; color: #856404; text-align: center; margin: 10px 0; }
+        .timer-btn { background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 5px; margin: 5px; cursor: pointer; font-size: 14px; }
+        .timer-btn:hover { background: #218838; }
+        .timer-btn.pause { background: #ffc107; color: #212529; }
+        .timer-btn.pause:hover { background: #e0a800; }
+        .timer-btn.stop { background: #dc3545; }
+        .timer-btn.stop:hover { background: #c82333; }
+        .start-timer-btn { background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-left: 10px; cursor: pointer; font-size: 14px; }
+        .start-timer-btn:hover { background: #138496; }
+        .template-link { background: #6c757d; color: white; text-decoration: none; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-size: 12px; }
+        .template-link:hover { background: #5a6268; color: white; }
+    </style>
+</head>
+<body>
+    <!-- Day Navigator -->
+    <div class="day-navigator">
+        <div class="day-controls">
+            {% if day_number > 1 %}
+                <a href="/day/{{ day_number - 1 }}" class="nav-arrow">← Previous</a>
+            {% else %}
+                <button class="nav-arrow" disabled>← Previous</button>
+            {% endif %}
+
+            <select class="day-selector" onchange="window.location.href='/day/' + this.value">
+                {% for d in range(1, 29) %}
+                    <option value="{{ d }}" {% if d == day_number %}selected{% endif %}>Day {{ d }}</option>
+                {% endfor %}
+            </select>
+
+            {% if day_number < 28 %}
+                <a href="/day/{{ day_number + 1 }}" class="nav-arrow">Next →</a>
+            {% else %}
+                <button class="nav-arrow" disabled>Next →</button>
+            {% endif %}
+        </div>
+
+        <div class="day-info">
+            <h2 style="margin: 0;">📚 Day {{ day_number }}
+                {% if day_number < current_coding_day or day_number < current_system_design_day %}
+                    <span class="day-badge badge-past">Past Day</span>
+                {% elif day_number == current_coding_day or day_number == current_system_design_day %}
+                    <span class="day-badge badge-today">Today</span>
+                {% else %}
+                    <span class="day-badge badge-future">Future</span>
+                {% endif %}
+            </h2>
+            <p style="margin: 5px 0; color: #666;">{{ day_date }}</p>
+        </div>
+
+        <div class="day-controls">
+            <a href="/" class="nav-arrow">📅 Today</a>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="nav-container">
+        <a href="/" class="nav-link" title="Go to Dashboard">📅 Dashboard</a>
+        <a href="/history" class="nav-link" title="View Progress History">📊 History</a>
+        <a href="/preview" class="nav-link" title="See Upcoming Topics">🔮 Preview</a>
+        <a href="/practice" class="nav-link" title="Practice & Mock Interviews">🎯 Practice</a>
+        <a href="/analytics" class="nav-link" title="Analyze Your Performance">📈 Analytics</a>
+        <a href="/curriculum" class="nav-link" title="Edit the Curriculum">📚 Curriculum</a>
+        <a href="/templates" class="nav-link" title="Coding Patterns & Templates">🔧 Templates</a>
+        <a href="/system-design" class="nav-link" title="System Design Templates">🏗️ System Design</a>
+        <a href="/config" class="nav-link" title="Configure Your Plan">⚙️ Config</a>
+        <a href="/help" class="nav-link" title="Get Help">❓ Help</a>
+    </div>
+
+    <div class="header">
+        <p><strong>Time Remaining:</strong> {{ total_time }} minutes</p>
+        {% if coding_topic_completed and system_design_topic_completed %}
+            <p style="color: #28a745; font-weight: bold;">✅ All topics completed for this day!</p>
+        {% elif coding_topic_completed or system_design_topic_completed %}
+            <p style="color: #ffc107; font-weight: bold;">⚠️ Some topics still pending</p>
+        {% else %}
+            <p style="color: #dc3545; font-weight: bold;">📝 Topics not yet completed</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>🧠 Day {{ day_number }} Learning</h2>
+
+        {% if coding_topic %}
+        <div class="topic {% if coding_topic_completed %}completed-section{% endif %}" id="coding-topic">
+            <h3>💻 Coding: {{ coding_topic.topic }}
+                <a href="/templates#{{ coding_topic.topic.lower().replace(' ', '-').replace('(', '').replace(')', '') }}" target="_blank" class="template-link" title="View code templates and patterns for {{ coding_topic.topic }}">
+                    📖 Template
+                </a>
+            </h3>
+            <p><strong>Activity:</strong> {{ coding_topic.activity }}</p>
+
+            {% if not coding_topic_completed %}
+            <p class="time-estimate">⏱️ {{ coding_topic.time_estimate }} minutes
+                <button class="start-timer-btn" onclick="startPomodoro('coding', {{ coding_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic.">
+                    🍅 Start Timer
+                </button>
+            </p>
+
+            <div class="pomodoro-section" id="coding-pomodoro">
+                <h4>🍅 Focus Session</h4>
+                <div class="pomodoro-timer" id="coding-timer">{{ coding_topic.time_estimate }}:00</div>
+                <div style="text-align: center;">
+                    <button class="timer-btn" onclick="pauseTimer('coding')" id="coding-pause-btn">⏸️ Pause</button>
+                    <button class="timer-btn stop" onclick="stopTimer('coding')">⏹️ Stop</button>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if coding_topic.detailed_content %}
+            <div class="detailed-content">
+                <h4>📖 Detailed Guide:</h4>
+                <pre>{{ coding_topic.detailed_content }}</pre>
+            </div>
+            {% endif %}
+
+            {% if coding_topic.problems %}
+            <div class="problems-section">
+                <h4>🎯 Practice Problems:</h4>
+                {% for problem in coding_topic.problems %}
+                <div class="problem-item">
+                    <strong><a href="{{ problem.url }}" target="_blank" class="problem-link">
+                        #{{ problem.number }} - {{ problem.title }}
+                    </a></strong>
+                    <span class="difficulty difficulty-{{ problem.difficulty.lower() }}">{{ problem.difficulty }}</span>
+                    <p class="problem-desc">{{ problem.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if coding_topic_completed %}
+            <div class="completed-message">
+                <h4>✅ {{ coding_topic.topic }} Complete!</h4>
+                <p>Completed on: {{ coding_completion_data.date }}</p>
+                <p>Rating: {{ coding_completion_data.rating }}/5 | Notes: {{ coding_completion_data.notes or 'No notes' }}</p>
+            </div>
+            {% else %}
+            <div class="rating">
+                <label>Rating (1-5):</label>
+                <select id="coding-rating">
+                    <option value="1">1 - Very Hard</option>
+                    <option value="2">2 - Hard</option>
+                    <option value="3" selected>3 - Medium</option>
+                    <option value="4">4 - Easy</option>
+                    <option value="5">5 - Very Easy</option>
+                </select>
+            </div>
+            <textarea id="coding-notes" class="notes" placeholder="Notes and reflections..."></textarea>
+            <button class="complete-btn" id="coding-complete-btn" onclick="markComplete('{{ coding_topic.topic }}', 'coding', 'topic')">
+                ✅ Mark Complete
+            </button>
+            <button class="complete-btn" id="coding-finish-early-btn" style="display: none; background: #28a745;" onclick="finishEarlyAndMarkComplete('coding', '{{ coding_topic.topic }}')" title="Complete this topic before the timer expires.">
+                ⏱️ Finish Early & Mark Complete
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if system_design_topic %}
+        <div class="topic {% if system_design_topic_completed %}completed-section{% endif %}" id="system_design-topic">
+            <h3>🏗️ System Design: {{ system_design_topic.topic }}</h3>
+            <p><strong>Activity:</strong> {{ system_design_topic.activity }}</p>
+
+            {% if not system_design_topic_completed %}
+            <p class="time-estimate">⏱️ {{ system_design_topic.time_estimate }} minutes
+                <button class="start-timer-btn" onclick="startPomodoro('system_design', {{ system_design_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic.">
+                    🍅 Start Timer
+                </button>
+            </p>
+
+            <div class="pomodoro-section" id="system_design-pomodoro">
+                <h4>🍅 Focus Session</h4>
+                <div class="pomodoro-timer" id="system_design-timer">{{ system_design_topic.time_estimate }}:00</div>
+                <div style="text-align: center;">
+                    <button class="timer-btn" onclick="pauseTimer('system_design')" id="system_design-pause-btn">⏸️ Pause</button>
+                    <button class="timer-btn stop" onclick="stopTimer('system_design')">⏹️ Stop</button>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if system_design_topic.detailed_content %}
+            <div class="detailed-content">
+                <h4>📖 Detailed Guide:</h4>
+                <pre>{{ system_design_topic.detailed_content }}</pre>
+            </div>
+            {% endif %}
+
+            {% if system_design_topic.practice_questions %}
+            <div class="practice-section">
+                <h4>🎯 Practice Questions:</h4>
+                <p><em>Test your understanding by answering these questions:</em></p>
+
+                {% if system_design_topic.practice_questions.estimation %}
+                <div class="question-category">
+                    <h5>📊 Estimation Questions:</h5>
+                    <ul>
+                        {% for question in system_design_topic.practice_questions.estimation %}
+                        <li>{{ question }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if system_design_topic.practice_questions.concepts %}
+                <div class="question-category">
+                    <h5>💡 Concept Questions:</h5>
+                    <ul>
+                        {% for question in system_design_topic.practice_questions.concepts %}
+                        <li>{{ question }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if system_design_topic.practice_questions.tradeoffs %}
+                <div class="question-category">
+                    <h5>⚖️ Trade-off Questions:</h5>
+                    <ul>
+                        {% for question in system_design_topic.practice_questions.tradeoffs %}
+                        <li>{{ question }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if system_design_topic.resources %}
+            <div class="resources-section">
+                <h4>📚 Study Resources:</h4>
+                {% for resource in system_design_topic.resources %}
+                <div class="resource-item">
+                    <strong><a href="{{ resource.url }}" target="_blank" class="resource-link">
+                        {{ resource.title }}
+                    </a></strong>
+                    <p class="resource-desc">{{ resource.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if system_design_topic.concepts %}
+            <div class="concepts-section">
+                <h4>🔑 Key Concepts:</h4>
+                <ul>
+                {% for concept in system_design_topic.concepts %}
+                    <li>{{ concept }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if system_design_topic_completed %}
+            <div class="completed-message">
+                <h4>✅ {{ system_design_topic.topic }} Complete!</h4>
+                <p>Completed on: {{ system_design_completion_data.date }}</p>
+                <p>Rating: {{ system_design_completion_data.rating }}/5 | Notes: {{ system_design_completion_data.notes or 'No notes' }}</p>
+            </div>
+            {% else %}
+            <div class="rating">
+                <label>Rating (1-5):</label>
+                <select id="system_design-rating">
+                    <option value="1">1 - Very Hard</option>
+                    <option value="2">2 - Hard</option>
+                    <option value="3" selected>3 - Medium</option>
+                    <option value="4">4 - Easy</option>
+                    <option value="5">5 - Very Easy</option>
+                </select>
+            </div>
+            <textarea id="system_design-notes" class="notes" placeholder="Notes and reflections..."></textarea>
+            <button class="complete-btn" id="system_design-complete-btn" onclick="markComplete('{{ system_design_topic.topic }}', 'system_design', 'topic')">
+                ✅ Mark Complete
+            </button>
+            <button class="complete-btn" id="system_design-finish-early-btn" style="display: none; background: #28a745;" onclick="finishEarlyAndMarkComplete('system_design', '{{ system_design_topic.topic }}')" title="Complete this topic before the timer expires.">
+                ⏱️ Finish Early & Mark Complete
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if due_reviews %}
+    <div class="section">
+        <h2>🔄 Reviews Due on Day {{ day_number }}</h2>
+        <p style="color: #666; font-size: 14px;">These reviews were scheduled for {{ day_date }}</p>
+        {% for review in due_reviews %}
+        <div class="review" id="review-{{ loop.index }}">
+            <h4>{{ review.track.replace('_', ' ') | title }}: {{ review.topic }} ({{ review.review_type }} review)</h4>
+            <p>Originally completed: {{ review.scheduled_date }}</p>
+
+            <div class="rating">
+                <label>How well do you remember? (1-5):</label>
+                <select id="review-rating-{{ loop.index }}">
+                    <option value="1">1 - Completely forgot</option>
+                    <option value="2">2 - Vague memory</option>
+                    <option value="3" selected>3 - Some memory</option>
+                    <option value="4">4 - Good memory</option>
+                    <option value="5">5 - Perfect recall</option>
+                </select>
+            </div>
+            <textarea id="review-notes-{{ loop.index }}" class="notes" placeholder="Review notes..."></textarea>
+            <button class="complete-btn" onclick="markCompleteReview('{{ review.topic }}', '{{ review.track }}', {{ loop.index }})">
+                ✅ Review Complete
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Reuse timer and completion logic from dashboard
+        let serverUnavailable = false;
+
+        async function startPomodoro(track, minutes) {
+            if (serverUnavailable) {
+                alert('Timer feature unavailable: Server connection lost. Please refresh the page.');
+                return;
+            }
+
+            try {
+                const stateResponse = await fetch('/api/timer/state');
+                if (stateResponse.ok) {
+                    const currentState = await stateResponse.json();
+                    if (currentState.active && currentState.track !== track) {
+                        const remainingMins = Math.floor(currentState.remaining / 60);
+                        const remainingSecs = Math.floor(currentState.remaining % 60);
+                        const timeLeft = `${remainingMins}:${remainingSecs.toString().padStart(2, '0')}`;
+                        const confirmed = confirm(
+                            `⚠️ You already have an active timer running!\n\n` +
+                            `Current: ${currentState.track.replace('_', ' ')} - "${currentState.topic}"\n` +
+                            `Time remaining: ${timeLeft}\n\n` +
+                            `Do you want to stop it and start a new timer?`
+                        );
+                        if (!confirmed) return;
+                    }
+                }
+
+                const topicName = getTopicName(track);
+                const response = await fetch('/api/timer/start', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({track: track, topic: topicName, duration: minutes})
+                });
+
+                if (response.ok) {
+                    await syncTimerState();
+                    const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+                    if (pomodoroSection) {
+                        pomodoroSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                } else {
+                    alert('Error starting timer. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error starting timer:', error);
+                alert('Network error starting timer. Please try again.');
+            }
+        }
+
+        window.startPomodoro = startPomodoro;
+
+        async function markComplete(topic, track, type) {
+            const ratingSelect = document.getElementById(`${track}-rating`);
+            const notesTextarea = document.getElementById(`${track}-notes`);
+            if (!ratingSelect || !notesTextarea) return;
+
+            const rating = parseInt(ratingSelect.value);
+            const notes = notesTextarea.value;
+            const elementId = `${track}-topic`;
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            element.style.pointerEvents = 'none';
+            const button = element.querySelector('.complete-btn');
+            if (button) {
+                button.textContent = '⏳ Saving...';
+                button.style.background = '#6c757d';
+            }
+
+            try {
+                const response = await fetch('/complete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        topic: topic,
+                        track: track,
+                        type: type,
+                        rating: rating,
+                        notes: notes,
+                        completed_on_time: await getCompletionTimingStatus(track)
+                    })
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    element.style.pointerEvents = 'auto';
+                    button.textContent = '✅ Mark Complete';
+                    button.style.background = '#28a745';
+                    alert('❌ Error saving completion. Please try again.');
+                }
+            } catch (error) {
+                element.style.pointerEvents = 'auto';
+                button.textContent = '✅ Mark Complete';
+                button.style.background = '#28a745';
+                alert('❌ Network error. Please try again.');
+            }
+        }
+
+        async function markCompleteReview(topic, track, reviewIndex) {
+            const ratingSelect = document.getElementById(`review-rating-${reviewIndex}`);
+            const notesTextarea = document.getElementById(`review-notes-${reviewIndex}`);
+            const rating = parseInt(ratingSelect.value);
+            const notes = notesTextarea.value;
+
+            try {
+                const response = await fetch('/complete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        topic: topic,
+                        track: track,
+                        type: 'review',
+                        rating: rating,
+                        notes: notes
+                    })
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('❌ Error saving completion. Please try again.');
+                }
+            } catch (error) {
+                alert('❌ Network error. Please try again.');
+            }
+        }
+
+        // Timer sync functions (simplified)
+        let syncInterval = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            syncTimerState();
+            startTimerSync();
+        });
+
+        function startTimerSync() {
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(syncTimerState, 2000);
+        }
+
+        async function syncTimerState() {
+            try {
+                const response = await fetch('/api/timer/state');
+                if (response.ok) {
+                    const state = await response.json();
+                    updateTimerDisplay(state);
+                    if (serverUnavailable) serverUnavailable = false;
+                }
+            } catch (error) {
+                if (!serverUnavailable) {
+                    serverUnavailable = true;
+                    hideAllTimers();
+                }
+            }
+        }
+
+        function updateTimerDisplay(state) {
+            const allTracks = ['coding', 'system_design'];
+            if (!state.active) {
+                hideAllTimers();
+                return;
+            }
+
+            const track = state.track;
+            const pomodoroSection = document.getElementById(`${track}-pomodoro`);
+            const startButton = document.querySelector(`#${track}-topic .start-timer-btn`);
+            const timerDisplay = document.getElementById(`${track}-timer`);
+            const pauseButton = document.getElementById(`${track}-pause-btn`);
+            const completeBtn = document.getElementById(`${track}-complete-btn`);
+            const finishEarlyBtn = document.getElementById(`${track}-finish-early-btn`);
+
+            if (!pomodoroSection || !timerDisplay) return;
+
+            pomodoroSection.style.display = 'block';
+            if (startButton) startButton.style.display = 'none';
+
+            if (state.remaining > 0) {
+                const minutes = Math.floor(state.remaining / 60);
+                const seconds = Math.floor(state.remaining % 60);
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                if (pauseButton) {
+                    pauseButton.innerHTML = state.paused ? '▶️ Resume' : '⏸️ Pause';
+                }
+                if (completeBtn) completeBtn.style.display = 'none';
+                if (finishEarlyBtn) finishEarlyBtn.style.display = 'inline-block';
+            } else {
+                timerDisplay.textContent = "00:00";
+                if (completeBtn) completeBtn.style.display = 'inline-block';
+                if (finishEarlyBtn) finishEarlyBtn.style.display = 'none';
+            }
+
+            for (const otherTrack of allTracks) {
+                if (otherTrack !== track) {
+                    const otherSection = document.getElementById(`${otherTrack}-pomodoro`);
+                    const otherButton = document.querySelector(`#${otherTrack}-topic .start-timer-btn`);
+                    if (otherSection) otherSection.style.display = 'none';
+                    if (otherButton) otherButton.style.display = 'inline-block';
+                }
+            }
+        }
+
+        function hideAllTimers() {
+            ['coding', 'system_design'].forEach(track => {
+                const section = document.getElementById(`${track}-pomodoro`);
+                const button = document.querySelector(`#${track}-topic .start-timer-btn`);
+                if (section) section.style.display = 'none';
+                if (button) button.style.display = 'inline-block';
+            });
+        }
+
+        async function pauseTimer(track) {
+            if (serverUnavailable) {
+                alert('Timer feature unavailable.');
+                return;
+            }
+            try {
+                const stateResponse = await fetch('/api/timer/state');
+                const currentState = await stateResponse.json();
+                const endpoint = currentState.paused ? '/api/timer/resume' : '/api/timer/pause';
+                const response = await fetch(endpoint, {method: 'POST', headers: {'Content-Type': 'application/json'}});
+                if (response.ok) await syncTimerState();
+            } catch (error) {
+                alert('Error with timer.');
+            }
+        }
+
+        async function stopTimer(track) {
+            if (serverUnavailable) {
+                alert('Timer feature unavailable.');
+                return;
+            }
+            try {
+                const response = await fetch('/api/timer/stop', {method: 'POST', headers: {'Content-Type': 'application/json'}});
+                if (response.ok) await syncTimerState();
+            } catch (error) {
+                alert('Error stopping timer.');
+            }
+        }
+
+        function getTopicName(track) {
+            const topicElement = document.querySelector(`#${track}-topic h3`);
+            if (topicElement) {
+                const text = topicElement.textContent;
+                const colonIndex = text.indexOf(':');
+                if (colonIndex !== -1) return text.substring(colonIndex + 1).trim();
+            }
+            return 'Unknown Topic';
+        }
+
+        async function getCompletionTimingStatus(track) {
+            try {
+                const response = await fetch('/api/timer/state');
+                if (response.ok) {
+                    const state = await response.json();
+                    if (!state.active || state.track !== track) return null;
+                    if (state.remaining <= 0) return false;
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error checking timer status:', error);
+            }
+            return null;
+        }
+
+        async function finishEarlyAndMarkComplete(track, topic) {
+            try {
+                await stopTimer(track);
+                await markComplete(topic, track, 'topic');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
