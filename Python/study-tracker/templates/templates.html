@@ -593,6 +593,7 @@ def find_middle(head):
 
     return slow
 
+# Problem: Remove nth node from end of linked list
 def remove_nth_from_end(head, n):
     dummy = ListNode(0)
     dummy.next = head
@@ -771,6 +772,7 @@ def find_last_occurrence(nums, target):
 
     return result
 
+# Problem: Find first and last position of target in sorted array
 def search_range(nums, target):
     return [find_first_occurrence(nums, target),
             find_last_occurrence(nums, target)]</code></pre>
@@ -937,6 +939,8 @@ def longest_common_subsequence(text1, text2):
 
     return dp[m][n]
 
+# Problem: Find minimum path sum in grid from top-left to bottom-right
+# Time: O(m*n), Space: O(1) - modifies input grid
 def min_path_sum(grid):
     m, n = len(grid), len(grid[0])
 
@@ -1145,6 +1149,8 @@ def find_kth_largest(nums, k):
 
     return min_heap[0]
 
+# Problem: Find k largest elements in array (return as list)
+# Time: O(n log k), Space: O(k)
 def find_k_largest_elements(nums, k):
     # Min heap approach
     min_heap = []
@@ -1157,6 +1163,7 @@ def find_k_largest_elements(nums, k):
 
     return sorted(min_heap, reverse=True)
 
+# Problem: Max heap operations using negation (Python heapq workaround)
 # For max heap, negate values (Python heapq is min heap by default)
 def max_heap_operations(values):
     max_heap = []
@@ -1333,6 +1340,8 @@ def top_k_frequent_elements(nums, k):
 
     return islands
 
+# Problem: Find redundant edge that creates cycle in graph
+# Time: O(n), Space: O(n)
 def redundant_connection(edges):
     uf = UnionFind(len(edges) + 1)
 
@@ -1593,6 +1602,8 @@ def merge_intervals(intervals):
 
     return merged
 
+# Problem: Insert interval and merge if necessary
+# Time: O(n), Space: O(n)
 def insert_interval(intervals, new_interval):
     result = []
     i = 0
@@ -1815,6 +1826,7 @@ def num_islands(grid):
     preorder(root)
     return ",".join(result)
 
+# Problem: Deserialize string to binary tree (preorder)
 def deserialize(data):
     def build():
         val = next(values)
@@ -1869,6 +1881,8 @@ def max_subarray_sum(nums):
 
     return max_sum
 
+# Problem: Find max subarray sum with start/end indices (Kadane's variant)
+# Time: O(n), Space: O(1)
 def max_subarray_with_indices(nums):
     max_sum = current_sum = nums[0]
     start = end = temp_start = 0
@@ -1955,6 +1969,8 @@ def daily_temperatures(temperatures):
 
     return result
 
+# Problem: Find largest rectangle area in histogram
+# Time: O(n), Space: O(n)
 def largest_rectangle_in_histogram(heights):
     stack = []
     max_area = 0
@@ -1983,6 +1999,8 @@ def largest_rectangle_in_histogram(heights):
             i += 1
     return nums
 
+# Problem: Find missing number in array [0, n]
+# Time: O(n), Space: O(1)
 def find_missing_number(nums):
     # Array contains n numbers in range [0, n]
     i = 0
@@ -2001,6 +2019,8 @@ def find_missing_number(nums):
 
     return n
 
+# Problem: Find all duplicate numbers in array
+# Time: O(n), Space: O(1) - uses array indices for marking
 def find_all_duplicates(nums):
     duplicates = []
 
