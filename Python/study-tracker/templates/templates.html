@@ -912,7 +912,8 @@ def house_robber(nums):
         <div class="template-variant">
             <div class="variant-title">2D DP Template</div>
             <div class="code-template">
-<pre><code class="language-python">def unique_paths(m, n):
+<pre><code class="language-python"># Problem: Count unique paths in m x n grid (top-left to bottom-right)
+def unique_paths(m, n):
     dp = [[1 for _ in range(n)] for _ in range(m)]
 
     for i in range(1, m):
