@@ -350,7 +350,7 @@
         <div class="template-variant">
             <div class="variant-title">Recursive DFS Template</div>
             <div class="code-template">
-<pre>def dfs_recursive(root):
+<pre><code class="language-python">def dfs_recursive(root):
     if not root:
         return  # Base case
 
@@ -384,14 +384,14 @@ def dfs_collect_paths(root):
         path.pop()  # Backtrack
 
     dfs(root, [])
-    return all_paths</pre>
+    return all_paths</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Iterative DFS Template</div>
             <div class="code-template">
-<pre>def dfs_iterative(root):
+<pre><code class="language-python">def dfs_iterative(root):
     if not root:
         return
 
@@ -423,7 +423,7 @@ def dfs_graph(graph, start):
             # Add neighbors
             for neighbor in graph[node]:
                 if neighbor not in visited:
-                    stack.append(neighbor)</pre>
+                    stack.append(neighbor)</code></pre>
             </div>
         </div>
     </div>
@@ -448,7 +448,7 @@ def dfs_graph(graph, start):
         <div class="template-variant">
             <div class="variant-title">Standard BFS Template</div>
             <div class="code-template">
-<pre>from collections import deque
+<pre><code class="language-python">from collections import deque
 
 # Problem: Binary Tree Level Order Traversal (LeetCode 102)
 # Given the root of a binary tree, return the level order traversal of its nodes' values
@@ -475,14 +475,14 @@ def bfs_level_order(root):
                 queue.append(node.right)
 
         result.append(level)
-    return result</pre>
+    return result</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">BFS for Shortest Path</div>
             <div class="code-template">
-<pre>def bfs_shortest_path(graph, start, target):
+<pre><code class="language-python">def bfs_shortest_path(graph, start, target):
     queue = deque([(start, 0)])  # (node, distance)
     visited = set([start])
 
@@ -497,7 +497,7 @@ def bfs_level_order(root):
                 visited.add(neighbor)
                 queue.append((neighbor, dist + 1))
 
-    return -1  # Target not reachable</pre>
+    return -1  # Target not reachable</code></pre>
             </div>
         </div>
     </div>
@@ -556,7 +556,7 @@ def is_palindrome(s):
         left += 1
         right -= 1
 
-    return True</pre>
+    return True</code></pre>
             </div>
         </div>
 
@@ -609,7 +609,7 @@ def remove_nth_from_end(head, n):
 
     # Remove nth node
     slow.next = slow.next.next
-    return dummy.next</pre>
+    return dummy.next</code></pre>
             </div>
         </div>
     </div>
@@ -651,7 +651,7 @@ def max_sum_subarray(nums, k):
         window_sum = window_sum - nums[i - k] + nums[i]
         max_sum = max(max_sum, window_sum)
 
-    return max_sum</pre>
+    return max_sum</code></pre>
             </div>
         </div>
 
@@ -683,7 +683,7 @@ def longest_substring_k_distinct(s, k):
 
         max_length = max(max_length, right - left + 1)
 
-    return max_length</pre>
+    return max_length</code></pre>
             </div>
         </div>
     </div>
@@ -726,14 +726,14 @@ def binary_search(nums, target):
         else:
             right = mid - 1
 
-    return -1</pre>
+    return -1</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Find First and Last Occurrence</div>
             <div class="code-template">
-<pre>def find_first_occurrence(nums, target):
+<pre><code class="language-python">def find_first_occurrence(nums, target):
     left, right = 0, len(nums) - 1
     result = -1
 
@@ -773,14 +773,14 @@ def find_last_occurrence(nums, target):
 
 def search_range(nums, target):
     return [find_first_occurrence(nums, target),
-            find_last_occurrence(nums, target)]</pre>
+            find_last_occurrence(nums, target)]</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Binary Search on Answer</div>
             <div class="code-template">
-<pre>def find_peak_element(nums):
+<pre><code class="language-python">def find_peak_element(nums):
     left, right = 0, len(nums) - 1
 
     while left < right:
@@ -819,7 +819,7 @@ def search_rotated_sorted_array(nums, target):
             else:
                 right = mid - 1
 
-    return -1</pre>
+    return -1</code></pre>
             </div>
         </div>
     </div>
@@ -845,7 +845,7 @@ def search_rotated_sorted_array(nums, target):
         <div class="template-variant">
             <div class="variant-title">1D DP Template</div>
             <div class="code-template">
-<pre>def fibonacci(n):
+<pre><code class="language-python">def fibonacci(n):
     if n <= 1:
         return n
 
@@ -905,14 +905,14 @@ def house_robber(nums):
     for i in range(2, len(nums)):
         dp[i] = max(dp[i-1], dp[i-2] + nums[i])
 
-    return dp[-1]</pre>
+    return dp[-1]</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">2D DP Template</div>
             <div class="code-template">
-<pre>def unique_paths(m, n):
+<pre><code class="language-python">def unique_paths(m, n):
     dp = [[1 for _ in range(n)] for _ in range(m)]
 
     for i in range(1, m):
@@ -951,7 +951,7 @@ def min_path_sum(grid):
         for j in range(1, n):
             grid[i][j] += min(grid[i-1][j], grid[i][j-1])
 
-    return grid[m-1][n-1]</pre>
+    return grid[m-1][n-1]</code></pre>
             </div>
         </div>
     </div>
@@ -977,7 +977,7 @@ def min_path_sum(grid):
         <div class="template-variant">
             <div class="variant-title">General Backtracking Template</div>
             <div class="code-template">
-<pre>def backtrack_template(candidates, target):
+<pre><code class="language-python">def backtrack_template(candidates, target):
     result = []
 
     def is_valid_solution(path, target):
@@ -1011,14 +1011,14 @@ def min_path_sum(grid):
             path.pop()
 
     backtrack(0, [])
-    return result</pre>
+    return result</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Permutations</div>
             <div class="code-template">
-<pre>def generate_permutations(nums):
+<pre><code class="language-python">def generate_permutations(nums):
     def backtrack(path, remaining):
         if not remaining:
             result.append(path[:])
@@ -1034,7 +1034,7 @@ def min_path_sum(grid):
 
     result = []
     backtrack([], nums)
-    return result</pre>
+    return result</code></pre>
             </div>
         </div>
 
@@ -1102,7 +1102,7 @@ def letter_combinations(digits):
 
     result = []
     backtrack(0, [])
-    return result</pre>
+    return result</code></pre>
             </div>
         </div>
     </div>
@@ -1170,7 +1170,7 @@ def max_heap_operations(values):
         max_val = -heapq.heappop(max_heap)
         results.append(max_val)
 
-    return results</pre>
+    return results</code></pre>
             </div>
         </div>
 
@@ -1219,14 +1219,14 @@ def top_k_frequent_elements(nums, k):
         if len(min_heap) > k:
             heapq.heappop(min_heap)
 
-    return [num for freq, num in min_heap]</pre>
+    return [num for freq, num in min_heap]</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Median Finder</div>
             <div class="code-template">
-<pre>class MedianFinder:
+<pre><code class="language-python">class MedianFinder:
     def __init__(self):
         self.small = []  # max heap (negated)
         self.large = []  # min heap
@@ -1245,7 +1245,7 @@ def top_k_frequent_elements(nums, k):
     def findMedian(self):
         if len(self.small) > len(self.large):
             return -self.small[0]
-        return (-self.small[0] + self.large[0]) / 2</pre>
+        return (-self.small[0] + self.large[0]) / 2</code></pre>
             </div>
         </div>
     </div>
@@ -1271,7 +1271,7 @@ def top_k_frequent_elements(nums, k):
         <div class="template-variant">
             <div class="variant-title">Complete Union-Find Implementation</div>
             <div class="code-template">
-<pre>class UnionFind:
+<pre><code class="language-python">class UnionFind:
     def __init__(self, n):
         self.parent = list(range(n))
         self.rank = [0] * n
@@ -1303,14 +1303,14 @@ def top_k_frequent_elements(nums, k):
         return True
 
     def connected(self, x, y):
-        return self.find(x) == self.find(y)</pre>
+        return self.find(x) == self.find(y)</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Union-Find Applications</div>
             <div class="code-template">
-<pre>def number_of_islands(grid):
+<pre><code class="language-python">def number_of_islands(grid):
     if not grid:
         return 0
 
@@ -1339,7 +1339,7 @@ def redundant_connection(edges):
         if not uf.union(u, v):
             return [u, v]  # This edge creates a cycle
 
-    return []</pre>
+    return []</code></pre>
             </div>
         </div>
     </div>
@@ -1365,7 +1365,7 @@ def redundant_connection(edges):
         <div class="template-variant">
             <div class="variant-title">Complete Trie Implementation</div>
             <div class="code-template">
-<pre>class TrieNode:
+<pre><code class="language-python">class TrieNode:
     def __init__(self):
         self.children = {}
         self.is_end_of_word = False
@@ -1416,14 +1416,14 @@ class Trie:
             words.append(path)
 
         for char, child_node in node.children.items():
-            self._dfs(child_node, path + char, words)</pre>
+            self._dfs(child_node, path + char, words)</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Word Search II with Trie</div>
             <div class="code-template">
-<pre>def find_words_in_board(board, words):
+<pre><code class="language-python">def find_words_in_board(board, words):
     # Build trie
     trie = Trie()
     for word in words:
@@ -1455,7 +1455,7 @@ class Trie:
             if board[i][j] in trie.root.children:
                 dfs(i, j, trie.root, "")
 
-    return list(result)</pre>
+    return list(result)</code></pre>
             </div>
         </div>
     </div>
@@ -1481,7 +1481,7 @@ class Trie:
         <div class="template-variant">
             <div class="variant-title">Kahn's Algorithm (BFS-based)</div>
             <div class="code-template">
-<pre>from collections import defaultdict, deque
+<pre><code class="language-python">from collections import defaultdict, deque
 
 def topological_sort_kahn(num_courses, prerequisites):
     # Build graph and in-degree array
@@ -1507,14 +1507,14 @@ def topological_sort_kahn(num_courses, prerequisites):
                 queue.append(neighbor)
 
     # Check if topological sort is possible
-    return result if len(result) == num_courses else []</pre>
+    return result if len(result) == num_courses else []</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">DFS-based Topological Sort</div>
             <div class="code-template">
-<pre>def topological_sort_dfs(graph):
+<pre><code class="language-python">def topological_sort_dfs(graph):
     visited = set()
     rec_stack = set()
     result = []
@@ -1541,7 +1541,7 @@ def topological_sort_kahn(num_courses, prerequisites):
             if not dfs(node):
                 return []  # Cycle detected
 
-    return result[::-1]  # Reverse for correct order</pre>
+    return result[::-1]  # Reverse for correct order</code></pre>
             </div>
         </div>
     </div>
@@ -1615,14 +1615,14 @@ def insert_interval(intervals, new_interval):
         result.append(intervals[i])
         i += 1
 
-    return result</pre>
+    return result</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Meeting Rooms II</div>
             <div class="code-template">
-<pre>def min_meeting_rooms(intervals):
+<pre><code class="language-python">def min_meeting_rooms(intervals):
     if not intervals:
         return 0
 
@@ -1641,7 +1641,7 @@ def insert_interval(intervals, new_interval):
             # Need new room
             rooms += 1
 
-    return rooms</pre>
+    return rooms</code></pre>
             </div>
         </div>
     </div>
@@ -1697,14 +1697,14 @@ def num_islands(grid):
                 dfs(i, j)
                 count += 1
 
-    return count</pre>
+    return count</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Rotting Oranges (Multi-source BFS)</div>
             <div class="code-template">
-<pre>def oranges_rotting(grid):
+<pre><code class="language-python">def oranges_rotting(grid):
     from collections import deque
 
     m, n = len(grid), len(grid[0])
@@ -1741,7 +1741,7 @@ def num_islands(grid):
                     fresh -= 1
                     queue.append((nx, ny))
 
-    return time - 1 if fresh == 0 else -1</pre>
+    return time - 1 if fresh == 0 else -1</code></pre>
             </div>
         </div>
     </div>
@@ -1767,7 +1767,7 @@ def num_islands(grid):
         <div class="template-variant">
             <div class="variant-title">Build Tree from Preorder and Inorder</div>
             <div class="code-template">
-<pre>def build_tree_preorder_inorder(preorder, inorder):
+<pre><code class="language-python">def build_tree_preorder_inorder(preorder, inorder):
     if not preorder or not inorder:
         return None
 
@@ -1793,14 +1793,14 @@ def num_islands(grid):
 
         return root
 
-    return build(0, len(inorder) - 1)</pre>
+    return build(0, len(inorder) - 1)</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Serialize and Deserialize</div>
             <div class="code-template">
-<pre>def serialize(root):
+<pre><code class="language-python">def serialize(root):
     def preorder(node):
         if not node:
             result.append("null")
@@ -1826,7 +1826,7 @@ def deserialize(data):
         return node
 
     values = iter(data.split(","))
-    return build()</pre>
+    return build()</code></pre>
             </div>
         </div>
     </div>
@@ -1884,14 +1884,14 @@ def max_subarray_with_indices(nums):
             start = temp_start
             end = i
 
-    return max_sum, start, end</pre>
+    return max_sum, start, end</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Prefix Sum</div>
             <div class="code-template">
-<pre>class PrefixSum:
+<pre><code class="language-python">class PrefixSum:
     def __init__(self, nums):
         self.prefix = [0]
         for num in nums:
@@ -1915,7 +1915,7 @@ def subarray_sum_equals_k(nums, k):
             count += sum_count[prefix_sum - k]
         sum_count[prefix_sum] = sum_count.get(prefix_sum, 0) + 1
 
-    return count</pre>
+    return count</code></pre>
             </div>
         </div>
 
@@ -1965,14 +1965,14 @@ def largest_rectangle_in_histogram(heights):
             max_area = max(max_area, height * width)
         stack.append(i)
 
-    return max_area</pre>
+    return max_area</code></pre>
             </div>
         </div>
 
         <div class="template-variant">
             <div class="variant-title">Cyclic Sort</div>
             <div class="code-template">
-<pre>def cyclic_sort(nums):
+<pre><code class="language-python">def cyclic_sort(nums):
     i = 0
     while i < len(nums):
         correct_index = nums[i] - 1
@@ -2011,7 +2011,7 @@ def find_all_duplicates(nums):
         else:
             nums[num - 1] *= -1
 
-    return duplicates</pre>
+    return duplicates</code></pre>
             </div>
         </div>
     </div>
