@@ -307,27 +307,40 @@ weeks:
       topic: "DFS Fundamentals"
       activity: "Master depth-first search for trees and graphs. Learn recursive patterns and connected component problems."
       detailed_content: |
+        Problem: Explore graph/tree by going as deep as possible before backtracking
+        (e.g., find paths, detect cycles, count connected components).
+
         DFS Template (Recursive):
         def dfs(node, visited):
+            # node: Current node being explored
+            # visited: Set of nodes already processed
+            # graph: Adjacency list (e.g., {0: [1, 2], 1: [3], 2: [3], 3: []})
+
             if node in visited:
                 return
             visited.add(node)
-            # Process current node
+            # Process current node (e.g., count it, check condition, etc.)
             for neighbor in graph[node]:
                 dfs(neighbor, visited)
 
         DFS Template (Iterative):
         def dfs(start):
-            stack = [start]
-            visited = set()
+            stack = [start]       # Stack for DFS (LIFO)
+            visited = set()       # Track processed nodes
             while stack:
-                node = stack.pop()
+                node = stack.pop()  # Get most recent node
                 if node not in visited:
                     visited.add(node)
                     # Process node
                     for neighbor in graph[node]:
                         if neighbor not in visited:
                             stack.append(neighbor)
+
+        Variables explained:
+        - node: Current vertex being processed (e.g., 0, 1, 2)
+        - visited: Set tracking processed nodes to avoid cycles
+        - graph: Dict mapping node to its neighbors (adjacency list)
+        - stack: List storing nodes to explore (last-in, first-out)
 
         Common DFS Applications:
         - Connected components counting
@@ -351,14 +364,21 @@ weeks:
       topic: "BFS & Graph/Matrix Traversal"
       activity: "Master breadth-first search for shortest paths and level-by-level processing. Combine with matrix traversal patterns."
       detailed_content: |
+        Problem: Explore graph level-by-level for shortest paths or layer processing
+        (e.g., shortest path in unweighted graph, level-order traversal).
+
         BFS Template:
         from collections import deque
         def bfs(start):
+            # queue: Nodes to process (FIFO - first-in, first-out)
+            # visited: Tracks nodes already seen to avoid revisiting
+            # graph: Adjacency list {0: [1, 2], 1: [3], ...}
+
             queue = deque([start])
             visited = set([start])
             while queue:
-                node = queue.popleft()
-                # Process node
+                node = queue.popleft()  # Process oldest node first
+                # Process node (e.g., check condition, record distance)
                 for neighbor in graph[node]:
                     if neighbor not in visited:
                         visited.add(neighbor)
@@ -367,24 +387,30 @@ weeks:
         Matrix BFS (Multi-source):
         def bfs_matrix(matrix):
             queue = deque()
-            # Add all starting positions
+            # Add all starting positions (e.g., all rotten oranges)
             for i in range(len(matrix)):
                 for j in range(len(matrix[0])):
                     if matrix[i][j] == target:
                         queue.append((i, j))
 
-            directions = [(0,1), (1,0), (0,-1), (-1,0)]
+            directions = [(0,1), (1,0), (0,-1), (-1,0)]  # Right, Down, Left, Up
             while queue:
                 x, y = queue.popleft()
                 for dx, dy in directions:
                     nx, ny = x + dx, y + dy
                     if 0 <= nx < len(matrix) and 0 <= ny < len(matrix[0]):
-                        # Process neighbor
+                        # Process neighbor (check validity, mark visited, add to queue)
+
+        Variables explained:
+        - queue: Deque storing nodes to visit (older nodes processed first)
+        - visited: Set preventing cycles and duplicate processing
+        - (x, y): Current cell coordinates in matrix
+        - directions: List of (row_delta, col_delta) for 4-directional movement
 
         Key insights:
         - BFS finds shortest path in unweighted graphs
-        - Level-by-level processing
-        - Multi-source BFS for optimization
+        - Level-by-level processing (all nodes at distance k before k+1)
+        - Multi-source BFS for optimization (start from multiple points)
         - Direction arrays for matrix navigation
       problems:
         - number: "542"
@@ -408,35 +434,50 @@ weeks:
       topic: "Dynamic Programming"
       activity: "Master DP fundamentals: memoization, tabulation, and optimal substructure. Learn to identify DP problems and common patterns."
       detailed_content: |
-        DP Approach:
-        1. Identify optimal substructure
-        2. Define state and recurrence relation
-        3. Choose memoization or tabulation
-        4. Optimize space if possible
+        Problem: Solve optimization problems by breaking into overlapping subproblems
+        (e.g., find minimum cost, count ways, maximize profit).
 
-        Top-down (Memoization):
+        DP Approach:
+        1. Identify optimal substructure (solution uses optimal solutions of subproblems)
+        2. Define state and recurrence relation (how to build answer from smaller problems)
+        3. Choose memoization (top-down) or tabulation (bottom-up)
+        4. Optimize space if possible (e.g., only keep last 2 values)
+
+        Top-down (Memoization - Fibonacci example):
         def dp(n, memo={}):
-            if n in memo:
+            # n: Current problem size
+            # memo: Dict caching previously computed results
+            # Returns: nth Fibonacci number
+
+            if n in memo:          # Already computed
                 return memo[n]
-            if n <= 1:
+            if n <= 1:             # Base case
                 return n
-            memo[n] = dp(n-1, memo) + dp(n-2, memo)
+            memo[n] = dp(n-1, memo) + dp(n-2, memo)  # Store result
             return memo[n]
 
-        Bottom-up (Tabulation):
+        Bottom-up (Tabulation - Fibonacci example):
         def dp(n):
+            # dp[i]: Answer for problem of size i
+            # Build from smallest to largest
+
             if n <= 1: return n
-            dp = [0] * (n + 1)
-            dp[1] = 1
+            dp = [0] * (n + 1)     # Table to store subproblem answers
+            dp[1] = 1              # Base cases
             for i in range(2, n + 1):
-                dp[i] = dp[i-1] + dp[i-2]
+                dp[i] = dp[i-1] + dp[i-2]  # Fill using recurrence
             return dp[n]
 
+        Variables explained:
+        - memo: Dictionary storing {problem_size: answer} to avoid recomputation
+        - dp[i]: Answer for subproblem of size i (e.g., fib(i), ways to reach stair i)
+        - n: Current problem size or target value
+
         Common DP patterns:
-        - Fibonacci-like (climbing stairs)
-        - House robber (adjacent constraints)
-        - Coin change (unlimited supply)
-        - Knapsack (limited items)
+        - Fibonacci-like (climbing stairs, decode ways)
+        - House robber (adjacent constraints, skip patterns)
+        - Coin change (unlimited supply, combinations)
+        - Knapsack (limited items, weight/value optimization)
       problems:
         - number: "70"
           title: "Climbing Stairs"
