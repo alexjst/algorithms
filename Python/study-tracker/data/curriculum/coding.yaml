@@ -459,23 +459,35 @@ weeks:
       topic: "Backtracking"
       activity: "Master backtracking for generating all solutions. Learn constraint checking and pruning techniques."
       detailed_content: |
+        Problem: Generate all valid solutions by exploring all possibilities
+        and pruning invalid paths early (e.g., all permutations, all subsets).
+
         Backtracking Template:
         def backtrack(path, remaining_choices):
+            # path: Current solution being built (list of choices made so far)
+            # remaining_choices: Options still available to choose from
+
             if is_solution(path):
-                result.append(path[:])  # Make copy
+                result.append(path[:])  # Make copy of solution
                 return
 
             for choice in remaining_choices:
-                if is_valid(choice, path):
-                    path.append(choice)
-                    backtrack(path, new_remaining)
-                    path.pop()  # Backtrack
+                if is_valid(choice, path):  # Check constraints
+                    path.append(choice)      # Make choice
+                    backtrack(path, new_remaining)  # Explore
+                    path.pop()               # Undo choice (backtrack)
+
+        Variables explained:
+        - path: Current partial solution (e.g., [1, 2] when building permutation)
+        - remaining_choices: Unused elements (e.g., [3, 4] from original [1,2,3,4])
+        - is_solution(): Checks if path is complete (e.g., path length equals target)
+        - is_valid(): Checks if choice satisfies constraints (e.g., no duplicates)
 
         Key concepts:
-        - Generate all possible solutions
-        - Prune invalid branches early
-        - Use recursion to manage state
-        - Always backtrack (undo) after recursive call
+        - Generate all possible solutions by trying every option
+        - Prune invalid branches early to save time
+        - Use recursion to manage state automatically
+        - Always backtrack (undo) after recursive call to try next option
 
         Common problems:
         - Permutations and combinations
