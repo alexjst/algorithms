@@ -477,6 +477,70 @@
       "due_date": "2025-10-21",
       "scheduled_date": "2025-10-07",
       "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-08",
+      "scheduled_date": "2025-10-07",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-10",
+      "scheduled_date": "2025-10-07",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-14",
+      "scheduled_date": "2025-10-07",
+      "completed_date": null
+    },
+    {
+      "topic": "Dynamic Programming",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-21",
+      "scheduled_date": "2025-10-07",
+      "completed_date": null
+    },
+    {
+      "topic": "Backtracking",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-09",
+      "scheduled_date": "2025-10-08",
+      "completed_date": null
+    },
+    {
+      "topic": "Backtracking",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-11",
+      "scheduled_date": "2025-10-08",
+      "completed_date": null
+    },
+    {
+      "topic": "Backtracking",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-15",
+      "scheduled_date": "2025-10-08",
+      "completed_date": null
+    },
+    {
+      "topic": "Backtracking",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-22",
+      "scheduled_date": "2025-10-08",
+      "completed_date": null
     }
   ]
 }

@@ -125,6 +125,24 @@
       "notes": "",
       "completed_on_time": null,
       "timestamp": "2025-10-07T01:32:57.854580"
+    },
+    {
+      "date": "2025-10-07",
+      "track": "coding",
+      "topic": "Dynamic Programming",
+      "rating": 4,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-07T19:46:23.238630"
+    },
+    {
+      "date": "2025-10-08",
+      "track": "coding",
+      "topic": "Backtracking",
+      "rating": 2,
+      "notes": "This is hard. I didn't follow such template but solved it with my own methods. Now I think I should do it more systematic and remember and get used to the backtracking template.",
+      "completed_on_time": null,
+      "timestamp": "2025-10-08T22:49:52.669073"
     }
   ]
 }
