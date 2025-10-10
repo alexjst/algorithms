@@ -18,6 +18,13 @@
             --bg-tertiary: #f9f9f9;
             --bg-header: #f0f8ff;
             --bg-review: #fff3cd;
+            --bg-practice: #fff9e6;
+            --border-practice: #ffc107;
+            --text-practice-heading: #856404;
+            --text-practice: #333333;
+            --border-question-item: #f0f0f0;
+            --bg-review-practice: #f8f9fa;
+            --border-review-practice: #17a2b8;
             --text-primary: #212529;
             --text-secondary: #666;
             --border-color: #ddd;
@@ -34,6 +41,13 @@
             --bg-tertiary: #3a3a3a;
             --bg-header: #2c3e50;
             --bg-review: #4a4a2d;
+            --bg-practice: #2d2d20;
+            --border-practice: #d4a017;
+            --text-practice-heading: #ffd700;
+            --text-practice: #ffffff;
+            --border-question-item: #555;
+            --bg-review-practice: #2d2d2d;
+            --border-review-practice: #17a2b8;
             --text-primary: #e0e0e0;
             --text-secondary: #b0b0b0;
             --border-color: #444;
@@ -114,11 +128,13 @@
         .detailed-content code { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; }
         .notes, .rating select { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); }
         .problems-section, .resources-section, .concepts-section, .practice-section { margin: 15px 0; }
-        .practice-section { background: #fff9e6; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .practice-section { background: var(--bg-practice); color: var(--text-practice); padding: 20px; border-radius: 8px; border-left: 4px solid var(--border-practice); }
+        .practice-section p, .practice-section h4 { color: var(--text-practice); }
+        .review-practice-section { margin: 15px 0; padding: 15px; background: var(--bg-review-practice); color: var(--text-primary); border-radius: 8px; border-left: 4px solid var(--border-review-practice); }
         .question-category { margin: 15px 0; }
-        .question-category h5 { color: #856404; margin-bottom: 10px; }
+        .question-category h5 { color: var(--text-practice-heading); margin-bottom: 10px; }
         .question-category ul { padding-left: 20px; }
-        .question-category li { margin: 8px 0; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+        .question-category li { margin: 8px 0; padding: 5px 0; border-bottom: 1px solid var(--border-question-item); color: var(--text-practice); }
         .problem-item, .resource-item { margin: 10px 0; padding: 10px; border: 1px solid #e9ecef; border-radius: 5px; background: #f8f9fa; }
         .problem-link, .resource-link { color: #007bff; text-decoration: none; font-size: 16px; }
         .problem-link:hover, .resource-link:hover { text-decoration: underline; }
@@ -416,7 +432,7 @@
             <p>Originally completed: {{ review.scheduled_date }}</p>
 
             {% if review.problems or review.practice_questions %}
-            <div class="review-practice-section" id="practice-section-{{ loop.index }}" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
+            <div class="review-practice-section" id="practice-section-{{ loop.index }}">
                 {% if review.track == 'coding' %}
                 <h5>🎯 Practice Problems</h5>
                 {% else %}

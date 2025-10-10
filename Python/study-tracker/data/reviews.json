@@ -541,6 +541,38 @@
       "due_date": "2025-10-22",
       "scheduled_date": "2025-10-08",
       "completed_date": null
+    },
+    {
+      "topic": "Bit Manipulation",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-10",
+      "scheduled_date": "2025-10-09",
+      "completed_date": null
+    },
+    {
+      "topic": "Bit Manipulation",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-12",
+      "scheduled_date": "2025-10-09",
+      "completed_date": null
+    },
+    {
+      "topic": "Bit Manipulation",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-16",
+      "scheduled_date": "2025-10-09",
+      "completed_date": null
+    },
+    {
+      "topic": "Bit Manipulation",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-10-23",
+      "scheduled_date": "2025-10-09",
+      "completed_date": null
     }
   ]
 }
