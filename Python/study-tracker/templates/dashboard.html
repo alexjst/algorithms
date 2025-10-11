@@ -501,7 +501,12 @@
                 {% endif %}
 
                 {% if review.benchmarks %}
-                <div class="time-benchmarks" style="margin: 10px 0; font-size: 14px; color: #666;">
+                <div class="time-benchmarks" style="margin: 10px 0; font-size: 14px; color: #666;"
+                     data-review-index="{{ loop.index }}"
+                     data-rating-5="{{ review.benchmarks.rating_benchmarks[5].max_minutes }}"
+                     data-rating-4="{{ review.benchmarks.rating_benchmarks[4].max_minutes }}"
+                     data-rating-3="{{ review.benchmarks.rating_benchmarks[3].max_minutes }}"
+                     data-rating-2="{{ review.benchmarks.rating_benchmarks[2].max_minutes }}">
                     <strong>Time Benchmarks:</strong>
                     Base time: {{ "%.0f"|format(review.benchmarks.total_base_minutes) }} min |
                     Rating 5: ≤{{ "%.0f"|format(review.benchmarks.rating_benchmarks[5].max_minutes) }} min |
@@ -1434,13 +1439,28 @@
                 const totalProblems = document.querySelectorAll(`#practice-section-${reviewIndex} .problem-item`).length;
                 console.log(`Completed ${problemCount} of ${totalProblems} problems`);
 
-                let suggestedRating = 3; // Default
+                // Get benchmarks from DOM
+                const benchmarksElement = document.querySelector(`.time-benchmarks[data-review-index="${reviewIndex}"]`);
+                let rating5Threshold = 54;  // Default fallback
+                let rating4Threshold = 78;
+                let rating3Threshold = 116;
+                let rating2Threshold = 999;
+
+                if (benchmarksElement) {
+                    rating5Threshold = parseFloat(benchmarksElement.dataset.rating5) || rating5Threshold;
+                    rating4Threshold = parseFloat(benchmarksElement.dataset.rating4) || rating4Threshold;
+                    rating3Threshold = parseFloat(benchmarksElement.dataset.rating3) || rating3Threshold;
+                    rating2Threshold = parseFloat(benchmarksElement.dataset.rating2) || rating2Threshold;
+                    console.log(`Using benchmarks: R5=${rating5Threshold}, R4=${rating4Threshold}, R3=${rating3Threshold}, R2=${rating2Threshold}`);
+                }
+
+                let suggestedRating = 1; // Default
                 if (problemCount === totalProblems) {
                     // All problems completed - base rating on time
-                    if (totalMinutes <= 30) suggestedRating = 5;
-                    else if (totalMinutes <= 45) suggestedRating = 4;
-                    else if (totalMinutes <= 70) suggestedRating = 3;
-                    else if (totalMinutes <= 100) suggestedRating = 2;
+                    if (totalMinutes <= rating5Threshold) suggestedRating = 5;
+                    else if (totalMinutes <= rating4Threshold) suggestedRating = 4;
+                    else if (totalMinutes <= rating3Threshold) suggestedRating = 3;
+                    else if (totalMinutes <= rating2Threshold) suggestedRating = 2;
                     else suggestedRating = 1;
                 } else {
                     // Not all problems completed
