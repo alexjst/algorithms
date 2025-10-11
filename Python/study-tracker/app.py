@@ -118,19 +118,24 @@ def get_topic_for_day(track, day):
 def get_due_reviews(date_str):
     """Get all reviews due on a specific date"""
     reviews_data = load_json_data(REVIEWS_FILE)
-    due_reviews = []
-    seen_reviews = set()  # Track unique reviews by (topic, track, review_type)
+    seen_reviews = {}  # Track best review per (topic, track)
 
     for review in reviews_data.get('scheduled_reviews', []):
         if review['due_date'] == date_str and not review.get('completed_date'):
-            # Create unique key for deduplication
-            review_key = (review['topic'], review['track'], review['review_type'])
+            # Create unique key for deduplication (topic and track only)
+            review_key = (review['topic'], review['track'])
 
-            # Only add if not already seen
+            # Keep the review with shortest interval (most urgent)
             if review_key not in seen_reviews:
-                due_reviews.append(review)
-                seen_reviews.add(review_key)
+                seen_reviews[review_key] = review
+            else:
+                # Compare interval days and keep shorter one
+                current_interval = int(review['review_type'].split('-')[0])
+                existing_interval = int(seen_reviews[review_key]['review_type'].split('-')[0])
+                if current_interval < existing_interval:
+                    seen_reviews[review_key] = review
 
+    due_reviews = list(seen_reviews.values())
     return due_reviews
 
 def get_topic_problems(topic, track):
