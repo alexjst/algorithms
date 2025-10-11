@@ -207,6 +207,31 @@
             background-color: var(--nav-hover);
             transform: scale(1.05);
         }
+        .practice-question-item { margin-bottom: 15px; }
+        .question-text { margin-bottom: 8px; }
+        .toggle-answer-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin: 5px 0;
+            transition: all 0.2s ease;
+        }
+        .toggle-answer-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+        .answer-text {
+            margin-top: 8px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -393,8 +418,20 @@
                 <div class="question-category">
                     <h5>📊 Estimation Questions:</h5>
                     <ul>
-                        {% for question in system_design_topic.practice_questions.estimation %}
-                        <li>{{ question }}</li>
+                        {% for item in system_design_topic.practice_questions.estimation %}
+                        <li class="practice-question-item">
+                            {% if item is mapping %}
+                            <div class="question-text">{{ item.question }}</div>
+                            {% if item.answer %}
+                            <button class="toggle-answer-btn" onclick="toggleAnswer(this)">💡 Show Answer</button>
+                            <div class="answer-text" style="display: none;">
+                                <strong>Answer:</strong> {{ item.answer }}
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <div class="question-text">{{ item }}</div>
+                            {% endif %}
+                        </li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -404,8 +441,20 @@
                 <div class="question-category">
                     <h5>💡 Concept Questions:</h5>
                     <ul>
-                        {% for question in system_design_topic.practice_questions.concepts %}
-                        <li>{{ question }}</li>
+                        {% for item in system_design_topic.practice_questions.concepts %}
+                        <li class="practice-question-item">
+                            {% if item is mapping %}
+                            <div class="question-text">{{ item.question }}</div>
+                            {% if item.answer %}
+                            <button class="toggle-answer-btn" onclick="toggleAnswer(this)">💡 Show Answer</button>
+                            <div class="answer-text" style="display: none;">
+                                <strong>Answer:</strong> {{ item.answer }}
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <div class="question-text">{{ item }}</div>
+                            {% endif %}
+                        </li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -415,8 +464,20 @@
                 <div class="question-category">
                     <h5>⚖️ Trade-off Questions:</h5>
                     <ul>
-                        {% for question in system_design_topic.practice_questions.tradeoffs %}
-                        <li>{{ question }}</li>
+                        {% for item in system_design_topic.practice_questions.tradeoffs %}
+                        <li class="practice-question-item">
+                            {% if item is mapping %}
+                            <div class="question-text">{{ item.question }}</div>
+                            {% if item.answer %}
+                            <button class="toggle-answer-btn" onclick="toggleAnswer(this)">💡 Show Answer</button>
+                            <div class="answer-text" style="display: none;">
+                                <strong>Answer:</strong> {{ item.answer }}
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <div class="question-text">{{ item }}</div>
+                            {% endif %}
+                        </li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -782,6 +843,18 @@
                 await markComplete(topic, track, 'topic');
             } catch (error) {
                 console.error('Error:', error);
+            }
+        }
+
+        // Toggle answer visibility
+        function toggleAnswer(button) {
+            const answerDiv = button.nextElementSibling;
+            if (answerDiv.style.display === 'none') {
+                answerDiv.style.display = 'block';
+                button.textContent = '🔒 Hide Answer';
+            } else {
+                answerDiv.style.display = 'none';
+                button.textContent = '💡 Show Answer';
             }
         }
     </script>

@@ -1,13 +1,13 @@
 {
   "active": false,
   "paused": false,
-  "start_time": null,
+  "start_time": "2025-10-10T18:22:02.441566",
   "pause_time": null,
-  "duration": null,
-  "remaining": null,
-  "track": null,
-  "topic": null,
-  "last_updated": "2025-10-09T23:39:47.855587",
-  "completed": false,
-  "total_pause_duration": 19061.059511
+  "duration": 2700,
+  "remaining": 0,
+  "track": "coding",
+  "topic": "Prefix Sum\n                \n                    \ud83d\udcd6 Template",
+  "last_updated": "2025-10-10T19:07:03.107744",
+  "completed": true,
+  "total_pause_duration": 0
 }
