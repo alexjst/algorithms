@@ -1,13 +1,13 @@
 {
   "active": false,
   "paused": false,
-  "start_time": "2025-10-11T17:17:57.267198",
+  "start_time": null,
   "pause_time": null,
-  "duration": 3600,
-  "remaining": 0,
-  "track": "coding",
-  "topic": "Week 2 Algorithm Integration\n                \n                    \ud83d\udcd6 Template",
-  "last_updated": "2025-10-11T18:17:58.582521",
-  "completed": true,
+  "duration": null,
+  "remaining": null,
+  "track": null,
+  "topic": null,
+  "last_updated": "2025-10-12T16:17:41.090813",
+  "completed": false,
   "total_pause_duration": 0
 }
