@@ -5,8 +5,14 @@ from datetime import datetime, timedelta
 import os
 import random
 import requests
+import subprocess
+import logging
 
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Add JSON filter for templates
 def tojsonfilter(value):
@@ -51,6 +57,116 @@ PROGRESS_FILE = f"{DATA_DIR}/progress.json"
 REVIEWS_FILE = f"{DATA_DIR}/reviews.json"
 CONFIG_FILE = f"{DATA_DIR}/config.json"
 TIMER_FILE = f"{DATA_DIR}/timer_state.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Git sync configuration
+GIT_SYNC_ENABLED = True  # Set to False to disable auto-sync
+
+def git_pull():
+    """Pull latest changes from git repository"""
+    if not GIT_SYNC_ENABLED:
+        return True
+
+    try:
+        # Check if there are uncommitted changes
+        result = subprocess.run(
+            ['git', 'status', '--porcelain'],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        if result.stdout.strip():
+            logger.warning("Uncommitted changes detected, skipping pull")
+            return False
+
+        # Pull with rebase
+        result = subprocess.run(
+            ['git', 'pull', '--rebase', 'origin', 'master'],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode == 0:
+            logger.info("Git pull successful")
+            return True
+        else:
+            logger.error(f"Git pull failed: {result.stderr}")
+            return False
+
+    except subprocess.TimeoutExpired:
+        logger.error("Git pull timed out")
+        return False
+    except Exception as e:
+        logger.error(f"Git pull error: {e}")
+        return False
+
+def git_push(message=None):
+    """Commit and push changes to git repository"""
+    if not GIT_SYNC_ENABLED:
+        return True
+
+    try:
+        # Add data files
+        subprocess.run(
+            ['git', 'add', 'data/'],
+            cwd=BASE_DIR,
+            capture_output=True,
+            timeout=10
+        )
+
+        # Check if there are changes to commit
+        result = subprocess.run(
+            ['git', 'diff', '--cached', '--quiet'],
+            cwd=BASE_DIR,
+            capture_output=True,
+            timeout=10
+        )
+
+        # If exit code is 0, no changes to commit
+        if result.returncode == 0:
+            logger.info("No changes to commit")
+            return True
+
+        # Commit changes
+        commit_message = message or f"Auto-sync: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        result = subprocess.run(
+            ['git', 'commit', '-m', commit_message],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        if result.returncode != 0:
+            logger.error(f"Git commit failed: {result.stderr}")
+            return False
+
+        # Push changes
+        result = subprocess.run(
+            ['git', 'push', 'origin', 'master'],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode == 0:
+            logger.info(f"Git push successful: {commit_message}")
+            return True
+        else:
+            logger.error(f"Git push failed: {result.stderr}")
+            return False
+
+    except subprocess.TimeoutExpired:
+        logger.error("Git push timed out")
+        return False
+    except Exception as e:
+        logger.error(f"Git push error: {e}")
+        return False
 
 def load_config():
     """Load configuration from config.json"""
@@ -86,10 +202,14 @@ def load_json_data(filename):
     except FileNotFoundError:
         return {}
 
-def save_json_data(filename, data):
-    """Save data to JSON file"""
+def save_json_data(filename, data, sync=True):
+    """Save data to JSON file and optionally sync to git"""
     with open(filename, 'w') as f:
         json.dump(data, f, indent=2)
+
+    # Auto-push changes to git
+    if sync:
+        git_push()
 
 def get_day_number(track):
     """Calculate current day number (1-28) based on configured start date for track and acceleration"""
@@ -1860,4 +1980,10 @@ def get_advancement_info():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    # Pull latest changes on startup
+    logger.info("Starting application...")
+    if GIT_SYNC_ENABLED:
+        logger.info("Pulling latest changes from git...")
+        git_pull()
+
     app.run(debug=True, port=5555)
