@@ -6,8 +6,14 @@ This guide explains how to set up the Study Tracker on multiple computers with a
 
 The application automatically syncs your progress data across machines:
 - **On Startup**: Pulls latest changes from GitHub
+- **Before Every Push**: Pulls remote changes to detect conflicts
+- **Smart Conflict Resolution**: Automatically merges conflicting changes
+  - **progress.json**: Combines completions from both machines
+  - **reviews.json**: Merges reviews, prefers completed ones
+  - **timer_state.json**: Keeps most recently updated timer
+  - **config.json**: Prefers local settings
 - **After Every Update**: Commits and pushes changes to GitHub
-- Data files (`progress.json`, `reviews.json`, `timer_state.json`, `config.json`) stay in sync
+- Data files stay in sync even when using multiple machines simultaneously
 
 ## Setup on Second Machine
 
@@ -40,9 +46,10 @@ The app will automatically pull the latest data on startup!
 ## Using Multiple Machines
 
 ### Best Practices
-1. **Always restart the app** when switching machines to get latest data
+1. ~~**Always restart the app** when switching machines~~ **Not needed!** Changes are pulled automatically before push
 2. **Complete your work** before closing - changes are pushed automatically
 3. **Check the console** for sync status messages
+4. **Simultaneous use is now safe** - conflicts are auto-merged
 
 ### What Gets Synced
 ✅ Progress completions and ratings
@@ -68,12 +75,13 @@ The app will automatically pull the latest data on startup!
 3. Check git remote: `git remote -v`
 
 ### Merge Conflicts
-**Rare but possible if editing from two machines simultaneously**
-**Fix**:
-1. Open the conflicted file (usually in `data/`)
-2. Manually resolve conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`)
-3. Commit the resolved file: `git add data/ && git commit -m "Resolve conflict"`
-4. Restart the app
+**Now handled automatically!** The app uses smart merge logic:
+- **progress.json**: Combines all completions from both machines (no data loss)
+- **reviews.json**: Merges reviews intelligently (prefers completed reviews)
+- **timer_state.json**: Uses the most recently updated timer state
+- **config.json**: Keeps your local configuration
+
+If automatic merge fails, fallback uses local version. Check console logs for details.
 
 ### Disable Auto-Sync (Emergency)
 If sync is causing issues, temporarily disable it:

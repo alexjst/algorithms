@@ -104,8 +104,159 @@ def git_pull():
         logger.error(f"Git pull error: {e}")
         return False
 
+def smart_merge_json(ours_data, theirs_data, filename):
+    """Smart merge of JSON data based on file type"""
+    try:
+        if filename == 'progress.json':
+            # Merge completions by combining both lists and deduplicating by timestamp
+            ours_completions = ours_data.get('completions', [])
+            theirs_completions = theirs_data.get('completions', [])
+
+            # Combine and deduplicate by (date, track, topic, timestamp)
+            all_completions = ours_completions + theirs_completions
+            seen = set()
+            merged = []
+
+            for comp in sorted(all_completions, key=lambda x: x.get('timestamp', '')):
+                key = (comp.get('date'), comp.get('track'), comp.get('topic'), comp.get('timestamp'))
+                if key not in seen:
+                    seen.add(key)
+                    merged.append(comp)
+
+            return {'completions': merged}
+
+        elif filename == 'reviews.json':
+            # Merge reviews - prefer completed reviews, combine scheduled ones
+            ours_reviews = ours_data.get('scheduled_reviews', [])
+            theirs_reviews = theirs_data.get('scheduled_reviews', [])
+
+            # Combine and deduplicate by (original_date, topic, track, review_type)
+            all_reviews = ours_reviews + theirs_reviews
+            review_dict = {}
+
+            for review in all_reviews:
+                key = (review.get('original_date'), review.get('topic'),
+                       review.get('track'), review.get('review_type'))
+
+                # If review is already in dict, prefer the completed one
+                if key in review_dict:
+                    existing = review_dict[key]
+                    # Keep the one with completed_date if either has it
+                    if review.get('completed_date') and not existing.get('completed_date'):
+                        review_dict[key] = review
+                    # If both completed, keep the later one
+                    elif review.get('completed_date') and existing.get('completed_date'):
+                        if review['completed_date'] > existing['completed_date']:
+                            review_dict[key] = review
+                else:
+                    review_dict[key] = review
+
+            return {'scheduled_reviews': list(review_dict.values())}
+
+        elif filename == 'timer_state.json':
+            # For timer, prefer the one with more recent last_updated
+            ours_updated = ours_data.get('last_updated', '')
+            theirs_updated = theirs_data.get('last_updated', '')
+
+            return ours_data if ours_updated >= theirs_updated else theirs_data
+
+        elif filename == 'config.json':
+            # For config, prefer ours (local settings should take precedence)
+            return ours_data
+
+        else:
+            # Default: prefer ours
+            return ours_data
+
+    except Exception as e:
+        logger.error(f"Smart merge failed for {filename}: {e}")
+        return ours_data
+
+def merge_json_files():
+    """Merge JSON files intelligently to preserve data from both versions"""
+    try:
+        # For each JSON file in data/, attempt smart merge
+        data_files = ['progress.json', 'reviews.json', 'timer_state.json', 'config.json']
+
+        # Get list of conflicted files
+        result = subprocess.run(
+            ['git', 'diff', '--name-only', '--diff-filter=U'],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+
+        conflicted_files = result.stdout.strip().split('\n')
+
+        for filename in data_files:
+            filepath = os.path.join(DATA_DIR, filename)
+            rel_path = f'data/{filename}'
+
+            if rel_path in conflicted_files:
+                logger.warning(f"Conflict detected in {filename}, attempting smart merge...")
+
+                try:
+                    # Read our version
+                    subprocess.run(
+                        ['git', 'checkout', '--ours', filepath],
+                        cwd=BASE_DIR,
+                        capture_output=True,
+                        timeout=5
+                    )
+                    with open(filepath, 'r') as f:
+                        ours_data = json.load(f)
+
+                    # Read their version
+                    subprocess.run(
+                        ['git', 'checkout', '--theirs', filepath],
+                        cwd=BASE_DIR,
+                        capture_output=True,
+                        timeout=5
+                    )
+                    with open(filepath, 'r') as f:
+                        theirs_data = json.load(f)
+
+                    # Smart merge
+                    merged_data = smart_merge_json(ours_data, theirs_data, filename)
+
+                    # Write merged data
+                    with open(filepath, 'w') as f:
+                        json.dump(merged_data, f, indent=2)
+
+                    # Add the resolved file
+                    subprocess.run(
+                        ['git', 'add', filepath],
+                        cwd=BASE_DIR,
+                        capture_output=True,
+                        timeout=5
+                    )
+
+                    logger.info(f"Successfully merged {filename}")
+
+                except Exception as e:
+                    logger.error(f"Failed to merge {filename}, using local version: {e}")
+                    # Fallback to our version
+                    subprocess.run(
+                        ['git', 'checkout', '--ours', filepath],
+                        cwd=BASE_DIR,
+                        capture_output=True,
+                        timeout=5
+                    )
+                    subprocess.run(
+                        ['git', 'add', filepath],
+                        cwd=BASE_DIR,
+                        capture_output=True,
+                        timeout=5
+                    )
+
+        return True
+    except Exception as e:
+        logger.error(f"Merge process failed: {e}")
+        return False
+
 def git_push(message=None):
-    """Commit and push changes to git repository"""
+    """Commit and push changes to git repository with automatic conflict resolution"""
     if not GIT_SYNC_ENABLED:
         return True
 
@@ -144,6 +295,44 @@ def git_push(message=None):
         if result.returncode != 0:
             logger.error(f"Git commit failed: {result.stderr}")
             return False
+
+        # Pull before push to handle any remote changes
+        logger.info("Pulling remote changes before push...")
+        pull_result = subprocess.run(
+            ['git', 'pull', '--rebase', 'origin', 'master'],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        # If pull fails due to conflicts, try to resolve them
+        if pull_result.returncode != 0:
+            if 'conflict' in pull_result.stderr.lower() or 'conflict' in pull_result.stdout.lower():
+                logger.warning("Conflicts detected during pull, attempting auto-resolution...")
+
+                # Merge using our version for conflicts
+                if merge_json_files():
+                    # Continue the rebase
+                    continue_result = subprocess.run(
+                        ['git', 'rebase', '--continue'],
+                        cwd=BASE_DIR,
+                        capture_output=True,
+                        text=True,
+                        timeout=10
+                    )
+
+                    if continue_result.returncode != 0:
+                        # If continue fails, abort and try manual merge
+                        logger.error("Auto-resolution failed, aborting rebase")
+                        subprocess.run(['git', 'rebase', '--abort'], cwd=BASE_DIR, capture_output=True)
+                        return False
+                else:
+                    subprocess.run(['git', 'rebase', '--abort'], cwd=BASE_DIR, capture_output=True)
+                    return False
+            else:
+                logger.error(f"Git pull failed: {pull_result.stderr}")
+                return False
 
         # Push changes
         result = subprocess.run(
