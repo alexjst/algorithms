@@ -624,6 +624,8 @@ def k_smallest(nums, k):
 # Merge k sorted lists
 def merge_k_lists(lists):
     heap = []
+    # Tuple trick: (key, tiebreaker, object)
+    # Python compares tuples element-wise for heap ordering
     for i, lst in enumerate(lists):
         if lst:
             heapq.heappush(heap, (lst.val, i, lst))
