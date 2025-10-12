@@ -9,10 +9,22 @@
 \usepackage{listings}
 \usepackage{xcolor}
 
-\geometry{top=.3in,left=.3in,right=.3in,bottom=.3in}
+\usepackage{fancyhdr}
 
-% Turn off header and footer
-\pagestyle{empty}
+\geometry{top=.3in,left=.3in,right=.3in,bottom=.3in,footskip=10pt}
+
+% Configure page style with page numbers
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[C]{\scriptsize\thepage} % center page number in footer
+\renewcommand{\headrulewidth}{0pt} % remove header line
+\renewcommand{\footrulewidth}{0pt} % remove footer line
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\scriptsize\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
 
 % Define colors for code
 \definecolor{codegreen}{rgb}{0,0.6,0}
