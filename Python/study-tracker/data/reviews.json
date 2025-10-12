@@ -612,7 +612,9 @@
       "review_type": "1-day",
       "due_date": "2025-10-12",
       "scheduled_date": "2025-10-11",
-      "completed_date": null
+      "completed_date": "2025-10-12",
+      "rating": 3,
+      "notes": ""
     },
     {
       "topic": "Week 2 Algorithm Integration",
