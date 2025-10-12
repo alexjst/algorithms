@@ -1,0 +1,779 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+
+% Compact spacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlist[itemize]{leftmargin=*,topsep=2pt,itemsep=1pt}
+\setlist[enumerate]{leftmargin=*,topsep=2pt,itemsep=1pt}
+
+% Section styling
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+% Colors for priority
+\definecolor{priority1}{rgb}{1.0,0.8,0.8}  % Light red - Master first
+\definecolor{priority2}{rgb}{1.0,1.0,0.8}  % Light yellow - Solidify
+\definecolor{priority3}{rgb}{0.8,1.0,0.8}  % Light green - Review
+
+\begin{document}
+
+\begin{center}
+\textbf{\LARGE System Design Interview Study Guide} \\
+\large{28-Day Preparation Plan for Staff-Level Interviews}
+\end{center}
+
+\section{Study Strategy: The Building-Blocks-First Approach}
+
+\subsection{Why This Order Matters}
+
+System design interviews differ fundamentally from algorithm interviews. Instead of implementing solutions, you're architecting distributed systems. Success requires:
+
+\textbf{1. Foundational Knowledge:} Understanding building blocks (load balancers, caches, databases) before combining them
+
+\textbf{2. Pattern Recognition:} Recognizing when to apply specific architectures (microservices, CQRS, event sourcing)
+
+\textbf{3. Trade-off Analysis:} Articulating why you choose one approach over another (CAP theorem, consistency vs latency)
+
+\textbf{4. Communication Skills:} Explaining complex systems clearly with diagrams and examples
+
+\subsection{The Optimal Strategy: Weak Spots First, Then Sequential}
+
+\textbf{Phase 1: Diagnostic (Day 1)}
+\begin{enumerate}
+\item Review all 27 topics briefly (30 min each)
+\item Identify 5-8 weak topics (unfamiliar concepts, can't explain trade-offs)
+\item Mark as Priority 1 in the progress tracker
+\item Topics most engineers struggle with: CAP theorem, sharding strategies, consistency models, capacity estimation
+\end{enumerate}
+
+\textbf{Phase 2: Intensive Practice on Weak Spots (Days 2-10)}
+\begin{enumerate}
+\item Spend 80\% of time on Priority 1 topics
+\item For each topic:
+  \begin{itemize}
+  \item Read notes thoroughly (1 hour)
+  \item Watch supplementary video if available (1 hour)
+  \item Practice mock design using that concept (1 hour)
+  \item Explain out loud as if teaching someone (30 min)
+  \end{itemize}
+\item Example: If weak on "Sharding," do multiple designs requiring sharding (URL shortener, chat system)
+\item Repeat each Priority 1 topic using spaced repetition: Day 2, 4, 7, 10
+\end{enumerate}
+
+\textbf{Phase 3: Sequential Study of Familiar Topics (Days 11-17)}
+\begin{enumerate}
+\item Work through Priority 2 and 3 topics in order
+\item Faster pace (1-2 hours per topic)
+\item Focus on connecting concepts (how caching + CDN work together)
+\item Build mental models of complete systems
+\end{enumerate}
+
+\textbf{Phase 4: Full System Designs (Days 18-24)}
+\begin{enumerate}
+\item Practice complete designs end-to-end (URL shortener, chat, feed, ride-sharing, video streaming)
+\item Time yourself: 45 minutes per design
+\item Cover all phases: Requirements, API, Data Model, High-Level Design, Deep Dives, Operations
+\item Practice explaining trade-offs clearly
+\end{enumerate}
+
+\textbf{Phase 5: Mock Interviews (Days 25-28)}
+\begin{enumerate}
+\item Simulate real interviews with timer
+\item Practice with peers or use Pramp/interviewing.io
+\item Focus on communication and whiteboarding (or diagramming tools)
+\item Review feedback and iterate
+\end{enumerate}
+
+\subsection{Falling Behind? Here's Your Recovery Plan}
+
+The 28-day plan is aggressive. If you're behind schedule, don't panic. Use this triage strategy:
+
+\textbf{If Behind by 3-5 Days (Minor Delay):}
+\begin{itemize}
+\item \textbf{Skip Priority 3 topics entirely} - Focus only on P1 and P2
+\item \textbf{Reduce spaced repetition:} Day 1, 4, 14 only (skip Day 2 and 7 reviews)
+\item \textbf{Cut practice problems:} Do only Tier 1 designs (skip Tier 2 and 3)
+\item \textbf{Extend by 1 week:} Total 35 days is still excellent prep
+\end{itemize}
+
+\textbf{If Behind by 1+ Weeks (Major Delay):}
+\begin{itemize}
+\item \textbf{Focus on top 8 Priority 1 topics only:} CAP, Caching, Sharding, Partitioning, Message Queues, Rate Limiting, Monitoring, Consensus
+\item \textbf{Minimal spaced repetition:} Day 1 deep study + Day 7 review only
+\item \textbf{Practice 3 core designs:} URL Shortener (fundamentals), Chat System (real-time), News Feed (scale)
+\item \textbf{Extend to 6 weeks total:} Quality over speed - better to master 8 topics than rush 27
+\end{itemize}
+
+\textbf{If Interview Is in 1 Week (Emergency Prep):}
+\begin{itemize}
+\item \textbf{Day 1-2:} Memorize capacity formulas + RADEO framework
+\item \textbf{Day 3-4:} Do URL Shortener + News Feed designs 3x each (until smooth)
+\item \textbf{Day 5-6:} Review cheatsheet sections 1, 3, 6, 8 (Building Blocks, CAP, Capacity, Strategy)
+\item \textbf{Day 7:} Mock interview + rest
+\item \textbf{Reality Check:} This is Senior-level prep, not Staff. Manage expectations.
+\end{itemize}
+
+\textbf{Key Principle:} Depth on few topics beats shallow coverage of all. Interviewers value mastery over breadth.
+
+\subsection{Spaced Repetition for Rusty Topics}
+
+For each Priority 1 topic, review on:
+\begin{itemize}
+\item \textbf{Day 1:} Initial deep study (3 hours)
+\item \textbf{Day 2:} Quick review + practice problem (1 hour)
+\item \textbf{Day 4:} Apply in full system design (1 hour)
+\item \textbf{Day 7:} Teach concept out loud (30 min)
+\item \textbf{Day 14:} Verify mastery with mock interview (45 min)
+\end{itemize}
+
+Research shows spaced repetition increases retention by 200\% compared to cramming. Missing a weak topic review is unacceptable for Staff-level prep.
+
+\section{Common Weak Spots}
+
+Based on thousands of system design interviews, these topics trip up even senior engineers:
+
+\begin{enumerate}
+\item \textbf{CAP Theorem \& Trade-offs:} Many can state "pick 2 of 3" but struggle to apply in designs. Must articulate: "I'm choosing availability over consistency here because..."
+
+\item \textbf{Capacity Estimation:} Engineers skip this or guess wildly. Practice calculating QPS, storage, bandwidth, memory for every design. Interviewers test rigor here.
+
+\item \textbf{Sharding Strategies:} Knowing "hash-based sharding" isn't enough. Must discuss: resharding, hot spots, cross-shard joins, consistent hashing.
+
+\item \textbf{Consistency Models:} Confusion between strong, eventual, causal consistency. When to use read-your-writes vs linearizability?
+
+\item \textbf{Caching Strategies:} Cache-aside vs write-through vs write-back. Eviction policies. Cache invalidation ("hardest problem in CS").
+
+\item \textbf{Message Queues:} When to use point-to-point vs pub-sub? Delivery guarantees? Ordering? Kafka vs RabbitMQ vs SQS?
+
+\item \textbf{Rate Limiting:} Token bucket vs leaky bucket vs sliding window. Implementation details (Redis-based).
+
+\item \textbf{Monitoring \& Operations:} Many designs omit this. Must discuss: metrics (QPS, latency, errors), alerting, failure modes, rollback strategies.
+\end{enumerate}
+
+If you're rusty on any of these, mark them Priority 1 and attack them first.
+
+\newpage
+
+\section{Progress Tracking Table}
+
+Use this table to track your study progress across all 27 topics. Color coding indicates priority:
+
+\begin{itemize}
+\item \cellcolor{priority1} \textbf{Priority 1 (🔴 P1):} Weak spots - Master these first with spaced repetition
+\item \cellcolor{priority2} \textbf{Priority 2 (🟡 P2):} Moderate - Solidify with practice
+\item \cellcolor{priority3} \textbf{Priority 3 (🟢 P3):} Familiar - Quick review sufficient
+\end{itemize}
+
+\textbf{Note:} On B\&W printers, priorities show as: P1 (darkest gray), P2 (medium gray), P3 (lightest gray)
+
+\subsection{How to Assign Your Own Priorities}
+
+The table below pre-assigns priorities based on common weak spots, but \textbf{customize to your experience:}
+
+\textbf{Mark as Priority 1 (Red) if:}
+\begin{itemize}
+\item You can't explain the concept clearly in 2 minutes
+\item You've never implemented it in production (or it's been 3+ years)
+\item You struggle to articulate trade-offs ("When would you use X vs Y?")
+\item It's a known interview hot topic (CAP, sharding, caching, consistency models)
+\end{itemize}
+
+\textbf{Mark as Priority 2 (Yellow) if:}
+\begin{itemize}
+\item You understand the concept but haven't practiced explaining it recently
+\item You know the theory but lack hands-on experience
+\item It's important but not your current weak spot
+\end{itemize}
+
+\textbf{Mark as Priority 3 (Green) if:}
+\begin{itemize}
+\item You've used it extensively in production (within last 2 years)
+\item You can explain trade-offs confidently without notes
+\item You've discussed it in past interviews successfully
+\end{itemize}
+
+\textbf{Pre-assigned Priorities Explained:}
+\begin{itemize}
+\item \textbf{P1 (Red):} CAP theorem, caching strategies, sharding, partitioning, message queues, rate limiting, monitoring, consensus - these trip up 70\%+ of Staff candidates
+\item \textbf{P2 (Yellow):} Full system designs (URL shortener, chat, feed, etc.) + intermediate topics (microservices, search, big data) - require practice but less conceptually dense
+\item \textbf{P3 (Green):} Fundamentals most senior engineers know (load balancing, basic DB concepts, API design, replication) - quick review sufficient
+\end{itemize}
+
+\textbf{Customization Example:} If you're a backend engineer who's built caching layers, change "Caching Strategies" from P1 to P3. If you've never touched Kafka/RabbitMQ, keep "Message Queues" as P1.
+
+Instructions:
+\begin{enumerate}
+\item \textbf{Week column:} Check off when you complete initial study
+\item \textbf{Day 2, 4, 7, 14 columns:} For Priority 1 topics only, check off spaced repetition reviews
+\item \textbf{Mock column:} Check off when you successfully use this concept in a mock interview
+\item \textbf{Notes:} Track specific problems practiced, resources used, key insights
+\end{enumerate}
+
+\small
+\begin{longtable}{|p{3.2cm}|c|c|c|c|c|c|c|p{3.5cm}|}
+\hline
+\textbf{Topic} & \textbf{Pri} & \textbf{Week} & \textbf{D2} & \textbf{D4} & \textbf{D7} & \textbf{D14} & \textbf{Mock} & \textbf{Notes / Insights} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Topic} & \textbf{Pri} & \textbf{Week} & \textbf{D2} & \textbf{D4} & \textbf{D7} & \textbf{D14} & \textbf{Mock} & \textbf{Notes / Insights} \\
+\hline
+\endhead
+
+\textbf{Week 1: Fundamentals} & & & & & & & & \\
+\hline
+1. Scalability Fundamentals & P3 & $\square$ & & & & & $\square$ & Vertical vs horizontal, stateless design \\
+\hline
+2. Load Balancing & P3 & $\square$ & & & & & $\square$ & L4 vs L7, algorithms, session persistence \\
+\hline
+3. Caching Strategies & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & Cache-aside, write-through, eviction policies \\
+\hline
+4. Database Fundamentals & P3 & $\square$ & & & & & $\square$ & RDBMS vs NoSQL, ACID, BASE \\
+\hline
+5. CAP Theorem & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & CP vs AP, PACELC, real-world examples \\
+\hline
+6. Design: URL Shortener & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & End-to-end practice, capacity estimation \\
+\hline
+
+\textbf{Week 2: Communication} & & & & & & & & \\
+\hline
+7. Message Queues & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & Point-to-point vs pub-sub, Kafka, RabbitMQ \\
+\hline
+8. API Design & P3 & $\square$ & & & & & $\square$ & REST vs RPC, versioning, pagination \\
+\hline
+9. Microservices & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & Service discovery, API gateway, saga pattern \\
+\hline
+10. Data Partitioning & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & Hash, range, geo sharding, consistent hashing \\
+\hline
+11. Replication & P3 & $\square$ & & & & & $\square$ & Master-slave, multi-master, sync vs async \\
+\hline
+12. Design: Chat System & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & WebSocket, message queue, group chat \\
+\hline
+
+\textbf{Week 3: Advanced Topics} & & & & & & & & \\
+\hline
+13. Database Sharding & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & Strategies, resharding, cross-shard joins \\
+\hline
+14. CDN \& Caching & P3 & $\square$ & & & & & $\square$ & Edge locations, cache invalidation, TTL \\
+\hline
+15. Search \& Indexing & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & Elasticsearch, inverted index, ranking \\
+\hline
+16. Big Data Processing & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & MapReduce, Spark, batch vs stream \\
+\hline
+17. NoSQL Deep Dive & P3 & $\square$ & & & & & $\square$ & Key-value, document, column, graph \\
+\hline
+18. Design: Social Feed & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & Fan-out on write/read, ranking, pagination \\
+\hline
+
+\textbf{Week 4: Production Systems} & & & & & & & & \\
+\hline
+19. Security & P3 & $\square$ & & & & & $\square$ & Auth, encryption, rate limiting, HTTPS \\
+\hline
+20. Monitoring \& Observability & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & Metrics, logs, traces, alerting, SLOs \\
+\hline
+21. REST DAY & -- & & & & & & & Take a break or review weak spots \\
+\hline
+22. Rate Limiting & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & Token bucket, leaky bucket, sliding window \\
+\hline
+23. Consensus \& Coordination & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & Paxos, Raft, ZooKeeper, leader election \\
+\hline
+24. Design: Ride Sharing & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & Geospatial index, matching, real-time updates \\
+\hline
+25. Design: Video Streaming & \cellcolor{priority2}P2 & $\square$ & & $\square$ & & $\square$ & $\square$ & Transcoding, CDN, adaptive bitrate \\
+\hline
+26-27. Mock Interviews & -- & $\square$ & & & & & $\square$ & Full end-to-end with timing \\
+\hline
+28. Final Review & -- & $\square$ & & & & & & Weak spots, common mistakes \\
+\hline
+
+\end{longtable}
+
+\section{Capacity Estimation Practice}
+
+System design interviews always include capacity estimation. Practice these formulas until automatic:
+
+\subsection{Standard Assumptions}
+\begin{itemize}
+\item \textbf{1 day = 86,400 seconds} (memorize this!)
+\item \textbf{1 month} $\approx$ 30 days = 2,592,000 seconds
+\item \textbf{Peak traffic} = 3-5x average (use 3x for conservative estimate)
+\item \textbf{80/20 rule:} 20\% of data generates 80\% of traffic
+\item \textbf{Cache hit rate:} 80-90\% typical for hot data
+\item \textbf{Replication factor:} 3x for high availability
+\item \textbf{Headroom:} Add 30\% for safety margin
+\end{itemize}
+
+\subsection{Core Formulas}
+
+\textbf{1. QPS (Queries Per Second):}
+\[
+\text{QPS} = \frac{\text{Daily Active Users} \times \text{Requests per User}}{\text{86,400 seconds}}
+\]
+\[
+\text{Peak QPS} = \text{Average QPS} \times 3
+\]
+
+\textbf{2. Storage:}
+\[
+\text{Storage} = \text{Items} \times \text{Size per Item} \times \text{Replication Factor}
+\]
+\[
+\text{5-Year Storage} = \text{Daily Items} \times 365 \times 5 \times \text{Size}
+\]
+
+\textbf{3. Bandwidth:}
+\[
+\text{Read Bandwidth} = \text{Read QPS} \times \text{Avg Response Size}
+\]
+\[
+\text{Write Bandwidth} = \text{Write QPS} \times \text{Avg Request Size}
+\]
+
+\textbf{4. Memory (for Caching):}
+\[
+\text{Cache Memory} = 0.2 \times \text{Daily Requests} \times \text{Avg Response Size}
+\]
+(Using 80/20 rule: cache 20\% of data for 80\% of traffic)
+
+\textbf{5. Server Count:}
+\[
+\text{Servers} = \frac{\text{QPS}}{\text{QPS per Server}} \times 1.3
+\]
+(Typical: 1K-10K QPS per web server, 100-1K per DB query server)
+
+\subsection{Practice Problem 1: URL Shortener}
+
+\textbf{Requirements:}
+\begin{itemize}
+\item 100 million new URLs per month
+\item 10:1 read-to-write ratio
+\item Each URL record = 500 bytes (short code + long URL + metadata)
+\item Plan for 5 years of storage
+\end{itemize}
+
+\textbf{Solution:}
+
+\textit{Step 1: Write QPS}
+\[
+\text{Write QPS} = \frac{100M}{30 \times 86400} = \frac{100,000,000}{2,592,000} \approx 39 \text{ writes/sec}
+\]
+
+\textit{Step 2: Read QPS}
+\[
+\text{Read QPS} = 39 \times 10 = 390 \text{ reads/sec}
+\]
+\[
+\text{Peak Read QPS} = 390 \times 3 = 1,170 \text{ reads/sec}
+\]
+
+\textit{Step 3: Storage (5 years)}
+\[
+\text{Total URLs} = 100M \times 12 \times 5 = 6 \text{ billion URLs}
+\]
+\[
+\text{Storage} = 6B \times 500 \text{ bytes} = 3 \text{ TB (raw)}
+\]
+\[
+\text{With 3x replication} = 3 \times 3 = 9 \text{ TB}
+\]
+
+\textit{Step 4: Bandwidth}
+\[
+\text{Write Bandwidth} = 39 \times 500 = 19,500 \text{ bytes/sec} \approx 20 \text{ KB/sec}
+\]
+\[
+\text{Read Bandwidth} = 390 \times 500 = 195,000 \text{ bytes/sec} \approx 200 \text{ KB/sec}
+\]
+
+\textit{Step 5: Cache Memory (80/20 rule)}
+\[
+\text{Daily Reads} = 390 \times 86,400 = 33.7M \text{ reads/day}
+\]
+\[
+\text{Cache 20\%} = 0.2 \times 33.7M \times 500 = 3.37 \text{ GB}
+\]
+
+\textit{Step 6: Servers}
+\begin{itemize}
+\item \textbf{Web Servers:} Peak 1,170 QPS / 5,000 per server = 1 server (+ 1 for redundancy = 2)
+\item \textbf{Database:} 9 TB / 3 TB per server = 3 shards (+ replicas = 9 DB servers)
+\item \textbf{Cache:} 4 GB fits in single Redis (+ 1 replica = 2 cache servers)
+\end{itemize}
+
+\subsection{Practice Problem 2: Chat System}
+
+\textbf{Requirements:}
+\begin{itemize}
+\item 50 million daily active users
+\item Each user sends 20 messages per day on average
+\item Each message = 200 bytes (text + metadata)
+\item Store message history for 2 years
+\end{itemize}
+
+\textbf{Your Turn:} Calculate write QPS, storage, bandwidth, cache memory, and server count. Use the formulas above.
+
+\textit{(Hint: Write QPS = 50M $\times$ 20 / 86,400 $\approx$ 11,574 messages/sec)}
+
+\subsection{Practice Problem 3: Video Streaming}
+
+\textbf{Requirements:}
+\begin{itemize}
+\item 10 million daily active users
+\item Each user watches 30 minutes of video per day
+\item Video: 720p @ 2 Mbps bitrate (average)
+\item Store videos for 10 years
+\item 100,000 new videos uploaded per day, average 10 minutes each
+\end{itemize}
+
+\textbf{Your Turn:} Calculate watch QPS, upload QPS, storage (10 years), bandwidth (separate read/write).
+
+\textit{(Hint: Convert minutes to bytes - 1 minute @ 2 Mbps = 2 Mbps $\times$ 60 sec / 8 bits/byte = 15 MB)}
+
+\section{Mock Interview Preparation Checklist}
+
+\subsection{Week 4: Mock Interview Readiness}
+
+By Week 4, you should be ready to simulate real interviews. Use this checklist:
+
+\textbf{Before Mock Interview:}
+\begin{itemize}
+\item[$\square$] Set up whiteboard or diagramming tool (Excalidraw, draw.io, or physical board)
+\item[$\square$] Prepare timer (45 minutes for design phase)
+\item[$\square$] Have cheatsheet printed for reference (but don't rely on it)
+\item[$\square$] Pick a random design problem (see list below)
+\item[$\square$] Record yourself or practice with peer
+\end{itemize}
+
+\textbf{During Mock Interview (Follow RADEO Framework):}
+\begin{itemize}
+\item[$\square$] \textbf{Requirements (5 min):} Ask clarifying questions, define functional/non-functional requirements
+\item[$\square$] \textbf{API Design (5 min):} Sketch 3-5 key endpoints with request/response
+\item[$\square$] \textbf{Data Model (5-10 min):} Database choice, schema, relationships, indexes
+\item[$\square$] \textbf{High-Level Design (10 min):} Draw components (client, LB, app, DB, cache, queue), data flow
+\item[$\square$] \textbf{Deep Dives (15 min):} Identify bottlenecks, discuss trade-offs, add sharding/caching/replication
+\item[$\square$] \textbf{Operations (5 min):} Monitoring, failure modes, security, scaling
+\end{itemize}
+
+\textbf{Communication Checklist:}
+\begin{itemize}
+\item[$\square$] Think out loud (don't go silent)
+\item[$\square$] Ask clarifying questions (don't assume)
+\item[$\square$] Discuss trade-offs explicitly ("I'm choosing X over Y because...")
+\item[$\square$] Draw clear diagrams with labels
+\item[$\square$] Use numbers (QPS, storage, latency) to justify decisions
+\item[$\square$] Acknowledge when you don't know something ("I'm not familiar with X, but I'd approach it by...")
+\end{itemize}
+
+\textbf{After Mock Interview:}
+\begin{itemize}
+\item[$\square$] Review recording or get peer feedback
+\item[$\square$] Identify gaps (concepts you struggled to explain)
+\item[$\square$] Update progress tracker with notes
+\item[$\square$] Redo the same design next day (should be much smoother)
+\end{itemize}
+
+\subsection{Mock Interview Problem Bank}
+
+Practice these in order. First 5 are most common in real interviews:
+
+\textbf{Tier 1 - Must Practice:}
+\begin{enumerate}
+\item URL Shortener (TinyURL, bit.ly)
+\item Chat System (WhatsApp, Slack)
+\item News Feed (Twitter, Instagram, Facebook)
+\item Video Streaming (YouTube, Netflix)
+\item Ride Sharing (Uber, Lyft)
+\end{enumerate}
+
+\textbf{Tier 2 - High Frequency:}
+\begin{enumerate}
+\setcounter{enumi}{5}
+\item Search Autocomplete (Google search suggestions)
+\item Notification System (Push notifications, email alerts)
+\item Web Crawler (Google crawler, Scrapy)
+\item Distributed Cache (Memcached, Redis cluster)
+\item Rate Limiter (API rate limiting)
+\end{enumerate}
+
+\textbf{Tier 3 - Good Practice:}
+\begin{enumerate}
+\setcounter{enumi}{10}
+\item Photo Sharing (Instagram, Flickr)
+\item E-commerce Platform (Amazon product catalog)
+\item Ticketing System (Ticketmaster, live event booking)
+\item Food Delivery (DoorDash, UberEats)
+\item Ad Click Tracking (Google Ads analytics)
+\end{enumerate}
+
+\section{Staff-Level Interview Expectations}
+
+\subsection{What Distinguishes Staff from Senior?}
+
+\textbf{Senior Engineer:}
+\begin{itemize}
+\item Design functional systems that meet requirements
+\item Apply standard patterns (load balancer, cache, database)
+\item Explain basic trade-offs (SQL vs NoSQL, sync vs async)
+\end{itemize}
+
+\textbf{Staff Engineer (Higher Bar):}
+\begin{itemize}
+\item \textbf{Proactive Problem Identification:} Spot bottlenecks before interviewer asks
+\item \textbf{Quantitative Analysis:} Use numbers to justify every decision ("With 10K QPS, we need...")
+\item \textbf{Deep Trade-off Discussion:} Go beyond surface level (e.g., not just "use cache" but "LRU cache because 80/20 rule, invalidation strategy is TTL + manual purge on updates")
+\item \textbf{Failure Modes:} Discuss what breaks and how to recover (DB failure, network partition, cascading failures)
+\item \textbf{Operations Mindset:} Monitoring, alerting, deployment strategy, rollback plan
+\item \textbf{Cross-Team Considerations:} API contracts, backward compatibility, migration strategy
+\item \textbf{Alternative Approaches:} Present multiple solutions, compare pros/cons, justify final choice
+\end{itemize}
+
+\subsection{Red Flags for Staff Level}
+
+These mistakes will hurt you at Staff level (even if acceptable at Senior):
+
+\begin{itemize}
+\item Jumping to solution without clarifying requirements
+\item Forgetting capacity estimation or guessing wildly
+\item Ignoring edge cases (what if service goes down?)
+\item Not discussing monitoring/alerting
+\item Overlooking security (auth, rate limiting, encryption)
+\item Failing to articulate trade-offs clearly
+\item Being too attached to one solution (not considering alternatives)
+\item Going silent for extended periods (not thinking out loud)
+\item Over-engineering simple problems
+\item Under-engineering scale problems
+\end{itemize}
+
+\subsection{Staff-Level Response Example: Good vs Bad}
+
+Let's compare Senior vs Staff responses to: \textit{"Design a URL shortener like TinyURL."}
+
+\textbf{BAD Response (Senior-Level Thinking):}
+
+\textit{"We need a database to store URLs. Let's use MySQL with two tables: one for URLs and one for users. When a user submits a URL, we generate a short code using Base62 encoding and store it. We'll use Redis for caching popular URLs. For high traffic, we'll add a load balancer and scale horizontally. That should handle the load."}
+
+\textbf{Why This Is Insufficient for Staff:}
+\begin{itemize}
+\item No requirements clarification (read-heavy? write-heavy? scale?)
+\item No capacity estimation (how much traffic? storage?)
+\item No trade-off discussion (why MySQL? why Base62? why Redis?)
+\item No failure modes (what if DB goes down?)
+\item No operations (monitoring? deployment?)
+\end{itemize}
+
+\textbf{GOOD Response (Staff-Level Thinking):}
+
+\textit{"Let me clarify requirements first. Are we expecting 100M new URLs per month with 10:1 read ratio? Let me calculate capacity..."}
+
+[Does math on whiteboard: 39 writes/sec, 390 reads/sec, 9TB storage over 5 years]
+
+\textit{"For this scale, I'll use Base62 encoding with 7 characters (62\^{}7 = 3.5 trillion combinations, plenty of headroom). For the database, I'm choosing a key-value store like DynamoDB over MySQL because:}
+\begin{itemize}
+\item Simple schema (short\_code -> long\_url)
+\item High write throughput (39 writes/sec easily handled)
+\item Built-in replication and auto-scaling
+\end{itemize}
+
+\textit{Trade-off: We lose relational queries, but we don't need them here. For caching, I'm using Redis with LRU eviction to cache the top 20\% of URLs (80/20 rule). That's about 3.4GB of cache memory based on daily reads.}
+
+\textit{For failure modes, if Redis goes down, we fall back to DynamoDB (slower but still works). If a DynamoDB partition goes down, we have 3x replication for high availability. For monitoring, I'd track: write QPS, read QPS, cache hit rate (should be 80\%+), p99 latency (target <50ms), and error rate.}
+
+\textbf{Why This Is Staff-Level:}
+\begin{itemize}
+\item Clarified requirements upfront
+\item Used numbers to justify decisions
+\item Articulated specific trade-offs (DynamoDB vs MySQL)
+\item Discussed failure modes and fallback
+\item Included operations (monitoring metrics)
+\item Mentioned specific algorithms (Base62, LRU) with reasoning
+\end{itemize}
+
+\textbf{Key Lesson:} Staff engineers justify every decision with \textit{why}, not just \textit{what}. Use numbers, discuss trade-offs, anticipate failures.
+
+\subsection{Common Mistakes with Examples}
+
+These are the most frequent mistakes in Staff-level interviews, with before/after corrections:
+
+\textbf{Mistake 1: Vague Capacity Estimation}
+
+\textit{Before:} "We'll need a few database servers and some cache."
+
+\textit{After:} "With 10K writes/sec and 100K reads/sec, each DB server handles ~1K QPS, so we need 10 write servers + 100 read replicas. Cache holds 20\% of 1TB dataset = 200GB, which fits in 4x Redis instances (50GB each)."
+
+\textit{Why It Matters:} Staff engineers quantify everything. Vague estimates suggest lack of production experience.
+
+\textbf{Mistake 2: Forgetting to Discuss Cache Invalidation}
+
+\textit{Before:} "We'll use Redis to cache user profiles for fast reads."
+
+\textit{After:} "We'll use Redis to cache user profiles. For invalidation, I'd use a hybrid approach: TTL of 1 hour for passive expiry + event-based invalidation via message queue when profile updates. Trade-off: Adds complexity but ensures consistency within seconds."
+
+\textit{Why It Matters:} Cache invalidation is notoriously hard. Staff engineers show they've dealt with stale data issues.
+
+\textbf{Mistake 3: Not Addressing Failure Modes}
+
+\textit{Before:} "We'll replicate the database for high availability."
+
+\textit{After:} "We'll replicate the database 3x across AZs. If master fails, we promote a replica (30-60 sec downtime using automated failover). During network partition, we enforce quorum (2 of 3 nodes) to prevent split-brain. If entire region fails, we have cross-region async replication (5 min RPO)."
+
+\textit{Why It Matters:} Staff engineers anticipate failures. Describing failure scenarios shows operational maturity.
+
+\textbf{Mistake 4: Ignoring Hot Shard Problem}
+
+\textit{Before:} "We'll shard users by user\_id using consistent hashing."
+
+\textit{After:} "We'll shard users by user\_id using consistent hashing. For celebrities with 100M+ followers (hot shard), we'll detect high QPS (>10x average) and move them to a dedicated cache layer with separate infrastructure. This prevents one celebrity from overloading a shard."
+
+\textit{Why It Matters:} Hot shard is a classic Staff question (Twitter/Instagram interviews). Ignoring it is a red flag.
+
+\textbf{Mistake 5: Weak Trade-off Articulation}
+
+\textit{Before:} "SQL is good for structured data, NoSQL is good for unstructured data."
+
+\textit{After:} "I'm choosing Cassandra (NoSQL) over PostgreSQL here because: (1) Write-heavy workload (10K writes/sec) favors LSM-tree, (2) No complex joins needed, (3) Built-in geo-replication. Trade-off: We lose ACID transactions, but we don't need them for this use case (eventual consistency is fine for social feed)."
+
+\textit{Why It Matters:} Staff engineers show deep understanding of internals (LSM-tree) and justify with use case specifics.
+
+\textbf{Mistake 6: Not Discussing Monitoring}
+
+\textit{Before:} "The system should be scalable and reliable."
+
+\textit{After:} "For observability, I'd track: (1) Golden metrics: QPS, latency (p50/p95/p99), error rate, (2) Business metrics: feed load time, post success rate, (3) SLO: 99.9\% availability (43 min downtime/month), p99 latency <500ms. Alerts fire on SLO violations. We'd use Prometheus + Grafana + PagerDuty."
+
+\textit{Why It Matters:} Staff engineers own production. Concrete metrics show you've run services at scale.
+
+\textbf{Practice Exercise:}
+
+Review your last 3 mock designs. For each, identify:
+\begin{itemize}
+\item Did I quantify capacity? (servers, storage, bandwidth)
+\item Did I discuss cache invalidation?
+\item Did I describe failure modes?
+\item Did I mention hot shard/hot key problems?
+\item Did I explain trade-offs with specific reasons?
+\item Did I include monitoring metrics and SLOs?
+\end{itemize}
+
+If you answered "no" to any, redo that design with corrections. This is the difference between Senior and Staff.
+
+\subsection{Final Week Checklist}
+
+\textbf{7 Days Before Interview:}
+\begin{itemize}
+\item[$\square$] Complete all Priority 1 topics (no gaps)
+\item[$\square$] Practice all 5 Tier 1 designs end-to-end
+\item[$\square$] Comfortable with capacity estimation (under 5 min per problem)
+\item[$\square$] Can draw clean diagrams quickly
+\item[$\square$] Have 2-3 "stories" ready (past projects, scale challenges you solved)
+\end{itemize}
+
+\textbf{3 Days Before Interview:}
+\begin{itemize}
+\item[$\square$] Do 2-3 full mock interviews (timed, with peer or online platform)
+\item[$\square$] Review feedback from mocks, fix weak spots
+\item[$\square$] Read cheatsheet cover-to-cover (refresh memory)
+\item[$\square$] Practice explaining trade-offs out loud (to yourself or others)
+\end{itemize}
+
+\textbf{1 Day Before Interview:}
+\begin{itemize}
+\item[$\square$] Light review only (don't cram new material)
+\item[$\square$] Skim cheatsheet for key formulas and numbers
+\item[$\square$] Do ONE mock design to stay sharp (pick an easy one: URL shortener)
+\item[$\square$] Prepare questions to ask interviewer (about team, tech stack, challenges)
+\item[$\square$] Get good sleep (seriously - fatigue kills performance)
+\end{itemize}
+
+\textbf{Day of Interview:}
+\begin{itemize}
+\item[$\square$] Review capacity estimation formulas (5 min)
+\item[$\square$] Review CAP theorem and trade-offs (5 min)
+\item[$\square$] Remind yourself: Think out loud, ask clarifying questions, discuss trade-offs
+\item[$\square$] Arrive 10 min early, calm and confident
+\end{itemize}
+
+\section{Additional Resources}
+
+\subsection{Recommended Books}
+\begin{itemize}
+\item \textit{Designing Data-Intensive Applications} by Martin Kleppmann (the bible)
+\item \textit{System Design Interview} by Alex Xu (Vol 1 \& 2) (practical, interview-focused)
+\item \textit{Web Scalability for Startup Engineers} by Artur Ejsmont
+\end{itemize}
+
+\subsection{Online Platforms}
+\begin{itemize}
+\item \textbf{Mock Interviews:} Pramp, interviewing.io, Exponent
+\item \textbf{Practice Problems:} SystemDesignPrimer (GitHub), DesignGurus.io
+\item \textbf{Video Courses:} Educative.io "Grokking System Design," Coursera "Cloud Computing"
+\end{itemize}
+
+\subsection{Companion Cheatsheet}
+
+This study guide pairs with \textit{system-design-templates-cheatsheet.tex} cheatsheet. Print both:
+\begin{itemize}
+\item \textbf{Cheatsheet:} Quick reference during practice (building blocks, formulas, patterns)
+\item \textbf{Study Guide:} Strategic planning, progress tracking, capacity practice
+\end{itemize}
+
+\textbf{How to Use Cheatsheet During Study:}
+
+\textit{Phase 1-2 (Days 1-10): Deep Learning Mode}
+\begin{itemize}
+\item \textbf{Before:} Read cheatsheet section thoroughly (15-20 min)
+\item \textbf{During:} Keep cheatsheet open while practicing mock designs
+\item \textbf{After:} Close cheatsheet, try to recreate key concepts from memory
+\item \textbf{Goal:} Internalize patterns, not memorize text
+\end{itemize}
+
+\textit{Phase 3-4 (Days 11-24): Quick Reference Mode}
+\begin{itemize}
+\item \textbf{Before:} Close cheatsheet, attempt design unaided
+\item \textbf{When Stuck:} Glance at cheatsheet for specific concept (30 sec lookup)
+\item \textbf{After:} Review full cheatsheet section you struggled with
+\item \textbf{Goal:} Build confidence, identify remaining weak spots
+\end{itemize}
+
+\textit{Phase 5 (Days 25-28): No-Cheatsheet Mode}
+\begin{itemize}
+\item \textbf{During:} Simulate real interview (no cheatsheet at all)
+\item \textbf{After:} Review cheatsheet to see what you missed
+\item \textbf{Goal:} Prove mastery, calibrate readiness
+\end{itemize}
+
+\textbf{Cheatsheet Sections by Study Phase:}
+\begin{itemize}
+\item \textbf{Building Blocks (Sec 1):} Reference daily Week 1-2
+\item \textbf{Observability (Sec 2):} Reference Week 4 for Operations discussion
+\item \textbf{CAP/Consistency (Sec 3):} Master by Day 5 (Priority 1 topic)
+\item \textbf{Scaling Patterns (Sec 4):} Reference daily Week 2-3 (sharding, replication)
+\item \textbf{Capacity Estimation (Sec 6):} Practice formulas daily Week 1-4
+\item \textbf{Interview Strategy (Sec 8):} Read before every mock interview
+\end{itemize}
+
+\subsection{Final Thoughts}
+
+System design mastery takes time. Don't rush. The 28-day plan is aggressive but achievable if you:
+\begin{itemize}
+\item Follow spaced repetition religiously
+\item Focus on weak spots first
+\item Practice out loud (explaining matters more than reading)
+\item Do full mock interviews (timing and communication are skills)
+\end{itemize}
+
+You've got this. Staff-level is within reach with disciplined preparation. Good luck!
+
+\end{document}

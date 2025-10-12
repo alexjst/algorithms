@@ -1,0 +1,787 @@
+\documentclass[8pt,landscape]{extarticle}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.4in]{geometry}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{tabularx}
+\usepackage{booktabs}
+
+% Compact spacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+\setlist[itemize]{leftmargin=*,topsep=0pt,itemsep=0pt}
+\setlist[enumerate]{leftmargin=*,topsep=0pt,itemsep=0pt}
+
+% Section styling
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0pt}{4pt}{2pt}{\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0pt}{3pt}{1pt}{\normalfont\normalsize\bfseries}}
+\makeatother
+
+% Colors for priority
+\definecolor{critical}{rgb}{0.8,0.2,0.2}
+\definecolor{important}{rgb}{0.2,0.4,0.8}
+\definecolor{cap}{rgb}{0.6,0.3,0.7}
+
+\begin{document}
+\begin{multicols*}{3}
+
+\begin{center}
+\textbf{\LARGE System Design Templates} \\
+\small{Essential Concepts for Staff-Level Interviews}
+\end{center}
+
+\section*{1. Building Blocks Overview}
+
+\subsection*{Load Balancers}
+\textbf{Purpose:} Distribute traffic across servers \\
+\textbf{Types:}
+\begin{itemize}
+\item \textbf{Layer 4 (Transport):} TCP/UDP routing, fast
+\item \textbf{Layer 7 (Application):} HTTP routing, content-aware
+\end{itemize}
+\textbf{Algorithms:}
+\begin{itemize}
+\item Round Robin - Equal distribution
+\item Least Connections - Favor idle servers
+\item IP Hash - Session persistence
+\item Weighted - Capacity-based routing
+\end{itemize}
+\textbf{Examples:} NGINX, HAProxy, AWS ELB/ALB
+
+\subsection*{Caching}
+\textbf{Purpose:} Reduce latency, database load \\
+\textbf{Types:}
+\begin{itemize}
+\item \textbf{Client-Side:} Browser cache, mobile app
+\item \textbf{CDN:} Static content distribution
+\item \textbf{Application:} Redis, Memcached
+\item \textbf{Database:} Query cache, materialized views
+\end{itemize}
+\textbf{Eviction Policies:}
+\begin{itemize}
+\item LRU - Least Recently Used (most common)
+\item LFU - Least Frequently Used
+\item FIFO - First In First Out
+\item TTL - Time To Live expiration
+\end{itemize}
+\textbf{Cache Patterns:}
+\begin{itemize}
+\item \textbf{Cache-Aside:} App reads cache, loads on miss
+  \\ \textbf{Trade-off:} Stale data risk vs reduced DB load
+\item \textbf{Write-Through:} Write to cache + DB synchronously
+  \\ \textbf{Trade-off:} Strong consistency vs write latency
+\item \textbf{Write-Back:} Write to cache, async to DB
+  \\ \textbf{Trade-off:} Fast writes vs data loss risk on crash
+\item \textbf{Read-Through:} Cache loads from DB automatically
+\end{itemize}
+\textbf{Cache Invalidation (Critical Staff Question):}
+\begin{itemize}
+\item \textbf{TTL (Time-To-Live):} Expire after fixed time
+  \\ Simple, but stale data until expiration
+\item \textbf{Write-Through:} Update cache on every write
+  \\ Automatically consistent, adds write latency
+\item \textbf{Event-Based:} Pub-sub on DB updates invalidates cache
+  \\ Complex setup, strong consistency, real-time
+\item \textbf{Version Tags:} Increment version on update
+  \\ Cache key includes version (user:123:v5)
+\end{itemize}
+\textbf{Trade-off:} Consistency (event/write-through) vs simplicity (TTL) vs latency
+
+\subsection*{Databases}
+\textbf{RDBMS (SQL):}
+\begin{itemize}
+\item Strong consistency, ACID transactions
+\item Structured schema, relations
+\item Use: Financial, user data, complex queries
+\item Examples: PostgreSQL, MySQL, Oracle
+\end{itemize}
+\textbf{NoSQL Types:}
+\begin{itemize}
+\item \textbf{Key-Value:} Redis, DynamoDB - Simple lookups
+\item \textbf{Document:} MongoDB, Couchbase - JSON data
+\item \textbf{Column-Family:} Cassandra, HBase - Time-series
+\item \textbf{Graph:} Neo4j, Amazon Neptune - Relationships
+\end{itemize}
+\textbf{SQL vs NoSQL Decision:}
+\begin{itemize}
+\item SQL: Structured data, complex joins, transactions
+\item NoSQL: Scale horizontally, flexible schema, eventual consistency OK
+\end{itemize}
+\textbf{Indexing Internals:}
+\begin{itemize}
+\item \textbf{B-Tree:} Traditional RDBMS (MySQL, PostgreSQL)
+  \\ Balanced tree, good for reads, range queries
+  \\ Updates in place (read-modify-write)
+\item \textbf{LSM-Tree:} Write-optimized NoSQL (Cassandra, RocksDB, HBase)
+  \\ Append-only writes (sequential), periodic compaction
+  \\ Fast writes, slower reads (multiple levels to check)
+\end{itemize}
+\textbf{Trade-off:} Read performance (B-tree) vs write throughput (LSM-tree)
+
+\subsection*{Message Queues}
+\textbf{Purpose:} Asynchronous communication, decoupling \\
+\textbf{Patterns:}
+\begin{itemize}
+\item \textbf{Point-to-Point:} Queue, single consumer
+\item \textbf{Pub-Sub:} Topic, multiple subscribers
+\end{itemize}
+\textbf{Key Features:}
+\begin{itemize}
+\item Delivery Guarantees: At-most-once, at-least-once, exactly-once
+\item Ordering: FIFO, partitioned ordering
+\item Durability: Persistent vs in-memory
+\end{itemize}
+\textbf{Examples:} Kafka (high throughput), RabbitMQ (reliable), SQS (managed)
+
+\subsection*{CDN (Content Delivery Network)}
+\textbf{Purpose:} Serve static content from edge locations \\
+\textbf{Benefits:}
+\begin{itemize}
+\item Reduced latency (geographic proximity)
+\item Reduced bandwidth costs
+\item DDoS protection
+\end{itemize}
+\textbf{Content Types:} Images, videos, JS/CSS, APIs (with caching) \\
+\textbf{Examples:} CloudFront, Cloudflare, Akamai
+
+\section*{2. Observability Pillars}
+
+\subsection*{Metrics (The "What")}
+\textbf{Purpose:} Aggregated numerical data over time \\
+\textbf{Key Frameworks:}
+\begin{itemize}
+\item \textbf{RED (for services):} Rate, Errors, Duration
+  \\ Rate: Requests per second
+  \\ Errors: Failed requests percentage
+  \\ Duration: Response time (p50, p95, p99)
+\item \textbf{USE (for resources):} Utilization, Saturation, Errors
+  \\ Utilization: \% time resource busy (CPU, memory)
+  \\ Saturation: Queue depth, backlog
+  \\ Errors: Error count or rate
+\end{itemize}
+\textbf{Tools:} Prometheus, Graphite, CloudWatch \\
+\textbf{Why?} Metrics provide high-level health indicators and enable alerting on SLO violations.
+
+\subsection*{Logging (The "Why")}
+\textbf{Purpose:} Detailed, immutable event records \\
+\textbf{Best Practices:}
+\begin{itemize}
+\item \textbf{Structured Logs (JSON):} Machine-readable, queryable
+  \\ Example: \{``level'': ``error'', ``service'': ``api'', ``user\_id'': 123\}
+\item \textbf{Centralized Collection:} Aggregate from all services
+\item \textbf{Log Levels:} DEBUG, INFO, WARN, ERROR, FATAL
+\item \textbf{Sampling:} Log 100\% errors, sample INFO logs at scale
+\end{itemize}
+\textbf{Tools:} ELK Stack (Elasticsearch, Logstash, Kibana), Splunk, Datadog \\
+\textbf{Why?} Logs answer "why did this specific request fail?" - debugging root cause.
+
+\subsection*{Tracing (The "Where")}
+\textbf{Purpose:} Track a single request through multiple services \\
+\textbf{Key Concepts:}
+\begin{itemize}
+\item \textbf{Trace ID:} Unique ID follows request across all services
+\item \textbf{Span:} Represents a single operation/service call
+  \\ Parent-child relationships form call tree
+\item \textbf{Sampling:} Trace 1-10\% of requests (storage cost)
+\end{itemize}
+\textbf{Tools:} Jaeger, Zipkin, OpenTelemetry, AWS X-Ray \\
+\textbf{Why?} Tracing identifies bottlenecks in distributed systems - "which service is slow?"
+
+\subsection*{SLIs/SLOs/SLAs}
+\textbf{SLI (Service Level Indicator):}
+\begin{itemize}
+\item Quantitative measure of service health
+\item Examples: Latency (p99 < 200ms), Availability (99.9\%)
+\end{itemize}
+\textbf{SLO (Service Level Objective):}
+\begin{itemize}
+\item Target value for SLI
+\item Example: 99.9\% of requests succeed (allows 0.1\% error budget)
+\end{itemize}
+\textbf{SLA (Service Level Agreement):}
+\begin{itemize}
+\item Contract with consequences (refunds, credits)
+\item Example: 99.5\% uptime guaranteed or customer gets credit
+\end{itemize}
+\textbf{Error Budget:}
+\begin{itemize}
+\item If SLO is 99.9\%, error budget is 0.1\% = 43 min downtime/month
+\item Balance reliability vs feature velocity
+\end{itemize}
+
+\section*{3. CAP Theorem \& Consistency}
+
+\subsection*{CAP Theorem}
+\textcolor{cap}{\textbf{Pick 2 of 3:}}
+\begin{itemize}
+\item \textbf{C (Consistency):} All nodes see same data
+\item \textbf{A (Availability):} Every request gets response
+\item \textbf{P (Partition Tolerance):} System works despite network splits
+\end{itemize}
+\textbf{Trade-offs:}
+\begin{itemize}
+\item \textbf{CP Systems:} MongoDB, HBase, Redis (single master)
+  \\ Sacrifice availability during partitions
+\item \textbf{AP Systems:} Cassandra, DynamoDB, Riak
+  \\ Sacrifice consistency for availability
+\item \textbf{CA:} Traditional RDBMS (single node, no partitions)
+\end{itemize}
+
+\subsection*{PACELC Extension}
+\textbf{If Partition:} Choose Availability or Consistency \\
+\textbf{Else (normal):} Choose Latency or Consistency
+\begin{itemize}
+\item PA/EL: Cassandra (A + Low Latency)
+\item PC/EC: HBase (C + Strong Consistency)
+\item PA/EC: DynamoDB (tunable)
+\end{itemize}
+
+\subsection*{Consistency Models}
+\textbf{Strong Consistency:}
+\begin{itemize}
+\item Read returns latest write
+\item Linearizability (total ordering)
+\item Examples: Spanner, ZooKeeper
+\end{itemize}
+\textbf{Eventual Consistency:}
+\begin{itemize}
+\item Replicas converge eventually
+\item Higher availability, lower latency
+\item Examples: DynamoDB, Cassandra (tunable)
+\end{itemize}
+\textbf{Causal Consistency:}
+\begin{itemize}
+\item Preserves cause-effect ordering
+\item Weaker than strong, stronger than eventual
+\end{itemize}
+\textbf{Read-Your-Writes:}
+\begin{itemize}
+\item User sees their own updates
+\item Session-based consistency
+\end{itemize}
+
+\section*{4. Scaling Patterns}
+
+\subsection*{Vertical vs Horizontal Scaling}
+\textbf{Vertical (Scale-Up):}
+\begin{itemize}
+\item Add CPU/RAM to single machine
+\item Pros: Simple, no code changes
+\item Cons: Hardware limits, single point of failure
+\item Use: Initial growth, monoliths
+\end{itemize}
+\textbf{Horizontal (Scale-Out):}
+\begin{itemize}
+\item Add more machines
+\item Pros: No limits, fault tolerance
+\item Cons: Complex, consistency challenges
+\item Use: Web scale, distributed systems
+\end{itemize}
+
+\subsection*{Replication}
+\textbf{Master-Slave (Primary-Secondary):}
+\begin{itemize}
+\item Writes to master, reads from replicas
+\item Pros: Read scalability, simple
+\item Cons: Single write point, replication lag
+\end{itemize}
+\textbf{Multi-Master:}
+\begin{itemize}
+\item Multiple write nodes
+\item Pros: Write scalability, no single point of failure
+\item Cons: Conflict resolution complexity
+\end{itemize}
+\textbf{Synchronous vs Asynchronous:}
+\begin{itemize}
+\item Sync: Consistent, slower writes
+\item Async: Fast writes, eventual consistency
+\end{itemize}
+\textbf{Trade-off:} Strong consistency (sync) vs write performance (async)
+
+\subsection*{Partitioning / Sharding}
+\textbf{Purpose:} Split data across multiple databases \\
+\textbf{Strategies:}
+\begin{itemize}
+\item \textbf{Hash-Based:} hash(key) \% N
+  \\ Pros: Even distribution
+  \\ Cons: Resharding difficult, no range queries
+\item \textbf{Range-Based:} Key ranges (A-M, N-Z)
+  \\ Pros: Range queries, easy to add shards
+  \\ Cons: Hot spots if unbalanced
+\item \textbf{Geography-Based:} By region/location
+  \\ Pros: Data locality, latency
+  \\ Cons: Uneven distribution
+\item \textbf{Consistent Hashing:} Virtual nodes, minimal resharding
+  \\ \textbf{Why?} Minimizes data re-shuffling when nodes added/removed (only K/n keys move)
+\end{itemize}
+\textbf{Challenges:}
+\begin{itemize}
+\item Joins across shards (avoid or denormalize)
+\item Distributed transactions (use sagas)
+\item Rebalancing during growth
+\end{itemize}
+\textbf{Hot Shard Problem (Critical Staff Question):}
+\begin{itemize}
+\item \textbf{Problem:} One shard overloaded (e.g., celebrity with 100M followers)
+\item \textbf{Detection:} Monitor per-shard QPS, identify outliers (10x avg)
+\item \textbf{Solutions:}
+  \\ 1. Further partition hot entity (split celebrity into multiple shards)
+  \\ 2. Dedicated cache for hot entities (Redis cluster for top 1000 users)
+  \\ 3. Read replicas for hot shard (scale reads independently)
+  \\ 4. Separate infrastructure (Twitter: Justin Bieber gets dedicated servers)
+\item \textbf{Prevention:} Hybrid sharding (hash most users, special-case celebrities)
+\end{itemize}
+\textbf{Trade-off:} Complexity (hybrid sharding) vs performance (dedicated cache)
+
+\section*{5. Microservices Patterns}
+
+\subsection*{Service Communication}
+\textbf{Synchronous:}
+\begin{itemize}
+\item REST APIs - HTTP, stateless, simple
+\item gRPC - Binary, fast, contracts (protobuf)
+\end{itemize}
+\textbf{Asynchronous:}
+\begin{itemize}
+\item Message Queues - Decoupled, reliable
+\item Event Streaming - Kafka, real-time
+\end{itemize}
+
+\subsection*{Data Management}
+\textbf{Database per Service:}
+\begin{itemize}
+\item Each service owns its data
+\item Pros: Loose coupling, independent scaling
+\item Cons: Distributed queries, consistency
+\end{itemize}
+\textbf{Saga Pattern (Distributed Transactions):}
+\begin{itemize}
+\item \textbf{Choreography:} Events trigger next steps
+\item \textbf{Orchestration:} Central coordinator
+\item Compensating transactions for rollback
+\end{itemize}
+
+\subsection*{API Gateway}
+\textbf{Purpose:} Single entry point for clients \\
+\textbf{Responsibilities:}
+\begin{itemize}
+\item Routing, load balancing
+\item Authentication, rate limiting
+\item Request aggregation (BFF pattern)
+\item Protocol translation
+\end{itemize}
+
+\subsection*{Service Discovery}
+\textbf{Client-Side:} Netflix Eureka, Consul \\
+\textbf{Server-Side:} Kubernetes services, AWS ELB \\
+\textbf{DNS-Based:} Route53, CoreDNS
+
+\section*{6. Capacity Estimation}
+
+\subsection*{Key Metrics}
+\textbf{QPS (Queries Per Second):}
+\begin{itemize}
+\item Daily Users $\times$ Avg Requests/User / 86400
+\item Peak = Average $\times$ 3-5
+\end{itemize}
+\textbf{Storage:}
+\begin{itemize}
+\item Items $\times$ Size per Item $\times$ Replication Factor
+\item Factor in growth (5 years typical)
+\end{itemize}
+\textbf{Bandwidth:}
+\begin{itemize}
+\item QPS $\times$ Avg Response Size
+\item Separate read vs write bandwidth
+\end{itemize}
+\textbf{Memory (Caching):}
+\begin{itemize}
+\item 20\% of daily requests $\times$ Response Size
+\item 80/20 rule: 20\% data = 80\% traffic
+\end{itemize}
+
+\subsection*{Server Count Estimation}
+\textbf{Formula:} Servers = QPS / (QPS per Server) \\
+\textbf{Assumptions:}
+\begin{itemize}
+\item 1 server handles 1000-10000 QPS (web)
+\item 1 server handles 100-1000 QPS (DB queries)
+\item Add 30\% headroom for safety
+\end{itemize}
+
+\subsection*{Example: URL Shortener}
+\textbf{Assumptions:}
+\begin{itemize}
+\item 100M new URLs per month
+\item 10:1 read-write ratio
+\item URL record = 500 bytes
+\end{itemize}
+\textbf{Calculations:}
+\begin{itemize}
+\item Write QPS = 100M / (30 $\times$ 86400) $\approx$ 40
+\item Read QPS = 40 $\times$ 10 = 400
+\item Storage (5 years) = 100M $\times$ 12 $\times$ 5 $\times$ 500B $\approx$ 3TB
+\item Bandwidth = 400 $\times$ 500B $\approx$ 200KB/s
+\item Cache (20\% of daily) = 0.2 $\times$ 400 $\times$ 86400 $\times$ 500B $\approx$ 3.5GB
+\end{itemize}
+
+\section*{7. Common System Designs}
+
+\subsection*{URL Shortener (TinyURL)}
+\textbf{Requirements:}
+\begin{itemize}
+\item Generate short URL from long URL
+\item Redirect short to long (low latency)
+\item Custom aliases, expiration
+\end{itemize}
+\textbf{Key Design:}
+\begin{itemize}
+\item \textbf{Short Code:} Base62 encoding (7 chars = 62\textsuperscript{7} $\approx$ 3.5T URLs)
+\item \textbf{ID Generation:} Auto-increment, UUID, or distributed ID (Snowflake)
+\item \textbf{Database:} Key-value store (Redis/DynamoDB)
+  \\ Schema: shortCode $\rightarrow$ \{longURL, createdAt, expiresAt\}
+\item \textbf{Cache:} LRU cache for hot URLs (80/20 rule)
+\item \textbf{Write Flow:} Generate ID $\rightarrow$ Encode $\rightarrow$ Store in DB
+\item \textbf{Read Flow:} Check cache $\rightarrow$ DB lookup $\rightarrow$ 301/302 redirect
+\end{itemize}
+\textbf{Scale:}
+\begin{itemize}
+\item Horizontal DB scaling with sharding (hash-based)
+\item CDN for redirects (cache 301s)
+\item Rate limiting per user (prevent abuse)
+\end{itemize}
+
+\subsection*{Chat System (WhatsApp/Slack)}
+\textbf{Requirements:}
+\begin{itemize}
+\item 1-on-1 and group chat
+\item Online status, message history
+\item Push notifications
+\end{itemize}
+\textbf{Key Design:}
+\begin{itemize}
+\item \textbf{Protocol:} WebSocket for real-time bidirectional
+\item \textbf{Message Flow:}
+  \\ Sender $\rightarrow$ Chat Server $\rightarrow$ Message Queue $\rightarrow$ Recipients
+\item \textbf{Message Storage:} Cassandra/HBase (wide-column)
+  \\ Schema: (userId, timestamp) $\rightarrow$ message
+\item \textbf{Online Status:} Redis with heartbeat + TTL
+\item \textbf{Group Chat:} Fan-out on write to all members
+\item \textbf{Read Receipts:} Track lastReadTimestamp per user
+\end{itemize}
+\textbf{Scale:}
+\begin{itemize}
+\item Partition users by hash to chat servers
+\item Message queue for reliability (Kafka)
+\item CDN for media (images, videos)
+\item Push service for offline users (FCM, APNs)
+\end{itemize}
+
+\subsection*{News Feed (Twitter/Instagram)}
+\textbf{Requirements:}
+\begin{itemize}
+\item Post creation, feed generation
+\item Follow/unfollow users
+\item Likes, comments (engagement)
+\end{itemize}
+\textbf{Key Design:}
+\begin{itemize}
+\item \textbf{Feed Generation:}
+  \\ Fan-out on write: Pre-compute feeds (better for reads)
+  \\ Fan-out on read: Compute on demand (better for celebrities)
+  \\ Hybrid: Fan-out for regular users, on-read for celebrities
+  \\ \textbf{Trade-off:} Fast reads + high storage/write cost (write) vs slow reads + low cost (read)
+\item \textbf{Storage:}
+  \\ Posts: Cassandra/DynamoDB (postId $\rightarrow$ content)
+  \\ Follow Graph: Redis/Graph DB (userId $\rightarrow$ followers/following)
+  \\ Feed Cache: Redis (userId $\rightarrow$ sorted list of postIds)
+\item \textbf{Ranking:} ML model scoring (recency, engagement, relevance)
+\item \textbf{Timeline:} Sorted by timestamp or personalized ranking
+\end{itemize}
+\textbf{Scale:}
+\begin{itemize}
+\item Async feed generation workers (Kafka)
+\item Cache feeds in Redis (LRU eviction)
+\item CDN for media assets
+\item Read replicas for graph queries
+\end{itemize}
+
+\subsection*{Ride Sharing (Uber/Lyft)}
+\textbf{Requirements:}
+\begin{itemize}
+\item Match riders to nearby drivers
+\item Real-time location tracking
+\item Fare calculation, ETA
+\end{itemize}
+\textbf{Key Design:}
+\begin{itemize}
+\item \textbf{Geospatial Indexing:}
+  \\ QuadTree or Geohash for location search
+  \\ Query: Find drivers within N km of rider
+\item \textbf{Matching:}
+  \\ Rider requests ride $\rightarrow$ Query nearby drivers
+  \\ Score by distance, rating, ETA
+  \\ Send to top K drivers (first accept wins)
+\item \textbf{Location Updates:} WebSocket or long polling (every 5s)
+\item \textbf{Storage:}
+  \\ Redis for active driver/rider locations (TTL)
+  \\ PostgreSQL/DynamoDB for trips, users, payments
+\item \textbf{Dispatch:} Message queue for ride requests
+\end{itemize}
+\textbf{Scale:}
+\begin{itemize}
+\item Shard by geography (city-based)
+\item In-memory geo index per region
+\item Event streaming (Kafka) for location updates
+\item Separate services: matching, routing, pricing
+\end{itemize}
+
+\subsection*{Video Streaming (YouTube/Netflix)}
+\textbf{Requirements:}
+\begin{itemize}
+\item Upload, transcode, stream videos
+\item Adaptive bitrate (quality based on bandwidth)
+\item Recommendations, watch history
+\end{itemize}
+\textbf{Key Design:}
+\begin{itemize}
+\item \textbf{Upload:} Direct to S3/GCS, async processing
+\item \textbf{Transcoding:} Worker fleet converts to multiple formats
+  \\ H.264/H.265, resolutions (1080p, 720p, 480p, 360p)
+  \\ Split into chunks (HLS, DASH) for streaming
+\item \textbf{Streaming:}
+  \\ CDN serves video chunks (CloudFront, Akamai)
+  \\ ABR protocol adjusts quality based on bandwidth
+\item \textbf{Metadata:} SQL/NoSQL for video info, comments
+\item \textbf{Recommendations:} ML pipeline (Spark, offline batch)
+\end{itemize}
+\textbf{Scale:}
+\begin{itemize}
+\item Multi-CDN for global reach
+\item Distributed transcoding (AWS MediaConvert)
+\item Pre-warming cache for popular videos
+\item Separate read/write paths (CQRS)
+\end{itemize}
+
+\section*{8. Additional Patterns}
+
+\subsection*{Rate Limiting}
+\textbf{Algorithms:}
+\begin{itemize}
+\item \textbf{Token Bucket:} Refill tokens at rate, consume on request
+\item \textbf{Leaky Bucket:} Fixed rate output, buffer overflow
+\item \textbf{Fixed Window:} Count per time window (can burst)
+\item \textbf{Sliding Window:} Weighted by timestamp (smooth)
+\end{itemize}
+\textbf{Implementation:} Redis with TTL, increment counters
+
+\subsection*{Circuit Breaker}
+\textbf{Purpose:} Prevent cascading failures \\
+\textbf{States:}
+\begin{itemize}
+\item Closed: Normal, requests pass through
+\item Open: Failures exceeded, reject requests
+\item Half-Open: Test if service recovered
+\end{itemize}
+\textbf{Key Trade-off:} Sacrifice single service availability to protect overall system stability
+
+\subsection*{Idempotency}
+\textbf{Purpose:} Ensure multiple identical requests have the same effect as one \\
+\textbf{Why?} Prevents duplicate processing in async systems (e.g., double charging a credit card, duplicate orders) \\
+\textbf{Implementation:}
+\begin{itemize}
+\item \textbf{Unique Transaction ID:} Check if transaction\_id exists before processing
+\item \textbf{State-based checks:} if status != 'processed'
+\item \textbf{Database constraints:} Unique index on transaction\_id
+\end{itemize}
+\textbf{Example (Payment):}
+\begin{itemize}
+\item 1. Check if transaction\_id in completed\_transactions table
+\item 2. If exists, return success (already processed)
+\item 3. If not, process payment and insert transaction\_id atomically
+\end{itemize}
+\textbf{Use Cases:} Payment processing, order creation, message queue consumers, API retries
+
+\subsection*{Leader Election}
+\textbf{Purpose:} Designate a single node for coordination tasks \\
+\textbf{Why?} Ensure exactly one node handles critical operations (writes, job scheduling, lock management) \\
+\textbf{Implementation:}
+\begin{itemize}
+\item \textbf{Consensus Algorithms:} Paxos, Raft (distributed agreement)
+\item \textbf{Lease-based:} Lock service with TTL (ZooKeeper, etcd)
+  \\ Leader holds lease, must renew periodically
+  \\ If leader fails, lease expires, new election triggered
+\end{itemize}
+\textbf{Use Cases:}
+\begin{itemize}
+\item Database master selection (MySQL, PostgreSQL)
+\item Distributed lock manager (ZooKeeper coordination)
+\item Job scheduler coordination (only one node runs cron jobs)
+\item Kafka partition leader (handles reads/writes for partition)
+\end{itemize}
+
+\subsection*{CQRS (Command Query Responsibility Segregation)}
+\textbf{Pattern:} Separate read/write models \\
+\textbf{Benefits:}
+\begin{itemize}
+\item Optimize read and write independently
+\item Scale reads with replicas/caches
+\item Complex queries without impacting writes
+\end{itemize}
+
+\subsection*{Event Sourcing}
+\textbf{Pattern:} Store state changes as events \\
+\textbf{Benefits:}
+\begin{itemize}
+\item Full audit log
+\item Replay events to rebuild state
+\item Time travel (historical queries)
+\end{itemize}
+\textbf{Combine with:} CQRS for materialized views
+
+\subsection*{Bloom Filter}
+\textbf{Purpose:} Space-efficient set membership test \\
+\textbf{Properties:}
+\begin{itemize}
+\item No false negatives
+\item Small false positive rate (tunable)
+\end{itemize}
+\textbf{Use Cases:} Cache hit prediction, duplicate detection
+
+\subsection*{Failure Modes \& Recovery}
+\textbf{Split-Brain Problem:}
+\begin{itemize}
+\item Network partition creates 2 masters (both accept writes)
+\item \textbf{Prevention:} Quorum consensus - majority vote required
+\item Example: 5-node cluster needs 3 to agree on leader
+\item Used by: ZooKeeper, etcd, Consul
+\end{itemize}
+\textbf{Cascading Failures:}
+\begin{itemize}
+\item One service failure triggers downstream failures
+\item \textbf{Prevention:} Circuit breaker, bulkheads (isolate), rate limiting, timeouts
+\item Example: Dependency failure $\rightarrow$ retry storm $\rightarrow$ entire system down
+\end{itemize}
+\textbf{Data Loss Scenarios:}
+\begin{itemize}
+\item Async replication lag during primary crash
+\item \textbf{Trade-off:} Sync replication (slow writes, no loss) vs async (fast, risk loss)
+\item \textbf{Mitigation:} Set replication factor $\geq$ 3, cross-region backups
+\end{itemize}
+\textbf{Quorum Reads/Writes:}
+\begin{itemize}
+\item \textbf{Write Quorum (W):} Min nodes that must acknowledge write
+\item \textbf{Read Quorum (R):} Min nodes that must respond to read
+\item \textbf{Consistency Rule:} R + W > N guarantees read sees latest write
+  \\ N = total replicas, typical: N=3, W=2, R=2 (strong consistency)
+  \\ DynamoDB: R=1, W=1 (fast, eventual) or R=2, W=2 (consistent)
+\end{itemize}
+\textbf{Disaster Recovery:}
+\begin{itemize}
+\item \textbf{RPO (Recovery Point Objective):} Max data loss tolerable (e.g., 1 hour)
+\item \textbf{RTO (Recovery Time Objective):} Max downtime tolerable (e.g., 15 min)
+\item \textbf{Strategies:} Multi-region replication, automated failover, backup/restore
+\end{itemize}
+
+\section*{9. Interview Strategy}
+
+\subsection*{Design Interview Framework (RADEO)}
+\textbf{1. Requirements (5-10 min):}
+\begin{itemize}
+\item Functional: Core features (what system does)
+\item Non-functional: Scale, latency, availability
+\item Constraints: Read/write ratio, data size
+\end{itemize}
+\textbf{2. API Design (5 min):}
+\begin{itemize}
+\item Define key endpoints (REST/RPC)
+\item Request/response schemas
+\item Example: POST /shorten, GET /:shortCode
+\end{itemize}
+\textbf{3. Data Model (5-10 min):}
+\begin{itemize}
+\item Database choice (SQL vs NoSQL)
+\item Schema design (tables/collections)
+\item Relationships, indexes
+\end{itemize}
+\textbf{4. High-Level Design (10-15 min):}
+\begin{itemize}
+\item Components: Client, LB, App, DB, Cache
+\item Data flow diagrams
+\item Key algorithms (hashing, ranking)
+\end{itemize}
+\textbf{5. Deep Dives (15-20 min):}
+\begin{itemize}
+\item Bottlenecks: Identify and address
+\item Trade-offs: Discuss alternatives
+\item Scale: Sharding, caching, replication
+\end{itemize}
+\textbf{6. Operations (5 min):}
+\begin{itemize}
+\item Monitoring: Metrics, alerts
+\item Failure modes: What can go wrong?
+\item Security: Auth, encryption, rate limiting
+\end{itemize}
+
+\subsection*{Key Trade-offs to Discuss}
+\begin{itemize}
+\item Consistency vs Availability (CAP)
+\item Latency vs Consistency (PACELC)
+\item SQL vs NoSQL (structure vs scale)
+\item Sync vs Async replication
+\item Fan-out on write vs read (feeds)
+\item Horizontal vs Vertical scaling
+\item Microservices vs Monolith
+\item Push vs Pull (notifications)
+\end{itemize}
+
+\subsection*{Numbers to Remember}
+\textbf{Time Units:}
+\begin{itemize}
+\item 1 million seconds $\approx$ 11.5 days
+\item 1 billion seconds $\approx$ 31.7 years
+\item 1 day = 86,400 seconds
+\end{itemize}
+\textbf{Latency Hierarchy (critical for Staff):}
+\begin{itemize}
+\item L1 cache reference: 0.5 ns
+\item L2 cache reference: 7 ns
+\item RAM (main memory): 100 ns
+\item SSD random read: 150 $\mu$s (150,000 ns)
+\item HDD seek: 10 ms (10,000,000 ns)
+\item Network within datacenter: 0.5 ms
+\item Network cross-region (US-Europe): 150 ms
+\end{itemize}
+\textbf{Key Insight:} Memory is 1000x faster than SSD, SSD is 100x faster than HDD. \\
+Network latency dominates in distributed systems.
+\vspace{2pt}
+
+\textbf{Capacity \& Throughput:}
+\begin{itemize}
+\item QPS for 1M DAU $\approx$ 10-100 (depends on activity)
+\item 1 char = 1 byte, 1 int = 4 bytes, 1 long = 8 bytes
+\item 1 MB = 1000 KB, 1 GB = 1000 MB, 1 TB = 1000 GB, 1 PB = 1000 TB
+\item CDN bandwidth: 1-10 Gbps per edge server
+\item Database: 1000-10000 QPS per server
+\item Redis: 100K+ ops/sec per instance
+\end{itemize}
+
+\subsection*{Common Mistakes to Avoid}
+\begin{itemize}
+\item Jumping to solution without clarifying requirements
+\item Over-engineering (keep it simple initially)
+\item Ignoring scale (assume billions of users)
+\item Not discussing trade-offs
+\item Forgetting about monitoring/operations
+\item Not asking clarifying questions
+\item Ignoring edge cases (failures, security)
+\end{itemize}
+
+\end{multicols*}
+\end{document}

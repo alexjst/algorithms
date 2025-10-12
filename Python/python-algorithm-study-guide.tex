@@ -1,0 +1,502 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+
+% Define colors
+\definecolor{priority1}{RGB}{255,200,200}
+\definecolor{priority2}{RGB}{255,235,200}
+\definecolor{priority3}{RGB}{200,255,200}
+
+\title{\textbf{Algorithm Templates Study Guide} \\ \large Companion to Python Algorithm Templates Cheatsheet}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This study guide accompanies the \textit{Python Algorithm Templates} cheatsheet (25 patterns). Use this document to:
+\begin{itemize}
+\item Diagnose your weak spots and prioritize study time
+\item Track progress with spaced repetition
+\item Map patterns to practice problems
+\item Prepare systematically for Staff-level interviews at Google/Meta/FAANG
+\end{itemize}
+
+\section{Study Strategy: The Weakness-First Approach}
+
+\subsection{Why Not Sequential?}
+
+\textbf{Don't} go through patterns 1-25 in order. Here's why:
+\begin{itemize}
+\item \textbf{Pareto Principle violation}: You waste time on patterns you already know (Two Pointers, Binary Search) and rush through hard ones (Union-Find, Advanced DP)
+\item \textbf{Fatigue effect}: By pattern \#18, you're tired and the hardest patterns get the least energy
+\item \textbf{False confidence}: You breeze through easy patterns, then panic on rusty ones in the interview
+\end{itemize}
+
+\subsection{The Optimal Strategy: Attack Weaknesses First}
+
+\textbf{Phase 1: Diagnostic (Day 1 - 20 minutes)}
+
+Quickly scan all 25 patterns and categorize:
+\begin{itemize}
+\item \colorbox{priority1}{\textbf{Priority 1 (🔴 Red)}}: Rusty/Unknown - haven't used recently or never learned well
+\item \colorbox{priority2}{\textbf{Priority 2 (🟡 Yellow)}}: Shaky - recognize it, but would struggle with details
+\item \colorbox{priority3}{\textbf{Priority 3 (🟢 Green)}}: Confident - could write from memory in an interview right now
+\end{itemize}
+
+\textbf{Phase 2: Intensive Practice (Days 2-7)}
+
+Focus 80\% of time on Priority 1 \& 2 patterns. For each rusty pattern:
+\begin{enumerate}
+\item \textbf{Study the template} (5 min) - understand the pattern deeply
+\item \textbf{Write from memory} (10 min) - close cheatsheet, try to recreate
+\item \textbf{Solve 2-3 LeetCode problems} (45 min) - apply the pattern
+\item \textbf{Review mistakes} (10 min) - what did you forget?
+\item \textbf{Repeat next day} - spaced repetition cements learning
+\end{enumerate}
+
+\textbf{Phase 3: Sequential Review (Days 8-10)}
+
+Now go through patterns 1-25 sequentially:
+\begin{itemize}
+\item 2-3 minutes per pattern
+\item Verify you can recall the key template
+\item Catches any gaps and reinforces connections
+\end{itemize}
+
+\textbf{Phase 4: Pattern Recognition (Days 11-14)}
+
+Practice identifying which pattern to use:
+\begin{enumerate}
+\item Read LeetCode problem description
+\item \textbf{Identify the pattern} (2-3 min) - use Pattern Recognition Guide
+\item Solve using the template
+\item This is the actual interview skill
+\end{enumerate}
+
+\subsection{Two-Week Intensive Schedule}
+
+\textbf{Week 1: Attack Weaknesses}
+\begin{itemize}
+\item Day 1: Diagnostic + Start Priority 1 patterns
+\item Day 2-3: Priority 1 patterns (3-4 patterns/day)
+\item Day 4-5: Priority 2 patterns (4-5 patterns/day)
+\item Day 6-7: Mixed practice - random problems from Priority 1\&2
+\end{itemize}
+
+\textbf{Week 2: Polish \& Pattern Recognition}
+\begin{itemize}
+\item Day 8: Sequential review (patterns 1-12)
+\item Day 9: Sequential review (patterns 13-25)
+\item Day 10: Timed practice - 3 LC problems under time pressure
+\item Day 11-12: Pattern recognition drills
+\item Day 13-14: Mock interviews or hard LC problems
+\end{itemize}
+
+\subsection{Spaced Repetition for Rusty Patterns}
+
+For each Priority 1 (🔴) pattern, follow this schedule:
+\begin{itemize}
+\item \textbf{Day 1}: Study + 3 problems + take detailed notes
+\item \textbf{Day 2}: Review notes + 2 problems
+\item \textbf{Day 4}: Quick review (10 min) + 1 problem
+\item \textbf{Day 7}: Quick review (10 min) + 1 problem
+\item \textbf{Day 14}: Final review (5 min)
+\end{itemize}
+
+This neurologically cements the pattern better than 10 hours on Day 1.
+
+\section{Common Weak Spots}
+
+Most engineers struggle with these patterns (start here if unsure):
+\begin{itemize}
+\item \textbf{Union-Find} - path compression \& union by rank optimizations are tricky
+\item \textbf{Topological Sort} - must know both Kahn's (BFS) and DFS versions
+\item \textbf{Trie} - forget the TrieNode structure and how to traverse
+\item \textbf{Advanced DP} - state machines and DP on trees require practice
+\item \textbf{Bellman-Ford} - newer addition, less commonly practiced
+\item \textbf{Monotonic Stack} - the increasing/decreasing logic is subtle
+\item \textbf{LCA} - recursive logic requires clear mental model
+\end{itemize}
+
+\newpage
+
+\section{Progress Tracking Table}
+
+Use this table to track your study progress. Fill in dates and check boxes as you complete each phase.
+
+\textbf{Priority Legend:}
+\begin{itemize}
+\item \colorbox{priority1}{\textbf{Priority 1 (🔴 P1)}}: Rusty/Unknown - Master these first with spaced repetition
+\item \colorbox{priority2}{\textbf{Priority 2 (🟡 P2)}}: Shaky - Solidify with practice
+\item \colorbox{priority3}{\textbf{Priority 3 (🟢 P3)}}: Confident - Quick review sufficient
+\end{itemize}
+
+\textbf{Note:} On B\&W printers, priorities show as: P1 (darkest gray), P2 (medium gray), P3 (lightest gray)
+
+\begin{center}
+\small
+\begin{longtable}{|p{3.2cm}|c|c|c|c|c|c|p{3.5cm}|}
+\hline
+\textbf{Pattern} & \textbf{Pri} & \textbf{D1} & \textbf{D2} & \textbf{D4} & \textbf{D7} & \textbf{D14} & \textbf{Notes / Problems} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Pattern} & \textbf{Pri} & \textbf{D1} & \textbf{D2} & \textbf{D4} & \textbf{D7} & \textbf{D14} & \textbf{Notes / Problems} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+1. Two Pointers & \cellcolor{priority3}P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+2. Sliding Window & \cellcolor{priority3}P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+3. Binary Search & \cellcolor{priority3}P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+4. Fast/Slow Pointers & \cellcolor{priority3}P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+5. Linked List Reversal & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+6. Binary Tree Traversal & \cellcolor{priority3}P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+7. DFS & \cellcolor{priority3}P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+8. BFS & \cellcolor{priority3}P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+9. Dynamic Programming & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+10. Backtracking & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+11. Bit Manipulation & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+12. Prefix Sum & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+13. Heaps & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+14. Monotonic Stack & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+15. Overlapping Intervals & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+16. Trie & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+17. Union-Find & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+18. Greedy Algorithms & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+19. Advanced DP & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+20. Graph Algorithms & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+21. Topological Sort & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+22. Cyclic Sort & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+23. LCA & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+24. Matrix Traversal & \cellcolor{priority2}P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+25. Bellman-Ford & \cellcolor{priority1}P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+\end{longtable}
+\end{center}
+
+\textbf{Instructions:}
+\begin{enumerate}
+\item \textbf{Day 1}: Customize priority based on your self-assessment (P1 = rusty, P2 = shaky, P3 = confident)
+\item Check boxes as you complete each review session
+\item Write problems solved and key insights in the Notes column
+\item Focus 80\% of time on P1/P2 patterns
+\end{enumerate}
+
+\newpage
+
+\section{Pattern-to-LeetCode Problem Mapping}
+
+Essential problems for each pattern. Solve these to master the template.
+
+\subsection{Priority 1 Patterns (Master These First)}
+
+\textbf{14. Monotonic Stack}
+\begin{itemize}
+\item LC 739 - Daily Temperatures (Easy - start here)
+\item LC 496 - Next Greater Element I (Easy)
+\item LC 84 - Largest Rectangle in Histogram (Hard - classic)
+\item LC 42 - Trapping Rain Water (Hard)
+\end{itemize}
+
+\textbf{16. Trie}
+\begin{itemize}
+\item LC 208 - Implement Trie (Medium - must know)
+\item LC 211 - Design Add and Search Words Data Structure (Medium)
+\item LC 212 - Word Search II (Hard - combines Trie + DFS)
+\end{itemize}
+
+\textbf{17. Union-Find}
+\begin{itemize}
+\item LC 547 - Number of Provinces (Medium - start here)
+\item LC 684 - Redundant Connection (Medium)
+\item LC 323 - Number of Connected Components (Medium)
+\item LC 1319 - Number of Operations to Make Network Connected (Medium)
+\end{itemize}
+
+\textbf{19. Advanced DP}
+\begin{itemize}
+\item LC 72 - Edit Distance (Medium - 2D DP)
+\item LC 309 - Best Time to Buy and Sell Stock with Cooldown (Medium - state machine)
+\item LC 337 - House Robber III (Medium - DP on trees)
+\item LC 1000 - Minimum Cost to Merge Stones (Hard)
+\end{itemize}
+
+\textbf{21. Topological Sort}
+\begin{itemize}
+\item LC 207 - Course Schedule (Medium - detection)
+\item LC 210 - Course Schedule II (Medium - ordering)
+\item LC 269 - Alien Dictionary (Hard)
+\item LC 310 - Minimum Height Trees (Medium)
+\end{itemize}
+
+\textbf{23. Lowest Common Ancestor}
+\begin{itemize}
+\item LC 236 - Lowest Common Ancestor of a Binary Tree (Medium - must know)
+\item LC 235 - Lowest Common Ancestor of a BST (Easy - optimization)
+\item LC 1644 - Lowest Common Ancestor of a Binary Tree II (Medium)
+\end{itemize}
+
+\textbf{25. Bellman-Ford}
+\begin{itemize}
+\item LC 787 - Cheapest Flights Within K Stops (Medium)
+\item LC 743 - Network Delay Time (Medium - compare with Dijkstra)
+\end{itemize}
+
+\subsection{Priority 2 Patterns (Solidify These)}
+
+\textbf{5. Linked List Reversal}
+\begin{itemize}
+\item LC 206 - Reverse Linked List (Easy - fundamental)
+\item LC 92 - Reverse Linked List II (Medium)
+\item LC 25 - Reverse Nodes in k-Group (Hard)
+\end{itemize}
+
+\textbf{9. Dynamic Programming}
+\begin{itemize}
+\item LC 70 - Climbing Stairs (Easy - start here)
+\item LC 198 - House Robber (Medium)
+\item LC 322 - Coin Change (Medium - unbounded knapsack)
+\item LC 53 - Maximum Subarray (Easy - Kadane's)
+\end{itemize}
+
+\textbf{10. Backtracking}
+\begin{itemize}
+\item LC 46 - Permutations (Medium)
+\item LC 78 - Subsets (Medium)
+\item LC 77 - Combinations (Medium)
+\item LC 79 - Word Search (Medium)
+\end{itemize}
+
+\textbf{12. Prefix Sum}
+\begin{itemize}
+\item LC 560 - Subarray Sum Equals K (Medium - classic)
+\item LC 974 - Subarray Sums Divisible by K (Medium)
+\item LC 304 - Range Sum Query 2D (Medium)
+\end{itemize}
+
+\textbf{13. Heaps / Top K Elements}
+\begin{itemize}
+\item LC 215 - Kth Largest Element (Medium)
+\item LC 347 - Top K Frequent Elements (Medium)
+\item LC 23 - Merge k Sorted Lists (Hard)
+\item LC 295 - Find Median from Data Stream (Hard)
+\end{itemize}
+
+\textbf{15. Overlapping Intervals}
+\begin{itemize}
+\item LC 56 - Merge Intervals (Medium - fundamental)
+\item LC 57 - Insert Interval (Medium)
+\item LC 435 - Non-overlapping Intervals (Medium)
+\item LC 252 - Meeting Rooms (Easy)
+\end{itemize}
+
+\textbf{20. Graph Algorithms}
+\begin{itemize}
+\item LC 743 - Network Delay Time (Medium - Dijkstra)
+\item LC 1334 - Find the City With Smallest Number of Neighbors (Medium - Floyd-Warshall)
+\item LC 1584 - Min Cost to Connect All Points (Medium - MST)
+\end{itemize}
+
+\textbf{22. Cyclic Sort}
+\begin{itemize}
+\item LC 268 - Missing Number (Easy)
+\item LC 287 - Find the Duplicate Number (Medium)
+\item LC 442 - Find All Duplicates in an Array (Medium)
+\end{itemize}
+
+\textbf{24. Matrix Traversal}
+\begin{itemize}
+\item LC 54 - Spiral Matrix (Medium - fundamental)
+\item LC 48 - Rotate Image (Medium - in-place rotation)
+\item LC 59 - Spiral Matrix II (Medium)
+\end{itemize}
+
+\subsection{Priority 3 Patterns (Quick Review)}
+
+\textbf{1. Two Pointers}
+\begin{itemize}
+\item LC 167 - Two Sum II (Easy)
+\item LC 15 - 3Sum (Medium)
+\end{itemize}
+
+\textbf{2. Sliding Window}
+\begin{itemize}
+\item LC 3 - Longest Substring Without Repeating Characters (Medium)
+\item LC 424 - Longest Repeating Character Replacement (Medium)
+\end{itemize}
+
+\textbf{3. Binary Search}
+\begin{itemize}
+\item LC 704 - Binary Search (Easy)
+\item LC 34 - Find First and Last Position (Medium)
+\item LC 410 - Split Array Largest Sum (Hard - search space)
+\end{itemize}
+
+\textbf{4. Fast/Slow Pointers}
+\begin{itemize}
+\item LC 141 - Linked List Cycle (Easy)
+\item LC 142 - Linked List Cycle II (Medium)
+\item LC 876 - Middle of the Linked List (Easy)
+\end{itemize}
+
+\textbf{7. DFS / 8. BFS}
+\begin{itemize}
+\item LC 200 - Number of Islands (Medium)
+\item LC 994 - Rotting Oranges (Medium - BFS)
+\item LC 133 - Clone Graph (Medium)
+\end{itemize}
+
+\newpage
+
+\section{Staff-Level Interview Preparation}
+
+\subsection{What This Cheatsheet Covers}
+
+\textbf{Algorithmic/DSA Portion: 9.5/10} \checkmark
+\begin{itemize}
+\item All 25 core patterns cover 98\%+ of coding interview problems
+\item Includes advanced patterns (Union-Find, Topological Sort, Advanced DP, Bellman-Ford)
+\item Optimization techniques (Kadane's, Monotonic Stack, Cyclic Sort)
+\item Comprehensive graph algorithms
+\end{itemize}
+
+At Staff level, algorithmic complexity doesn't necessarily increase. You'll still see LC Medium/Hard. What changes is the \textbf{depth of understanding} and \textbf{communication} expected.
+
+\subsection{What Staff Interviews Add (Beyond Algorithms)}
+
+\textbf{1. System Design (50\% of Staff interviews)}
+\begin{itemize}
+\item This cheatsheet: Does not cover
+\item You need: Scalability, CAP theorem, distributed systems, load balancing, caching
+\item Resources: \textit{Designing Data-Intensive Applications}, System Design Interview Vol 1 \& 2
+\end{itemize}
+
+\textbf{2. Code Quality \& Production Readiness}
+\begin{itemize}
+\item Write production-quality code with error handling, edge cases, clean naming
+\item Discuss time/space tradeoffs explicitly
+\item Code that "could ship tomorrow"
+\end{itemize}
+
+\textbf{3. Communication \& Problem-Solving Process}
+\begin{itemize}
+\item Articulate multiple approaches before coding
+\item Justify design decisions
+\item Discuss scalability implications
+\item Handle ambiguous requirements
+\item Drive the conversation
+\end{itemize}
+
+\textbf{4. Optimization \& Follow-ups}
+\begin{itemize}
+\item "What if we have 1 billion items?"
+\item "What if this needs to run in real-time?"
+\item Discuss: Parallelization, memory constraints, hardware limitations
+\end{itemize}
+
+\subsection{Pro Tips for Staff-Level Prep}
+
+\begin{enumerate}
+\item \textbf{Don't just memorize - understand WHY}
+\begin{itemize}
+\item Why does Union-Find need path compression?
+\item Why does Bellman-Ford relax edges n-1 times?
+\item Staff interviewers will ask "why" questions
+\end{itemize}
+
+\item \textbf{Practice explaining while coding}
+\begin{itemize}
+\item Talk through your thought process
+\item "I'm using a monotonic stack here because..."
+\item Staff interviews heavily weight communication
+\end{itemize}
+
+\item \textbf{Focus on optimization tradeoffs}
+\begin{itemize}
+\item Know when to use DFS vs BFS
+\item Know when Bellman-Ford beats Dijkstra
+\item This is where Staff candidates differentiate
+\end{itemize}
+
+\item \textbf{The "blank page test"}
+\begin{itemize}
+\item For your top 5 rusty patterns: can you write them on a blank page from memory?
+\item If not, you'll struggle under interview pressure
+\end{itemize}
+\end{enumerate}
+
+\subsection{Interview Simulation Checklist}
+
+Use this for mock interviews or final prep:
+
+\begin{enumerate}
+\item[$\square$] Can explain approach before coding (2-3 min)
+\item[$\square$] Can identify pattern within 1-2 minutes
+\item[$\square$] Can write solution from memory without cheatsheet
+\item[$\square$] Can analyze time/space complexity correctly
+\item[$\square$] Can discuss alternative approaches and tradeoffs
+\item[$\square$] Can handle follow-up questions (scalability, edge cases)
+\item[$\square$] Can explain WHY this approach is optimal
+\item[$\square$] Code is clean with good variable names
+\item[$\square$] Communicate clearly throughout the process
+\item[$\square$] Can solve under time pressure (35-40 min for LC Medium)
+\end{enumerate}
+
+\subsection{Final Week Checklist}
+
+\begin{enumerate}
+\item[$\square$] Completed all Priority 1 patterns with 3+ problems each
+\item[$\square$] Reviewed all 25 patterns sequentially at least once
+\item[$\square$] Practiced 10+ pattern recognition drills
+\item[$\square$] Completed 3+ full mock interviews
+\item[$\square$] Can write top 10 patterns from memory
+\item[$\square$] Prepared behavioral/leadership STAR stories (5-7 examples)
+\item[$\square$] Reviewed system design fundamentals (if applicable)
+\item[$\square$] Got 8 hours sleep before interview day
+\end{enumerate}
+
+\section*{Good Luck!}
+
+Remember: \textbf{This cheatsheet + deliberate practice = Staff-level algorithmic mastery}
+
+The difference between passing and failing isn't knowing more algorithms—it's knowing these 25 patterns \textbf{deeply} and recognizing when to use them \textbf{instantly}.
+
+Focus on your weak spots. Practice with purpose. Communicate clearly. You've got this!
+
+\end{document}
