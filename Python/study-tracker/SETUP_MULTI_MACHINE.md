@@ -13,6 +13,10 @@ The application automatically syncs your progress data across machines:
   - **timer_state.json**: Keeps most recently updated timer
   - **config.json**: Prefers local settings
 - **After Every Update**: Commits and pushes changes to GitHub
+- **Race Condition Prevention**: File locks prevent simultaneous git operations
+  - Git operations are serialized across all processes
+  - Data reads/writes are protected during git sync
+  - 30-second timeout prevents deadlocks
 - Data files stay in sync even when using multiple machines simultaneously
 
 ## Setup on Second Machine

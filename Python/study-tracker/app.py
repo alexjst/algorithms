@@ -7,6 +7,8 @@ import random
 import requests
 import subprocess
 import logging
+import fcntl
+import time
 
 app = Flask(__name__)
 
@@ -61,6 +63,42 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Git sync configuration
 GIT_SYNC_ENABLED = True  # Set to False to disable auto-sync
+GIT_LOCK_FILE = "/tmp/study-tracker-git.lock"
+DATA_LOCK_FILE = "/tmp/study-tracker-data.lock"
+
+class FileLock:
+    """Context manager for file-based locking"""
+    def __init__(self, lock_file, timeout=30):
+        self.lock_file = lock_file
+        self.timeout = timeout
+        self.fd = None
+
+    def __enter__(self):
+        start_time = time.time()
+        self.fd = open(self.lock_file, 'w')
+
+        while True:
+            try:
+                # Try to acquire exclusive lock (non-blocking)
+                fcntl.flock(self.fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                logger.debug(f"Acquired lock: {self.lock_file}")
+                return self
+            except IOError:
+                # Lock is held by another process
+                if time.time() - start_time > self.timeout:
+                    logger.error(f"Failed to acquire lock after {self.timeout}s: {self.lock_file}")
+                    raise TimeoutError(f"Could not acquire lock: {self.lock_file}")
+                # Wait a bit before retrying
+                time.sleep(0.1)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.fd:
+            try:
+                fcntl.flock(self.fd.fileno(), fcntl.LOCK_UN)
+                self.fd.close()
+                logger.debug(f"Released lock: {self.lock_file}")
+            except Exception as e:
+                logger.error(f"Error releasing lock: {e}")
 
 def git_pull():
     """Pull latest changes from git repository"""
@@ -68,34 +106,37 @@ def git_pull():
         return True
 
     try:
-        # Check if there are uncommitted changes
-        result = subprocess.run(
-            ['git', 'status', '--porcelain'],
-            cwd=BASE_DIR,
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
+        # Acquire both locks: git lock for git operations, data lock to prevent reads during pull
+        with FileLock(GIT_LOCK_FILE, timeout=30):
+            with FileLock(DATA_LOCK_FILE, timeout=30):
+                # Check if there are uncommitted changes
+                result = subprocess.run(
+                    ['git', 'status', '--porcelain'],
+                    cwd=BASE_DIR,
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
 
-        if result.stdout.strip():
-            logger.warning("Uncommitted changes detected, skipping pull")
-            return False
+                if result.stdout.strip():
+                    logger.warning("Uncommitted changes detected, skipping pull")
+                    return False
 
-        # Pull with rebase
-        result = subprocess.run(
-            ['git', 'pull', '--rebase', 'origin', 'master'],
-            cwd=BASE_DIR,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+                # Pull with rebase
+                result = subprocess.run(
+                    ['git', 'pull', '--rebase', 'origin', 'master'],
+                    cwd=BASE_DIR,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
 
-        if result.returncode == 0:
-            logger.info("Git pull successful")
-            return True
-        else:
-            logger.error(f"Git pull failed: {result.stderr}")
-            return False
+                if result.returncode == 0:
+                    logger.info("Git pull successful")
+                    return True
+                else:
+                    logger.error(f"Git pull failed: {result.stderr}")
+                    return False
 
     except subprocess.TimeoutExpired:
         logger.error("Git pull timed out")
@@ -261,94 +302,96 @@ def git_push(message=None):
         return True
 
     try:
-        # Add data files
-        subprocess.run(
-            ['git', 'add', 'data/'],
-            cwd=BASE_DIR,
-            capture_output=True,
-            timeout=10
-        )
+        # Acquire git lock to prevent concurrent git operations
+        with FileLock(GIT_LOCK_FILE, timeout=30):
+            # Add data files
+            subprocess.run(
+                ['git', 'add', 'data/'],
+                cwd=BASE_DIR,
+                capture_output=True,
+                timeout=10
+            )
 
-        # Check if there are changes to commit
-        result = subprocess.run(
-            ['git', 'diff', '--cached', '--quiet'],
-            cwd=BASE_DIR,
-            capture_output=True,
-            timeout=10
-        )
+            # Check if there are changes to commit
+            result = subprocess.run(
+                ['git', 'diff', '--cached', '--quiet'],
+                cwd=BASE_DIR,
+                capture_output=True,
+                timeout=10
+            )
 
-        # If exit code is 0, no changes to commit
-        if result.returncode == 0:
-            logger.info("No changes to commit")
-            return True
+            # If exit code is 0, no changes to commit
+            if result.returncode == 0:
+                logger.info("No changes to commit")
+                return True
 
-        # Commit changes
-        commit_message = message or f"Auto-sync: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        result = subprocess.run(
-            ['git', 'commit', '-m', commit_message],
-            cwd=BASE_DIR,
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
+            # Commit changes
+            commit_message = message or f"Auto-sync: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            result = subprocess.run(
+                ['git', 'commit', '-m', commit_message],
+                cwd=BASE_DIR,
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
 
-        if result.returncode != 0:
-            logger.error(f"Git commit failed: {result.stderr}")
-            return False
+            if result.returncode != 0:
+                logger.error(f"Git commit failed: {result.stderr}")
+                return False
 
-        # Pull before push to handle any remote changes
-        logger.info("Pulling remote changes before push...")
-        pull_result = subprocess.run(
-            ['git', 'pull', '--rebase', 'origin', 'master'],
-            cwd=BASE_DIR,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+            # Pull before push to handle any remote changes
+            logger.info("Pulling remote changes before push...")
+            pull_result = subprocess.run(
+                ['git', 'pull', '--rebase', 'origin', 'master'],
+                cwd=BASE_DIR,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
 
-        # If pull fails due to conflicts, try to resolve them
-        if pull_result.returncode != 0:
-            if 'conflict' in pull_result.stderr.lower() or 'conflict' in pull_result.stdout.lower():
-                logger.warning("Conflicts detected during pull, attempting auto-resolution...")
+            # If pull fails due to conflicts, try to resolve them
+            if pull_result.returncode != 0:
+                if 'conflict' in pull_result.stderr.lower() or 'conflict' in pull_result.stdout.lower():
+                    logger.warning("Conflicts detected during pull, attempting auto-resolution...")
 
-                # Merge using our version for conflicts
-                if merge_json_files():
-                    # Continue the rebase
-                    continue_result = subprocess.run(
-                        ['git', 'rebase', '--continue'],
-                        cwd=BASE_DIR,
-                        capture_output=True,
-                        text=True,
-                        timeout=10
-                    )
+                    # Merge using our version for conflicts
+                    if merge_json_files():
+                        # Continue the rebase
+                        continue_result = subprocess.run(
+                            ['git', 'rebase', '--continue'],
+                            cwd=BASE_DIR,
+                            capture_output=True,
+                            text=True,
+                            timeout=10
+                        )
 
-                    if continue_result.returncode != 0:
-                        # If continue fails, abort and try manual merge
-                        logger.error("Auto-resolution failed, aborting rebase")
+                        if continue_result.returncode != 0:
+                            # If continue fails, abort and try manual merge
+                            logger.error("Auto-resolution failed, aborting rebase")
+                            subprocess.run(['git', 'rebase', '--abort'], cwd=BASE_DIR, capture_output=True)
+                            return False
+                    else:
                         subprocess.run(['git', 'rebase', '--abort'], cwd=BASE_DIR, capture_output=True)
                         return False
                 else:
-                    subprocess.run(['git', 'rebase', '--abort'], cwd=BASE_DIR, capture_output=True)
+                    logger.error(f"Git pull failed: {pull_result.stderr}")
                     return False
+
+            # Push changes
+            result = subprocess.run(
+                ['git', 'push', 'origin', 'master'],
+                cwd=BASE_DIR,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if result.returncode == 0:
+                logger.info(f"Git push successful: {commit_message}")
+                return True
             else:
-                logger.error(f"Git pull failed: {pull_result.stderr}")
+                logger.error(f"Git push failed: {result.stderr}")
                 return False
-
-        # Push changes
-        result = subprocess.run(
-            ['git', 'push', 'origin', 'master'],
-            cwd=BASE_DIR,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-
-        if result.returncode == 0:
-            logger.info(f"Git push successful: {commit_message}")
-            return True
-        else:
-            logger.error(f"Git push failed: {result.stderr}")
-            return False
 
     except subprocess.TimeoutExpired:
         logger.error("Git push timed out")
@@ -385,20 +428,24 @@ def load_curriculum(track):
 
 def load_json_data(filename):
     """Load data from JSON file"""
-    try:
-        with open(filename, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
+    # Acquire data lock to prevent reading during git pull
+    with FileLock(DATA_LOCK_FILE, timeout=30):
+        try:
+            with open(filename, 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
 
 def save_json_data(filename, data, sync=True):
     """Save data to JSON file and optionally sync to git"""
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=2)
+    # Acquire data lock to prevent write-push-write race condition
+    with FileLock(DATA_LOCK_FILE, timeout=30):
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=2)
 
-    # Auto-push changes to git
-    if sync:
-        git_push()
+        # Auto-push changes to git (git_push has its own lock)
+        if sync:
+            git_push()
 
 def get_day_number(track):
     """Calculate current day number (1-28) based on configured start date for track and acceleration"""
