@@ -633,7 +633,9 @@ def merge_k_lists(lists):
     dummy = ListNode(0)
     curr = dummy
     while heap:
+        # Access tuple elements via unpacking (recommended)
         val, i, node = heapq.heappop(heap)
+        # Alternative: indexing - top[0], top[1], top[2]
         curr.next = node
         curr = curr.next
         if node.next:
