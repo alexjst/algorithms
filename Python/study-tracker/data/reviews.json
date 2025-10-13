@@ -48,7 +48,9 @@
       "review_type": "14-day",
       "due_date": "2025-10-12",
       "scheduled_date": "2025-09-28",
-      "completed_date": null
+      "completed_date": "2025-10-12",
+      "rating": 3,
+      "notes": ""
     },
     {
       "topic": "Scalability Fundamentals",
