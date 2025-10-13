@@ -576,6 +576,12 @@
                         <div class="question-text" style="margin: 8px 0; font-weight: 500; color: #333;">
                             {{ question.question }}
                         </div>
+                        {% if question.answer %}
+                        <button class="toggle-answer-btn" onclick="toggleAnswer(this)" style="margin: 8px 0;">💡 Show Hint</button>
+                        <div class="answer-text" style="display: none; margin: 8px 0; padding: 10px; background: #fff3cd; border-left: 3px solid #ffc107; border-radius: 4px;">
+                            <strong>Hint:</strong> {{ question.answer }}
+                        </div>
+                        {% endif %}
                         <div class="answer-section" id="answer-section-{{ review_index }}-{{ loop.index0 }}" style="display: none; margin-top: 12px;">
                             <textarea id="answer-{{ review_index }}-{{ loop.index0 }}"
                                     style="width: 100%; min-height: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"

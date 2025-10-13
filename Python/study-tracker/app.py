@@ -553,10 +553,19 @@ def select_review_questions(topic, track, review_type):
         if available_questions:
             # Randomly select questions of this type
             selected = random.sample(available_questions, min(count, len(available_questions)))
-            for question_text in selected:
+            for question_dict in selected:
+                # Handle both string questions and dict questions
+                if isinstance(question_dict, dict):
+                    question_text = question_dict.get('question', question_dict)
+                    answer_text = question_dict.get('answer', '')
+                else:
+                    question_text = question_dict
+                    answer_text = ''
+                
                 selected_questions.append({
                     'type': question_type,
                     'question': question_text,
+                    'answer': answer_text,
                     'id': f"{question_type}_{len(selected_questions)}"
                 })
 
