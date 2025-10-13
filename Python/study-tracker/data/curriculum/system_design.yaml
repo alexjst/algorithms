@@ -93,8 +93,8 @@ weeks:
             answer: "Daily: 1M × 10 × 2KB = 20GB/day. Annual: 20GB × 365 = 7.3TB/year. With 3x replication: 22TB/year. Plan for 30-40TB storage with buffer. Cost: ~$600/month on cloud storage."
           - question: "Video streaming: 100K concurrent streams at 1080p (5Mbps). Calculate total bandwidth and CDN requirements."
             answer: "Total bandwidth: 100K × 5Mbps = 500Gbps = 62.5GB/s. CDN egress: ~$0.08/GB = $5/sec = $432K/day. Need multi-tier CDN with regional POPs to reduce costs 70-80%."
-          - question: "E-commerce site: 1M products, 10 bytes metadata each. With 10x read/write ratio, estimate database IOPS."
-            answer: "Storage: 1M × 100B = 100MB (tiny). Reads dominate: assume 1000 QPS total, 900 reads, 100 writes. Database needs ~1000 IOPS. Use SSD with read replicas. Cost: ~$50/month for RDS."
+          - question: "E-commerce site: 1M products, 100 bytes metadata each, 1000 QPS total traffic. With 10x read/write ratio and 95% cache hit rate, estimate database IOPS."
+            answer: "Storage: 1M × 100B = 100MB (tiny). Traffic split: 1000 QPS = 900 reads + 100 writes. With 95% cache hit rate: 900 × 5% = 45 cache misses. Database IOPS: 45 reads + 100 writes = ~145 IOPS. Use Redis cache + standard SSD. Cost: ~$30/month RDS + $20/month Redis."
           - question: "Chat app: 50M users, average 100 messages/day, 200 bytes per message. Calculate storage for 1 year."
             answer: "Daily: 50M × 100 × 200B = 1TB/day. Annual: 365TB. With 3x replication: 1.1PB. Archive old messages to cheap storage after 90 days to save 70% costs. Active storage: ~300TB."
         concepts:

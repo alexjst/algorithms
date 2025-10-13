@@ -529,8 +529,15 @@ def get_system_design_practice_questions(topic, track):
 
     return {}
 
-def select_review_questions(topic, track, review_type):
-    """Select appropriate questions for a review session based on type and difficulty"""
+def select_review_questions(topic, track, review_type, seed=None):
+    """Select appropriate questions for a review session based on type and difficulty
+    
+    Args:
+        topic: The topic to select questions for
+        track: The track (e.g., 'system_design')
+        review_type: Type of review (e.g., '1-day', '3-day')
+        seed: Optional seed for reproducible random selection
+    """
     if track != 'system_design':
         return []
 
@@ -545,6 +552,11 @@ def select_review_questions(topic, track, review_type):
     }
 
     import random
+    
+    # Use seed for reproducible random selection if provided
+    if seed is not None:
+        random.seed(seed)
+    
     selected_questions = []
     counts = question_counts.get(review_type, question_counts['3-day'])
 
@@ -568,6 +580,10 @@ def select_review_questions(topic, track, review_type):
                     'answer': answer_text,
                     'id': f"{question_type}_{len(selected_questions)}"
                 })
+    
+    # Reset random seed to avoid affecting other random operations
+    if seed is not None:
+        random.seed()
 
     return selected_questions
 
@@ -826,7 +842,9 @@ def dashboard():
                 review['benchmarks'] = None
         elif review['track'] == 'system_design':
             # System design reviews: use practice questions
-            practice_questions = select_review_questions(review['topic'], review['track'], review['review_type'])
+            # Use topic + review_type + due_date as seed for consistent question selection
+            seed = hash(f"{review['topic']}_{review['review_type']}_{review['due_date']}")
+            practice_questions = select_review_questions(review['topic'], review['track'], review['review_type'], seed=seed)
             review['practice_questions'] = practice_questions
             review['problems'] = None
             if practice_questions:
@@ -910,7 +928,9 @@ def day_view(day_number):
             else:
                 review['benchmarks'] = None
         elif review['track'] == 'system_design':
-            practice_questions = select_review_questions(review['topic'], review['track'], review['review_type'])
+            # Use topic + review_type + due_date as seed for consistent question selection
+            seed = hash(f"{review['topic']}_{review['review_type']}_{review['due_date']}")
+            practice_questions = select_review_questions(review['topic'], review['track'], review['review_type'], seed=seed)
             review['practice_questions'] = practice_questions
             review['problems'] = None
             if practice_questions:
