@@ -179,6 +179,15 @@
       "notes": "surprisingly smooth using heapq, min_heap in python. note we use a counter variable to make a tuple comparable.",
       "completed_on_time": null,
       "timestamp": "2025-10-12T16:17:41.111403"
+    },
+    {
+      "date": "2025-10-14",
+      "track": "coding",
+      "topic": "Monotonic Stack",
+      "rating": 1,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-14T00:39:37.422807"
     }
   ]
 }
