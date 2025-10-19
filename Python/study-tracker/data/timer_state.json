@@ -1,13 +1,13 @@
 {
   "active": false,
   "paused": false,
-  "start_time": null,
+  "start_time": "2025-10-18T23:40:08.316596",
   "pause_time": null,
-  "duration": null,
-  "remaining": null,
-  "track": null,
-  "topic": null,
-  "last_updated": "2025-10-18T23:11:42.691783",
-  "completed": false,
+  "duration": 2700,
+  "remaining": 0,
+  "track": "coding",
+  "topic": "Union-Find\n                \n                    \ud83d\udcd6 Template",
+  "last_updated": "2025-10-19T00:25:08.624919",
+  "completed": true,
   "total_pause_duration": 0
 }

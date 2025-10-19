@@ -8,11 +8,28 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{colortbl}
+\usepackage{listings}
 
 % Define colors
 \definecolor{priority1}{RGB}{255,200,200}
 \definecolor{priority2}{RGB}{255,235,200}
 \definecolor{priority3}{RGB}{200,255,200}
+
+% Configure listings for code blocks
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{lightgray!20},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
 
 \title{\textbf{ML System Design Study Guide} \\ \large Production ML Infrastructure for Staff/Principal Interviews}
 \author{}

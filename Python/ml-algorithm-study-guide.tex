@@ -8,11 +8,28 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{colortbl}
+\usepackage{listings}
 
 % Define colors
 \definecolor{priority1}{RGB}{255,200,200}
 \definecolor{priority2}{RGB}{255,235,200}
 \definecolor{priority3}{RGB}{200,255,200}
+
+% Configure listings for code blocks
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{lightgray!20},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
 
 \title{\textbf{ML Algorithm Study Guide} \\ \large Deep Learning \& Classical ML for Staff/Principal Interviews}
 \author{}
@@ -313,9 +330,9 @@ Use this table to track your study progress. Fill in dates and check boxes as yo
 
 \textbf{Priority Legend:}
 \begin{itemize}
-\item \colorbox{priority1}{\textbf{Priority 1 (🔴 P1)}}: Critical - Master with spaced repetition
-\item \colorbox{priority2}{\textbf{Priority 2 (🟡 P2)}}: Important - Solid understanding needed
-\item \colorbox{priority3}{\textbf{Priority 3 (🟢 P3)}}: Good to know - Quick review sufficient
+\item \colorbox{priority1}{\textbf{Priority 1 (P1)}}: Critical - Master with spaced repetition
+\item \colorbox{priority2}{\textbf{Priority 2 (P2)}}: Important - Solid understanding needed
+\item \colorbox{priority3}{\textbf{Priority 3 (P3)}}: Good to know - Quick review sufficient
 \end{itemize}
 
 \textbf{Note:} On B\&W printers, priorities show as: P1 (darkest gray), P2 (medium gray), P3 (lightest gray)
@@ -1227,20 +1244,20 @@ This decision guide helps you quickly map business problems to the right techniq
 \begin{verbatim}
 Business Problem
     |
-    ├─ Is the intervention costly/limited? (e.g., sending coupons)
-    |   └─ YES → Uplift Modeling
-    |       • Identify WHO to treat (persuadables)
-    |       • Optimize ROI of expensive interventions
+    +-- Is the intervention costly/limited? (e.g., sending coupons)
+    |   +-- YES -> Uplift Modeling
+    |       * Identify WHO to treat (persuadables)
+    |       * Optimize ROI of expensive interventions
     |
-    ├─ Fixed set of choices, need to pick best option in real-time?
-    |   └─ YES → Contextual Bandits
-    |       • E.g., Which of 5 headlines to show?
-    |       • Minimize regret, maximize immediate reward
+    +-- Fixed set of choices, need to pick best option in real-time?
+    |   +-- YES -> Contextual Bandits
+    |       * E.g., Which of 5 headlines to show?
+    |       * Minimize regret, maximize immediate reward
     |
-    └─ Sequential decisions where today's action affects future state?
-        └─ YES → Reinforcement Learning
-            • E.g., Recommend series of videos to maximize session time
-            • Optimize long-term cumulative reward
+    +-- Sequential decisions where today's action affects future state?
+        +-- YES -> Reinforcement Learning
+            * E.g., Recommend series of videos to maximize session time
+            * Optimize long-term cumulative reward
 \end{verbatim}
 
 \textbf{Detailed Comparison Table:}
