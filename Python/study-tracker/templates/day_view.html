@@ -232,6 +232,48 @@
             border-radius: 4px;
             color: var(--text-primary);
         }
+        /* Track Group Switcher */
+        .track-switcher {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--bg-tertiary);
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            border: 2px solid var(--border-color);
+        }
+        .track-switcher-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        .track-switcher-current {
+            font-weight: 700;
+            color: var(--nav-active-color);
+            font-size: 14px;
+        }
+        .track-switcher-link {
+            text-decoration: none;
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        .track-switcher-link:hover {
+            background-color: var(--nav-hover);
+            color: var(--nav-active-color);
+            transform: translateY(-1px);
+        }
+        .track-switcher-link.active {
+            background-color: var(--nav-active-bg);
+            color: var(--nav-active-color);
+            border-color: var(--nav-active-color);
+        }
     </style>
 </head>
 <body>
@@ -259,10 +301,21 @@
 
         <div class="day-info">
             <h2 style="margin: 0;">📚 Day {{ day_number }}
-                {% if day_number < current_coding_day or day_number < current_system_design_day %}
-                    <span class="day-badge badge-past">Past Day</span>
-                {% elif day_number == current_coding_day or day_number == current_system_design_day %}
+                {% set is_today = namespace(value=false) %}
+                {% set is_past = namespace(value=false) %}
+                {% for track in tracks %}
+                    {% set data = track_data[track] %}
+                    {% if data.current_day == day_number %}
+                        {% set is_today.value = true %}
+                    {% elif data.current_day > day_number %}
+                        {% set is_past.value = true %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if is_today.value %}
                     <span class="day-badge badge-today">Today</span>
+                {% elif is_past.value %}
+                    <span class="day-badge badge-past">Past Day</span>
                 {% else %}
                     <span class="day-badge badge-future">Future</span>
                 {% endif %}
@@ -277,6 +330,14 @@
 
     <!-- Navigation Bar -->
     <div class="nav-container">
+        <!-- Track Group Switcher -->
+        <div class="track-switcher">
+            <span class="track-switcher-label">Track:</span>
+            <span class="track-switcher-current">{{ track_group_name }}</span>
+            <a href="/switch-track-group/general_swe" class="track-switcher-link {% if track_group == 'general_swe' %}active{% endif %}" title="Switch to Software Engineering track">💻 SWE</a>
+            <a href="/switch-track-group/ml_specialist" class="track-switcher-link {% if track_group == 'ml_specialist' %}active{% endif %}" title="Switch to ML Engineering track">🤖 ML</a>
+        </div>
+
         <a href="/" class="nav-link" title="Go to Dashboard">📅 Dashboard</a>
         <a href="/history" class="nav-link" title="View Progress History">📊 History</a>
         <a href="/preview" class="nav-link" title="See Upcoming Topics">🔮 Preview</a>
@@ -292,9 +353,22 @@
 
     <div class="header">
         <p><strong>Time Remaining:</strong> {{ total_time }} minutes</p>
-        {% if coding_topic_completed and system_design_topic_completed %}
+        {% set all_completed = namespace(value=true) %}
+        {% set any_completed = namespace(value=false) %}
+        {% for track in tracks %}
+            {% set data = track_data[track] %}
+            {% if data.topic %}
+                {% if data.completed %}
+                    {% set any_completed.value = true %}
+                {% else %}
+                    {% set all_completed.value = false %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if all_completed.value and any_completed.value %}
             <p style="color: #28a745; font-weight: bold;">✅ All topics completed for this day!</p>
-        {% elif coding_topic_completed or system_design_topic_completed %}
+        {% elif any_completed.value %}
             <p style="color: #ffc107; font-weight: bold;">⚠️ Some topics still pending</p>
         {% else %}
             <p style="color: #dc3545; font-weight: bold;">📝 Topics not yet completed</p>
@@ -304,43 +378,56 @@
     <div class="section">
         <h2>🧠 Day {{ day_number }} Learning</h2>
 
-        {% if coding_topic %}
-        <div class="topic {% if coding_topic_completed %}completed-section{% endif %}" id="coding-topic">
-            <h3>💻 Coding: {{ coding_topic.topic }}
-                <a href="/templates#{{ coding_topic.topic.lower().replace(' ', '-').replace('(', '').replace(')', '') }}" target="_blank" class="template-link" title="View code templates and patterns for {{ coding_topic.topic }}">
+        {% for track in tracks %}
+        {% set data = track_data[track] %}
+        {% if data.topic %}
+        {# Set track-specific variables #}
+        {% set track_icon = '💻' if track == 'coding' else '🤖' if track == 'ml_algorithms' else '🏗️' if track in ['system_design', 'ml_system_design'] else '🎯' %}
+        {% set track_display_name = track.replace('_', ' ').title() %}
+        {% set is_coding_type = track in ['coding', 'ml_algorithms'] %}
+        {% set topic = data.topic %}
+        {% set completed = data.completed %}
+        {% set completion_data = data.completion_data %}
+
+        <div class="topic {% if completed %}completed-section{% endif %}" id="{{ track }}-topic">
+            <h3>{{ track_icon }} {{ track_display_name }}: {{ topic.topic }}
+                {% if is_coding_type %}
+                <a href="/templates#{{ topic.topic.lower().replace(' ', '-').replace('(', '').replace(')', '') }}" target="_blank" class="template-link" title="View code templates and patterns for {{ topic.topic }}">
                     📖 Template
                 </a>
+                {% endif %}
             </h3>
-            <p><strong>Activity:</strong> {{ coding_topic.activity }}</p>
+            <p><strong>Activity:</strong> {{ topic.activity }}</p>
 
-            {% if not coding_topic_completed %}
-            <p class="time-estimate">⏱️ {{ coding_topic.time_estimate }} minutes
-                <button class="start-timer-btn" onclick="startPomodoro('coding', {{ coding_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic.">
+            {% if not completed %}
+            <p class="time-estimate">⏱️ {{ topic.time_estimate }} minutes
+                <button class="start-timer-btn" onclick="startPomodoro('{{ track }}', {{ topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic.">
                     🍅 Start Timer
                 </button>
             </p>
 
-            <div class="pomodoro-section" id="coding-pomodoro">
+            <div class="pomodoro-section" id="{{ track }}-pomodoro">
                 <h4>🍅 Focus Session</h4>
-                <div class="pomodoro-timer" id="coding-timer">{{ coding_topic.time_estimate }}:00</div>
+                <div class="pomodoro-timer" id="{{ track }}-timer">{{ topic.time_estimate }}:00</div>
                 <div style="text-align: center;">
-                    <button class="timer-btn" onclick="pauseTimer('coding')" id="coding-pause-btn">⏸️ Pause</button>
-                    <button class="timer-btn stop" onclick="stopTimer('coding')">⏹️ Stop</button>
+                    <button class="timer-btn" onclick="pauseTimer('{{ track }}')" id="{{ track }}-pause-btn">⏸️ Pause</button>
+                    <button class="timer-btn stop" onclick="stopTimer('{{ track }}')">⏹️ Stop</button>
                 </div>
             </div>
             {% endif %}
 
-            {% if coding_topic.detailed_content %}
+            {% if topic.detailed_content %}
             <div class="detailed-content">
                 <h4>📖 Detailed Guide:</h4>
-                <pre>{{ coding_topic.detailed_content }}</pre>
+                <pre>{{ topic.detailed_content }}</pre>
             </div>
             {% endif %}
 
-            {% if coding_topic.problems %}
+            {# Coding-type tracks: show problems #}
+            {% if is_coding_type and topic.problems %}
             <div class="problems-section">
                 <h4>🎯 Practice Problems:</h4>
-                {% for problem in coding_topic.problems %}
+                {% for problem in topic.problems %}
                 <div class="problem-item">
                     <strong><a href="{{ problem.url }}" target="_blank" class="problem-link">
                         #{{ problem.number }} - {{ problem.title }}
@@ -352,73 +439,17 @@
             </div>
             {% endif %}
 
-            {% if coding_topic_completed %}
-            <div class="completed-message">
-                <h4>✅ {{ coding_topic.topic }} Complete!</h4>
-                <p>Completed on: {{ coding_completion_data.date }}</p>
-                <p>Rating: {{ coding_completion_data.rating }}/5 | Notes: {{ coding_completion_data.notes or 'No notes' }}</p>
-            </div>
-            {% else %}
-            <div class="rating">
-                <label>Rating (1-5):</label>
-                <select id="coding-rating">
-                    <option value="1">1 - Very Hard</option>
-                    <option value="2">2 - Hard</option>
-                    <option value="3" selected>3 - Medium</option>
-                    <option value="4">4 - Easy</option>
-                    <option value="5">5 - Very Easy</option>
-                </select>
-            </div>
-            <textarea id="coding-notes" class="notes" placeholder="Notes and reflections..."></textarea>
-            <button class="complete-btn" id="coding-complete-btn" onclick="markComplete('{{ coding_topic.topic }}', 'coding', 'topic')">
-                ✅ Mark Complete
-            </button>
-            <button class="complete-btn" id="coding-finish-early-btn" style="display: none; background: #28a745;" onclick="finishEarlyAndMarkComplete('coding', '{{ coding_topic.topic }}')" title="Complete this topic before the timer expires.">
-                ⏱️ Finish Early & Mark Complete
-            </button>
-            {% endif %}
-        </div>
-        {% endif %}
-
-        {% if system_design_topic %}
-        <div class="topic {% if system_design_topic_completed %}completed-section{% endif %}" id="system_design-topic">
-            <h3>🏗️ System Design: {{ system_design_topic.topic }}</h3>
-            <p><strong>Activity:</strong> {{ system_design_topic.activity }}</p>
-
-            {% if not system_design_topic_completed %}
-            <p class="time-estimate">⏱️ {{ system_design_topic.time_estimate }} minutes
-                <button class="start-timer-btn" onclick="startPomodoro('system_design', {{ system_design_topic.time_estimate }})" title="Start a focused Pomodoro timer for this topic.">
-                    🍅 Start Timer
-                </button>
-            </p>
-
-            <div class="pomodoro-section" id="system_design-pomodoro">
-                <h4>🍅 Focus Session</h4>
-                <div class="pomodoro-timer" id="system_design-timer">{{ system_design_topic.time_estimate }}:00</div>
-                <div style="text-align: center;">
-                    <button class="timer-btn" onclick="pauseTimer('system_design')" id="system_design-pause-btn">⏸️ Pause</button>
-                    <button class="timer-btn stop" onclick="stopTimer('system_design')">⏹️ Stop</button>
-                </div>
-            </div>
-            {% endif %}
-
-            {% if system_design_topic.detailed_content %}
-            <div class="detailed-content">
-                <h4>📖 Detailed Guide:</h4>
-                <pre>{{ system_design_topic.detailed_content }}</pre>
-            </div>
-            {% endif %}
-
-            {% if system_design_topic.practice_questions %}
+            {# System design type tracks: show practice questions #}
+            {% if not is_coding_type and topic.practice_questions %}
             <div class="practice-section">
                 <h4>🎯 Practice Questions:</h4>
                 <p><em>Test your understanding by answering these questions:</em></p>
 
-                {% if system_design_topic.practice_questions.estimation %}
+                {% if topic.practice_questions.estimation %}
                 <div class="question-category">
                     <h5>📊 Estimation Questions:</h5>
                     <ul>
-                        {% for item in system_design_topic.practice_questions.estimation %}
+                        {% for item in topic.practice_questions.estimation %}
                         <li class="practice-question-item">
                             {% if item is mapping %}
                             <div class="question-text">{{ item.question }}</div>
@@ -437,11 +468,11 @@
                 </div>
                 {% endif %}
 
-                {% if system_design_topic.practice_questions.concepts %}
+                {% if topic.practice_questions.concepts %}
                 <div class="question-category">
                     <h5>💡 Concept Questions:</h5>
                     <ul>
-                        {% for item in system_design_topic.practice_questions.concepts %}
+                        {% for item in topic.practice_questions.concepts %}
                         <li class="practice-question-item">
                             {% if item is mapping %}
                             <div class="question-text">{{ item.question }}</div>
@@ -460,11 +491,11 @@
                 </div>
                 {% endif %}
 
-                {% if system_design_topic.practice_questions.tradeoffs %}
+                {% if topic.practice_questions.tradeoffs %}
                 <div class="question-category">
                     <h5>⚖️ Trade-off Questions:</h5>
                     <ul>
-                        {% for item in system_design_topic.practice_questions.tradeoffs %}
+                        {% for item in topic.practice_questions.tradeoffs %}
                         <li class="practice-question-item">
                             {% if item is mapping %}
                             <div class="question-text">{{ item.question }}</div>
@@ -485,10 +516,11 @@
             </div>
             {% endif %}
 
-            {% if system_design_topic.resources %}
+            {# Resources section (system design type) #}
+            {% if not is_coding_type and topic.resources %}
             <div class="resources-section">
                 <h4>📚 Study Resources:</h4>
-                {% for resource in system_design_topic.resources %}
+                {% for resource in topic.resources %}
                 <div class="resource-item">
                     <strong><a href="{{ resource.url }}" target="_blank" class="resource-link">
                         {{ resource.title }}
@@ -499,27 +531,28 @@
             </div>
             {% endif %}
 
-            {% if system_design_topic.concepts %}
+            {# Concepts section (system design type) #}
+            {% if not is_coding_type and topic.concepts %}
             <div class="concepts-section">
                 <h4>🔑 Key Concepts:</h4>
                 <ul>
-                {% for concept in system_design_topic.concepts %}
+                {% for concept in topic.concepts %}
                     <li>{{ concept }}</li>
                 {% endfor %}
                 </ul>
             </div>
             {% endif %}
 
-            {% if system_design_topic_completed %}
+            {% if completed %}
             <div class="completed-message">
-                <h4>✅ {{ system_design_topic.topic }} Complete!</h4>
-                <p>Completed on: {{ system_design_completion_data.date }}</p>
-                <p>Rating: {{ system_design_completion_data.rating }}/5 | Notes: {{ system_design_completion_data.notes or 'No notes' }}</p>
+                <h4>✅ {{ topic.topic }} Complete!</h4>
+                <p>Completed on: {{ completion_data.date }}</p>
+                <p>Rating: {{ completion_data.rating }}/5 | Notes: {{ completion_data.notes or 'No notes' }}</p>
             </div>
             {% else %}
             <div class="rating">
                 <label>Rating (1-5):</label>
-                <select id="system_design-rating">
+                <select id="{{ track }}-rating">
                     <option value="1">1 - Very Hard</option>
                     <option value="2">2 - Hard</option>
                     <option value="3" selected>3 - Medium</option>
@@ -527,16 +560,17 @@
                     <option value="5">5 - Very Easy</option>
                 </select>
             </div>
-            <textarea id="system_design-notes" class="notes" placeholder="Notes and reflections..."></textarea>
-            <button class="complete-btn" id="system_design-complete-btn" onclick="markComplete('{{ system_design_topic.topic }}', 'system_design', 'topic')">
+            <textarea id="{{ track }}-notes" class="notes" placeholder="Notes and reflections..."></textarea>
+            <button class="complete-btn" id="{{ track }}-complete-btn" onclick="markComplete('{{ topic.topic }}', '{{ track }}', 'topic')">
                 ✅ Mark Complete
             </button>
-            <button class="complete-btn" id="system_design-finish-early-btn" style="display: none; background: #28a745;" onclick="finishEarlyAndMarkComplete('system_design', '{{ system_design_topic.topic }}')" title="Complete this topic before the timer expires.">
+            <button class="complete-btn" id="{{ track }}-finish-early-btn" style="display: none; background: #28a745;" onclick="finishEarlyAndMarkComplete('{{ track }}', '{{ topic.topic }}')" title="Complete this topic before the timer expires.">
                 ⏱️ Finish Early & Mark Complete
             </button>
             {% endif %}
         </div>
         {% endif %}
+        {% endfor %}
     </div>
 
     {% if due_reviews %}
@@ -730,9 +764,12 @@
         }
 
         function updateTimerDisplay(state) {
-            const allTracks = ['coding', 'system_design'];
+            // Get all track elements present on the page
+            const allTrackElements = document.querySelectorAll('[id$="-topic"]');
+            const allTracks = Array.from(allTrackElements).map(el => el.id.replace('-topic', ''));
+
             if (!state.active) {
-                hideAllTimers();
+                hideAllTimers(allTracks);
                 return;
             }
 
@@ -774,8 +811,13 @@
             }
         }
 
-        function hideAllTimers() {
-            ['coding', 'system_design'].forEach(track => {
+        function hideAllTimers(allTracks = null) {
+            if (!allTracks) {
+                // Get all track elements present on the page
+                const allTrackElements = document.querySelectorAll('[id$="-topic"]');
+                allTracks = Array.from(allTrackElements).map(el => el.id.replace('-topic', ''));
+            }
+            allTracks.forEach(track => {
                 const section = document.getElementById(`${track}-pomodoro`);
                 const button = document.querySelector(`#${track}-topic .start-timer-btn`);
                 if (section) section.style.display = 'none';

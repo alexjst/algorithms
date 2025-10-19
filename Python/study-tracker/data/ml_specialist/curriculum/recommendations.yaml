@@ -1,0 +1,1510 @@
+track: "recommendations"
+description: "14-day recommendation systems deep dive for Staff/Principal ML interviews with spaced repetition"
+
+weeks:
+  week1:
+    - day: 1
+      topic: "Recommendation Systems Architecture and Three-Stage Funnel"
+      activity: "Understand the modern recommendation system architecture: candidate generation (retrieval) → ranking → re-ranking"
+      detailed_content: |
+        **Three-Stage Recommendation Funnel:**
+
+        1. **Candidate Generation (Retrieval)**: Narrow down from millions of items to hundreds/thousands
+           - Goal: High recall, fast inference (1-10ms)
+           - Methods: Collaborative filtering, content-based, two-tower models, graph-based
+           - Trade-off: Speed vs. coverage
+
+        2. **Ranking**: Score and rank candidates (hundreds → tens)
+           - Goal: Precision and relevance
+           - Models: DeepFM, Wide & Deep, multi-task learning
+           - Features: User, item, context, cross features
+           - Trade-off: Model complexity vs. latency
+
+        3. **Re-ranking**: Apply business logic and diversity (tens → final N)
+           - Goal: Optimize for multiple objectives (relevance, diversity, freshness)
+           - Methods: MMR, DPP, contextual bandits
+           - Constraints: Diversity, fairness, position bias
+
+        **Key Architecture Decisions:**
+        - When to use each stage vs. end-to-end model
+        - How to balance offline metrics with online A/B test results
+        - Cold start handling at each stage
+
+        **Modern Trends:**
+        - Moving from collaborative filtering to deep learning retrieval
+        - Multi-task learning for ranking (CTR, dwell time, engagement)
+        - LLM integration for semantic understanding and user intent
+
+      practice_questions:
+        concepts:
+          - question: "Explain why recommendation systems use a three-stage funnel instead of ranking all items directly."
+            answer: "Computational efficiency - it's infeasible to score millions of items with complex models. Retrieval quickly narrows to candidates (simple models, 1-10ms), ranking applies expensive models to hundreds of items (10-100ms), re-ranking optimizes for diversity and business rules on final set."
+
+          - question: "Compare collaborative filtering vs. content-based filtering for candidate generation. When would you use each?"
+            answer: "Collaborative filtering uses user-item interactions (implicit/explicit feedback), good for discovering unexpected items, suffers from cold start. Content-based uses item features, good for new items with metadata, limited by feature quality. Hybrid approaches combine both: use collaborative for warm users/items, content-based for cold start."
+
+          - question: "What are the key metrics for each stage of the funnel?"
+            answer: "Retrieval: Recall@K, coverage, latency. Ranking: Precision@K, NDCG, AUC for CTR prediction, ranking loss. Re-ranking: Diversity metrics (ILD, coverage), fairness metrics, final engagement metrics (CTR, dwell time, conversion)."
+
+        tradeoffs:
+          - question: "Trade-off: Deep learning retrieval models (two-tower) vs. traditional collaborative filtering (matrix factorization)"
+            answer: "Two-tower: Better feature flexibility (can incorporate context, text), handles cold start better, slower inference. Matrix factorization: Faster (precomputed embeddings), simpler to debug, limited to user-item interactions. Trade-off is model expressiveness vs. serving latency. Solution: Use two-tower for retrieval with approximate nearest neighbor (ANN) search like FAISS."
+
+          - question: "Trade-off: Accuracy vs. diversity in recommendations"
+            answer: "High accuracy (relevance) may lead to filter bubbles and repetitive recommendations. High diversity improves exploration but may lower immediate engagement. Trade-off: Use ranking for accuracy, re-ranking for diversity. Metrics: balance NDCG (relevance) with ILD (diversity). Solution: Multi-objective optimization, MMR algorithm, diversity-aware ranking."
+
+        estimation:
+          - question: "Estimate the latency budget for each stage in a production recommendation system serving 100M users."
+            answer: "Total budget: ~100-200ms. Retrieval: 10-20ms (ANN search on precomputed embeddings), Ranking: 50-100ms (batch inference on 100-500 candidates), Re-ranking: 10-30ms (lightweight diversity algorithms). User request → response: Include 20-30ms for networking, data fetching. Trade-offs: More retrieval time = better recall, more ranking time = better precision."
+
+      time_estimate: 90
+
+    - day: 2
+      topic: "Collaborative Filtering: User-Based, Item-Based, Matrix Factorization"
+      activity: "Master traditional collaborative filtering techniques and their evolution to modern embedding methods"
+      detailed_content: |
+        **1. User-Based Collaborative Filtering:**
+        - Find similar users based on rating/interaction history
+        - Similarity: Cosine similarity, Pearson correlation
+        - Recommendation: Weighted average of similar users' ratings
+        - **Limitation**: Scalability (O(N²) user comparisons), sparsity
+
+        **2. Item-Based Collaborative Filtering:**
+        - Find similar items based on user interactions
+        - More stable than user-based (item relationships change less)
+        - Amazon's item-to-item algorithm
+        - **Implementation**: Precompute item-item similarity matrix
+
+        **3. Matrix Factorization (MF):**
+        - Decompose user-item matrix R ≈ U × V^T
+        - U: user embeddings (N × d), V: item embeddings (M × d)
+        - Learn via SGD minimizing: ||R - UV^T||² + λ(||U||² + ||V||²)
+        - **ALS (Alternating Least Squares)**: Fix U, solve for V; fix V, solve for U
+
+        **4. Advanced Matrix Factorization:**
+        - **SVD++**: Incorporates implicit feedback
+        - **Factorization Machines (FM)**: Handles sparse features, higher-order interactions
+        - **Bayesian Personalized Ranking (BPR)**: Optimizes for ranking (pairwise loss)
+
+        **5. Modern Evolution:**
+        - Neural collaborative filtering replaces dot product with MLP
+        - Two-tower models extend MF with deep networks
+        - Graph neural networks model complex relationships
+
+        **Interview Focus:**
+        - Derive MF gradient updates
+        - Explain cold start solutions
+        - Compare explicit vs. implicit feedback
+
+      practice_questions:
+        concepts:
+          - question: "Derive the gradient update for matrix factorization with squared loss."
+            answer: "Loss: L = Σ(r_ui - u_i · v_u)² + λ(||u||² + ||v||²). Gradients: ∂L/∂u_i = -2(r_ui - u_i · v_u)v_u + 2λu_i, ∂L/∂v_u = -2(r_ui - u_i · v_u)u_i + 2λv_u. Update: u_i ← u_i - α∂L/∂u_i, v_u ← v_u - α∂L/∂v_u. Regularization term λ prevents overfitting on sparse data."
+
+          - question: "Explain the cold start problem in collaborative filtering and solutions for new users and new items."
+            answer: "Cold start: No interaction history for new users/items. New user: Use demographic features, popular items, onboarding questions to infer preferences, content-based filtering. New item: Use item metadata (content-based), show to exploratory users, hybrid models. Solutions: Combine collaborative filtering with content-based (metadata, text embeddings), use side information (demographics, context), contextual bandits for exploration."
+
+          - question: "Compare explicit feedback (ratings) vs. implicit feedback (clicks, views) for collaborative filtering."
+            answer: "Explicit: Direct preference signal, sparse (users rarely rate), positive and negative feedback. Implicit: Abundant data, noisy (click ≠ like), only positive signals (absence ≠ dislike). For implicit: Use confidence weighting (view count), negative sampling for unobserved items, optimize for ranking (BPR) instead of rating prediction."
+
+        tradeoffs:
+          - question: "Trade-off: User-based vs. item-based collaborative filtering"
+            answer: "User-based: Better for diverse catalogs, captures real-time user preferences, but O(N²) user similarity, unstable (user preferences drift). Item-based: More stable (item relationships change slowly), scalable with precomputed similarities, but less personalized for new trends. Trade-off: Freshness vs. stability. Solution: Use item-based for cold items, user-based for personalization, or hybrid."
+
+          - question: "Trade-off: Matrix factorization dimension (embedding size)"
+            answer: "High dimension (d=100-500): Better expressiveness, captures complex patterns, slower inference, overfitting on sparse data. Low dimension (d=10-50): Faster, more generalizable, but underfitting. Trade-off: Model capacity vs. data sparsity. Solution: Cross-validate on held-out data, regularization (λ), use validation metrics (NDCG, recall) to select d."
+
+        estimation:
+          - question: "Estimate memory requirements for matrix factorization with 10M users, 1M items, embedding dimension 100."
+            answer: "User embeddings: 10M × 100 × 4 bytes (float32) = 4GB. Item embeddings: 1M × 100 × 4 bytes = 400MB. Total: ~4.4GB for embeddings. Add gradient buffers for training (~2x), total ~10GB. For serving: Only need item embeddings (400MB) and user embeddings on-demand (fetch from cache/DB). ANN index (FAISS): ~1-2GB for 1M items. Total serving memory: ~2-3GB."
+
+      time_estimate: 90
+
+    - day: 3
+      topic: "Two-Tower Neural Networks and Embedding-Based Retrieval"
+      activity: "Learn modern deep learning retrieval with two-tower models, ANN search, and embedding spaces"
+      detailed_content: |
+        **Two-Tower Architecture:**
+
+        1. **Structure**:
+           - User tower: Neural network encoding user features → user embedding
+           - Item tower: Neural network encoding item features → item embedding
+           - Similarity: Dot product or cosine similarity between embeddings
+           - Output dimension: 64-256 (balance expressiveness vs. retrieval speed)
+
+        2. **Training**:
+           - Positive pairs: (user, interacted item)
+           - Negative sampling: Random items, hard negatives (popular but not clicked)
+           - Loss: Contrastive loss, triplet loss, or softmax over batch
+           - In-batch negatives: Treat other items in batch as negatives (efficient)
+
+        3. **Features**:
+           - User: Demographics, history (sequential encoding), context (time, device)
+           - Item: Metadata (category, price, text embeddings), popularity, freshness
+           - Shared features: Cross features handled in ranking, not retrieval
+
+        **Approximate Nearest Neighbor (ANN) Search:**
+
+        1. **Inverted Index (IVF)**:
+           - Cluster items into K centroids (k-means)
+           - At serving: Search only nearest clusters (probe P clusters)
+           - Trade-off: P (accuracy vs. speed)
+
+        2. **Product Quantization (PQ)**:
+           - Split embedding into subvectors
+           - Quantize each subvector independently
+           - Memory: 256d float32 (1KB) → 256d uint8 (256 bytes)
+
+        3. **HNSW (Hierarchical Navigable Small World)**:
+           - Graph-based index, multi-layer skip lists
+           - Better recall than IVF but higher memory
+
+        **Production Considerations:**
+        - Refresh embeddings: Daily batch or online streaming
+        - Index updates: Incremental or full rebuild
+        - Personalization: Combine general retrieval with personalized re-ranking
+
+        **Advanced Techniques:**
+        - Multi-task learning: Predict CTR, dwell time jointly
+        - Hard negative mining: Sample items user skipped
+        - Temperature scaling for softmax calibration
+
+      practice_questions:
+        concepts:
+          - question: "Explain the in-batch negative sampling technique for training two-tower models and why it's efficient."
+            answer: "In-batch negatives treat all other items in the same training batch as negative examples for each user-item pair. For batch size B, each positive pair gets B-1 negatives for free (no additional forward passes). Efficient because: 1) Single forward pass computes all embeddings, 2) O(B²) pairwise comparisons via matrix multiplication, 3) Approximates softmax over full catalog. Trade-off: Biased sampling (not random negatives), needs large batch size (1K-10K)."
+
+          - question: "Compare dot product vs. cosine similarity for two-tower retrieval. When would you use each?"
+            answer: "Dot product: Faster (no normalization), captures both direction and magnitude, allows popularity bias (popular items have larger norms). Cosine similarity: Normalized (range [-1,1]), invariant to embedding scale, better for pure semantic similarity. Use dot product when popularity should influence retrieval (most production systems), cosine when you want pure similarity (search, cold start). Trade-off: Speed vs. normalization bias."
+
+          - question: "Explain product quantization (PQ) for compressing embeddings. What are the trade-offs?"
+            answer: "PQ splits d-dimensional embedding into m subvectors (d/m each), quantizes each independently to k centroids (typically 256). Storage: d×4 bytes → m×1 byte (32x compression for m=8). Distance: Precompute distances to all centroids, approximate full distance as sum of subvector distances. Trade-offs: 32x memory savings vs. 5-10% recall loss. Balance: More subvectors (m) = better approximation but less compression. Used in FAISS for billion-scale retrieval."
+
+        tradeoffs:
+          - question: "Trade-off: Two-tower model embedding dimension (64 vs. 256)"
+            answer: "Dimension 256: More expressive, better offline metrics (recall, NDCG), 4x larger index, slower ANN search (high-dimensional curse). Dimension 64: 4x smaller index, faster retrieval, but may underfit complex patterns. Trade-off: Model capacity vs. serving latency/memory. Solution: A/B test online metrics (CTR, engagement), use PQ for compression, start with 128 as middle ground."
+
+          - question: "Trade-off: Refreshing item embeddings (real-time vs. daily batch)"
+            answer: "Real-time: Fresh embeddings for new items, react to trending topics, but complex serving (streaming inference, index updates), higher cost. Daily batch: Simple pipeline (offline training → index rebuild), stale for new items (<24h), batch optimization (efficient). Trade-off: Freshness vs. complexity. Solution: Hybrid - batch for most items, real-time for high-value/trending items, incremental index updates."
+
+        estimation:
+          - question: "Estimate the serving latency for ANN search on 10M items with HNSW index."
+            answer: "HNSW parameters: M=16 (neighbors per layer), ef=200 (search breadth). Search complexity: O(log N × M × ef) = log(10M) × 16 × 200 ≈ 50K distance computations. Distance: 128d dot product ≈ 0.1μs (SIMD). Total: 50K × 0.1μs = 5ms. Add index traversal overhead: ~2ms. Total latency: ~7-10ms for top-K=100. With GPU (batch processing): Can do 10K queries/sec. With quantization (PQ): 2-3x faster but 5% recall loss."
+
+      time_estimate: 90
+
+    - day: 4
+      topic: "Sequential Recommendation Models: GRU4Rec, SASRec, BERT4Rec"
+      activity: "Understand how to model user behavior sequences with RNNs, self-attention, and transformers"
+      detailed_content: |
+        **Why Sequential Models?**
+        - Capture temporal dynamics: User interests evolve over time
+        - Session-based recommendations: Short-term intent (within session)
+        - Next-item prediction: What will user click/buy next?
+
+        **1. GRU4Rec (2016):**
+        - First RNN-based session recommendation
+        - Input: Sequence of item embeddings [i₁, i₂, ..., iₜ]
+        - GRU hidden state captures session state
+        - Output: Softmax over all items for next-item prediction
+        - Loss: Cross-entropy or BPR (ranking loss)
+        - **Limitation**: RNN gradient issues, sequential computation (slow)
+
+        **2. Caser (CNN for Sequential Recommendation):**
+        - Convolutional layers over recent L items
+        - Horizontal filters: Capture union of L items
+        - Vertical filters: Capture transitions between items
+        - Faster than RNN (parallel convolutions)
+
+        **3. SASRec (Self-Attentive Sequential Recommendation, 2018):**
+        - Transformer-based (self-attention over item sequence)
+        - Positional encoding: sin/cos or learned embeddings
+        - Causal masking: Attend only to past items (autoregressive)
+        - Multi-head attention: Capture different patterns
+        - **Advantages**: Parallelizable, long-range dependencies
+
+        **4. BERT4Rec (2019):**
+        - Bidirectional self-attention (masked language model approach)
+        - Training: Randomly mask items, predict masked positions
+        - Advantage: Captures both left and right context
+        - Use case: Better for understanding, not just next-item prediction
+
+        **5. Advanced Techniques:**
+        - Multi-interest modeling: MIND, ComiRec (multiple user embeddings)
+        - Time-aware: Continuous time modeling, time decay
+        - Multi-behavior: Clicks, likes, purchases (different weights)
+
+        **Production Considerations:**
+        - Real-time inference: Precompute sequence representations
+        - Cold start: Initialize with popular sequences
+        - Sequence length: Trade-off between context and latency
+
+        **Interview Focus:**
+        - Compare RNN vs. Transformer for sequences
+        - Explain self-attention mechanism
+        - Discuss positional encoding strategies
+
+      practice_questions:
+        concepts:
+          - question: "Explain the self-attention mechanism in SASRec. How does it differ from RNN-based sequential models?"
+            answer: "Self-attention computes weighted sum of all previous items in sequence: Attention(Q,K,V) = softmax(QK^T/√d)V, where Q=K=V are item embeddings with positional encoding. Each position attends to all previous positions (causal mask). Differs from RNN: 1) Parallel computation (not sequential), 2) Direct connections to all past items (no gradient vanishing), 3) Multi-head attention captures different patterns. Trade-off: O(L²) complexity vs. O(L) for RNN, but faster with GPU parallelization."
+
+          - question: "Compare masked language model training (BERT4Rec) vs. autoregressive training (SASRec) for sequential recommendations."
+            answer: "BERT4Rec (masked): Randomly mask 15% of items, predict masked positions using bidirectional context. Better representation learning, but inference differs from training. SASRec (autoregressive): Predict next item given prefix, causal masking. Training matches inference, better for next-item prediction. Trade-offs: BERT4Rec better for understanding patterns, SASRec better for real-time recommendations. Many systems use BERT4Rec for offline embedding, SASRec for online serving."
+
+          - question: "Explain positional encoding in sequential models. Why is it necessary and what are the options?"
+            answer: "Positional encoding adds order information (self-attention is permutation-invariant). Options: 1) Sinusoidal (sin/cos of different frequencies) - fixed, generalizes to unseen lengths, 2) Learned embeddings - more flexible, limited to training length, 3) Relative positions - attention bias based on distance. Necessary because without position: [item1, item2, item3] = [item3, item1, item2]. Production choice: Learned embeddings for fixed-length sequences, sinusoidal for variable length."
+
+        tradeoffs:
+          - question: "Trade-off: Sequence length (L=10 vs. L=100) in sequential recommendation models"
+            answer: "L=100: More context, captures long-term interests, O(L²) attention complexity (10x slower), 10x memory for embeddings, overfitting on short sequences. L=10: Faster inference (10ms vs. 100ms), captures short-term intent, misses long-term patterns. Trade-off: Context vs. latency. Solution: Hierarchical - use L=100 for user embedding (daily batch), L=10 for session-based real-time, or adaptive sequence length based on user activity."
+
+          - question: "Trade-off: Single-interest vs. multi-interest user modeling (MIND model)"
+            answer: "Single interest: One user embedding, simple, fast retrieval (one ANN query), assumes single latent preference. Multi-interest: Multiple embeddings (K=2-5), captures diverse interests (e.g., work and hobby), K × retrieval cost, more coverage. Trade-off: Diversity vs. efficiency. Solution: Use multi-interest for retrieval (broad coverage), single interest for ranking (focused), or route to different towers based on context."
+
+        estimation:
+          - question: "Estimate the training time for SASRec on 1M users with average 50 interactions each."
+            answer: "Data: 1M users × 50 interactions = 50M training sequences. Model: d=128 embedding, L=20 sequence length, 2 transformer layers. Forward pass: O(L² × d) = 20² × 128 ≈ 50K ops per sequence. Batch size: 256 sequences. Time per batch: 256 × 50K ops ≈ 13M ops ≈ 1ms on GPU (1 TFLOP). Total batches: 50M / 256 ≈ 200K. Training time: 200K × 1ms = 200 seconds per epoch. For convergence (10 epochs): ~30 minutes on single V100 GPU. With 8 GPUs: ~4 minutes."
+
+      time_estimate: 90
+
+    - day: 5
+      topic: "Graph-Based Retrieval: Random Walk, Node2Vec, Graph Neural Networks"
+      activity: "Learn how to leverage graph structure for candidate generation using random walks and GNNs"
+      detailed_content: |
+        **Why Graph-Based Retrieval?**
+        - User-item interactions form bipartite graph
+        - Item-item similarity from co-occurrence
+        - Social networks: Friend recommendations
+        - Captures higher-order relationships (friend of friend)
+
+        **1. Random Walk-Based Methods:**
+
+        **PersonalRank / Pixie:**
+        - Random walk from user node, visit items with probability
+        - Restart probability α (typically 0.15)
+        - Score items by visit frequency
+        - **Pixie (Pinterest)**: Multi-query random walk with early stopping
+
+        **DeepWalk:**
+        - Generate random walk sequences
+        - Treat as "sentences", apply Word2Vec (SkipGram)
+        - Learn node embeddings from co-occurrence
+
+        **Node2Vec:**
+        - Biased random walk: BFS vs. DFS exploration
+        - Parameters: p (return), q (in-out)
+        - p=1, q=0.5: DFS (local structure)
+        - p=1, q=2: BFS (global structure)
+
+        **2. Graph Neural Networks (GNNs):**
+
+        **Basic GNN (Message Passing):**
+        - h_v^(l+1) = σ(W · AGGREGATE({h_u^(l) : u ∈ N(v)}))
+        - Aggregate: Mean, max, sum of neighbor embeddings
+        - Stack L layers for L-hop neighborhood
+
+        **GraphSAGE:**
+        - Sample fixed-size neighborhood (K neighbors per hop)
+        - Aggregation: Mean, LSTM, pooling
+        - Inductive: Can handle new nodes
+
+        **PinSage (Pinterest):**
+        - Production GNN for billion-scale graphs
+        - Hard negative sampling from random walk
+        - Importance-based sampling (weighted neighbors)
+        - MapReduce for distributed training
+
+        **3. LightGCN (for Recommendations):**
+        - Simplify GCN: Remove feature transformation and activation
+        - Pure neighborhood aggregation (weighted sum)
+        - Final embedding: Weighted sum across layers
+        - State-of-art for collaborative filtering
+
+        **Production Challenges:**
+        - Sampling neighbors at serving time (precompute embeddings)
+        - Graph updates: Incremental vs. full retrain
+        - Scalability: Distributed graph storage (graph database)
+
+        **Interview Focus:**
+        - Explain message passing in GNNs
+        - Compare random walk vs. GNN approaches
+        - Discuss inductive vs. transductive learning
+
+      practice_questions:
+        concepts:
+          - question: "Explain the message passing framework in Graph Neural Networks. How does it capture graph structure?"
+            answer: "Message passing: Each node aggregates information from neighbors iteratively. Layer l: h_v^(l+1) = σ(W · AGG({h_u^(l) : u ∈ N(v)})). After L layers, node v's embedding captures L-hop neighborhood. Aggregation options: Mean (GraphSAGE), sum (GCN), max (GAT with attention). Captures structure because: Similar nodes (connected) have similar embeddings, higher-order relationships via multiple layers. Trade-off: More layers = more context but over-smoothing (all nodes similar)."
+
+          - question: "Compare random walk methods (Node2Vec) vs. GNN methods (GraphSAGE) for graph-based retrieval."
+            answer: "Node2Vec: Unsupervised, generates walks → Word2Vec embeddings, captures co-occurrence patterns, inductive (can't handle new nodes), fast inference (no aggregation). GraphSAGE: Supervised/semi-supervised, aggregates neighbor features, learns task-specific embeddings, inductive (sample neighbors for new nodes), slower inference (K-hop sampling). Trade-off: Node2Vec simpler and faster, GNN more flexible and accurate. Production: Use Node2Vec for static graphs, GNN for dynamic graphs with rich features."
+
+          - question: "Explain the return parameter (p) and in-out parameter (q) in Node2Vec. How do they control exploration?"
+            answer: "Return parameter p: Likelihood of returning to previous node. High p (e.g., 2) discourages revisiting, encourages exploration. In-out parameter q: BFS vs DFS. Low q (e.g., 0.5) = DFS (stay local, structural equivalence), high q (e.g., 2) = BFS (explore broadly, community detection). Example: p=1, q=0.5 finds structurally similar nodes (same role in different communities), p=1, q=2 finds same-community nodes. Tuned via grid search on downstream task."
+
+        tradeoffs:
+          - question: "Trade-off: Number of GNN layers (L=2 vs. L=4) in recommendation GNNs"
+            answer: "L=2: Captures 2-hop neighbors (friend's friends), fast inference, avoids over-smoothing (embeddings don't collapse). L=4: Captures 4-hop relationships, more context, but over-smoothing (all nodes similar in dense graphs), 2x slower inference. Trade-off: Receptive field vs. over-smoothing. LightGCN solution: Use 3 layers + weighted sum (layer combination) to balance. For sparse graphs: More layers helpful. For dense graphs: Fewer layers (2-3)."
+
+          - question: "Trade-off: Sampling neighbors (K=10 vs. K=50) in GraphSAGE"
+            answer: "K=50: More context from neighbors, better representation, 5x slower (50 vs 10 forward passes per hop), memory intensive for batching. K=10: Faster inference (10ms vs 50ms), lower memory, may miss important neighbors. Trade-off: Accuracy vs. latency. Solution: Importance sampling (weight popular/active neighbors), adaptive K based on node degree, or hierarchical sampling (more samples at first hop, fewer at second hop)."
+
+        estimation:
+          - question: "Estimate memory for PinSage on a graph with 100M items, 1B edges, embedding dimension 256."
+            answer: "Node embeddings: 100M × 256 × 4 bytes = 100GB. Edge storage (adjacency list): 1B edges × (4+4) bytes = 8GB (source + target IDs). Sampled subgraphs during training: Batch 1024 nodes × K=10 neighbors × L=2 layers ≈ 20K nodes per batch × 256 × 4 = 20MB. Training memory: 100GB embeddings + 8GB graph + 20MB×N_batches gradients ≈ 120GB (distributed across GPUs). Serving: Only final embeddings (100GB) + ANN index (PQ compressed to ~25GB). Total serving memory: ~30GB."
+
+      time_estimate: 90
+
+    - day: 6
+      topic: "Ranking Models: DeepFM, Wide & Deep, Deep Cross Network"
+      activity: "Master deep learning ranking architectures that combine explicit and implicit feature interactions"
+      detailed_content: |
+        **Ranking Stage Goals:**
+        - Predict engagement: CTR, conversion, dwell time
+        - Features: User, item, context, cross features
+        - Latency budget: 50-100ms for 100-500 candidates
+
+        **1. Wide & Deep (Google, 2016):**
+
+        **Architecture:**
+        - Wide: Linear model on cross features (memorization)
+        - Deep: MLP on embeddings (generalization)
+        - Joint training: Combined loss
+
+        **Wide Component:**
+        - Cross features: city × category, user_id × item_id
+        - Captures specific rules (e.g., "SF users click tech jobs")
+
+        **Deep Component:**
+        - Dense embeddings for categorical features
+        - 3-4 hidden layers (ReLU activation)
+        - Learns feature representations
+
+        **2. DeepFM (2017):**
+
+        **Key Innovation:** Replace wide component with FM
+
+        **FM (Factorization Machines):**
+        - Second-order interactions: Σᵢ Σⱼ <vᵢ, vⱼ> xᵢ xⱼ
+        - vᵢ, vⱼ: Learned embeddings
+        - Advantage: Handles sparse features, learns all pairwise interactions
+
+        **Architecture:**
+        - FM component: Second-order feature interactions
+        - Deep component: Same as Wide & Deep (MLP)
+        - Shared embeddings: Same embeddings used in FM and deep
+
+        **3. Deep Cross Network (DCN, Google, 2017):**
+
+        **Cross Network:**
+        - Explicit feature crossing at bit level
+        - Layer l: xₗ₊₁ = x₀ xₗᵀ wₗ + bₗ + xₗ
+        - Efficiently captures high-order interactions
+
+        **DCN-V2 (2021):**
+        - Matrix form: xₗ₊₁ = x₀ (Wₗ xₗ + bₗ) + xₗ
+        - More expressive, better performance
+
+        **4. Production Considerations:**
+
+        **Feature Engineering:**
+        - User: Demographics, history stats, sequence embeddings
+        - Item: Metadata, popularity, quality score
+        - Context: Time, location, device, session stats
+        - Cross: User-item, user-context, item-context
+
+        **Calibration:**
+        - Model outputs: Logits → probabilities
+        - Isotonic regression or Platt scaling
+        - Essential for multi-objective optimization
+
+        **Serving:**
+        - Batch inference: Score 100-500 candidates
+        - Feature caching: User features cached
+        - Model compression: Quantization, pruning
+
+        **Interview Focus:**
+        - Derive FM pairwise interaction term
+        - Explain advantage of DeepFM vs Wide & Deep
+        - Discuss feature interaction orders
+
+      practice_questions:
+        concepts:
+          - question: "Derive the Factorization Machines pairwise interaction term and explain why it's O(kn) instead of O(n²)."
+            answer: "FM: ŷ = w₀ + Σwᵢxᵢ + ΣᵢΣⱼ<vᵢ,vⱼ>xᵢxⱼ. Expand: ΣᵢΣⱼ<vᵢ,vⱼ>xᵢxⱼ = ½Σₖ[(Σᵢvᵢₖxᵢ)² - Σᵢvᵢₖ²xᵢ²]. Complexity: O(kn) - compute Σᵢvᵢₖxᵢ once for each factor k. Why efficient: Reformulation avoids nested loops. Allows learning pairwise interactions for millions of sparse features. Space: O(nk) for n features × k factors."
+
+          - question: "Explain the architecture of DeepFM. How does it improve upon Wide & Deep?"
+            answer: "DeepFM: 1) FM component (replaces wide) for automatic second-order interactions, 2) Deep component (MLP) for higher-order, 3) Shared embeddings between FM and deep. Improvement over Wide & Deep: No manual feature engineering for cross features (FM learns interactions), better for sparse data (FM handles unseen combinations). Output: ŷ = sigmoid(y_FM + y_Deep). Trade-off: FM adds O(kn) complexity but removes manual feature crossing."
+
+          - question: "Compare the feature interaction mechanisms in Wide & Deep vs DeepFM vs DCN."
+            answer: "Wide & Deep: Manual cross features (explicit, limited combinations), linear wide component. DeepFM: Automatic second-order via FM (all pairs), shared embeddings, no manual crossing. DCN: Explicit bounded-order crossing via cross layers (xₗ₊₁ = x₀xₗᵀwₗ + xₗ), captures high-order efficiently. Interaction depth: Wide (manual), DeepFM (2nd order + implicit deep), DCN (explicit up to L+1 order). Production choice: DeepFM for most cases (automatic, proven), DCN for complex interaction patterns."
+
+        tradeoffs:
+          - question: "Trade-off: Embedding dimension (k=8 vs k=64) in DeepFM for categorical features"
+            answer: "k=64: More expressive, better accuracy for high-cardinality features (item_id with millions of items), 8x memory (64 vs 8), slower training. k=8: Faster inference (8x fewer parameters), regularization effect (prevents overfitting on sparse features), underfitting for complex patterns. Trade-off: Model capacity vs. efficiency. Solution: Variable dimension based on cardinality (k=8 for low cardinality like gender, k=64 for item_id), or use hashing for ultra-high cardinality."
+
+          - question: "Trade-off: Deep component depth (3 layers vs 6 layers) in ranking models"
+            answer: "6 layers: More complex interactions, better offline metrics (AUC), 2x latency (50ms → 100ms), overfitting risk on sparse features, harder to debug. 3 layers: Faster inference (fits latency budget), easier to train, less overfitting, sufficient for most tasks. Trade-off: Expressiveness vs. latency. Solution: 3 layers (standard), add more only if offline metrics show significant gain AND A/B test confirms online improvement. Consider wider layers instead of deeper."
+
+        estimation:
+          - question: "Estimate inference latency for DeepFM ranking 500 candidates with feature dimension 100, embedding size 32."
+            answer: "Features: 100 sparse features → 100 embeddings (32d each) = 3200 floats. FM component: O(k×n) = 32×100 ≈ 3K ops per sample. Deep component: 3 layers [128, 64, 1], ≈ (3200×128 + 128×64 + 64×1) ≈ 420K ops. Total: 423K ops per sample. For 500 candidates: 500 × 423K = 212M ops. On CPU (1 GFLOP): 212ms (too slow). On GPU batch: 212M ops / 100 GFLOPS = 2ms. With batching (batch=500): ~5-10ms including overhead. Solution: GPU inference for low latency."
+
+      time_estimate: 90
+
+    - day: 7
+      topic: "Multi-Task Learning and Multi-Objective Optimization"
+      activity: "Learn to optimize multiple objectives (CTR, dwell time, conversion) jointly in ranking models"
+      detailed_content: |
+        **Why Multi-Task Learning (MTL)?**
+        - Optimize multiple goals: CTR, video watch time, conversion, revenue
+        - Share representations: Improve data efficiency
+        - Implicit regularization: Prevent overfitting on single task
+
+        **1. Hard Parameter Sharing:**
+
+        **Architecture:**
+        - Shared bottom layers (encoding features)
+        - Task-specific towers for each objective
+        - Separate loss per task: L = Σ wᵢ Lᵢ
+
+        **Loss Weighting:**
+        - Manual: Set weights based on business importance
+        - Uncertainty weighting: 1/(2σᵢ²) Lᵢ + log σᵢ (learn task uncertainty)
+        - GradNorm: Balance gradient magnitudes across tasks
+
+        **2. Multi-Gate Mixture-of-Experts (MMoE, Google, 2018):**
+
+        **Key Innovation:** Multiple expert networks + gating
+
+        **Architecture:**
+        - K expert networks (shared)
+        - Each task has its own gate: g^k(x) = softmax(W^k x)
+        - Task output: f^k = Σᵢ g^k_i(x) fᵢ(x)
+
+        **Advantage:**
+        - Learns task-specific routing
+        - Handles task conflicts (negative correlation)
+        - Better than hard sharing when tasks differ
+
+        **3. Progressive Layered Extraction (PLE, Tencent, 2020):**
+
+        **Improvement over MMoE:**
+        - Task-specific experts (not just shared)
+        - Progressive extraction: Earlier layers for sharing, later for specialization
+
+        **Architecture:**
+        - L levels of expert networks
+        - Each level: Shared experts + task-specific experts
+        - Gates route to both types
+
+        **4. Multi-Objective Ranking:**
+
+        **Scoring Function:**
+        - Weighted sum: score = w₁·CTR + w₂·watchTime + w₃·conversion
+        - Weights: Business logic (e.g., 1 conversion = 100 clicks)
+
+        **Pareto Optimization:**
+        - No single optimal solution (trade-offs)
+        - Find Pareto frontier: Improve one without hurting others
+
+        **Constraint Optimization:**
+        - Primary objective: Revenue
+        - Constraints: CTR > threshold, diversity > min
+
+        **5. Production Techniques:**
+
+        **Calibration:**
+        - Each task needs calibration (outputs → probabilities)
+        - Isotonic regression on validation set
+
+        **A/B Testing:**
+        - Test multiple weight combinations
+        - Monitor ecosystem metrics (long-term engagement)
+
+        **Online Learning:**
+        - Continuously update models with fresh data
+        - Per-task learning rates (different convergence speeds)
+
+        **Interview Focus:**
+        - Explain MMoE gating mechanism
+        - Discuss loss weighting strategies
+        - Design multi-objective scoring function
+
+      practice_questions:
+        concepts:
+          - question: "Explain the Multi-gate Mixture-of-Experts (MMoE) architecture. How does it improve upon hard parameter sharing?"
+            answer: "MMoE: K expert networks (shared bottom) + task-specific gates. Each task k computes gate weights g^k = softmax(W^k x), outputs f^k = Σᵢ g^k_i Expert_i(x). Improvement: Tasks learn different expert combinations (task-specific routing), handles task conflicts (when tasks negatively correlated). Hard sharing forces all tasks to use same representation. MMoE allows specialization while sharing. Example: CTR task uses experts focusing on clicks, conversion task uses experts focusing on purchase signals."
+
+          - question: "Compare different loss weighting strategies in multi-task learning: manual, uncertainty weighting, and GradNorm."
+            answer: "Manual: Set w₁, w₂ based on business importance. Simple but requires tuning. Uncertainty weighting: L = Σ (1/(2σᵢ²))Lᵢ + log σᵢ, learns task uncertainty (σᵢ). High uncertainty → lower weight. Automatic but adds parameters. GradNorm: Balance gradient magnitudes, ||∇Lᵢ|| ≈ constant. Prevents one task dominating. Trade-offs: Manual (simple, interpretable), uncertainty (automatic, principled), GradNorm (stable training, complex). Production: Start with manual, use uncertainty if tasks have different scales."
+
+          - question: "Design a multi-objective scoring function for a video recommendation system optimizing for CTR, watch time, and likes."
+            answer: "Objectives: CTR (immediate engagement), watch time (content quality), likes (strong signal). Scoring: score = w₁·p(click) + w₂·E[watch_time|click] + w₃·p(like|watch). Weights: Normalize to same scale (watch time in minutes → 0-1), business importance (1 like = 10 clicks = 5 min watch time), calibration (ensure probabilities). Example: score = 0.3·CTR + 0.5·(watch_time/10) + 0.2·(like_rate×5). A/B test multiple weight combinations. Monitor long-term metrics (daily active users, retention)."
+
+        tradeoffs:
+          - question: "Trade-off: Number of experts (K=4 vs K=16) in MMoE for multi-task learning"
+            answer: "K=16: More routing flexibility, each task finds specialized experts, 4x parameters (4x memory/latency), overfitting risk on small data. K=4: Faster inference, fewer parameters, forces more sharing (regularization), may underfit complex task relationships. Trade-off: Flexibility vs. efficiency. Solution: Start with K=8, cross-validate on held-out data, monitor task-specific performance. If tasks are very different (e.g., CTR vs fraud): More experts. If similar tasks: Fewer experts."
+
+          - question: "Trade-off: Task-specific towers (separate) vs shared output layer in multi-task learning"
+            answer: "Separate towers: Each task has own 2-3 layer MLP, learns task-specific transformations, 2-3x parameters, better performance when tasks differ. Shared output: One MLP for all tasks, faster inference, strong regularization (forces alignment), underfitting when tasks conflict. Trade-off: Performance vs. efficiency. Solution: Separate towers (standard in production), share bottom 80% of network, specialize top 20%. Example: YouTube ranking uses separate towers for CTR, watch time, satisfaction."
+
+        estimation:
+          - question: "Estimate the training time for MMoE with 3 tasks, 8 experts, on 1B training examples."
+            answer: "Model: Shared bottom (256d), 8 experts (128d each), 3 task towers (64d). Forward pass per sample: Bottom (256×128) + 8 experts (8×128×64) + 3 gates (3×256×8) + 3 towers (3×64×32) ≈ 100K ops. Batch size: 2048. Time per batch: 2048 × 100K ≈ 200M ops ≈ 2ms on GPU (100 GFLOPS). Total batches: 1B / 2048 ≈ 500K. Training time per epoch: 500K × 2ms = 1000 seconds ≈ 17 min. For convergence (5 epochs): ~1.5 hours on single V100. With 8 GPUs: ~12 minutes."
+
+      time_estimate: 90
+
+  week2:
+    - day: 8
+      topic: "Re-ranking and Diversity: MMR, DPP, Submodular Optimization"
+      activity: "Learn algorithms for diversifying recommendations while maintaining relevance"
+      detailed_content: |
+        **Why Re-ranking?**
+        - Ranking optimizes for relevance only
+        - Re-ranking adds: Diversity, freshness, fairness, position bias correction
+        - Operates on final N items (10-20)
+
+        **1. Maximal Marginal Relevance (MMR):**
+
+        **Algorithm:**
+        - Start with empty set S
+        - Iteratively add item i that maximizes: λ·relevance(i) - (1-λ)·max_similarity(i, S)
+        - λ: Relevance-diversity trade-off (typically 0.5-0.7)
+
+        **Similarity:**
+        - Content: Cosine similarity of item embeddings
+        - Category: Overlap in tags/categories
+
+        **Complexity:** O(N²) for N candidates
+
+        **2. Determinantal Point Process (DPP):**
+
+        **Key Idea:** Probabilistic model for diverse sets
+
+        **Formulation:**
+        - Kernel matrix L: L_ij = quality(i) · similarity(i,j) · quality(j)
+        - Probability: P(S) ∝ det(L_S), where L_S is submatrix for set S
+        - Determinant favors diverse sets (low correlation)
+
+        **MAP Inference:**
+        - Find set S with maximum det(L_S)
+        - Greedy approximation: Start with argmax det({i}), add items greedily
+
+        **Fast DPP:**
+        - Low-rank approximation: L ≈ BB^T
+        - Sampling: O(kN²) for rank k
+
+        **3. Submodular Optimization:**
+
+        **Submodular Function:**
+        - f(S ∪ {i}) - f(S) ≥ f(T ∪ {i}) - f(T) for S ⊆ T
+        - Diminishing returns property
+
+        **Examples:**
+        - Coverage: Number of unique categories
+        - MMR objective is submodular
+
+        **Greedy Algorithm:**
+        - (1 - 1/e) approximation guarantee
+        - Add item with maximum marginal gain
+
+        **4. Constrained Optimization:**
+
+        **Formulation:**
+        - Maximize: Σ relevance(i) · position_weight(i)
+        - Subject to: At most 2 items per category, at least 1 new item
+
+        **Integer Linear Programming (ILP):**
+        - Binary variables x_i (item i selected)
+        - Constraints as linear inequalities
+        - Solve with branch-and-bound
+
+        **5. Position Bias Correction:**
+
+        **Problem:** Users click top positions more (independent of relevance)
+
+        **Solutions:**
+        - Inverse Propensity Scoring (IPS): Weight by 1/P(position)
+        - Position features: Add position as model input
+        - Randomization: Occasionally shuffle top items (exploration)
+
+        **6. Production Considerations:**
+
+        **Real-time Constraints:**
+        - Re-ranking budget: 10-30ms
+        - Greedy algorithms (MMR, submodular) efficient
+        - DPP: Precompute kernel, fast sampling
+
+        **A/B Testing:**
+        - Monitor diversity metrics: ILD (intra-list diversity), coverage
+        - Watch for engagement drop (too much diversity)
+
+        **Interview Focus:**
+        - Explain MMR algorithm and parameters
+        - Compare MMR vs DPP
+        - Derive submodularity property
+
+      practice_questions:
+        concepts:
+          - question: "Explain the MMR (Maximal Marginal Relevance) algorithm. How does the λ parameter control the relevance-diversity trade-off?"
+            answer: "MMR iteratively selects items maximizing: score(i) = λ·relevance(i) - (1-λ)·max_j∈S similarity(i,j). λ=1: Pure relevance (no diversity), λ=0: Maximum diversity (ignore relevance). Typical: λ=0.6-0.7 (favor relevance but add diversity). Algorithm: Start with top relevant item, then add items balancing relevance and dissimilarity to selected set. Complexity O(N²). Example: λ=0.7 adds item with 0.9 relevance if dissimilar, or 0.7 relevance if very dissimilar."
+
+          - question: "Explain Determinantal Point Process (DPP) for diverse recommendations. How does the determinant favor diversity?"
+            answer: "DPP: P(S) ∝ det(L_S), where L_ij = q_i · sim(i,j) · q_j. Determinant det(L_S) = volume of parallelepiped formed by rows of L_S. Geometrically: Similar items (high correlation) reduce volume → lower probability. Diverse items (orthogonal) maximize volume. MAP inference: Find set S with max det(L_S). Greedy: Add item i maximizing det(L_S∪{i}) / det(L_S). Advantage over MMR: Principled probabilistic model, global diversity. Disadvantage: O(N³) complexity (use fast DPP with low-rank approximation)."
+
+          - question: "What is submodularity? Give an example in recommendation re-ranking and explain why greedy works."
+            answer: "Submodular function: f(S∪{i}) - f(S) ≥ f(T∪{i}) - f(T) for S⊆T. Diminishing returns: Adding item to small set gives more gain than to large set. Example: Coverage (# unique categories). Adding 'sports' item to {news, tech} gives +1 category, but to {news, tech, sports, finance} gives 0 if sports already covered. Greedy algorithm: (1-1/e)≈0.63 approximation guarantee. Iteratively add item with max marginal gain. Works because submodularity ensures greedy choices are near-optimal."
+
+        tradeoffs:
+          - question: "Trade-off: MMR vs DPP for recommendation diversity"
+            answer: "MMR: Simple greedy algorithm, O(N²), explicit λ parameter (interpretable), heuristic (no optimality guarantee). DPP: Principled probabilistic model, captures global diversity, O(N³) complexity (slow), harder to tune (kernel matrix). Trade-off: Speed vs. optimality. Production choice: MMR for real-time (10ms re-ranking), DPP for batch recommendations (offline personalization). Hybrid: DPP for candidate generation (pre-compute), MMR for re-ranking."
+
+          - question: "Trade-off: Diversity (λ=0.5 in MMR) vs pure relevance (λ=1.0)"
+            answer: "λ=1.0 (pure relevance): Maximize immediate engagement (CTR), filter bubble (repetitive content), lower long-term satisfaction. λ=0.5 (high diversity): More exploration, better discovery, lower immediate CTR, higher serendipity. Trade-off: Short-term engagement vs. long-term satisfaction. Solution: A/B test multiple λ values, monitor both CTR (short-term) and retention (long-term). Typical production: λ=0.6-0.7 (slight diversity bias). Adaptive λ: Higher for new users (exploration), lower for established users (exploitation)."
+
+        estimation:
+          - question: "Estimate the latency for MMR re-ranking on 50 items with embedding similarity computation."
+            answer: "Input: 50 items with 128d embeddings. Similarity: Cosine similarity, O(d) per pair. MMR iterations: 50 (select each item once). Per iteration i: Compute similarity to i selected items, O(i×128) ops. Total: Σᵢ₌₁⁵⁰ (50-i)×i×128 ≈ 50³×128/6 ≈ 2.7M ops. On CPU (1 GFLOP): 2.7ms. With optimizations (precompute all pairwise similarities): 50²×128/2 = 160K ops upfront + 50² selections ≈ 0.16ms + 2.5ms = 2.7ms. Add relevance scoring: 50 items × 1ms = 50ms. Total: ~3ms for MMR, 50ms for ranking. Re-ranking budget: ~53ms (feasible)."
+
+      time_estimate: 90
+
+    - day: 9
+      topic: "Feature Engineering and Importance for Recommendations"
+      activity: "Learn to design, engineer, and select features for recommendation models"
+      detailed_content: |
+        **Feature Categories:**
+
+        **1. User Features:**
+        - Demographics: Age, gender, location, language
+        - Historical: Lifetime clicks, purchases, avg session time
+        - Recent behavior: Last 10 clicks, 24h activity
+        - Engagement: Click-through rate, bounce rate, dwell time
+        - Temporal: Time since signup, days active
+
+        **2. Item Features:**
+        - Metadata: Category, tags, price, brand
+        - Content: Text embeddings (BERT), image embeddings (ResNet)
+        - Popularity: Global CTR, impressions, velocity (trending)
+        - Quality: Rating, review count, completeness
+        - Temporal: Recency, seasonality
+
+        **3. Context Features:**
+        - Time: Hour, day of week, season
+        - Device: Mobile, desktop, tablet
+        - Location: Country, city, IP-based
+        - Session: Position in session, session duration
+
+        **4. Cross Features:**
+        - User-item: Historical interaction (clicked before?)
+        - User-category: Category affinity score
+        - User-context: Time-of-day preferences
+        - Item-context: Category × time, price × location
+
+        **Feature Engineering Techniques:**
+
+        **1. Aggregation Features:**
+        - Count: # clicks in last 7 days
+        - Statistics: Mean, max, stddev of watched duration
+        - Ratios: Click-through rate, conversion rate
+
+        **2. Temporal Features:**
+        - Recency: Days since last purchase
+        - Trend: Engagement increasing/decreasing?
+        - Seasonality: Holiday indicator, weekend flag
+
+        **3. Embedding Features:**
+        - Pretrained: BERT for text, ResNet for images
+        - Learned: User/item embeddings from MF, two-tower
+        - Aggregated: Mean of last 10 clicked item embeddings
+
+        **4. Interaction Features:**
+        - Pairwise: user_age × item_category
+        - Higher-order: Learned via DeepFM, DCN
+
+        **Feature Importance:**
+
+        **1. Tree-based Methods:**
+        - Feature importance from XGBoost, Random Forest
+        - Gain, cover, frequency metrics
+
+        **2. Permutation Importance:**
+        - Shuffle feature, measure performance drop
+        - Model-agnostic, captures true importance
+
+        **3. SHAP (SHapley Additive exPlanations):**
+        - Game-theoretic feature attribution
+        - Explains individual predictions
+
+        **4. Ablation Study:**
+        - Train model without feature, measure impact
+        - Gold standard but expensive
+
+        **Production Considerations:**
+
+        **Feature Store:**
+        - Centralized repository (Feast, Tecton)
+        - Online serving: Low-latency lookup
+        - Offline training: Historical values with time-travel
+
+        **Feature Freshness:**
+        - Real-time: Compute on request (expensive)
+        - Near-real-time: Update every 5-15 minutes (stream processing)
+        - Batch: Daily updates (cheap, stale)
+
+        **Data Quality:**
+        - Missing values: Imputation, default values, special embedding
+        - Outliers: Clipping, log transformation
+        - Drift: Monitor feature distributions
+
+        **Interview Focus:**
+        - Design features for specific recommendation task
+        - Explain feature importance methods
+        - Discuss feature freshness trade-offs
+
+      practice_questions:
+        concepts:
+          - question: "Design a comprehensive feature set for a video recommendation ranking model. Include user, item, context, and cross features."
+            answer: "User: [Demographics] age_bin, country, [History] lifetime_watch_hours, avg_session_minutes, [Recent] last_10_video_embeddings_avg, 24h_clicks, [Engagement] CTR_7d, completion_rate. Item: [Metadata] category, duration_minutes, upload_date, creator_id, [Content] video_title_BERT_embedding, thumbnail_ResNet_embedding, [Popularity] global_CTR, view_count, like_ratio, [Quality] avg_watch_percentage, comment_sentiment. Context: hour_of_day, day_of_week, device_type, network_speed. Cross: user_category_affinity (CTR on category), watched_creator_before (binary), category×hour, user_embedding·video_embedding (dot product). Total: ~50-100 features."
+
+          - question: "Explain SHAP (SHapley Additive exPlanations) for feature importance. How does it differ from tree-based feature importance?"
+            answer: "SHAP: Game-theoretic approach, assigns each feature a contribution φᵢ such that prediction = baseline + Σφᵢ. Shapley value: Average marginal contribution across all feature subsets. Properties: Additivity, consistency, null feature = 0. Tree importance: Based on split gain/frequency, biased toward high-cardinality features, doesn't account for interactions. SHAP: Model-agnostic, consistent attribution, computationally expensive O(2^n). Use cases: SHAP for explaining individual predictions (interpretability), tree importance for quick feature selection."
+
+          - question: "Compare real-time vs batch feature computation for recommendations. Give examples of each."
+            answer: "Real-time: Computed on-demand per request. Examples: current_time, device_type, session_clicks_so_far. Advantages: Always fresh, captures immediate context. Cost: High latency (1-10ms per feature), infrastructure complexity. Batch: Precomputed daily/hourly. Examples: user_lifetime_clicks, item_global_CTR, user_embedding. Advantages: Low latency (lookup from cache), cheaper compute. Disadvantages: Stale (up to 24h old). Hybrid (near-real-time): Stream processing (Flink/Spark) updates every 5-15 min. Examples: trending_score, last_hour_clicks. Trade-off: Freshness vs. cost/latency."
+
+        tradeoffs:
+          - question: "Trade-off: Feature freshness (real-time vs daily batch) for user engagement features"
+            answer: "Real-time: Always fresh, captures current session (e.g., clicks in last 5 min), 10-50ms latency per feature, high infrastructure cost (Kafka, stream processing). Daily batch: Stale (up to 24h), misses recent changes, <1ms latency (cache lookup), 10x cheaper. Trade-off: Accuracy vs. cost. Solution: Tiered approach - batch for slow-changing features (lifetime stats), near-real-time (15 min) for engagement metrics, real-time only for critical context (current session). A/B test impact of freshness on engagement."
+
+          - question: "Trade-off: Number of cross features (10 manual vs 1000 learned via DeepFM)"
+            answer: "10 manual: Interpretable, fast (low dimensionality), requires domain expertise, misses long-tail interactions. 1000 learned (DeepFM): Captures all pairwise interactions, no manual effort, black box (hard to debug), slower inference (larger model). Trade-off: Interpretability vs. coverage. Production: Hybrid - manual for critical interactions (user_id×item_id for memorization), learned for sparse features. Start with manual cross features, add DeepFM if offline metrics improve significantly."
+
+        estimation:
+          - question: "Estimate the feature serving latency for a ranking model with 50 features (20 from cache, 10 computed, 20 from embeddings)."
+            answer: "Cached features (user lifetime stats, item metadata): 20 features × 0.1ms (Redis lookup) = 2ms. Computed features (aggregations like CTR_7d from logs): 10 features × 5ms (DB query + aggregation) = 50ms. Embedding features (user/item vectors): 20 lookups × 1ms (vector DB like Pinecone) = 20ms. Total: 2 + 50 + 20 = 72ms. Optimization: 1) Batch DB queries (50ms → 10ms), 2) Cache computed features (update every 15 min via streaming), 3) Precompute embeddings (daily batch). Optimized: 2 + 10 + 5 = 17ms."
+
+      time_estimate: 90
+
+    - day: 10
+      topic: "Cold Start Problem: New Users, New Items, and Solutions"
+      activity: "Master techniques for handling cold start in recommendations: content-based, hybrid, exploration"
+      detailed_content: |
+        **Cold Start Types:**
+
+        **1. New User (User Cold Start):**
+        - No interaction history
+        - Can't use collaborative filtering
+        - Need to learn preferences quickly
+
+        **2. New Item (Item Cold Start):**
+        - No usage data (clicks, ratings)
+        - Can't recommend via popularity or collaborative
+        - Need to surface to users
+
+        **3. New System (System Cold Start):**
+        - No data at all (new platform)
+        - Bootstrap with external data
+
+        **Solutions for User Cold Start:**
+
+        **1. Onboarding:**
+        - Ask preferences: Select favorite categories, creators
+        - Implicit feedback: Track behavior during onboarding
+        - Social: Import from other platforms (Facebook friends)
+
+        **2. Demographic-based:**
+        - Use age, gender, location to assign to user segment
+        - Recommend popular items in segment
+        - Cluster-based: Assign to nearest user cluster
+
+        **3. Content-based Filtering:**
+        - Use item metadata (category, tags, text)
+        - Match item features to expressed preferences
+        - No need for collaborative signals
+
+        **4. Exploration:**
+        - Thompson Sampling: Bayesian approach, sample from posterior
+        - ε-greedy: Explore random items with probability ε
+        - Upper Confidence Bound (UCB): Optimistic exploration
+
+        **Solutions for Item Cold Start:**
+
+        **1. Content-based Features:**
+        - Rich metadata: Category, tags, description (BERT embeddings)
+        - Image/video embeddings: ResNet, CLIP
+        - Creator features: If creator has history
+
+        **2. Seeding Strategy:**
+        - Show to diverse users: Sample across demographics
+        - Power users: Users who engage with new content
+        - Similarity-based: Show to users who liked similar items
+
+        **3. Hybrid Retrieval:**
+        - Two-tower model: User features × item content features
+        - Can handle new items immediately
+        - Degrades gracefully (falls back to content similarity)
+
+        **4. Multi-armed Bandits:**
+        - Explore-exploit trade-off
+        - LinUCB: Linear model with confidence bounds
+        - Contextual bandits: Use user/item context
+
+        **Advanced Techniques:**
+
+        **1. Transfer Learning:**
+        - Pretrain on related domain (YouTube → new video platform)
+        - Cross-domain: Movies → Books
+        - Multi-task: Learn from multiple platforms
+
+        **2. Meta-learning (MAML):**
+        - Learn to adapt quickly to new users
+        - Few-shot learning: Learn from 5-10 interactions
+
+        **3. Knowledge Graphs:**
+        - Entity relationships: Actor → Movie, Topic → Article
+        - Path-based reasoning for new items
+
+        **4. Active Learning:**
+        - Query user on most informative items
+        - Maximize information gain per question
+
+        **Production Strategies:**
+
+        **1. Tiered Approach:**
+        - Tier 1 (0 interactions): Popular + demographic
+        - Tier 2 (1-10 interactions): Hybrid (collaborative + content)
+        - Tier 3 (>10 interactions): Full collaborative filtering
+
+        **2. Warm-up Period:**
+        - Boost new items in ranking for first 24-48h
+        - Gradually reduce boost as data accumulates
+
+        **3. Monitoring:**
+        - Track cold start metrics separately
+        - Measure time-to-first-interaction
+        - A/B test cold start strategies
+
+        **Interview Focus:**
+        - Design cold start solution for specific platform
+        - Explain explore-exploit trade-off
+        - Compare content-based vs contextual bandits
+
+      practice_questions:
+        concepts:
+          - question: "Design a comprehensive cold start solution for a new user on a video streaming platform. Include onboarding, initial recommendations, and learning strategy."
+            answer: "Onboarding: 1) Ask to select 5 favorite genres, 2) Show 20 popular videos, track which they click/watch, 3) Import from social media (optional). Initial recommendations: 1) Popular videos in selected genres (collaborative from other users), 2) Content-based: Videos similar to watched (BERT embeddings of titles/descriptions), 3) Demographic: Popular for user's age/location. Learning: 1) Contextual bandits (LinUCB) to explore categories, 2) Update user embedding after each interaction (online learning), 3) After 10 interactions: Enable full collaborative filtering. Metrics: Engagement rate in first session, time-to-second-session."
+
+          - question: "Explain the explore-exploit trade-off in cold start recommendations. Compare ε-greedy vs Thompson Sampling."
+            answer: "Explore-exploit: Exploit = recommend best-known items (maximize immediate reward), Explore = try new items (learn preferences, maximize long-term reward). ε-greedy: Probability ε explore random item, 1-ε exploit best. Simple but inefficient (random exploration ignores uncertainty). Thompson Sampling: Bayesian approach, sample reward from posterior distribution P(reward|data), recommend item with highest sample. Intelligent exploration (prioritizes uncertain items). Trade-off: Thompson Sampling better performance but complex (maintain posteriors). Production: ε-greedy for simplicity (ε=0.1-0.2), Thompson Sampling for critical applications."
+
+          - question: "Compare content-based filtering vs collaborative filtering for handling item cold start. When would you use each?"
+            answer: "Content-based: Uses item metadata (category, text, image embeddings), works immediately for new items, no collaborative signals needed. Limited by feature quality, can't discover unexpected preferences. Collaborative: Uses user-item interactions, discovers hidden patterns, requires interaction data (fails for new items). Solution: Hybrid approach - start with content-based for new items (day 1), blend in collaborative as data accumulates (after 10-100 interactions), use two-tower model (content features for new items, collaborative for warm items). Example: Netflix uses metadata (genre, actors) for new shows, collaborative after viewers accumulate."
+
+        tradeoffs:
+          - question: "Trade-off: Aggressive exploration (ε=0.3) vs conservative exploitation (ε=0.05) for new users"
+            answer: "ε=0.3 (aggressive): Learns preferences faster (more exploration), 30% random items (lower immediate engagement), better long-term (avoids filter bubble), risky (may frustrate user). ε=0.05 (conservative): Higher immediate engagement (95% best items), slower learning, may miss user's diverse interests. Trade-off: Learning speed vs. user experience. Solution: Adaptive ε - start high (0.2-0.3) for first 5-10 items (onboarding), decay to 0.05 after 50 interactions. Or contextual: Higher ε for engaged users, lower for at-risk users."
+
+          - question: "Trade-off: Seeding new items to diverse users vs power users"
+            answer: "Diverse users: Broad feedback (geographic, demographic diversity), slower to reach critical mass (low engagement), better generalization. Power users: Fast feedback (high engagement), biased sample (may not represent general population), good for niche content. Trade-off: Speed vs. representation. Solution: Hybrid - seed to power users for quick signal (first 100 interactions), then broaden to diverse sample (next 1000), use importance weighting to debias power user feedback. Monitor: Engagement by user segment."
+
+        estimation:
+          - question: "Estimate how many interactions needed for a new item to reach 'warm' status (sufficient data for collaborative filtering)."
+            answer: "Assume: 1M total users, 10K active daily, item shown to 0.1% → 10 impressions/day. CTR 2% → 0.2 clicks/day. For collaborative filtering: Need ~100 interactions for stable embedding. At 0.2 clicks/day → 500 days (too slow!). Solution: Boost new items to 1% (100 impressions/day, 2 clicks/day) → 50 days. Or seed to high-engagement users (10% CTR) → 10 impressions × 10% = 1 click/day → 100 days. Hybrid: Use content-based for first 50 interactions (week 1), blend collaborative after 50 (week 2+), full collaborative after 500 (month 2+). Definition of 'warm': 50-100 interactions for ranking, 500+ for stable retrieval."
+
+      time_estimate: 90
+
+  week3:
+    - day: 11
+      topic: "Evaluation Metrics: NDCG, Diversity, Coverage, Serendipity"
+      activity: "Master offline and online metrics for comprehensive recommendation system evaluation"
+      detailed_content: |
+        **Offline Metrics:**
+
+        **1. Ranking Metrics:**
+
+        **NDCG (Normalized Discounted Cumulative Gain):**
+        - DCG@K = Σᵢ₌₁ᴷ (2^relᵢ - 1) / log₂(i+1)
+        - IDCG@K = DCG for perfect ranking
+        - NDCG@K = DCG@K / IDCG@K (normalized to [0,1])
+        - Discount: log₂(i+1) penalizes lower positions
+        - Standard: NDCG@10, NDCG@50
+
+        **Mean Average Precision (MAP):**
+        - Precision@K = (# relevant in top K) / K
+        - AP = (Σ Precision@K × relevant_indicator) / (# relevant items)
+        - MAP = Average AP across all queries
+
+        **Recall@K:**
+        - Recall@K = (# relevant retrieved in top K) / (# total relevant)
+        - Important for retrieval stage
+
+        **2. Accuracy Metrics:**
+
+        **AUC (Area Under ROC Curve):**
+        - Probability that positive item ranked higher than negative
+        - Good for binary classification (click vs no click)
+
+        **Log Loss:**
+        - -Σ (y log(p) + (1-y) log(1-p))
+        - Measures calibration quality
+
+        **3. Diversity Metrics:**
+
+        **Intra-List Diversity (ILD):**
+        - ILD = (Σᵢ Σⱼ₌ᵢ₊₁ dissimilarity(i,j)) / (K(K-1)/2)
+        - Average pairwise dissimilarity
+        - Dissimilarity: 1 - cosine_similarity(embedding_i, embedding_j)
+
+        **Coverage:**
+        - Item coverage = (# unique items recommended) / (# total items)
+        - Category coverage = (# unique categories) / (# total categories)
+        - Long-tail coverage: % recommendations to items in bottom 80%
+
+        **4. Novelty and Serendipity:**
+
+        **Novelty:**
+        - Novelty(i) = -log₂(popularity(i))
+        - Higher for less popular items
+
+        **Serendipity:**
+        - Serendipity = relevance × unexpectedness
+        - Unexpected: Not in user's typical consumption pattern
+        - Hard to measure offline (requires user feedback)
+
+        **Online Metrics:**
+
+        **1. Engagement Metrics:**
+        - CTR (Click-Through Rate): clicks / impressions
+        - Watch time, dwell time
+        - Completion rate: % who finish video/article
+        - Engagement rate: (clicks + likes + shares) / impressions
+
+        **2. Business Metrics:**
+        - Conversion rate: purchases / clicks
+        - Revenue per user (RPU)
+        - Customer lifetime value (CLV)
+
+        **3. Retention Metrics:**
+        - DAU (Daily Active Users)
+        - Session length, sessions per day
+        - N-day retention: % users active on day N
+        - Churn rate
+
+        **4. Ecosystem Metrics:**
+        - Creator earnings (two-sided marketplace)
+        - New item discovery rate
+        - Filter bubble: % new categories explored
+
+        **A/B Testing:**
+
+        **Design:**
+        - Control vs treatment groups (50/50 split)
+        - Randomization: User-level (not session-level)
+        - Duration: 1-2 weeks for significance
+
+        **Statistical Significance:**
+        - T-test for continuous metrics (watch time)
+        - Z-test for proportions (CTR)
+        - Bonferroni correction for multiple comparisons
+        - Minimum detectable effect (MDE): Typically 0.5-1%
+
+        **Interview Focus:**
+        - Derive NDCG formula
+        - Design evaluation strategy for specific platform
+        - Explain diversity-accuracy trade-off
+
+      practice_questions:
+        concepts:
+          - question: "Derive the NDCG@K formula and explain the intuition behind the position discount."
+            answer: "NDCG@K = DCG@K / IDCG@K. DCG@K = Σᵢ₌₁ᴷ (2^relᵢ - 1) / log₂(i+1). Relevance relᵢ ∈ [0,1,...,5]. Discount 1/log₂(i+1): Position 1 (no discount), position 2 (1/1), position 3 (1/1.58), position 10 (1/3.32). Intuition: Users focus on top positions, exponentially less attention to lower ranks. IDCG: DCG for perfect ranking (sorted by relevance). Normalization: NDCG ∈ [0,1], allows comparison across queries. Example: [rel=3,1,2] at positions [1,2,3] → DCG=(7/1 + 1/1 + 3/1.58)=10.9, perfect [3,2,1] → IDCG=11.9, NDCG=0.92."
+
+          - question: "Compare NDCG vs MAP for evaluating recommendation systems. When would you use each?"
+            answer: "NDCG: Graded relevance (0-5 scale), position-weighted, smooth gradient for learning. Suitable for: Video recommendations (watch time as relevance), search ranking. MAP: Binary relevance (relevant/not), emphasizes precision, harder to optimize (discrete). Suitable for: Information retrieval, when relevance is binary. Production: NDCG preferred for recommendations (captures engagement spectrum), MAP for search/retrieval. NDCG@10 for ranking, Recall@100 for retrieval. Both offline metrics - validate with online A/B test (CTR, engagement)."
+
+          - question: "Design a comprehensive evaluation framework for a video recommendation system. Include offline metrics, online metrics, and A/B test design."
+            answer: "Offline (on held-out test set): 1) Ranking: NDCG@10 (relevance=watch percentage), Recall@100 (retrieval coverage), 2) Diversity: ILD (content similarity), category coverage, 3) Fairness: NDCG by user demographic. Online (A/B test, 1 week, 50/50 split): 1) Engagement: CTR, avg watch time, completion rate, 2) Retention: 7-day retention, session length, 3) Ecosystem: Creator diversity, new video discovery rate. Guardrails: Revenue ≥ baseline, churn rate ≤ baseline. Significance: T-test for watch time (α=0.05), require >1% lift for launch. Segment analysis: New vs returning users."
+
+        tradeoffs:
+          - question: "Trade-off: Optimizing for NDCG@10 vs long-term retention in recommendations"
+            answer: "NDCG@10: Immediate relevance, maximizes short-term engagement (CTR, watch time), may create filter bubble (repetitive content), offline metric (easy to optimize). Long-term retention: Diverse content, serendipity, harder to measure offline, multi-month A/B tests. Trade-off: Short-term vs long-term value. Example: Optimizing NDCG may recommend same genre repeatedly (high NDCG), but user gets bored (low retention). Solution: Multi-objective - primary NDCG, constraint on diversity (ILD > threshold), validate with online retention metrics. Balance: 70% exploitation (NDCG), 30% exploration (diversity)."
+
+          - question: "Trade-off: High diversity (ILD=0.8) vs high relevance (NDCG=0.9) in recommendations"
+            answer: "High diversity (ILD=0.8): Varied content (different categories), lower immediate engagement (NDCG=0.7), better long-term (discovery, serendipity), higher complexity (re-ranking needed). High relevance (NDCG=0.9): Strong immediate engagement, lower diversity (ILD=0.5), filter bubble risk. Trade-off: Engagement vs. exploration. Solution: User-adaptive - new users: Higher diversity (onboarding), engaged users: Balance (60% relevant, 40% diverse), at-risk users: High relevance (retention). Metrics: Track both NDCG and ILD, A/B test multiple points on Pareto frontier."
+
+        estimation:
+          - question: "Estimate sample size and duration for A/B test detecting 1% CTR improvement (baseline CTR=5%)."
+            answer: "Baseline CTR: p₁=0.05, treatment CTR: p₂=0.051 (1% relative lift). Variance: σ² ≈ p(1-p) = 0.05×0.95 = 0.0475. Standard error: SE = √(σ²/n₁ + σ²/n₂) = √(2σ²/n) for equal groups. For 80% power, α=0.05 (two-tailed): Z = 1.96 + 0.84 = 2.8. Effect size: δ = p₂-p₁ = 0.001. Sample size: n = (2.8 × √(2×0.0475))² / 0.001² ≈ 250K per group, 500K total. At 100K active users/day: 5 days. Practical: Run 1-2 weeks for seasonality, check novelty effects (first week may differ)."
+
+      time_estimate: 90
+
+    - day: 12
+      topic: "Contextual Bandits and Reinforcement Learning for Recommendations"
+      activity: "Learn to model recommendations as sequential decision-making with exploration-exploitation"
+      detailed_content: |
+        **From Supervised Learning to RL:**
+
+        **Supervised Learning:**
+        - Static data: Train on historical logs
+        - Limitation: Position bias, selection bias
+        - No exploration: Only exploits known patterns
+
+        **Reinforcement Learning:**
+        - Sequential decisions: Actions affect future state
+        - Reward: Immediate (click) + long-term (retention)
+        - Exploration: Try new actions to learn
+
+        **Multi-Armed Bandits (MAB):**
+
+        **1. Basic MAB:**
+        - K arms (items), each with unknown reward distribution
+        - Goal: Maximize cumulative reward
+        - Regret: Loss from not picking optimal arm
+
+        **2. ε-greedy:**
+        - Exploit best arm with probability 1-ε
+        - Explore random arm with probability ε
+        - Regret: O(T²/³) (sublinear)
+
+        **3. Upper Confidence Bound (UCB):**
+        - Select arm with highest UCB score
+        - UCB(i) = μ̂ᵢ + √(2 log t / nᵢ)
+        - μ̂ᵢ: Estimated mean reward
+        - nᵢ: Number of times arm i pulled
+        - Optimistic exploration (uncertainty bonus)
+
+        **4. Thompson Sampling:**
+        - Bayesian approach: Maintain posterior over rewards
+        - Sample reward from posterior for each arm
+        - Select arm with highest sample
+        - Better empirical performance than UCB
+
+        **Contextual Bandits:**
+
+        **1. LinUCB (Linear UCB):**
+        - Context: User features x ∈ ℝᵈ
+        - Reward model: E[r|x,a] = xᵀθₐ (linear)
+        - Estimate θ̂ₐ with confidence bound
+        - UCB(a) = xᵀθ̂ₐ + α√(xᵀAₐ⁻¹x)
+        - Aₐ: Covariance matrix for arm a
+
+        **2. Neural Bandits:**
+        - Replace linear model with neural network
+        - Uncertainty: Dropout, ensembles, Bayesian NN
+        - Thompson sampling with neural posteriors
+
+        **Reinforcement Learning for Recommendations:**
+
+        **1. MDP Formulation:**
+        - State: User history, context, session state
+        - Action: Recommend item (or list of items)
+        - Reward: Click (r=1), watch time (r=duration), long-term (retention)
+        - Transition: User state evolves with interactions
+
+        **2. Policy-based Methods:**
+
+        **REINFORCE:**
+        - Policy π(a|s): Probability of action a in state s
+        - Gradient: ∇J = 𝔼[∇log π(a|s) × Q(s,a)]
+        - Q(s,a): Expected cumulative reward
+        - High variance (needs baseline)
+
+        **Actor-Critic:**
+        - Actor: Policy network π(a|s)
+        - Critic: Value network V(s) or Q(s,a)
+        - Advantage: A(s,a) = Q(s,a) - V(s)
+        - Reduces variance
+
+        **3. Off-Policy Learning:**
+
+        **Importance Sampling:**
+        - Learn from logged data (behavior policy β)
+        - Correct for distribution mismatch
+        - Weight: π(a|s) / β(a|s)
+        - High variance with large mismatch
+
+        **Doubly Robust Estimator:**
+        - Combine importance sampling + model-based estimation
+        - More robust, lower variance
+
+        **Production Considerations:**
+
+        **1. Exploration Strategy:**
+        - ε-greedy: Simple, works for small action spaces
+        - Thompson Sampling: Better for contextual, scales to large actions
+        - Bootstrapped DQN: Ensemble-based uncertainty
+
+        **2. Delayed Rewards:**
+        - Immediate: Click (1 second)
+        - Medium: Watch time (minutes)
+        - Long-term: Retention (days)
+        - Solution: Multi-objective reward, discount factor γ
+
+        **3. Cold Start:**
+        - Bandits handle cold start naturally (exploration)
+        - Warm start: Initialize with supervised model
+
+        **Interview Focus:**
+        - Formulate recommendation as MAB/MDP
+        - Derive UCB formula
+        - Compare Thompson Sampling vs LinUCB
+        - Explain exploration-exploitation trade-off
+
+      practice_questions:
+        concepts:
+          - question: "Formulate the video recommendation problem as a Contextual Bandit. Define context, actions, and reward."
+            answer: "Context (x): User features (demographics, history embeddings, current session), context features (time, device). Actions (a): Recommend video i from candidate set (100-500 items). Reward (r): Immediate r=1 if click else 0, or r=watch_percentage (0-1), or delayed r=session_length. Algorithm: LinUCB or Neural UCB. At each step: Observe x, compute UCB(a|x) for all actions, select argmax UCB, observe reward, update model. Exploration: Uncertainty bonus √(xᵀA⁻¹x) ensures trying uncertain items. Compared to supervised: Bandits explore new videos, adapt to non-stationary preferences."
+
+          - question: "Derive the UCB (Upper Confidence Bound) formula and explain the exploration-exploitation trade-off."
+            answer: "UCB(i,t) = μ̂ᵢ(t) + √(2 log t / nᵢ(t)). μ̂ᵢ: Sample mean reward for arm i. nᵢ: Times arm i pulled. √(2 log t / nᵢ): Confidence radius (uncertainty). Exploitation: μ̂ᵢ (choose arm with highest known reward). Exploration: Bonus term (choose uncertain arms, nᵢ small → large bonus). Trade-off: As nᵢ increases, bonus shrinks → focus on exploitation. As t grows, log t increases → maintain some exploration. Intuition: Optimism under uncertainty - assume uncertain arms could be best. Regret bound: O(√(Kt log t)) (optimal for MAB)."
+
+          - question: "Compare Thompson Sampling vs LinUCB for contextual bandits in recommendations. When would you use each?"
+            answer: "LinUCB: Frequentist, UCB with linear reward model E[r|x,a]=xᵀθₐ, confidence bound via covariance matrix, deterministic (argmax UCB). Thompson Sampling: Bayesian, sample reward from posterior P(θₐ|data), randomized (stochastic exploration). Comparison: Thompson Sampling often better empirically (more efficient exploration), LinUCB easier to analyze (regret bounds), both O(√T) regret. When to use: LinUCB if reward is truly linear, Thompson Sampling for neural models (sample from dropout/ensemble), LinUCB for interpretability. Production: Thompson Sampling preferred (better performance, scales to neural nets)."
+
+        tradeoffs:
+          - question: "Trade-off: Immediate rewards (clicks) vs long-term rewards (retention) in RL for recommendations"
+            answer: "Immediate (r=click): Easy to measure (1 sec), abundant signal (every recommendation), optimizes short-term engagement, may lead to clickbait. Long-term (r=retention): Measures true value, delayed (days), sparse signal (low variance), hard to attribute (many factors). Trade-off: Signal quality vs. actionability. Solutions: 1) Multi-objective: r = α·click + β·watch_time + γ·retention, tune α,β,γ via A/B test, 2) Hierarchical: RL for session (immediate), supervised for user-level (long-term), 3) Discount factor: r = Σ γᵗrₜ (γ=0.9-0.99). Production: Weighted combination with γ=0.95 (balances both)."
+
+          - question: "Trade-off: Exploration rate (ε=0.1 vs ε=0.3) in ε-greedy bandit for recommendations"
+            answer: "ε=0.3 (high exploration): Discovers new items faster, 30% suboptimal recommendations (lower immediate engagement), better long-term (avoids local optima), higher regret initially. ε=0.1 (low exploration): 90% exploit (higher immediate reward), slower learning, may miss better items. Trade-off: Learning speed vs. immediate performance. Solution: Decaying ε - start ε=0.3 (first 1K samples), decay to ε=0.05 (after 10K), or adaptive ε based on uncertainty (high uncertainty → high ε). For production: ε=0.1-0.2 (proven safe), decay over days/weeks."
+
+        estimation:
+          - question: "Estimate the regret for UCB algorithm on a 1000-arm bandit after 100K pulls."
+            answer: "UCB regret bound: R(T) ≤ O(√(KT log T)). K=1000 arms, T=100K pulls. R(100K) ≤ C√(1000 × 100K × log(100K)) = C√(1000 × 100K × 11.5) ≈ C√(1.15B) ≈ 33.9K × C. Constant C depends on reward gaps (typically 1-10). Regret: ~34K - 340K suboptimal pulls. Fraction: 0.34 - 3.4% of pulls. Interpretation: UCB makes O(√T) suboptimal decisions. For production: High K → more exploration needed. Alternative: Thompson Sampling (lower empirical regret), or warm start (initialize with supervised model to reduce regret)."
+
+      time_estimate: 90
+
+    - day: 13
+      topic: "Production ML Systems: Serving, Monitoring, A/B Testing"
+      activity: "Learn end-to-end production considerations for deploying recommendation systems at scale"
+      detailed_content: |
+        **Model Serving Architecture:**
+
+        **1. Online Serving:**
+
+        **Request Flow:**
+        1. User request → API gateway
+        2. Feature fetching (user, context from cache/DB)
+        3. Candidate generation (retrieval via ANN)
+        4. Ranking (batch inference on candidates)
+        5. Re-ranking (diversity, business rules)
+        6. Response (top N items)
+
+        **Latency Budget:**
+        - Total: 100-200ms (p99)
+        - Feature fetch: 10-30ms
+        - Retrieval: 10-20ms (ANN search)
+        - Ranking: 50-100ms (GPU batch inference)
+        - Re-ranking: 10-30ms
+
+        **2. Batch Serving:**
+
+        **Offline Computation:**
+        - Compute recommendations daily/hourly
+        - Store in cache (Redis, Memcached)
+        - Fast serving: <1ms lookup
+
+        **Hybrid:**
+        - Batch for personalized retrieval
+        - Online for real-time ranking (context)
+
+        **3. Model Deployment:**
+
+        **Containerization:**
+        - Docker containers with model artifacts
+        - Kubernetes for orchestration
+        - Rolling updates (gradual rollout)
+
+        **Model Registry:**
+        - Versioned models (MLflow, SageMaker)
+        - A/B test multiple model versions
+        - Rollback capability
+
+        **Feature Store:**
+
+        **1. Architecture:**
+        - Offline: Historical features (training)
+        - Online: Low-latency serving (<10ms)
+        - Time-travel: Point-in-time correctness
+
+        **2. Implementation (Feast, Tecton):**
+        - Feature definitions (YAML/Python)
+        - Materialization: Batch → online store
+        - Serving: gRPC API, Redis backend
+
+        **3. Consistency:**
+        - Training-serving skew: Same features offline/online
+        - Backfill: Recompute historical features
+
+        **Monitoring and Alerting:**
+
+        **1. Model Metrics:**
+        - Online performance: CTR, conversion, watch time
+        - Drift detection: Feature distributions, prediction distributions
+        - Latency: p50, p95, p99 percentiles
+
+        **2. System Metrics:**
+        - QPS (queries per second)
+        - Error rate: 4xx, 5xx
+        - Resource utilization: CPU, memory, GPU
+
+        **3. Business Metrics:**
+        - Revenue, DAU, retention
+        - Creator metrics (two-sided marketplace)
+
+        **4. Alerts:**
+        - Anomaly detection: Sudden CTR drop >5%
+        - Latency SLA: p99 >200ms
+        - Error rate: >0.1%
+
+        **A/B Testing Framework:**
+
+        **1. Experiment Design:**
+        - Hypothesis: New ranking model increases engagement
+        - Metric: Primary (watch time), guardrails (revenue, retention)
+        - Population: 50/50 split, user-level randomization
+        - Duration: 1-2 weeks
+
+        **2. Randomization:**
+        - Hash-based: hash(user_id) % 100 < 50
+        - Stratified: Balance by user segments
+        - Avoid contamination: User-level (not session-level)
+
+        **3. Statistical Analysis:**
+        - T-test for continuous (watch time)
+        - Z-test for proportions (CTR)
+        - Multiple testing: Bonferroni correction
+        - Power analysis: Sample size calculation
+
+        **4. Guardrails:**
+        - Revenue: Must not decrease >1%
+        - Retention: 7-day retention ≥ baseline
+        - Ecosystem: Creator diversity
+
+        **5. Ramp-up:**
+        - 1% → 10% → 50% → 100%
+        - Monitor at each stage
+        - Automated rollback on metric degradation
+
+        **Model Retraining:**
+
+        **1. Trigger Conditions:**
+        - Scheduled: Daily, weekly
+        - Performance-based: CTR drop >3%
+        - Data drift: Feature distribution shift
+
+        **2. Retraining Pipeline:**
+        - Data extraction: Last N days of logs
+        - Feature engineering: Aggregate, join
+        - Training: Distributed (Spark, Ray)
+        - Evaluation: Offline metrics on holdout
+        - Deployment: A/B test before full rollout
+
+        **3. Online Learning:**
+        - Incremental updates: Stream processing
+        - Warm start: Continue from previous model
+        - Trade-off: Freshness vs. stability
+
+        **Production Debugging:**
+
+        **1. Logging:**
+        - Request-level: User, items, scores
+        - Sample logging: 1% for analysis
+        - Structured: JSON for easy querying
+
+        **2. Shadowing:**
+        - Run new model in shadow mode
+        - Compare predictions with production
+        - No impact on users (logged only)
+
+        **3. Offline Replay:**
+        - Replay production traffic on new model
+        - Measure offline metrics
+        - Faster iteration than A/B test
+
+        **Interview Focus:**
+        - Design end-to-end serving architecture
+        - Explain training-serving consistency
+        - Design A/B test for model change
+
+      practice_questions:
+        concepts:
+          - question: "Design an end-to-end serving architecture for a recommendation system serving 10M requests/day with 100ms p99 latency."
+            answer: "Architecture: 1) API Gateway (rate limiting, auth), 2) Feature Service (Redis cache for user features, 5ms lookup, fallback to DB for cold users), 3) Retrieval (FAISS for ANN search, 10M items, 10ms for top 500), 4) Ranking (GPU inference server, batch 256, TensorRT optimization, 50ms for 500 candidates), 5) Re-ranking (CPU, MMR diversity, 20ms). Latency budget: 5+10+50+20 = 85ms (p50), 95ms (p99 with tail latency). Scaling: 10M requests/day = 115 QPS, 3x peak = 345 QPS. GPU: 1 V100 (2000 QPS with batching), CPU: 4 instances (load balancer). Caching: 80% cache hit (Redis), 20% DB lookup. Monitoring: p99 latency, error rate, cache hit rate."
+
+          - question: "Explain training-serving skew and how to prevent it using a feature store."
+            answer: "Training-serving skew: Features computed differently offline (training) vs online (serving), causing model degradation. Examples: 1) Offline uses last 7 days, online uses cached 24h-old data, 2) Different aggregation logic (mean vs sum), 3) Missing values handled differently. Prevention with Feature Store (Feast/Tecton): 1) Single feature definition (Python/SQL), 2) Offline materialization (Spark batch → Parquet) for training, 3) Online materialization (streaming → Redis) for serving, 4) Time-travel: Point-in-time correctness (joins at timestamp). Result: Identical features offline and online. Validation: Log online features (sample 1%), compare with offline."
+
+          - question: "Design an A/B test to evaluate a new ranking model for video recommendations. Include metrics, duration, and statistical analysis."
+            answer: "Hypothesis: New DeepFM ranking improves engagement. Metric: Primary = watch time per session (minutes). Guardrails: Revenue ≥ baseline, 7-day retention ≥ baseline. Design: 50/50 split, user-level randomization (hash(user_id)), 10M users → 5M per group. Duration: 2 weeks (account for weekly patterns). Sample size: Detect 2% lift in watch time (baseline 30 min, σ=20 min), 80% power, α=0.05 → 160K users per group (met). Analysis: T-test for watch time, Z-test for CTR. Bonferroni: Correct for 3 metrics (α=0.017). Segmentation: Analyze new vs returning users. Launch: If watch time +2% and guardrails pass."
+
+        tradeoffs:
+          - question: "Trade-off: Model retraining frequency (daily vs weekly) for recommendation models"
+            answer: "Daily: Fresh model (captures trends, new items), 7x training cost (compute, pipeline), risk of overfitting to noise (yesterday's signal may not generalize), faster drift detection. Weekly: More stable (aggregates multiple days), lower cost, slower to adapt to trends (Black Friday lag). Trade-off: Freshness vs. stability/cost. Solution: Hybrid - online learning for embeddings (daily), full retrain weekly. Or trigger-based: Retrain when CTR drops >2%. Monitor: Feature drift (compare distributions daily), performance metrics. Production: Weekly for most systems, daily for news/trending content."
+
+          - question: "Trade-off: Batch serving (precompute recommendations) vs online serving (real-time)"
+            answer: "Batch: Precompute top N items daily (Spark job), store in Redis, 1ms serving latency, stale (up to 24h old), can't incorporate real-time context (current session). Online: Compute on request, fresh features (current time, session clicks), 50-100ms latency, higher cost (GPU inference 24/7). Trade-off: Latency/cost vs. freshness. Solution: Hybrid - batch for retrieval (personalized candidates daily), online for ranking (score with real-time features). Example: YouTube batch retrieves 500 videos, online ranking scores with session context. Latency: 10ms batch lookup + 50ms online ranking = 60ms."
+
+        estimation:
+          - question: "Estimate the cost of running a GPU-based ranking service for 1B requests/day."
+            answer: "Requests: 1B/day = 11.5K QPS avg, peak 3x = 34.5K QPS. Ranking: 500 candidates, 50ms per request. GPU: V100 can do 2000 QPS with batching (batch=256, 2ms per batch). GPUs needed: 34.5K / 2000 = 18 GPUs (peak). Cost: AWS p3.2xlarge (1 V100) = $3/hour = $72/day. Total: 18 GPUs × $72 = $1,296/day = $40K/month. Optimization: 1) Autoscaling (18 peak, 6 off-peak), avg 10 GPUs → $22K/month, 2) Model compression (quantization, pruning) → 2x throughput → $11K/month, 3) CPU inference (slower but cheaper) for 80%, GPU for 20% → $5K/month. Final estimate: $5-11K/month with optimizations."
+
+      time_estimate: 90
+
+    - day: 14
+      topic: "LLM Integration and Next-Generation Recommendations"
+      activity: "Explore cutting-edge techniques: LLM-based recommendations, conversational systems, and future trends"
+      detailed_content: |
+        **LLMs for Recommendations:**
+
+        **1. LLM as Feature Encoder:**
+
+        **Text Embeddings:**
+        - Use BERT, GPT, LLaMA for item descriptions
+        - Sentence embeddings: all-MiniLM, E5, instructor
+        - Benefits: Semantic understanding, handles cold start
+
+        **User Intent:**
+        - Encode user queries: "relaxing music for studying"
+        - Match against item embeddings (semantic search)
+        - Better than keyword matching
+
+        **2. LLM as Ranker:**
+
+        **Prompt-based Ranking:**
+        - Input: "Given user profile {...} and items [A, B, C], rank by relevance"
+        - Output: [B, A, C] with explanations
+        - Zero-shot: No training data needed
+        - Few-shot: Provide examples in prompt
+
+        **Challenges:**
+        - Latency: 1-10 seconds per request (too slow for production)
+        - Cost: $0.001-0.01 per request (expensive at scale)
+        - Non-deterministic: Temperature sampling
+
+        **Solutions:**
+        - Use for re-ranking final 10 items (not 1000 candidates)
+        - Distill LLM into smaller model (knowledge distillation)
+        - Cache popular queries
+
+        **3. LLM for Explanations:**
+
+        **Generate Explanations:**
+        - "Recommended because you watched similar sci-fi movies"
+        - Prompt: "Explain why user {...} would like item {...}"
+        - Improves trust and transparency
+
+        **Conversational Recommendations:**
+
+        **1. Architecture:**
+
+        **Dialogue Manager:**
+        - Understand user intent: "I want action movies from 2020s"
+        - Multi-turn: Ask clarifying questions
+        - Slot filling: Extract preferences (genre, year, actor)
+
+        **Recommendation Engine:**
+        - Query construction: Convert dialogue to structured query
+        - Retrieval: Semantic search + filters
+        - Ranking: Contextual (dialogue history)
+
+        **Response Generation:**
+        - LLM generates natural language response
+        - Include recommendations: "Here are 3 action movies..."
+        - Ask for feedback: "Did you like these?"
+
+        **2. State Management:**
+        - Session history: Track preferences, shown items
+        - User profile: Long-term interests
+        - Context: Current dialogue state
+
+        **3. Challenges:**
+        - Latency: LLM inference (1-3 seconds)
+        - Coherence: Maintain context across turns
+        - Evaluation: BLEU, ROUGE for text quality
+
+        **Advanced Techniques:**
+
+        **1. Multimodal Recommendations:**
+        - Text: BERT embeddings
+        - Image: CLIP, ResNet embeddings
+        - Video: Video transformers (TimeSformer)
+        - Audio: Wav2Vec
+        - Fusion: Concatenate, cross-attention
+
+        **2. Graph + LLM:**
+        - Knowledge graph: Entity relationships
+        - LLM: Generate graph reasoning paths
+        - Example: "User likes Inception → similar to Interstellar (same director)"
+
+        **3. Retrieval-Augmented Generation (RAG):**
+        - Retrieve relevant items (vector search)
+        - Generate response conditioned on retrieval
+        - Better factuality than pure generation
+
+        **4. LLM Agents for Recommendations:**
+        - Multi-step reasoning: "Find popular sci-fi, filter by recent, rank by ratings"
+        - Tool use: Call search API, ranking API
+        - ReAct pattern: Reasoning + Acting
+
+        **Production Considerations:**
+
+        **1. Cost Optimization:**
+        - Tier models: GPT-4 for complex, GPT-3.5 for simple, local LLM for embeddings
+        - Caching: Cache LLM responses (5-min TTL)
+        - Batching: Process multiple requests together
+
+        **2. Latency:**
+        - Streaming: Show results incrementally
+        - Async: Generate explanations in background
+        - Hybrid: Traditional recs + LLM enhancement
+
+        **3. Safety:**
+        - Filter toxic content
+        - Bias detection and mitigation
+        - Human-in-the-loop for sensitive domains
+
+        **Future Trends:**
+
+        **1. Agentic Recommendations:**
+        - Autonomous agents explore user preferences
+        - Active learning: Ask questions to learn
+
+        **2. Personalized LLMs:**
+        - Fine-tune LLM on user data
+        - LoRA for efficient personalization
+
+        **3. Cross-Domain Transfer:**
+        - Learn from multiple platforms (YouTube, Netflix, Spotify)
+        - Universal user representation
+
+        **Interview Focus:**
+        - Design LLM-powered recommendation system
+        - Compare traditional vs LLM-based approaches
+        - Discuss production challenges (latency, cost)
+
+      practice_questions:
+        concepts:
+          - question: "Design an LLM-powered recommendation system for a movie streaming platform. Include architecture, latency optimization, and cost considerations."
+            answer: "Architecture: 1) Retrieval: Two-tower (user/movie embeddings) + ANN search → 500 candidates (10ms), 2) Ranking: DeepFM on features → top 50 (50ms), 3) LLM Re-ranking: GPT-4 prompt with user profile + 10 finalists → ranked with explanations (2s). Latency: Total 2.06s (too slow). Optimization: 1) Async - show top 10 from DeepFM immediately, stream LLM re-ranking (perceived latency 50ms), 2) Cache - cache LLM responses for popular movies (70% hit rate → 0.6s avg), 3) Distill - fine-tune smaller model (Llama-7B) on GPT-4 outputs (300ms). Cost: 1M requests/day × $0.001 (GPT-4) = $1K/day. With caching (30% LLM calls) = $300/day. With distillation (local inference) = $50/day (GPU cost)."
+
+          - question: "Compare traditional collaborative filtering vs LLM-based recommendation for cold start scenarios. What are the trade-offs?"
+            answer: "Collaborative filtering: Requires interaction history (fails for new users/items), fast (10ms), proven accuracy, interpretable (similar users liked X). LLM-based: Uses text descriptions (works for cold start), slow (1-10s), zero-shot capability, expensive ($0.001/request). Cold start comparison: New user - CF uses demographics (weak signal), LLM uses preferences from dialogue (stronger). New item - CF can't recommend (no history), LLM uses description/metadata (semantic similarity). Trade-offs: LLM better for cold start (richer features), but 100x slower and 100x more expensive. Production solution: Hybrid - LLM for new users (onboarding dialogue), CF for warm users, LLM embeddings for new items (precomputed)."
+
+          - question: "Explain Retrieval-Augmented Generation (RAG) for recommendations. How does it improve upon pure LLM generation?"
+            answer: "Pure LLM: Generate recommendations from parameters (parametric knowledge), hallucinates (invents non-existent movies), limited to training data (stale). RAG: 1) Retrieve relevant items (vector search on movie database), 2) Generate response conditioned on retrieved items. Example: Query 'sci-fi movies like Inception', retrieve [Interstellar, Arrival, Tenet], generate 'Based on your interest in Inception, I recommend Interstellar (same director)...'. Benefits: Factual (grounds in real data), up-to-date (retrieval from live DB), controllable (filter by availability). Architecture: User query → Embedding (BERT) → ANN search (FAISS) → Top 10 items → LLM prompt (context + items) → Natural language response. Trade-off: More complex (two-step) but much more reliable."
+
+        tradeoffs:
+          - question: "Trade-off: Using GPT-4 vs fine-tuned Llama-7B for recommendation ranking"
+            answer: "GPT-4: Superior reasoning (understands nuanced preferences), zero-shot (no training needed), slow (2-5s), expensive ($0.001/request = $1K/day for 1M requests), closed-source (API dependency). Llama-7B (fine-tuned): Fast (200-500ms on GPU), cheap (self-hosted, ~$100/month GPU), requires training data (10K examples), lower quality reasoning. Trade-off: Quality vs. cost/latency. Solution: 1) Use GPT-4 to generate training data, fine-tune Llama-7B (distillation), 2) GPT-4 for top 1% users (VIPs), Llama-7B for rest, 3) Llama-7B with GPT-4 verification (sample 5%, ensure quality). Production: Llama-7B for scale (99%), GPT-4 for new use cases (1%)."
+
+          - question: "Trade-off: Synchronous LLM re-ranking (wait for response) vs asynchronous (show initial results, update with LLM)"
+            answer: "Synchronous: User waits for LLM (2-5s), perfect ranking (LLM-optimized), poor UX (high latency), higher bounce rate. Asynchronous: Show traditional recs immediately (50ms), stream LLM updates (2s later), perceived latency 50ms, potential re-ordering confusion (items jump). Trade-off: Accuracy vs. UX. User study: Async preferred (instant results > perfect ranking). Implementation: Show top 10 from DeepFM, add 'Personalizing...' indicator, smoothly update with LLM results (animated transition). Metrics: Time to first result (50ms sync vs 50ms async), engagement (async +15% due to lower bounce). Production: Async for main feed, sync for explicit 'refine' button."
+
+        estimation:
+          - question: "Estimate the monthly cost of using GPT-4 for generating explanations for 100M recommendations/month (1% of total recommendations)."
+            answer: "Requests with explanations: 100M × 1% = 1M/month. GPT-4 pricing: $0.03/1K input tokens, $0.06/1K output tokens. Prompt: User profile (100 tokens) + item metadata (50 tokens) + instruction (50 tokens) = 200 input tokens. Response: Explanation (100 tokens). Cost per request: (200×0.03 + 100×0.06) / 1000 = $0.012. Total: 1M × $0.012 = $12K/month. Optimization: 1) Cache explanations for popular items (70% hit) → $3.6K/month, 2) Use GPT-3.5-turbo ($0.001/request) → $1K/month, 3) Batch requests (10 items → 1 call) → $1.2K/month. Optimized cost: $1-4K/month. Compare to human-written: 1M items × $2/explanation = $2M (one-time), but stale. LLM: Fresh, dynamic, cost-effective."
+
+      time_estimate: 90
+
+time_estimate_total: 1260  # 14 days × 90 minutes average

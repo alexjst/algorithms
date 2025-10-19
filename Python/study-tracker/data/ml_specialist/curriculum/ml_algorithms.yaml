@@ -1,0 +1,1138 @@
+track: "ml_algorithms"
+description: "14-day ML algorithms curriculum covering deep learning and classical ML for Staff/Principal interviews"
+weeks:
+  week1:
+    - day: 1
+      topic: "Neural Network Fundamentals"
+      activity: "Master forward/backward propagation, activation functions, loss functions, and optimization basics"
+      detailed_content: |
+        Neural Network Mechanics:
+        - Forward propagation: Layer-by-layer computation from input to output
+          * Input → Hidden layers → Output
+          * Each layer: z = Wx + b, a = activation(z)
+        - Backpropagation: Computing gradients via chain rule
+          * ∂L/∂W = ∂L/∂a * ∂a/∂z * ∂z/∂W
+          * Efficient gradient computation through computational graph
+
+        Activation Functions:
+        - ReLU: f(x) = max(0, x)
+          * Pros: No vanishing gradient, computationally efficient
+          * Cons: Dead neurons (always outputs 0), not zero-centered
+        - Sigmoid: f(x) = 1/(1 + e^-x)
+          * Pros: Output in [0,1], smooth gradient
+          * Cons: Vanishing gradient for extreme values, not zero-centered
+        - Tanh: f(x) = (e^x - e^-x)/(e^x + e^-x)
+          * Pros: Zero-centered, output in [-1,1]
+          * Cons: Still has vanishing gradient problem
+        - Softmax: f(x_i) = e^x_i / Σe^x_j
+          * Use: Multi-class classification output layer
+          * Properties: Outputs sum to 1, differentiable
+
+        Loss Functions:
+        - Mean Squared Error (MSE): L = 1/n * Σ(y - ŷ)²
+          * Use: Regression problems
+          * Properties: Penalizes large errors heavily
+        - Cross-Entropy: L = -Σ y*log(ŷ)
+          * Binary: -[y*log(ŷ) + (1-y)*log(1-ŷ)]
+          * Categorical: -Σ y_i * log(ŷ_i)
+          * Use: Classification problems
+          * Why better than MSE for classification: Addresses vanishing gradient
+        - Hinge Loss: L = max(0, 1 - y*ŷ)
+          * Use: SVMs, margin-based classifiers
+
+        Weight Initialization:
+        - Xavier/Glorot: Var(W) = 2/(n_in + n_out)
+          * Good for sigmoid, tanh activations
+        - He Initialization: Var(W) = 2/n_in
+          * Good for ReLU activations
+          * Prevents vanishing/exploding gradients
+
+        Basic Optimizers:
+        - SGD (Stochastic Gradient Descent): w = w - η*∇L
+          * Simple but slow convergence
+        - SGD with Momentum: v = βv + ∇L; w = w - ηv
+          * Accelerates in relevant directions
+          * β typically 0.9
+        - Adam: Combines momentum + adaptive learning rates
+          * m = β₁m + (1-β₁)∇L (momentum)
+          * v = β₂v + (1-β₂)(∇L)² (adaptive)
+          * Most popular optimizer in practice
+      practice_questions:
+        concepts:
+          - question: "Explain backpropagation and the chain rule. Why is it computationally efficient?"
+            answer: "Backpropagation computes gradients by applying chain rule backward through the network. For loss L and weights W in layer l: ∂L/∂W_l = ∂L/∂a_l * ∂a_l/∂z_l * ∂z_l/∂W_l. Efficient because we reuse intermediate gradients (∂L/∂a_l) computed in later layers, avoiding redundant calculations. Time complexity: O(edges) in computational graph, same as forward pass."
+          - question: "Why does ReLU help with vanishing gradient problem compared to sigmoid?"
+            answer: "Sigmoid gradient: σ'(x) = σ(x)(1-σ(x)), max value 0.25. For deep networks, gradients multiply: ∂L/∂w₁ = ∂L/∂a_n * σ'(z_n) * ... * σ'(z₁) * x. With many layers, this product → 0 (vanishing). ReLU gradient: 1 if x>0, 0 otherwise. No saturation for positive values, so gradients don't vanish through deep networks."
+          - question: "Derive the gradient of cross-entropy loss with softmax output layer."
+            answer: "Let ŷ_i = e^z_i/Σe^z_j (softmax), L = -Σy_i*log(ŷ_i). Through chain rule: ∂L/∂z_i = ŷ_i - y_i. Remarkably simple! This is why cross-entropy + softmax is standard for classification. Gradient is just (prediction - label), which is intuitive and numerically stable."
+        tradeoffs:
+          - question: "When would you use sigmoid vs tanh vs ReLU activations?"
+            answer: "ReLU: Default choice for hidden layers (fast, no vanishing gradient). Use in CNNs, deep networks. Sigmoid: Output layer for binary classification (outputs probability 0-1). Tanh: Hidden layers when zero-centered outputs beneficial (RNNs sometimes). Avoid sigmoid/tanh in deep networks due to vanishing gradients. Special cases: LeakyReLU for dead neuron problem, GELU for transformers."
+          - question: "Compare SGD, SGD+Momentum, and Adam. When to use each?"
+            answer: "SGD: Simple, works for convex problems but slow. SGD+Momentum: Better convergence, good for non-convex. Need to tune learning rate carefully. Adam: Adaptive learning rates, works well out-of-box, most popular for deep learning. Trade-offs: SGD can generalize better (reach flatter minima), Adam faster convergence but may overfit. Use Adam for quick prototyping, SGD+Momentum for final tuning in research."
+        estimation:
+          - question: "Calculate memory for 3-layer MLP: 784→256→128→10. Assume float32 weights."
+            answer: "Layer 1: 784*256 + 256 (bias) = 200,960 params. Layer 2: 256*128 + 128 = 32,896 params. Layer 3: 128*10 + 10 = 1,290 params. Total: 235,146 params. Memory: 235,146 * 4 bytes = 940KB for weights. Also need gradients (same size) + activations. Total: ~3-5MB including activations for batch size 32."
+      time_estimate: 90
+
+    - day: 2
+      topic: "Convolutional Neural Networks (CNNs)"
+      activity: "Understand convolution operations, pooling, receptive fields, and classic architectures (VGG, ResNet)"
+      detailed_content: |
+        Convolution Operation:
+        - 2D Convolution: Output(i,j) = Σ Σ Input(i+m, j+n) * Kernel(m,n)
+          * Kernel/Filter: Small matrix (3x3, 5x5) sliding over input
+          * Stride: Step size for sliding (stride=1 means move 1 pixel)
+          * Padding: Add zeros around border (same padding keeps spatial dims)
+        - Parameters in Conv layer: K filters of size (C_in × F × F) + K biases
+          * Example: 64 filters, 3x3, input 128 channels → 64*(128*3*3) + 64 = 73,792 params
+
+        Pooling Layers:
+        - Max Pooling: Take maximum value in each region (2x2)
+          * Downsamples spatial dimensions (H/2, W/2)
+          * Provides translation invariance
+          * No learnable parameters
+        - Average Pooling: Take average value
+          * Used in final layers (global average pooling)
+        - Why pooling: Reduce computation, increase receptive field, invariance
+
+        Receptive Field:
+        - Receptive field: Region of input that affects one output neuron
+        - Calculation: For L layers with kernel k and stride s:
+          * RF = 1 + Σ(k_i - 1) * Π(s_j) for j<i
+        - Example: 2 conv layers (3x3, stride 1) → RF = 5x5
+        - Deep networks have larger receptive fields (see more context)
+
+        Classic Architectures:
+        - LeNet-5 (1998): Conv→Pool→Conv→Pool→FC→FC
+          * 60K parameters, designed for MNIST
+        - VGG-16 (2014): Stack of 3x3 convs, max pools
+          * Key insight: Multiple 3x3 conv = larger kernel but fewer params
+          * 2 layers of 3x3 = 5x5 receptive field
+          * 138M parameters (very large)
+        - ResNet (2015): Residual connections F(x) + x
+          * Solves degradation problem (deeper networks worse)
+          * Skip connections allow gradients to flow directly
+          * ResNet-50: 25M parameters, 152 layers possible
+
+        Batch Normalization:
+        - Normalize: z_norm = (z - μ_batch) / √(σ²_batch + ε)
+        - Scale and shift: y = γ*z_norm + β (learnable γ, β)
+        - Benefits: Faster training, higher learning rates, regularization
+        - Where to use: After conv/linear, before activation
+
+        Key Design Patterns:
+        - Bottleneck blocks: 1x1 conv to reduce channels, 3x3 conv, 1x1 to expand
+          * Reduces computation: (64→16→16→64) < (64→64)
+        - Depthwise separable conv: Separate spatial and channel convolutions
+          * Used in MobileNet for efficiency
+      practice_questions:
+        concepts:
+          - question: "Why are multiple 3x3 conv layers better than one 5x5 layer?"
+            answer: "1. Parameters: Two 3x3 layers have 2*(C²*9) = 18C² params vs one 5x5 with 25C² params (28% fewer). 2. Receptive field: Same 5x5 RF. 3. Non-linearity: Two ReLU activations vs one, more expressive. 4. VGG popularized this: deeper networks with fewer parameters."
+          - question: "Explain how residual connections in ResNet solve the degradation problem."
+            answer: "Without skip connections: deeper networks have worse training accuracy (not just overfitting). With F(x) + x: if identity mapping is optimal, network can learn F(x)=0. Gradients flow through skip connections directly: ∂L/∂x = ∂L/∂(F+x) * (∂F/∂x + 1). The '+1' ensures gradient doesn't vanish. Enables training 100+ layer networks."
+          - question: "How does batch normalization help training? What are the downsides?"
+            answer: "Benefits: 1) Reduces internal covariate shift (layer inputs stay normalized), 2) Allows higher learning rates, 3) Acts as regularization (batch statistics add noise). Downsides: 1) Batch size dependency (small batches have noisy statistics), 2) Different behavior train vs test, 3) Doesn't work well with batch size 1. Alternatives: Layer Norm (for transformers, RNNs), Group Norm (for small batches)."
+        tradeoffs:
+          - question: "Compare VGG, ResNet, and EfficientNet. When to use each?"
+            answer: "VGG: Simple architecture (easy to understand), 138M params, slow. Use for: teaching, small datasets with transfer learning. ResNet: 25M params (ResNet-50), skip connections, good accuracy. Use for: general CV, ImageNet baseline. EfficientNet: Best accuracy/params ratio via neural architecture search, 5M params. Use for: production (mobile, edge devices), when efficiency matters. Trade-off: VGG easiest to implement, ResNet best researched, EfficientNet most efficient."
+        estimation:
+          - question: "Calculate output dimensions and parameters for: Input 224x224x3, Conv(64 filters, 3x3, stride=2, padding=1), MaxPool(2x2, stride=2)."
+            answer: "Conv output: ((224+2*1-3)/2 + 1) = 112x112x64. Parameters: 64*(3*3*3) + 64 = 1,792. MaxPool output: 112/2 = 56x56x64. MaxPool parameters: 0 (no learnable params). Total output: 56x56x64 = 200,704 activations. Memory for batch=32: 32*200,704*4bytes = 25MB just for this layer's activations."
+      time_estimate: 90
+
+    - day: 3
+      topic: "Recurrent Neural Networks (RNNs) and LSTMs"
+      activity: "Master sequence modeling, vanishing gradients, LSTM/GRU architecture, and bidirectional RNNs"
+      detailed_content: |
+        RNN Basics:
+        - Recurrent computation: h_t = tanh(W_hh * h_{t-1} + W_xh * x_t + b_h)
+        - Output: y_t = W_hy * h_t + b_y
+        - Hidden state h_t acts as memory of past sequence
+        - Shared weights across time steps
+
+        Vanishing/Exploding Gradient Problem:
+        - Gradient through time: ∂L/∂h_0 = ∂L/∂h_T * Π ∂h_t/∂h_{t-1}
+        - ∂h_t/∂h_{t-1} = diag(tanh'(·)) * W_hh
+        - If largest eigenvalue of W < 1: gradients vanish (→0)
+        - If largest eigenvalue of W > 1: gradients explode (→∞)
+        - Result: RNNs can't learn long-term dependencies (T > 10-20 steps)
+
+        LSTM (Long Short-Term Memory):
+        - Cell state c_t: runs through time with minimal modification
+        - Gates (all sigmoid σ, output 0-1):
+          * Forget gate: f_t = σ(W_f * [h_{t-1}, x_t] + b_f)
+          * Input gate: i_t = σ(W_i * [h_{t-1}, x_t] + b_i)
+          * Output gate: o_t = σ(W_o * [h_{t-1}, x_t] + b_o)
+        - Cell update:
+          * Candidate: c̃_t = tanh(W_c * [h_{t-1}, x_t] + b_c)
+          * New cell: c_t = f_t ⊙ c_{t-1} + i_t ⊙ c̃_t
+          * Hidden: h_t = o_t ⊙ tanh(c_t)
+        - Key insight: Cell state allows unobstructed gradient flow
+
+        GRU (Gated Recurrent Unit):
+        - Simplified LSTM: 2 gates instead of 3
+        - Update gate: z_t = σ(W_z * [h_{t-1}, x_t])
+        - Reset gate: r_t = σ(W_r * [h_{t-1}, x_t])
+        - Hidden: h_t = (1-z_t) ⊙ h_{t-1} + z_t ⊙ h̃_t
+        - Fewer parameters than LSTM, often similar performance
+
+        Bidirectional RNN:
+        - Forward pass: h→_t processes sequence left-to-right
+        - Backward pass: h←_t processes sequence right-to-left
+        - Concatenate: h_t = [h→_t; h←_t]
+        - Use: When future context available (not for generation)
+        - Examples: BERT, sentence classification
+
+        Sequence-to-Sequence:
+        - Encoder: RNN that processes input sequence → context vector
+        - Decoder: RNN that generates output sequence from context
+        - Bottleneck: Single context vector for entire input
+        - Solution: Attention mechanism (see Day 4)
+      practice_questions:
+        concepts:
+          - question: "Explain why vanilla RNNs suffer from vanishing gradients. Derive the gradient flow."
+            answer: "Gradient at time 0: ∂L/∂h_0 = ∂L/∂h_T * (∂h_T/∂h_{T-1}) * ... * (∂h_1/∂h_0). Each ∂h_t/∂h_{t-1} = diag(tanh'(·)) * W_hh. For T steps, gradient scales as (W_hh)^T. If largest eigenvalue λ < 1, then λ^T → 0 exponentially. For T=20 and λ=0.9: gradient is 0.9^20 = 0.12, very small. Can't learn dependencies beyond 10-20 steps."
+          - question: "How do LSTM gates solve the vanishing gradient problem? Explain the cell state gradient flow."
+            answer: "Cell state gradient: ∂c_t/∂c_{t-1} = f_t (forget gate). Unlike RNN where ∂h_t/∂h_{t-1} involves W matrix multiplication, LSTM uses element-wise multiplication by forget gate. If f_t ≈ 1, gradient flows unchanged. Cell state acts as 'highway' for gradients. Key insight: Additive update (c_t = f_t⊙c_{t-1} + i_t⊙c̃_t) vs multiplicative in RNN. Allows learning dependencies 100+ steps."
+          - question: "Compare LSTM and GRU. When would you choose one over the other?"
+            answer: "LSTM: 3 gates (forget, input, output), more parameters, more expressive. GRU: 2 gates (update, reset), fewer parameters, faster training. Performance: Similar on most tasks, GRU slightly faster. Choose LSTM: When you have lots of data and computational resources, need maximum expressiveness. Choose GRU: Limited data/compute, faster prototyping, mobile deployment. In practice: Try both, GRU often wins in speed vs accuracy trade-off."
+        tradeoffs:
+          - question: "When would you use an RNN/LSTM vs a Transformer for sequence modeling?"
+            answer: "RNN/LSTM advantages: 1) Constant memory O(1) for sequence length, 2) Good for streaming/online processing, 3) Natural for variable-length sequences. Transformer advantages: 1) Parallelizable training (RNN is sequential), 2) Better at long-range dependencies, 3) State-of-the-art results. Use RNN: Edge devices, streaming data, very long sequences (>1000 tokens), limited compute. Use Transformer: When accuracy is critical, have GPUs for training, sequences <512 tokens. In 2024: Transformers dominate most NLP tasks."
+        estimation:
+          - question: "Calculate parameters for LSTM with input size 300, hidden size 512, and explain memory for sequence length 100."
+            answer: "LSTM has 4 weight matrices (forget, input, output, candidate), each size (hidden+input) × hidden. Params: 4 * (512+300) * 512 = 1,662,976 ≈ 1.7M params. For sequence length 100: need to store hidden states h_t and cell states c_t for all timesteps. Memory: 100 * 512 * 2 * 4 bytes * batch_size. For batch=32: 13MB just for hidden states. Add gradients (same size) for backprop through time: total ~40MB per batch."
+      time_estimate: 75
+
+    - day: 4
+      topic: "Transformers and Attention Mechanisms"
+      activity: "Master self-attention, multi-head attention, positional encoding, and understand BERT vs GPT architectures"
+      detailed_content: |
+        Self-Attention Mechanism:
+        - Query, Key, Value: Q = X*W_Q, K = X*W_K, V = X*W_V
+        - Attention scores: A = softmax(Q*K^T / √d_k)
+        - Output: Attention(Q,K,V) = A*V
+        - Intuition: Each token attends to all other tokens
+        - √d_k scaling: Prevents softmax saturation for large d_k
+
+        Scaled Dot-Product Attention:
+        - Score(q, k) = q·k / √d_k
+        - Why scaling: Without it, dot products grow large for high dimensions
+          * Softmax(large values) → near one-hot, vanishing gradients
+        - Time complexity: O(n² d) where n is sequence length
+
+        Multi-Head Attention:
+        - h parallel attention heads, each with d_k = d_model/h
+        - Head_i = Attention(QW^Q_i, KW^K_i, VW^V_i)
+        - Concat all heads, project: MultiHead = Concat(heads)*W_O
+        - Why multiple heads: Attend to different representation subspaces
+          * Example: One head for syntax, one for semantics
+
+        Positional Encoding:
+        - Transformers have no recurrence → no positional information
+        - Add position embeddings to input embeddings
+        - Sinusoidal encoding: PE(pos, 2i) = sin(pos/10000^(2i/d))
+                               PE(pos, 2i+1) = cos(pos/10000^(2i/d))
+        - Why sinusoidal: Can extrapolate to longer sequences than training
+        - Alternative: Learned positional embeddings (BERT uses this)
+
+        Transformer Encoder:
+        - Multi-head attention → Add & Norm → FFN → Add & Norm
+        - Feed-forward: FFN(x) = max(0, xW_1 + b_1)W_2 + b_2
+          * Position-wise (same FFN for all positions)
+        - Residual connections: Prevent gradient vanishing
+        - Layer normalization: Normalize across features (not batch)
+
+        BERT (Bidirectional Encoder Representations):
+        - Architecture: Stack of transformer encoders (12 or 24 layers)
+        - Pretraining tasks:
+          * Masked Language Modeling: Predict masked tokens [MASK]
+          * Next Sentence Prediction: Classify if sentence B follows A
+        - Fine-tuning: Add task-specific head, train on downstream task
+        - Use cases: Classification, NER, question answering
+
+        GPT (Generative Pre-trained Transformer):
+        - Architecture: Stack of transformer decoders (autoregressive)
+        - Causal masking: Can only attend to previous tokens
+        - Pretraining: Next token prediction (language modeling)
+        - Use cases: Text generation, few-shot learning
+
+        Vision Transformer (ViT):
+        - Split image into patches (16x16 pixels)
+        - Linear embed each patch → add positional embeddings
+        - Pass through transformer encoder
+        - Use [CLS] token for image classification
+        - Key insight: Transformers can work on any sequence (not just text)
+      practice_questions:
+        concepts:
+          - question: "Derive the scaled dot-product attention formula and explain why scaling by √d_k is necessary."
+            answer: "Attention(Q,K,V) = softmax(QK^T/√d_k)V. Derivation: For query q and key k, score is dot product q·k = Σq_i*k_i. If q,k are random with variance 1, then q·k has variance d_k. For large d_k, q·k can be very large → softmax([10, 1, 0.1]) ≈ [1, 0, 0] (near one-hot) → gradient ≈ 0. Dividing by √d_k normalizes variance to 1, keeping softmax gradients healthy."
+          - question: "How does multi-head attention differ from single-head? What are the benefits?"
+            answer: "Single-head: One set of Q,K,V projections, attends to one representation. Multi-head (h heads): Split d_model into h heads, each with d_k=d_model/h dimensions. Each head learns different attention patterns (syntax, semantics, long-range, local). Concatenate outputs: O(n²d) complexity same as single-head but more expressive. Analogy: Ensemble of attention mechanisms. BERT uses 12 heads, GPT-3 uses 96 heads."
+          - question: "Explain the difference between BERT and GPT architectures. When to use each?"
+            answer: "BERT: Encoder-only, bidirectional attention (sees full context). Trained with MLM + NSP. Best for: Understanding tasks (classification, NER, QA). GPT: Decoder-only, causal masking (only sees past). Trained with next-token prediction. Best for: Generation tasks (text completion, dialogue). Key difference: BERT can't generate text (no autoregressive structure), GPT less effective at understanding (can't see future context). For fine-tuning: BERT for discriminative, GPT for generative."
+        tradeoffs:
+          - question: "Compare Transformers vs RNNs for sequence modeling. What are the trade-offs?"
+            answer: "Transformers: 1) Parallelizable (train fast on GPUs), 2) Better long-range dependencies (direct attention), 3) O(n²) memory/computation. RNNs: 1) Sequential (slow training), 2) O(1) memory for sequence length, 3) Struggle with long dependencies. Use Transformers: Most NLP (translation, QA, generation), have GPU resources, sequences <2000 tokens. Use RNNs: Edge devices, streaming data, very long sequences, limited memory. In practice: Transformers won in NLP, but RNNs still used for time series with constraints."
+        estimation:
+          - question: "Calculate parameters for BERT-base: 12 layers, hidden=768, heads=12, vocab=30K. Estimate memory for sequence length 512."
+            answer: "Per layer: Q,K,V projections 3*(768*768) + FFN 768*3072 + 3072*768 = 7.1M params. 12 layers: 85M. Embeddings: 30K*768 = 23M. Position: 512*768 = 0.4M. Total: ~110M params (matches BERT-base). Memory for batch=8, seq=512: Activations 8*512*768*12 layers = 38M floats = 150MB. Attention matrices 8*12*512*512 = 25M = 100MB. Total: ~350MB for forward pass, double for backward."
+      time_estimate: 90
+
+    - day: 5
+      topic: "Generative Models - Autoencoders, VAEs, and GANs"
+      activity: "Understand autoencoder architectures, variational inference, and GAN training dynamics"
+      detailed_content: |
+        Autoencoder (AE):
+        - Architecture: Encoder → Latent code → Decoder
+        - Encoder: Maps input x to latent z (dimensionality reduction)
+        - Decoder: Reconstructs x̂ from z
+        - Loss: Reconstruction loss ||x - x̂||²
+        - Uses: Dimensionality reduction, denoising, feature learning
+
+        Variational Autoencoder (VAE):
+        - Probabilistic autoencoder: Learn distribution p(z|x)
+        - Encoder outputs: μ(x) and σ(x) (mean and std of z)
+        - Reparameterization trick: z = μ + σ⊙ε where ε ~ N(0,1)
+          * Allows backpropagation through sampling
+        - Loss: ELBO = E[log p(x|z)] - KL(q(z|x)||p(z))
+          * Reconstruction term + regularization
+          * KL divergence: Forces q(z|x) to match prior N(0,1)
+        - Sampling: Generate new x by sampling z ~ N(0,1), decode
+
+        Denoising Autoencoder (DAE):
+        - Add noise to input x̃ = x + noise
+        - Train to reconstruct clean x from x̃
+        - Forces robust feature learning
+        - Use: Pretraining, data augmentation
+
+        Generative Adversarial Network (GAN):
+        - Two networks playing minimax game:
+          * Generator G: Maps noise z → fake image x̂
+          * Discriminator D: Classifies real vs fake
+        - Adversarial loss:
+          * D wants to maximize: E[log D(x)] + E[log(1-D(G(z)))]
+          * G wants to minimize: E[log(1-D(G(z)))]
+        - Training: Alternating optimization
+          1. Train D to distinguish real from G(z)
+          2. Train G to fool D
+
+        GAN Training Challenges:
+        - Mode collapse: G produces limited variety of outputs
+          * Symptom: All generated images look similar
+          * Solutions: Minibatch discrimination, Wasserstein GAN
+        - Non-convergence: Losses oscillate, no stable equilibrium
+          * Nash equilibrium is hard to find
+          * Solutions: Spectral normalization, progressive growing
+        - Vanishing gradients: If D is too good, G gets no signal
+          * Solution: Non-saturating loss, Wasserstein distance
+
+        GAN Variants:
+        - DCGAN (Deep Convolutional GAN): Use conv layers, batch norm
+        - Conditional GAN: Condition on label y: G(z, y) and D(x, y)
+        - CycleGAN: Unpaired image-to-image translation
+        - StyleGAN: Control different levels of detail
+
+        Diffusion Models (Conceptual):
+        - Forward process: Gradually add noise to data (T steps)
+        - Reverse process: Learn to denoise (neural network)
+        - Sampling: Start from noise, iteratively denoise
+        - Advantages over GANs: More stable training, better mode coverage
+        - Current state-of-art for image generation
+      practice_questions:
+        concepts:
+          - question: "Explain the reparameterization trick in VAEs. Why is it necessary for backpropagation?"
+            answer: "Problem: Can't backprop through sampling z ~ N(μ,σ²). Gradients don't flow through random sampling. Solution: z = μ + σ⊙ε where ε ~ N(0,1). Now randomness is in ε (doesn't depend on μ,σ), and transformation is deterministic. ∂z/∂μ = 1, ∂z/∂σ = ε. Gradients can flow through μ and σ. This allows end-to-end training of encoder and decoder."
+          - question: "Why do GANs suffer from mode collapse? What are potential solutions?"
+            answer: "Mode collapse: G finds a few samples that fool D, ignores rest of data distribution. Why: G optimizes to maximize D error, not to cover all modes. If one mode is easy to fool D, G focuses there. Solutions: 1) Minibatch discrimination (penalize similar outputs in batch), 2) Unrolled GAN (G looks ahead at D's response), 3) Wasserstein GAN (better gradient signal), 4) Mode regularization (encourage diversity)."
+          - question: "Compare VAE vs GAN for image generation. What are the trade-offs?"
+            answer: "VAE: Pros: Stable training, can encode/decode, latent space interpolation. Cons: Blurry images (MSE loss), lower sample quality. GAN: Pros: Sharp, realistic images, state-of-art quality. Cons: Training instability, mode collapse, can't encode images. Use VAE: Need stable training, want latent space manipulation, understand data distribution. Use GAN: Need highest quality samples, don't need encoding. Modern: Diffusion models surpassing both."
+        tradeoffs:
+          - question: "When would you use an autoencoder vs PCA for dimensionality reduction?"
+            answer: "PCA: Linear projection, fast, interpretable, closed-form solution. Good for: Linear structure, small data, need interpretability. Autoencoder: Non-linear, can learn complex manifolds, needs training. Good for: High-dimensional data (images), non-linear structure, large datasets. Trade-offs: PCA is faster and guaranteed to find optimal linear subspace. Autoencoders are more powerful but can overfit and require tuning. For images: autoencoders much better. For tabular: try PCA first."
+        estimation:
+          - question: "Design a VAE for MNIST (28x28 grayscale). Choose architecture and calculate parameters."
+            answer: "Encoder: 784→400→200→20 (latent). Output: μ (20-dim) and log_σ² (20-dim). Decoder: 20→200→400→784. Parameters: Encoder: 784*400 + 400*200 + 200*40 = 401,600. Decoder: 20*200 + 200*400 + 400*784 = 397,600. Total: ~800K params. Training: Batch size 128, Adam optimizer, β=0.001. Loss weights: Recon=1.0, KL=0.01 (anneal from 0). Generate: Sample z~N(0,1), pass through decoder."
+      time_estimate: 75
+
+  week2:
+    - day: 6
+      topic: "Optimization and Regularization Techniques"
+      activity: "Master advanced optimizers (Adam, AdamW), learning rate schedules, and regularization methods"
+      detailed_content: |
+        Advanced Optimizers:
+        - Adam (Adaptive Moment Estimation):
+          * First moment: m_t = β₁*m_{t-1} + (1-β₁)*∇L (momentum)
+          * Second moment: v_t = β₂*v_{t-1} + (1-β₂)*(∇L)² (adaptive LR)
+          * Bias correction: m̂ = m_t/(1-β₁^t), v̂ = v_t/(1-β₂^t)
+          * Update: θ = θ - α*m̂/√(v̂ + ε)
+          * Default: β₁=0.9, β₂=0.999, α=0.001
+        - AdamW (Adam with Weight Decay):
+          * Decouples weight decay from gradient update
+          * Better generalization than Adam with L2
+        - RMSprop: Second moment only (no momentum)
+          * Good for RNNs with non-stationary objectives
+
+        Learning Rate Schedules:
+        - Step Decay: Reduce LR by factor every N epochs
+          * Example: α = α₀ * 0.1^(epoch/30)
+        - Cosine Annealing: α_t = α_min + 0.5*(α_max - α_min)*(1 + cos(πt/T))
+          * Smooth decrease, avoids sudden drops
+        - Warm Restarts: Periodically reset to high LR
+          * Helps escape local minima
+        - Linear Warmup: Start with small LR, gradually increase
+          * Prevents instability early in training
+
+        Regularization Techniques:
+        - L1 Regularization (Lasso): Loss + λ*Σ|w_i|
+          * Induces sparsity (many weights → 0)
+          * Feature selection effect
+        - L2 Regularization (Ridge): Loss + λ*Σw_i²
+          * Shrinks weights uniformly
+          * Preferred for neural networks
+        - Elastic Net: L1 + L2 combined
+
+        Dropout:
+        - Training: Randomly set neurons to 0 with probability p
+        - Test: Use all neurons, scale by (1-p)
+        - Effect: Prevents co-adaptation of features
+        - Where to apply: After dense layers, before final layer
+        - Typical p: 0.3-0.5 for hidden layers
+
+        Batch/Layer/Instance Normalization:
+        - Batch Norm: Normalize over batch dimension
+          * Good for CNNs, large batches
+          * Problem: Small batch size → noisy statistics
+        - Layer Norm: Normalize over feature dimension
+          * Good for RNNs, Transformers, batch size 1
+          * Independent of batch size
+        - Instance Norm: Normalize per sample, per channel
+          * Good for style transfer
+        - Group Norm: Compromise between batch and layer
+
+        Early Stopping:
+        - Monitor validation loss during training
+        - Stop when val loss stops improving (patience=5-10 epochs)
+        - Restore best model weights
+        - Prevents overfitting without sacrificing capacity
+
+        Data Augmentation:
+        - Images: Random crop, flip, rotation, color jitter
+        - Text: Synonym replacement, back-translation
+        - Why it works: Expands effective training set, regularization
+
+        Gradient Clipping:
+        - Clip gradients to max norm: if ||g|| > θ, g = θ*g/||g||
+        - Prevents exploding gradients in RNNs
+        - Typical threshold: θ = 1.0 or 5.0
+      practice_questions:
+        concepts:
+          - question: "Explain how Adam optimizer combines momentum and adaptive learning rates. Derive the update rule."
+            answer: "Adam maintains two moving averages: m_t (first moment, like momentum) and v_t (second moment, adaptive LR). m_t = β₁m_{t-1} + (1-β₁)∇L tracks gradient direction with momentum. v_t = β₂v_{t-1} + (1-β₂)(∇L)² tracks gradient magnitude for adaptive scaling. Bias correction: m̂=m_t/(1-β₁^t) compensates for initialization at 0. Update: θ = θ - α*m̂/√(v̂+ε). Benefits: Fast convergence (momentum) + adaptive per-parameter LR (handles sparse gradients)."
+          - question: "Why does L1 regularization induce sparsity but L2 doesn't? Provide geometric and analytical explanations."
+            answer: "Geometric: L1 constraint is diamond-shaped (|w₁|+|w₂|≤C), L2 is circular (w₁²+w₂²≤C). Optimization moves along contours of loss until hitting constraint. Diamond has corners on axes → sparse solutions. Analytical: L1 gradient is constant (±λ), pushes weights to exactly 0. L2 gradient is proportional to weight (2λw), shrinks but never reaches 0. For weight w: L1 pushes by λ regardless of size. L2 pushes by 2λw, slows as w→0."
+          - question: "Compare Batch Normalization vs Layer Normalization. When to use each?"
+            answer: "Batch Norm: Normalizes over batch dimension (N, H, W, C) → compute μ,σ over N. Good for CNNs, large batches. Problem: Batch-dependent, breaks with small batches or batch size 1. Layer Norm: Normalizes over feature dimension (N, H, W, C) → compute μ,σ over (H,W,C) per sample. Good for RNNs, Transformers, any batch size. Use BN: CNNs with batch size ≥32. Use LN: Transformers, RNNs, or when batch size varies/small. BERT/GPT use Layer Norm."
+        tradeoffs:
+          - question: "Compare SGD+Momentum vs Adam for training deep networks. When would you choose each?"
+            answer: "SGD+Momentum: Pros: Better generalization (flatter minima), fewer hyperparams. Cons: Sensitive to LR, slower convergence. Adam: Pros: Fast convergence, works out-of-box, handles sparse gradients. Cons: May overfit, more hyperparams (β₁, β₂, ε). Use SGD: Final tuning for best accuracy, research papers. Use Adam: Quick prototyping, unknown problem, limited tuning time. Best practice: Start with Adam for quick baseline, switch to SGD+Momentum if overfitting."
+        estimation:
+          - question: "Calculate memory overhead for Adam optimizer training a model with 100M parameters."
+            answer: "Adam requires: 1) Model weights: 100M params * 4 bytes = 400MB. 2) Gradients: 100M * 4 bytes = 400MB. 3) First moment m_t: 100M * 4 bytes = 400MB. 4) Second moment v_t: 100M * 4 bytes = 400MB. Total: 1.6GB just for optimizer state. Add activations (depends on batch size). For batch=32 and deep network: ~2-4GB activations. Total training memory: ~4-6GB. This is why large models need multiple GPUs."
+      time_estimate: 75
+
+    - day: 7
+      topic: "Transfer Learning and Fine-tuning"
+      activity: "Master pretrained models, feature extraction, fine-tuning strategies, and domain adaptation"
+      detailed_content: |
+        Transfer Learning Fundamentals:
+        - Motivation: Training from scratch needs massive data and compute
+        - Key insight: Low-level features transfer across domains
+          * CNNs: Edges, textures, patterns (ImageNet → medical images)
+          * Transformers: Language understanding (BERT → domain-specific text)
+        - When to use: Limited labeled data (< 10K samples), related domains
+
+        Pretrained Models:
+        - Vision:
+          * ResNet-50/101: ImageNet (1M images, 1000 classes)
+          * EfficientNet: State-of-art accuracy/efficiency
+          * Vision Transformer (ViT): Transformer for images
+        - NLP:
+          * BERT: Bidirectional understanding, 110M-340M params
+          * GPT-2/3: Text generation, 1.5B-175B params
+          * RoBERTa: Improved BERT training
+        - Multimodal:
+          * CLIP: Vision + language alignment
+          * DALL-E: Text → image generation
+
+        Feature Extraction vs Fine-tuning:
+        - Feature Extraction:
+          * Freeze all pretrained layers
+          * Only train new classification head
+          * Fast, needs less data
+          * Use when: Very different domain or very small data
+        - Fine-tuning:
+          * Unfreeze some/all layers, train with small LR
+          * Adapts features to new domain
+          * Better accuracy but needs more data
+          * Use when: >1K labeled samples, related domain
+
+        Fine-tuning Strategies:
+        - Gradual unfreezing: Start with head, progressively unfreeze layers
+        - Discriminative learning rates: Lower LR for earlier layers
+          * Head: 1e-3, Middle: 1e-4, Base: 1e-5
+        - Layer-wise learning rate decay: LR decreases deeper in network
+        - Warm-up: Train head first (freeze base), then unfreeze
+
+        Domain Adaptation:
+        - Problem: Training data distribution ≠ test data distribution
+        - Techniques:
+          * Domain adversarial training: Force domain-invariant features
+          * Self-training: Use model predictions as pseudo-labels
+          * Data augmentation: Match target domain characteristics
+        - Example: ImageNet → medical images (different color distribution)
+
+        Few-Shot Learning:
+        - Goal: Learn from few examples (1-10 per class)
+        - Meta-learning: Learn to learn (MAML, Prototypical Networks)
+        - Prompting (GPT-3): Provide examples in prompt
+        - Use case: Rare diseases, new product categories
+
+        Practical Considerations:
+        - Data size vs strategy:
+          * < 100 samples: Feature extraction only
+          * 100-1K: Fine-tune last few layers
+          * 1K-10K: Fine-tune most layers with careful LR
+          * > 10K: Can train from scratch or full fine-tune
+        - Compute budget:
+          * Feature extraction: 10× faster than fine-tuning
+          * Full fine-tuning: Can take days on single GPU
+        - Evaluation: Compare against training from scratch
+      practice_questions:
+        concepts:
+          - question: "Explain the difference between feature extraction and fine-tuning. When would you use each approach?"
+            answer: "Feature extraction: Freeze pretrained weights, train only new head. Fast (10× faster), needs less data, features might not be optimal for task. Fine-tuning: Unfreeze layers, train with low LR. Slower, needs more data, adapts features to task. Use feature extraction: <1K samples, very different domain (ImageNet → X-rays), limited compute. Use fine-tuning: >1K samples, related domain, have GPU time. Best practice: Start with feature extraction, then fine-tune if results unsatisfactory."
+          - question: "Why use discriminative learning rates when fine-tuning? What's the intuition?"
+            answer: "Early layers learn general features (edges, textures), later layers learn task-specific features. When fine-tuning: early layers already good, later layers need more adaptation. Use lower LR for early layers (small changes), higher LR for later layers (larger changes). Typical: Layer 1: 1e-5, Layer 2: 1e-4, Head: 1e-3. Prevents catastrophic forgetting of useful pretrained features while allowing task adaptation. Alternative: Progressive unfreezing."
+          - question: "How does domain adaptation address distribution shift? Explain domain adversarial training."
+            answer: "Problem: Source domain (ImageNet: natural images) ≠ Target domain (medical images: X-rays). Standard fine-tuning may not bridge gap. Domain adversarial: 1) Feature extractor learns features. 2) Task classifier predicts labels. 3) Domain classifier predicts source vs target. 4) Train feature extractor to fool domain classifier (make features domain-invariant). Loss: L_task - λ*L_domain. Features that work well for task but can't distinguish domain → transferable features."
+        tradeoffs:
+          - question: "Compare using BERT vs training a custom LSTM for text classification. What factors determine the choice?"
+            answer: "BERT: Pros: Pretrained on massive corpus, state-of-art accuracy, transfer learning. Cons: Large (110M params), slower inference (100ms), needs GPU. LSTM: Pros: Smaller (1M params), faster inference (10ms), can train on CPU. Cons: Needs more labeled data, lower accuracy. Choose BERT: Have >1K labeled samples, accuracy critical, have GPU. Choose LSTM: Limited data, low latency required (<50ms), edge deployment. Data: BERT wins with 1K+ samples, LSTM competitive with <500 samples if well-tuned."
+        estimation:
+          - question: "Estimate compute and time to fine-tune ResNet-50 on 5K medical images (224×224) for 10 epochs."
+            answer: "ResNet-50: 4B FLOPs per forward pass. Backward: 2× forward = 8B FLOPs total. Training: 5K images * 10 epochs = 50K iterations. Total: 50K * 8B = 400T FLOPs. On V100 (125 TFLOPS): 400T / 125T = 3,200 seconds = 53 minutes. Add data loading, batch size effects: ~2 hours total. Cost: V100 on AWS = $3/hour → $6 for fine-tuning. Memory: Batch size 32, activations ~500MB, total ~4GB. Conclusion: Feasible on single GPU in few hours."
+      time_estimate: 75
+
+    - day: 8
+      topic: "Tree-Based Methods - Decision Trees, Random Forests, Gradient Boosting"
+      activity: "Understand tree splitting, ensemble methods, XGBoost, LightGBM, and when trees beat neural networks"
+      detailed_content: |
+        Decision Tree Fundamentals:
+        - Recursive binary splitting: Choose best split at each node
+        - Split criteria:
+          * Classification (Gini): Gini = 1 - Σ p_i²
+          * Classification (Entropy): H = -Σ p_i log(p_i)
+          * Regression (MSE): Σ(y_i - ȳ)²
+        - Split selection: Try all features and thresholds, pick best
+        - Stopping criteria: Max depth, min samples per leaf, min impurity decrease
+
+        Tree Pruning:
+        - Problem: Trees overfit easily
+        - Pre-pruning: Stop early (max_depth, min_samples_split)
+        - Post-pruning: Grow full tree, then prune based on validation
+        - Cost-complexity pruning: Trade-off between accuracy and tree size
+
+        Random Forest:
+        - Ensemble of decision trees with randomness:
+          * Bootstrap sampling: Each tree trained on random subset (with replacement)
+          * Feature sampling: Each split considers random subset of features
+        - Prediction: Majority vote (classification) or average (regression)
+        - Why it works: Decorrelates trees, reduces variance
+        - Hyperparameters: n_estimators (100-1000), max_features (√p or log₂p)
+
+        Gradient Boosting:
+        - Key insight: Sequentially fit trees to residuals
+        - Algorithm:
+          1. Initialize: F₀(x) = mean(y)
+          2. For m = 1 to M:
+             - Compute residuals: r_i = y_i - F_{m-1}(x_i)
+             - Fit tree h_m to residuals r
+             - Update: F_m(x) = F_{m-1}(x) + η*h_m(x)
+        - η is learning rate (0.01-0.3)
+        - Equivalence to gradient descent in function space
+
+        XGBoost (Extreme Gradient Boosting):
+        - Improvements over standard gradient boosting:
+          * Regularization: L1/L2 on leaf weights
+          * Second-order approximation (Newton's method)
+          * Sparsity-aware splits (handles missing values)
+          * Parallel tree construction
+        - Loss function: L = Σ l(y_i, ŷ_i) + Ω(tree)
+          * Ω(tree) = γT + ½λΣw_j² (T=num leaves, w=leaf weights)
+        - Excellent for tabular data, wins Kaggle competitions
+
+        LightGBM:
+        - Gradient-based One-Side Sampling (GOSS):
+          * Keep samples with large gradients, random sample small gradients
+          * Speeds up training without losing accuracy
+        - Exclusive Feature Bundling (EFB):
+          * Bundle mutually exclusive features
+          * Reduces dimensionality
+        - Leaf-wise growth (vs level-wise in XGBoost)
+          * Faster but can overfit (needs max_depth limit)
+
+        CatBoost:
+        - Handles categorical features natively
+        - Ordered boosting: Prevents target leakage
+        - Symmetric trees: Faster inference
+        - Good default parameters, less tuning needed
+
+        When Trees Beat Neural Networks:
+        - Tabular data with:
+          * Mixed feature types (categorical + numerical)
+          * < 100K samples
+          * Feature interactions important
+          * Interpretability needed
+        - Examples: Fraud detection, credit scoring, sales forecasting
+        - Why: Trees handle non-monotonic relationships, missing values naturally
+      practice_questions:
+        concepts:
+          - question: "Explain gradient boosting as gradient descent in function space. Derive the residual fitting step."
+            answer: "Gradient boosting minimizes loss L(y, F(x)) where F is a function (tree ensemble). Gradient descent: F_{m+1} = F_m - η*∇L. In function space, gradient is: ∇L = ∂L/∂F = ∂L/∂ŷ. For MSE loss: ∂L/∂ŷ = -(y - ŷ) = -residual. So fitting tree to residuals = following negative gradient. Update: F_{m+1}(x) = F_m(x) + η*h_m(x) where h_m fits residuals. This is gradient descent with learning rate η and direction h_m."
+          - question: "How does Random Forest reduce variance compared to a single decision tree? Use bias-variance decomposition."
+            answer: "Single tree: High variance (sensitive to data), low bias (can fit any function). Random Forest: Average of B trees: F_RF = (1/B)Σf_i. Variance: Var(F_RF) = (ρσ²/B) + ((1-ρ)/B)σ² where ρ=correlation, σ²=tree variance. As B→∞: Var→ρσ² if trees perfectly correlated, Var→0 if uncorrelated. Bootstrap + feature sampling decorrelates trees (reduces ρ), averaging reduces variance. Bias stays same (average of unbiased estimators is unbiased). Result: Lower variance, same bias."
+          - question: "Why does XGBoost use second-order approximation (Newton's method) instead of first-order (gradient)?"
+            answer: "Gradient descent (first-order): Uses only ∂L/∂F. Newton (second-order): Uses ∂L/∂F and ∂²L/∂F². Advantage: Better curvature information, faster convergence. For loss L(y, F): Taylor expansion L ≈ L₀ + g*ΔF + ½h*(ΔF)² where g=∂L/∂F (gradient), h=∂²L/∂F² (Hessian). Optimal step: ΔF = -g/h (Newton step). XGBoost uses this for leaf weight calculation. Converges in fewer iterations, but requires computing Hessian."
+        tradeoffs:
+          - question: "When would you use XGBoost vs a neural network for tabular data? Consider sample size, feature types, and interpretability."
+            answer: "XGBoost: Pros: 1) Works well with <100K samples, 2) Handles categorical features natively, 3) Missing values handled automatically, 4) More interpretable (feature importance), 5) Faster training. Neural Network: Pros: 1) Scales better to >1M samples, 2) Can learn complex interactions automatically, 3) Better for high-cardinality categoricals, 4) Transfer learning possible. Use XGBoost: <100K samples, mixed features, need interpretability, limited compute. Use NN: >100K samples, complex patterns, have GPUs. In practice: Try XGBoost first for tabular (faster experimentation), then NN if needed."
+        estimation:
+          - question: "Estimate training time for XGBoost on 100K samples, 100 features, 1000 trees, max_depth=6."
+            answer: "Per tree: Try each feature (100) at each node. Tree has 2^6 - 1 = 63 nodes max. Per node: Scan all samples for best split. Complexity: O(samples * features * depth) = O(100K * 100 * 6) = 60M operations per tree. 1000 trees: 60B operations. On modern CPU (10 GFLOPS): 60B / 10G = 6 seconds per tree × 1000 = 6000 seconds = 1.7 hours. With XGBoost optimizations (column block, cache-aware, parallel): ~30-60 minutes. Memory: 100K * 100 * 4 bytes = 40MB for data, minimal overhead."
+      time_estimate: 90
+
+    - day: 9
+      topic: "Classical ML - Linear Models, SVMs, and Dimensionality Reduction"
+      activity: "Master logistic regression, support vector machines, PCA, and understand when simple models work best"
+      detailed_content: |
+        Linear Regression:
+        - Model: y = w^T x + b
+        - Loss: MSE = (1/n) Σ(y_i - ŷ_i)²
+        - Closed-form solution: w = (X^T X)^{-1} X^T y
+          * Works when X^T X is invertible (features < samples)
+        - Gradient descent: w = w - η * (1/n) X^T (Xw - y)
+        - Regularization:
+          * Ridge (L2): Add λΣw_i² → w = (X^T X + λI)^{-1} X^T y
+          * Lasso (L1): Add λΣ|w_i| → no closed form, use coordinate descent
+
+        Logistic Regression:
+        - Model: p(y=1|x) = σ(w^T x + b) where σ(z) = 1/(1+e^{-z})
+        - Loss: Binary cross-entropy = -[y log(ŷ) + (1-y)log(1-ŷ)]
+        - No closed form, use gradient descent or Newton's method
+        - Gradient: ∇L = (1/n) X^T (ŷ - y)
+        - Interpretation: w_i is log-odds ratio for feature i
+
+        Support Vector Machines (SVM):
+        - Goal: Find maximum margin hyperplane
+        - Hard margin: min ||w||² subject to y_i(w^T x_i + b) ≥ 1
+        - Soft margin: Add slack ξ_i for misclassified points
+          * min (½||w||² + C Σξ_i) subject to y_i(w^T x_i + b) ≥ 1 - ξ_i
+        - Dual problem: Involves only dot products x_i^T x_j
+          * Enables kernel trick
+
+        Kernel Trick:
+        - Problem: Data not linearly separable
+        - Solution: Map to higher dimension φ(x), find linear separator there
+        - Key insight: Don't need explicit φ(x), only K(x_i, x_j) = φ(x_i)^T φ(x_j)
+        - Common kernels:
+          * Linear: K(x,y) = x^T y
+          * Polynomial: K(x,y) = (x^T y + c)^d
+          * RBF (Gaussian): K(x,y) = exp(-γ||x-y||²)
+        - RBF most popular: Infinite dimensional space, single hyperparameter γ
+
+        Principal Component Analysis (PCA):
+        - Goal: Find directions of maximum variance
+        - Method: Eigendecomposition of covariance matrix Σ = X^T X
+        - Principal components: Eigenvectors with largest eigenvalues
+        - Dimensionality reduction: Keep top k components
+        - Variance explained: λ_k / Σλ_i (choose k to explain 95% variance)
+
+        Naive Bayes:
+        - Bayes rule: P(y|x) ∝ P(x|y) P(y)
+        - Naive assumption: Features independent given class
+          * P(x|y) = P(x_1|y) * P(x_2|y) * ... * P(x_n|y)
+        - Training: Estimate P(x_i|y) and P(y) from data
+        - Types:
+          * Gaussian NB: Features are continuous, normally distributed
+          * Multinomial NB: Features are counts (text classification)
+        - Fast training and inference, works well for text with small data
+
+        K-Means Clustering:
+        - Algorithm:
+          1. Initialize k centroids randomly
+          2. Assign each point to nearest centroid
+          3. Update centroids as mean of assigned points
+          4. Repeat until convergence
+        - Loss: Σ min_c ||x_i - μ_c||² (within-cluster sum of squares)
+        - Choosing k: Elbow method (plot loss vs k)
+        - Limitations: Assumes spherical clusters, sensitive to initialization
+      practice_questions:
+        concepts:
+          - question: "Derive the closed-form solution for linear regression with L2 regularization (Ridge regression)."
+            answer: "Loss: L = ||Xw - y||² + λ||w||². Take gradient: ∂L/∂w = 2X^T(Xw - y) + 2λw = 0. Rearrange: X^T Xw + λw = X^T y. Factor: (X^T X + λI)w = X^T y. Solve: w = (X^T X + λI)^{-1} X^T y. Key insight: λI makes X^T X + λI always invertible (even if X^T X is singular). This is why Ridge works with more features than samples, unlike standard linear regression."
+          - question: "Explain the kernel trick in SVMs. Why is it computationally efficient for high-dimensional spaces?"
+            answer: "SVM dual formulation: α* = argmax Σα_i - ½ΣΣ α_i α_j y_i y_j (x_i^T x_j). Notice only dot products x_i^T x_j appear. Kernel trick: Replace x_i^T x_j with K(x_i, x_j) = φ(x_i)^T φ(x_j). Example: RBF kernel maps to infinite dimensions, but K(x,y) = exp(-γ||x-y||²) is O(d) to compute. Never compute φ(x) explicitly! Enables learning in high/infinite-dim space with O(d) cost per kernel evaluation. Dual has O(n²) kernel evaluations."
+          - question: "How does PCA find directions of maximum variance? Relate to eigenvalues and eigenvectors."
+            answer: "Goal: Find direction w (||w||=1) that maximizes variance Var(X w). Variance: w^T Σ w where Σ = X^T X / n (covariance). Constrained optimization: max w^T Σ w subject to ||w||²=1. Lagrangian: L = w^T Σ w - λ(w^T w - 1). Take derivative: ∂L/∂w = 2Σw - 2λw = 0. This gives: Σw = λw (eigenvalue equation). w is eigenvector, λ is eigenvalue = variance along w. First PC: eigenvector with largest eigenvalue."
+        tradeoffs:
+          - question: "Compare Logistic Regression vs Neural Network for binary classification. When to use each?"
+            answer: "Logistic Regression: Pros: 1) Interpretable coefficients, 2) Fast training and inference, 3) Works with small data (<1K samples), 4) No hyperparameter tuning. Cons: 1) Assumes linear decision boundary, 2) Can't learn interactions without manual feature engineering. Neural Network: Pros: 1) Learns non-linear boundaries automatically, 2) Can learn feature interactions, 3) Scales to large data. Cons: 1) Black box, 2) Needs more data (>10K), 3) Slower, needs tuning. Use Logistic Regression: <10K samples, need interpretability, linear/simple problem. Use NN: >10K samples, complex patterns, have compute."
+        estimation:
+          - question: "Calculate complexity of training SVM with RBF kernel on n=10K samples, d=100 features."
+            answer: "SVM dual problem: Solve QP with O(n²) kernel evaluations. Kernel matrix: 10K × 10K = 100M entries. Each RBF kernel: K(x,y) = exp(-γ||x-y||²) costs O(d)=O(100) ops. Total: 100M * 100 = 10B operations to build kernel matrix. QP solve: O(n³) in worst case = (10K)³ = 10^12 ops. With SMO algorithm (used in practice): O(n² to n³) depending on data. Memory: Store kernel matrix = 100M * 4 bytes = 400MB. Training time: Minutes to hours depending on C, γ. Prediction for new point: O(n*d) = 1M ops."
+      time_estimate: 75
+
+    - day: 10
+      topic: "Model Evaluation and Metrics"
+      activity: "Master classification metrics (precision, recall, F1, ROC-AUC), regression metrics, and cross-validation strategies"
+      detailed_content: |
+        Classification Metrics:
+        - Confusion Matrix:
+          * True Positive (TP), False Positive (FP), True Negative (TN), False Negative (FN)
+        - Accuracy: (TP + TN) / Total
+          * Misleading for imbalanced classes (99% class 0 → accuracy=99% by predicting all 0)
+        - Precision: TP / (TP + FP)
+          * "Of predicted positives, how many are correct?"
+          * High precision: Few false alarms
+        - Recall (Sensitivity, TPR): TP / (TP + FN)
+          * "Of actual positives, how many did we find?"
+          * High recall: Few missed positives
+        - F1 Score: 2 * (Precision * Recall) / (Precision + Recall)
+          * Harmonic mean of precision and recall
+          * Use when you need balance between both
+
+        Precision-Recall Trade-off:
+        - Increase threshold → higher precision, lower recall
+        - Decrease threshold → higher recall, lower precision
+        - F_β score: Weighted harmonic mean
+          * β > 1: Favor recall (e.g., cancer screening)
+          * β < 1: Favor precision (e.g., spam filtering)
+
+        ROC and AUC:
+        - ROC curve: TPR vs FPR at different thresholds
+          * FPR = FP / (FP + TN)
+        - AUC (Area Under Curve): Single number summarizing ROC
+          * AUC = 1: Perfect classifier
+          * AUC = 0.5: Random classifier
+          * Interpretation: Probability that model ranks random positive higher than random negative
+        - When to use: Binary classification, balanced classes
+
+        Multi-class Metrics:
+        - Macro-average: Compute metric per class, average
+          * Treats all classes equally (good for imbalanced)
+        - Micro-average: Aggregate TP, FP, FN across classes, then compute
+          * Weighted by class frequency
+        - Weighted average: Average weighted by class support
+
+        Regression Metrics:
+        - Mean Squared Error (MSE): (1/n) Σ(y_i - ŷ_i)²
+          * Penalizes large errors heavily, sensitive to outliers
+        - Root MSE (RMSE): √MSE
+          * Same units as target variable
+        - Mean Absolute Error (MAE): (1/n) Σ|y_i - ŷ_i|
+          * More robust to outliers than MSE
+        - R² (Coefficient of Determination): 1 - (SS_res / SS_tot)
+          * Proportion of variance explained
+          * R² = 1: Perfect fit, R² = 0: Predicts mean
+
+        Cross-Validation:
+        - K-Fold CV: Split data into K folds, train on K-1, test on 1
+          * Repeat K times, average performance
+          * Typical: K=5 or K=10
+        - Stratified K-Fold: Preserves class distribution in each fold
+          * Important for imbalanced data
+        - Leave-One-Out CV (LOOCV): K=n (expensive but low bias)
+        - Time-series CV: Respect temporal order
+          * Train on [1:t], test on [t+1:t+h]
+
+        Bias-Variance Trade-off:
+        - Total Error = Bias² + Variance + Irreducible Error
+        - Bias: Error from wrong assumptions (underfitting)
+          * High bias: Model too simple (linear for non-linear data)
+          * Fix: More complex model, more features, less regularization
+        - Variance: Error from sensitivity to training data (overfitting)
+          * High variance: Model too complex, memorizes noise
+          * Fix: More data, regularization, simpler model
+
+        Learning Curves:
+        - Plot train/val error vs training set size
+        - High bias: Train and val error both high, converge together
+          * Adding more data doesn't help
+        - High variance: Large gap between train and val error
+          * Adding more data helps
+
+        Overfitting Diagnosis:
+        - Symptoms: Train accuracy >> val accuracy
+        - Solutions: More data, regularization, simpler model, early stopping, data augmentation
+
+        Underfitting Diagnosis:
+        - Symptoms: Train and val accuracy both low
+        - Solutions: More complex model, more features, less regularization, train longer
+      practice_questions:
+        concepts:
+          - question: "Explain the precision-recall trade-off. In what scenarios would you optimize for high precision vs high recall?"
+            answer: "Precision-recall trade-off: Increasing threshold → fewer positive predictions → higher precision (fewer FP) but lower recall (more FN). Decreasing threshold → more positive predictions → higher recall but lower precision. High precision scenarios: Spam detection (don't want legitimate emails marked spam), ad click prediction (don't waste money on unlikely clicks). High recall scenarios: Cancer screening (can't miss cases), fraud detection (catch all fraud, even with false alarms). Use F_β score: β=2 for recall priority, β=0.5 for precision priority."
+          - question: "What is AUC-ROC measuring? Provide an intuitive interpretation and explain when it's appropriate vs misleading."
+            answer: "AUC = P(model ranks random positive higher than random negative). Intuitive: If you pick one positive and one negative sample, what's probability model scores positive > negative? ROC plots TPR vs FPR across all thresholds. Appropriate: Binary classification, care about ranking, balanced classes. Misleading: Imbalanced data (99% negative) - high AUC doesn't mean good precision at operating point. Alternative for imbalanced: Precision-Recall curve. Example: 1% fraud - AUC=0.95 looks good but precision at 1% threshold might be only 10%."
+          - question: "Explain bias-variance trade-off using a mathematical decomposition. How do you diagnose high bias vs high variance?"
+            answer: "Expected error: E[(y - ŷ)²] = Bias[ŷ]² + Var[ŷ] + σ² where Bias[ŷ] = E[ŷ] - y, Var[ŷ] = E[(ŷ - E[ŷ])²]. Bias: Error from model assumptions (linear model for quadratic data). Variance: Error from sensitivity to training set. Diagnosis: 1) High bias: Train error high, gap small → model too simple. 2) High variance: Train error low, val error high, large gap → overfitting. Learning curves: Bias → errors converge high. Variance → large gap persists with more data."
+        tradeoffs:
+          - question: "For an imbalanced classification problem (1% positive class), compare accuracy, F1, and AUC. Which metric is most appropriate?"
+            answer: "Accuracy: Misleading. Predict all negative → 99% accuracy but useless. F1: Better, balances precision and recall. Penalizes missing positives and false alarms. AUC: Good for ranking, but doesn't reflect performance at operating threshold. Best: Precision-Recall curve or F1 at desired operating point. For imbalanced: Report precision, recall, F1 at relevant threshold. Example: If business tolerates 10% FPR, report precision/recall at that point. AUC can be high while precision at operating point is low."
+        scenarios:
+          - question: "You have a binary classifier with 95% train accuracy and 70% validation accuracy. Diagnose the problem and suggest solutions."
+            answer: "Diagnosis: High variance (overfitting). Large gap (25%) between train and val indicates memorization. Solutions: 1) More training data (most effective if possible), 2) Regularization (L1/L2, dropout), 3) Simpler model (reduce capacity), 4) Early stopping, 5) Data augmentation (effectively increases data), 6) Cross-validation to select hyperparameters. Not solutions: More training epochs (makes worse), more complex model (makes worse). Verify: Check learning curves - gap should decrease with more data."
+      time_estimate: 75
+
+  week3:
+    - day: 11
+      topic: "Embedding Techniques and Representation Learning"
+      activity: "Master word embeddings (Word2Vec, GloVe), entity embeddings, and modern contextualized representations"
+      detailed_content: |
+        Word Embeddings Motivation:
+        - One-hot encoding: High dimensional, no semantic relationships
+        - Embedding: Dense vector in R^d (d=100-300) captures semantics
+        - Distributional hypothesis: Words in similar contexts have similar meanings
+
+        Word2Vec:
+        - Skip-gram: Predict context words given center word
+          * Maximize: log P(w_{t-k},...,w_{t+k} | w_t)
+          * Model: P(w_o|w_i) = exp(u_o^T v_i) / Σ exp(u_j^T v_i)
+        - CBOW (Continuous Bag of Words): Predict center word from context
+          * Faster than skip-gram
+        - Negative sampling: Avoid expensive softmax
+          * Sample k negative words, maximize log σ(u_o^T v_i) + Σ log σ(-u_j^T v_i)
+        - Hierarchical softmax: Use binary tree instead of flat softmax
+
+        GloVe (Global Vectors):
+        - Idea: Combine global matrix factorization with local context
+        - Co-occurrence matrix X: X_ij = # times word j appears in context of word i
+        - Objective: Minimize Σ f(X_ij) (w_i^T w̃_j + b_i + b̃_j - log X_ij)²
+          * f(x): Weighting function (less weight to rare co-occurrences)
+        - Captures linear relationships: king - man + woman ≈ queen
+
+        Entity Embeddings:
+        - Categorical features in tabular data
+        - Learn embedding for each category during training
+        - Example: Country → 50-dim vector (captures geographical/economic similarity)
+        - Benefits: Dimensionality reduction, semantic relationships, better generalization
+
+        Contextualized Embeddings:
+        - Problem with Word2Vec: "bank" has same embedding in "river bank" and "savings bank"
+        - ELMo (Embeddings from Language Models):
+          * Bidirectional LSTM trained on language modeling
+          * Embedding depends on entire sentence context
+        - BERT: Transformer-based, better than ELMo
+          * Each token's embedding depends on entire sequence via attention
+
+        Sentence Embeddings:
+        - Averaging word embeddings: Simple but loses word order
+        - Doc2Vec: Extension of Word2Vec to documents
+        - Sentence-BERT: Fine-tuned BERT for sentence similarity
+          * Siamese network architecture
+          * Cosine similarity in embedding space
+
+        Metric Learning:
+        - Goal: Learn embedding space where similar items are close
+        - Contrastive loss: Minimize distance for similar pairs, maximize for dissimilar
+        - Triplet loss: (anchor, positive, negative)
+          * Minimize: max(0, ||a-p||² - ||a-n||² + margin)
+        - Applications: Face recognition, image retrieval, recommendation
+
+        t-SNE (t-distributed Stochastic Neighbor Embedding):
+        - Non-linear dimensionality reduction for visualization
+        - Preserves local structure (similar points stay close)
+        - Algorithm: Model probability distributions in high-dim and 2D, minimize KL divergence
+        - Use: Visualize embeddings (Word2Vec, BERT), cluster analysis
+        - Caveat: Non-deterministic, hyperparameter-sensitive
+      practice_questions:
+        concepts:
+          - question: "Explain negative sampling in Word2Vec. Why is it more efficient than full softmax?"
+            answer: "Full softmax: P(w_o|w_i) = exp(u_o^T v_i) / Σ_j exp(u_j^T v_i). Denominator sums over entire vocab (10K-100K words), very expensive. Negative sampling: For context pair (w_i, w_o), sample k negative words (k=5-20). Maximize log σ(u_o^T v_i) + Σ_{j∈NEG} log σ(-u_j^T v_i). Only k+1 words per update instead of vocab size. Complexity: O(k) vs O(|V|). Still approximates softmax well in practice. Sampling distribution: P(w) ∝ freq(w)^{3/4} (balance frequency)."
+          - question: "How do contextualized embeddings (BERT) differ from static embeddings (Word2Vec)? Explain with an example."
+            answer: "Word2Vec: Each word has fixed embedding regardless of context. 'bank' has same vector in 'river bank' and 'savings bank'. BERT: Embedding depends on entire sentence via transformer attention. 'bank' in 'river bank' attends to 'river', 'bank' in 'savings bank' attends to 'savings' → different embeddings. Mechanism: Self-attention computes weighted average of all tokens. Each word's representation is context-dependent. Use Word2Vec: Fast lookup, limited memory. Use BERT: Need context-awareness, have compute for transformer."
+          - question: "Derive the triplet loss for metric learning. Why use margin?"
+            answer: "Goal: Anchor a should be closer to positive p than to negative n. Distance constraint: ||a-p||² + margin < ||a-n||². Loss: L = max(0, ||a-p||² - ||a-n||² + margin). Why margin: Ensures separation, not just ordering. Without margin: Could have ||a-p||²=5.0, ||a-n||²=5.1 (barely separated). With margin=1.0: Forces ||a-n||² ≥ ||a-p||² + 1.0, creating buffer. Typical margin: 0.2-1.0. Used in FaceNet: Learn face embeddings where same person is close."
+        tradeoffs:
+          - question: "Compare Word2Vec, GloVe, and BERT embeddings for a text classification task with 10K training samples."
+            answer: "Word2Vec: Pros: Fast, pretrained on large corpus, works with small data. Cons: No context (polysemy problem), average pooling loses order. GloVe: Similar to Word2Vec but incorporates global statistics. BERT: Pros: Context-aware, state-of-art accuracy. Cons: Slow (transformer forward pass), needs GPU, large memory. For 10K samples: Word2Vec/GloVe sufficient (99% accuracy achievable), BERT gains 1-2% but 10× slower. Use BERT: If accuracy critical and have compute. Use Word2Vec: Fast baseline, limited resources, interpretability."
+        estimation:
+          - question: "Calculate memory for storing Word2Vec embeddings: vocab=100K words, embedding dim=300."
+            answer: "Embeddings: 100K words × 300 dimensions × 4 bytes/float = 120MB. If also store context vectors (skip-gram has input and output embeddings): 2 × 120MB = 240MB. In practice: Only keep input embeddings after training → 120MB. Compared to one-hot: 100K × 100K sparse matrix (impractical). Lookup time: O(1) hash table. For sentence: Average 20 words → 20 × 300 = 6K floats = 24KB per sentence. Batch of 32 sentences: 768KB (fits in CPU cache)."
+      time_estimate: 60
+
+    - day: 12
+      topic: "Advanced Deep Learning Topics - Normalization, Initialization, Residual Learning"
+      activity: "Deep dive into batch normalization variants, weight initialization strategies, and architectural patterns"
+      detailed_content: |
+        Normalization Techniques:
+        - Batch Normalization:
+          * Normalize: μ_B = (1/m)Σx_i, σ²_B = (1/m)Σ(x_i-μ_B)²
+          * Transform: x̂ = (x-μ_B)/√(σ²_B+ε), y = γx̂ + β
+          * Benefits: Faster training, higher LR, regularization
+          * Drawbacks: Batch-size dependent, train/test discrepancy
+        - Layer Normalization:
+          * Normalize across features per sample (not across batch)
+          * Independence from batch size
+          * Used in: Transformers (BERT, GPT), RNNs
+        - Instance Normalization:
+          * Normalize per sample, per channel
+          * Used in: Style transfer, GANs
+        - Group Normalization:
+          * Divide channels into groups, normalize within groups
+          * Compromise between batch and layer norm
+          * Good for small batches (<8)
+
+        When to use each:
+        - CNNs, large batch (≥32): Batch Norm
+        - Transformers, RNNs: Layer Norm
+        - Style transfer: Instance Norm
+        - Small batch (<8), object detection: Group Norm
+
+        Weight Initialization:
+        - Zero initialization: All neurons learn same features (symmetry problem)
+        - Random small values: Vanishing gradients in deep networks
+        - Xavier/Glorot: Var(W) = 2/(n_in + n_out)
+          * Derivation: Keep variance of activations constant across layers
+          * Good for: sigmoid, tanh activations
+        - He initialization: Var(W) = 2/n_in
+          * Designed for ReLU (accounts for half neurons being zero)
+          * Modern default for deep networks
+
+        Residual Learning:
+        - Skip connections: y = F(x) + x
+        - Why it works:
+          * Gradients flow directly through skip connection
+          * ∂L/∂x = ∂L/∂y * (∂F/∂x + 1) - the "+1" prevents vanishing
+        - ResNet variants:
+          * Pre-activation: BN → ReLU → Conv (better than Conv → BN → ReLU)
+          * Wide ResNet: Wider layers (more channels) instead of deeper
+          * ResNeXt: Multiple parallel paths (group convolutions)
+
+        Attention Mechanisms Beyond Transformers:
+        - Squeeze-and-Excitation (SE) Networks:
+          * Channel attention: Which channels are important?
+          * Global pool → FC → Sigmoid → Scale channels
+        - CBAM (Convolutional Block Attention Module):
+          * Channel attention + Spatial attention
+        - Non-local Neural Networks:
+          * Self-attention for CNNs (captures long-range dependencies)
+
+        Neural Architecture Search (NAS):
+        - Automated design of architectures
+        - Search space: Operations, connections, hyperparameters
+        - Search strategy: Reinforcement learning, evolutionary, gradient-based
+        - Results: EfficientNet, AmoebaNet
+        - Drawback: Expensive (thousands of GPU-hours)
+
+        Knowledge Distillation:
+        - Train small "student" model to mimic large "teacher" model
+        - Loss: L = αL_CE(y, student) + (1-α)L_KL(teacher, student)
+        - Soft targets from teacher contain more information than hard labels
+        - Application: Deploy large BERT → distill to DistilBERT (40% smaller, 97% accuracy)
+      practice_questions:
+        concepts:
+          - question: "Why does Layer Normalization work better than Batch Normalization for Transformers?"
+            answer: "Transformers process variable-length sequences. Batch Norm normalizes across batch dimension - different sequence lengths lead to different statistics per position. Layer Norm normalizes across feature dimension per sample - independent of batch or sequence length. For transformer with hidden size 768: LN computes μ,σ over 768 dimensions per token. Consistent statistics regardless of batch size or sequence length. Also: Transformers often use batch size 1 during inference (generation), where BN statistics would be noisy."
+          - question: "Derive He initialization variance for ReLU activations. Why is it different from Xavier?"
+            answer: "Goal: Preserve variance through layers. For layer l: y = W·x where x has variance σ²_x. Var(y) = E[W²]·Var(x) = n_in·Var(W)·σ²_x. To keep Var(y)=σ²_x, need Var(W) = 1/n_in. But ReLU zeros half the neurons: E[ReLU(x)] = E[max(0,x)] ≈ σ_x/2 for zero-mean x. Variance is also halved. To compensate: Var(W) = 2/n_in (He init). Xavier: Var(W) = 2/(n_in+n_out) assumes linear activation. He accounts for ReLU's nonlinearity."
+          - question: "How does knowledge distillation work? Why do soft targets from teacher model help student learning?"
+            answer: "Student learns from: 1) Hard labels (one-hot), 2) Soft targets from teacher (probability distribution). Teacher output at temperature T: p_i = exp(z_i/T)/Σexp(z_j/T). Higher T → softer distribution. Why soft targets help: Encode relative similarities between classes. Example: For image of dog, teacher outputs [0.7 dog, 0.2 wolf, 0.1 cat] (soft) vs [1 dog, 0 wolf, 0 cat] (hard). Soft targets contain information about similarity (wolf closer to dog than cat). Student learns these relationships."
+        tradeoffs:
+          - question: "Compare using a 50-layer ResNet vs a 20-layer plain CNN. What are the trade-offs in accuracy, training time, and complexity?"
+            answer: "50-layer ResNet: Pros: Higher accuracy (skip connections enable training), can learn more complex features. Cons: 2.5× more layers → 2× slower training/inference, 2× memory. 20-layer plain CNN: Pros: Faster, smaller. Cons: Plain networks degrade with depth (degradation problem), lower accuracy. Empirical: ResNet-50 > Plain-20 accuracy by ~3-5% on ImageNet. Training: ResNet-50 takes 2× time of Plain-20 but achieves better accuracy. Use ResNet: When accuracy is critical. Use plain: Limited compute, shallow enough to train (< 20 layers)."
+        scenarios:
+          - question: "You're training a 100-layer network and observe training accuracy stuck at 60% (random is 50%). Diagnose and fix."
+            answer: "Diagnosis: Likely vanishing gradients. Deep network without skip connections can't backprop gradients effectively. Other possibilities: Bad initialization, too high LR. Fixes: 1) Add residual connections (ResNet-style) - most effective. 2) Check initialization (use He init for ReLU). 3) Reduce learning rate (try 10× smaller). 4) Use Batch Normalization after each conv layer. 5) Gradient clipping to prevent explosion. Verification: Monitor gradient norms - if < 1e-5 in early layers, it's vanishing. After fixes: Should see training accuracy increase to 80-90%."
+      time_estimate: 60
+
+    - day: 13
+      topic: "Unsupervised and Self-Supervised Learning"
+      activity: "Understand clustering, autoencoders, contrastive learning, and modern self-supervised methods like SimCLR and MAE"
+      detailed_content: |
+        Clustering Algorithms:
+        - K-Means: Already covered (Day 9)
+        - Hierarchical Clustering:
+          * Agglomerative (bottom-up): Start with each point as cluster, merge
+          * Linkage: Single (min distance), complete (max distance), average
+          * Output: Dendrogram (tree of merges)
+        - DBSCAN (Density-Based):
+          * Core points: ≥minPts neighbors within radius ε
+          * Border points: Within ε of core point
+          * Noise points: Neither core nor border
+          * Advantage: Finds arbitrary-shaped clusters, handles noise
+
+        Self-Supervised Learning:
+        - Motivation: Leverage unlabeled data (abundant) before fine-tuning on labeled (scarce)
+        - Pretext tasks: Create supervised task from unlabeled data
+
+        Contrastive Learning:
+        - Idea: Learn representations where similar samples are close, dissimilar are far
+        - SimCLR (Simple Framework for Contrastive Learning):
+          1. Augment image twice (crop, color jitter) → x_i, x_j
+          2. Encode through CNN: h_i = f(x_i), h_j = f(x_j)
+          3. Project: z_i = g(h_i) (small MLP)
+          4. Contrastive loss: Maximize agreement between z_i, z_j, minimize with other samples
+          * Loss: -log[exp(sim(z_i,z_j)/τ) / Σ_k exp(sim(z_i,z_k)/τ)]
+        - MoCo (Momentum Contrast):
+          * Maintains queue of negative samples
+          * Momentum encoder for consistency
+
+        Masked Language Modeling:
+        - BERT pretraining: Mask 15% of tokens, predict them
+        - Why it works: Forces model to understand context
+        - T5, RoBERTa: Improved masking strategies
+
+        Masked Image Modeling:
+        - MAE (Masked Autoencoders):
+          * Mask 75% of image patches (16×16 pixels)
+          * Encode visible patches with transformer
+          * Decode to reconstruct masked patches
+          * Forces learning of spatial relationships
+        - BEiT: Similar but uses discrete tokens (VQ-VAE)
+
+        Rotation Prediction:
+        - Rotate image by 0°, 90°, 180°, 270°
+        - Train network to predict rotation angle
+        - Forces learning of object structure
+
+        Jigsaw Puzzle:
+        - Split image into 3×3 grid, shuffle patches
+        - Train network to predict correct permutation
+        - Learns spatial relationships
+
+        Colorization:
+        - Input: Grayscale image
+        - Output: Predicted color channels
+        - Forces semantic understanding (sky is blue, grass is green)
+
+        Relative Positioning:
+        - Predict relative position of two image patches
+        - Learns spatial context
+
+        Transfer Learning Pipeline:
+        1. Pretrain on large unlabeled data (self-supervised)
+        2. Fine-tune on small labeled data (supervised)
+        3. Achieves competitive accuracy with less labeled data
+
+        Applications:
+        - Medical imaging: Limited labeled data (expert annotations expensive)
+        - Satellite imagery: Lots of unlabeled data
+        - Video understanding: Temporal consistency as supervision
+      practice_questions:
+        concepts:
+          - question: "Explain the intuition behind contrastive learning (SimCLR). How does it learn useful representations without labels?"
+            answer: "Intuition: Different augmentations of same image should have similar embeddings (positive pairs), different images should have dissimilar embeddings (negative pairs). SimCLR: For image x, create two augmented views x_i, x_j. Loss maximizes similarity between (x_i, x_j) and minimizes with other images in batch. Why it works: Forces encoder to learn features invariant to augmentations but discriminative across images. Must capture semantic content (object identity) while ignoring superficial changes (color, crop). No labels needed - supervision comes from data augmentation."
+          - question: "How does Masked Autoencoding (MAE) work for images? Why mask such a high percentage (75%)?"
+            answer: "MAE: Randomly mask 75% of image patches, encode visible patches with transformer, decode to reconstruct masked patches. High masking (75%): Makes task challenging, forces learning global structure. With low masking (15% like BERT), could reconstruct by interpolating neighboring pixels (no semantic understanding). 75% masking: Can't just interpolate, must understand what object is to fill in. Example: Mask most of cat → must infer 'this is a cat' to reconstruct whiskers, ears. Also: Computational benefit - only encode 25% of patches."
+          - question: "Compare self-supervised learning (SimCLR, MAE) vs supervised pretraining (ImageNet classification). Pros and cons?"
+            answer: "Self-supervised: Pros: No labels needed (leverage billions of unlabeled images), learns general representations, recent results match/exceed supervised. Cons: Needs large batch sizes (SimCLR uses 4096), more compute, less mature. Supervised (ImageNet): Pros: Well-established, works with smaller batches, pretrained models widely available. Cons: Needs labeled data (ImageNet = 1.2M labels), may learn label biases. Trend: Self-supervised catching up. Use self-supervised: Have lots of unlabeled domain data. Use supervised: Need stable baseline, limited compute."
+        tradeoffs:
+          - question: "For a medical imaging task with 1K labeled X-rays and 100K unlabeled, design a learning strategy. Compare options."
+            answer: "Options: 1) Supervised only (1K): Simple but likely underfits, accuracy ~70%. 2) ImageNet pretrain + fine-tune: Good baseline, accuracy ~85%. But ImageNet photos ≠ X-rays. 3) Self-supervised on 100K unlabeled, then fine-tune on 1K: Best accuracy ~90-92%. Recommendation: Option 3 (MAE or SimCLR). Steps: 1) Pretrain MAE on 100K unlabeled X-rays (learn X-ray-specific features). 2) Fine-tune on 1K labeled. Why better: Domain-specific pretraining > generic ImageNet. Trade-off: More engineering complexity but worth for 5-7% accuracy gain in medical domain."
+        estimation:
+          - question: "Estimate compute for SimCLR pretraining: 1M unlabeled images, ResNet-50 encoder, batch size 4096, 800 epochs."
+            answer: "Per image: ResNet-50 forward pass = 4B FLOPs. Batch: 4096 * 4B = 16T FLOPs. Contrastive loss: 4096 × 4096 similarity matrix = 16M similarities, each O(dim) = O(2048). Total: ~32B FLOPs for loss. Per epoch: 1M / 4096 ≈ 244 batches. Epoch compute: 244 * 16T = 4P FLOPs. 800 epochs: 3200P FLOPs = 3.2 exaFLOPs. On 8× V100 (1 PFLOPS total): 3.2P / 1P = 3200 seconds = 53 minutes per epoch. Total: 53 × 800 = 42K minutes = 700 GPU-hours. Cost on AWS: 8 V100s = $25/hour → $17,500."
+      time_estimate: 60
+
+    - day: 14
+      topic: "Production ML Concerns - Model Compression, Quantization, Distillation"
+      activity: "Master techniques for deploying models efficiently: pruning, quantization, knowledge distillation, and serving optimization"
+      detailed_content: |
+        Model Compression Motivation:
+        - Production constraints: Latency < 100ms, memory < 100MB, mobile/edge devices
+        - Large models: BERT (110M params, 440MB), ResNet-50 (25M params, 100MB)
+        - Need: 10× smaller models with <5% accuracy drop
+
+        Knowledge Distillation:
+        - Train small student to mimic large teacher
+        - Loss: L = α*L_hard(y, student) + (1-α)*L_soft(teacher, student)
+        - Temperature scaling: Softmax with T>1 makes distribution softer
+          * p_i = exp(z_i/T) / Σexp(z_j/T)
+        - Dark knowledge: Soft targets encode similarity between classes
+        - Example: DistilBERT (66M params) = 97% of BERT (110M) accuracy
+
+        Quantization:
+        - Reduce precision: FP32 → INT8 (4× smaller, 4× faster)
+        - Post-training quantization (PTQ):
+          * Calibrate on small dataset (100-1000 samples)
+          * Map FP32 weights to INT8: w_int8 = round(w_fp32 / scale)
+          * Fast, no retraining, 1-2% accuracy drop
+        - Quantization-aware training (QAT):
+          * Simulate quantization during training
+          * Better accuracy (< 0.5% drop) but slower
+        - Per-channel vs per-tensor quantization
+        - Dynamic quantization: Activations quantized at runtime
+
+        Pruning:
+        - Remove unimportant weights
+        - Magnitude pruning: Remove weights with |w| < threshold
+        - Structured pruning: Remove entire neurons/channels
+        - Iterative pruning:
+          1. Train full model
+          2. Prune small weights (remove 20%)
+          3. Fine-tune remaining weights
+          4. Repeat
+        - Lottery Ticket Hypothesis: Dense networks contain sparse subnetworks
+        - Typical: 50-90% weights can be pruned with <1% accuracy drop
+
+        Architecture-Specific Optimization:
+        - MobileNet: Depthwise separable convolutions
+          * Factorize 3×3 conv → 3×3 depthwise + 1×1 pointwise
+          * 8-9× fewer parameters
+        - SqueezeNet: Fire modules (squeeze + expand)
+          * 50× smaller than AlexNet with similar accuracy
+        - EfficientNet: Neural architecture search for efficiency
+          * Compound scaling (depth, width, resolution)
+
+        Serving Optimizations:
+        - Batching: Combine multiple requests, amortize overhead
+          * Trade-off: Latency (wait for batch) vs throughput
+        - Model caching: Cache embeddings for popular items
+        - Approximate nearest neighbors (ANN): FAISS, ScaNN
+          * 100× faster than exact search with 99% recall
+        - GPU optimizations: TensorRT, ONNX Runtime
+        - ONNX (Open Neural Network Exchange):
+          * Framework-agnostic model format
+          * Deploy PyTorch model in TensorFlow Serving
+
+        Inference Frameworks:
+        - TensorFlow Serving: Production-ready, supports batching, model versioning
+        - TorchServe: PyTorch native serving
+        - Triton Inference Server: NVIDIA, multi-framework
+        - Cloud options: AWS SageMaker, GCP AI Platform, Azure ML
+
+        Edge Deployment:
+        - TensorFlow Lite: Mobile and edge devices
+        - Core ML: iOS devices
+        - Edge TPU: Google's edge accelerator
+        - Challenges: Limited memory (<100MB), CPU-only, battery constraints
+        - Solution: Distillation + quantization + pruning (combo can achieve 100× compression)
+      practice_questions:
+        concepts:
+          - question: "Explain how INT8 quantization achieves 4× speedup. What is the accuracy trade-off?"
+            answer: "INT8 vs FP32: 1) Memory: 1 byte vs 4 bytes = 4× reduction. 2) Speed: INT8 ops are 4× faster on modern CPUs/GPUs (SIMD instructions). 3) Bandwidth: 4× less data transfer (major bottleneck). Quantization: w_int8 = round(w_fp32 / scale) where scale = max(|w_fp32|) / 127. Dequantize: w_fp32 ≈ w_int8 * scale. Accuracy: Post-training quantization (PTQ): 1-2% drop. Quantization-aware training (QAT): <0.5% drop. Works because: Neural networks are overparameterized, robust to small perturbations."
+          - question: "Compare pruning vs quantization vs distillation for model compression. When to use each?"
+            answer: "Pruning: Removes weights (sparsity). Pros: Can remove 50-90% weights. Cons: Needs sparse matrix libraries to see speedup (not all hardware supports). Quantization: Reduces precision (FP32→INT8). Pros: 4× smaller, 4× faster on all hardware, minimal accuracy loss. Cons: Limited to 4× compression. Distillation: Train small model. Pros: Can design arbitrary small architecture, maintains accuracy. Cons: Requires retraining, may need unlabeled data. Best practice: Combine all three - distill to small architecture, quantize to INT8, prune if needed. Example: BERT→DistilBERT (distill) →INT8 (quantize) = 16× smaller."
+          - question: "How does knowledge distillation transfer 'dark knowledge' from teacher to student? Why use temperature scaling?"
+            answer: "Dark knowledge: Soft targets from teacher contain relative probabilities. Example: Teacher outputs [0.7 dog, 0.2 wolf, 0.1 cat] vs hard label [1 dog, 0 others]. Soft targets encode: wolf is more similar to dog than cat. Temperature scaling: p_i = exp(z_i/T)/Σexp(z_j/T). T=1: Normal softmax (sharp). T>1: Softer distribution (spreads probability). Why: At T=1, teacher might output [0.99, 0.005, 0.005] (near one-hot, little info). At T=10, outputs [0.7, 0.2, 0.1] (reveals similarity structure). Student learns these relationships, generalizes better."
+        tradeoffs:
+          - question: "For deploying BERT on mobile (latency <100ms, model <50MB), compare options: DistilBERT, quantization, pruning, or combination."
+            answer: "BERT: 110M params = 440MB FP32, latency ~500ms on mobile CPU. DistilBERT: 66M params = 264MB FP32, latency ~300ms (40% smaller, 40% faster). INT8 quantization: 110M params = 110MB, latency ~125ms (4× smaller, 4× faster). Pruning 50%: 55M params = 220MB FP32, latency ~250ms (needs sparse lib). Best: DistilBERT + INT8: 66M params = 66MB INT8, latency ~75ms. Still too large. Final: DistilBERT + INT8 + 12→6 layers: 33M params = 33MB, latency ~40ms. Meets requirements (< 50MB, <100ms)."
+        estimation:
+          - question: "Calculate memory and latency savings from quantizing ResNet-50 (25M params, 4B FLOPs) from FP32 to INT8."
+            answer: "Memory: FP32: 25M * 4 bytes = 100MB. INT8: 25M * 1 byte = 25MB. Savings: 75MB (4× reduction). Latency: FP32 on CPU (2 GFLOPS): 4B FLOPs / 2G = 2 seconds. INT8 on CPU (8 GOPS INT8): 4B ops / 8G = 0.5 seconds. Savings: 1.5 seconds (4× faster). Accuracy: Post-training quantization typically <1% drop. On GPU: FP32 (125 TFLOPS): 32ms. INT8 (250 TOPS): 16ms. Conclusion: Quantization essential for deployment - 4× smaller and faster with minimal accuracy loss."
+      time_estimate: 75

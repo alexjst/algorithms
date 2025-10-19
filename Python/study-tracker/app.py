@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 import yaml
 import json
 from datetime import datetime, timedelta
@@ -11,6 +11,7 @@ import fcntl
 import time
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -54,12 +55,41 @@ TOPIC_TO_LEETCODE_TAGS = {
 
 # Configuration
 DATA_DIR = "data"
-CURRICULUM_DIR = f"{DATA_DIR}/curriculum"
-PROGRESS_FILE = f"{DATA_DIR}/progress.json"
-REVIEWS_FILE = f"{DATA_DIR}/reviews.json"
-CONFIG_FILE = f"{DATA_DIR}/config.json"
-TIMER_FILE = f"{DATA_DIR}/timer_state.json"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Track groups configuration
+TRACK_GROUPS = {
+    'general_swe': {
+        'name': 'Software Engineering',
+        'tracks': ['coding', 'system_design'],
+        'description': 'General software engineering interview prep'
+    },
+    'ml_specialist': {
+        'name': 'ML Engineering',
+        'tracks': ['ml_algorithms', 'ml_system_design', 'recommendations'],
+        'description': 'Machine learning specialist interview prep'
+    }
+}
+
+def get_track_group():
+    """Get current track group from session, default to general_swe"""
+    return session.get('track_group', 'general_swe')
+
+def get_data_paths(track_group=None):
+    """Get file paths for a track group"""
+    if track_group is None:
+        track_group = get_track_group()
+
+    base_path = f"{DATA_DIR}/{track_group}"
+    return {
+        'curriculum_dir': f"{base_path}/curriculum",
+        'progress_file': f"{base_path}/progress.json",
+        'reviews_file': f"{base_path}/reviews.json",
+        'config_file': f"{base_path}/config.json",
+    }
+
+# Timer file (shared across track groups, stored in DATA_DIR)
+TIMER_FILE = f"{DATA_DIR}/timer_state.json"
 
 # Git sync configuration
 GIT_SYNC_ENABLED = True  # Set to False to disable auto-sync
@@ -400,30 +430,44 @@ def git_push(message=None):
         logger.error(f"Git push error: {e}")
         return False
 
-def load_config():
+def load_config(track_group=None):
     """Load configuration from config.json"""
+    paths = get_data_paths(track_group)
     try:
-        with open(CONFIG_FILE, 'r') as f:
+        with open(paths['config_file'], 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        # Default configuration
-        default_config = {
-            "study_plan": {
-                "coding": {"start_date": datetime.now().strftime('%Y-%m-%d'), "active": True},
-                "system_design": {"start_date": datetime.now().strftime('%Y-%m-%d'), "active": True}
-            },
-            "settings": {"review_intervals": [1, 3, 7, 14], "timezone": "UTC"}
-        }
-        save_json_data(CONFIG_FILE, default_config)
+        # Default configuration based on track group
+        if track_group == 'ml_specialist' or (track_group is None and get_track_group() == 'ml_specialist'):
+            default_config = {
+                "study_plan": {
+                    "ml_algorithms": {"start_date": datetime.now().strftime('%Y-%m-%d'), "active": True, "acceleration_days": 0},
+                    "ml_system_design": {"start_date": datetime.now().strftime('%Y-%m-%d'), "active": True, "acceleration_days": 0},
+                    "recommendations": {"start_date": datetime.now().strftime('%Y-%m-%d'), "active": True, "acceleration_days": 0}
+                },
+                "settings": {"review_intervals": [1, 3, 7, 14], "timezone": "UTC"}
+            }
+        else:
+            default_config = {
+                "study_plan": {
+                    "coding": {"start_date": datetime.now().strftime('%Y-%m-%d'), "active": True, "acceleration_days": 0},
+                    "system_design": {"start_date": datetime.now().strftime('%Y-%m-%d'), "active": True, "acceleration_days": 0}
+                },
+                "settings": {"review_intervals": [1, 3, 7, 14], "timezone": "UTC"}
+            }
+        save_json_data(paths['config_file'], default_config)
         return default_config
 
-# Load configuration
-config = load_config()
-REVIEW_INTERVALS = config['settings']['review_intervals']
+# Load configuration for default track group (general_swe) at startup
+# Individual routes will call load_config(track_group) as needed
+default_config = load_config('general_swe')
+REVIEW_INTERVALS = default_config['settings']['review_intervals']
 
-def load_curriculum(track):
+def load_curriculum(track, track_group=None):
     """Load curriculum from YAML file"""
-    with open(f"{CURRICULUM_DIR}/{track}.yaml", 'r') as f:
+    paths = get_data_paths(track_group)
+    curriculum_dir = paths['curriculum_dir']
+    with open(f"{curriculum_dir}/{track}.yaml", 'r') as f:
         return yaml.safe_load(f)
 
 def load_json_data(filename):
@@ -461,9 +505,9 @@ def get_day_number(track):
     days_elapsed = (today - start_date).days + 1 + acceleration_days
     return max(1, min(28, days_elapsed))
 
-def get_topic_for_day(track, day):
+def get_topic_for_day(track, day, track_group=None):
     """Get the topic scheduled for a specific day"""
-    curriculum = load_curriculum(track)
+    curriculum = load_curriculum(track, track_group)
 
     for week_name, days in curriculum['weeks'].items():
         for day_info in days:
@@ -471,9 +515,10 @@ def get_topic_for_day(track, day):
                 return day_info
     return None
 
-def get_due_reviews(date_str):
+def get_due_reviews(date_str, track_group=None):
     """Get all reviews due on a specific date"""
-    reviews_data = load_json_data(REVIEWS_FILE)
+    paths = get_data_paths(track_group)
+    reviews_data = load_json_data(paths['reviews_file'])
     seen_reviews = {}  # Track best review per (topic, track)
 
     for review in reviews_data.get('scheduled_reviews', []):
@@ -703,7 +748,8 @@ def calculate_system_design_rating(session_data, benchmarks):
 
 def schedule_reviews(topic, track, completed_date):
     """Schedule spaced repetition reviews for a completed topic"""
-    reviews_data = load_json_data(REVIEWS_FILE)
+    paths = get_data_paths()
+    reviews_data = load_json_data(paths['reviews_file'])
     if 'scheduled_reviews' not in reviews_data:
         reviews_data['scheduled_reviews'] = []
 
@@ -734,7 +780,7 @@ def schedule_reviews(topic, track, completed_date):
             }
             reviews_data['scheduled_reviews'].append(review)
 
-    save_json_data(REVIEWS_FILE, reviews_data)
+    save_json_data(paths['reviews_file'], reviews_data)
 
 def load_timer_state():
     """Load timer state from JSON file"""
@@ -802,36 +848,49 @@ def dashboard():
     """Main dashboard showing today's agenda"""
     today = datetime.now().date().strftime('%Y-%m-%d')
 
-    # Get current day for each track (they can have different start dates)
-    coding_day = get_day_number('coding')
-    system_design_day = get_day_number('system_design')
+    # Get current track group and its configuration
+    track_group = get_track_group()
+    tracks = TRACK_GROUPS[track_group]['tracks']
 
-    # Get today's new learning
-    coding_topic = get_topic_for_day('coding', coding_day)
-    system_design_topic = get_topic_for_day('system_design', system_design_day)
+    # Get track group specific data paths
+    paths = get_data_paths(track_group)
+    progress_data = load_json_data(paths['progress_file'])
 
-    # Check if topics are already completed today
-    progress_data = load_json_data(PROGRESS_FILE)
-    coding_topic_completed = False
-    system_design_topic_completed = False
-    coding_completion_data = None
-    system_design_completion_data = None
+    # Build track data dynamically for all tracks in the group
+    track_data = {}
+    max_day = 1
 
-    for completion in progress_data.get('completions', []):
-        if completion['date'] == today:
-            if completion['track'] == 'coding' and coding_topic and completion['topic'] == coding_topic['topic']:
-                coding_topic_completed = True
-                coding_completion_data = completion
-            elif completion['track'] == 'system_design' and system_design_topic and completion['topic'] == system_design_topic['topic']:
-                system_design_topic_completed = True
-                system_design_completion_data = completion
+    for track in tracks:
+        day_number = get_day_number(track)
+        max_day = max(max_day, day_number)
+        topic = get_topic_for_day(track, day_number, track_group)
 
-    # Get due reviews and enhance with problems and benchmarks
-    due_reviews = get_due_reviews(today)
+        # Check if topic is already completed today
+        topic_completed = False
+        completion_data = None
 
-    # Enhance each review with practice problems and time benchmarks
+        for completion in progress_data.get('completions', []):
+            if completion['date'] == today and completion['track'] == track:
+                if topic and completion['topic'] == topic['topic']:
+                    topic_completed = True
+                    completion_data = completion
+                    break
+
+        track_data[track] = {
+            'day': day_number,
+            'topic': topic,
+            'completed': topic_completed,
+            'completion_data': completion_data
+        }
+
+    # Get due reviews for this track group and enhance with problems/questions
+    due_reviews = get_due_reviews(today, track_group)
+
     for review in due_reviews:
-        if review['track'] == 'coding':
+        # Determine if this is a coding-type or system-design-type track
+        is_coding_type = review['track'] in ['coding', 'ml_algorithms']
+
+        if is_coding_type:
             # Coding reviews: use LeetCode problems
             problems = get_topic_problems(review['topic'], review['track'])
             review['problems'] = problems
@@ -840,9 +899,8 @@ def dashboard():
                 review['benchmarks'] = get_time_benchmarks(problems)
             else:
                 review['benchmarks'] = None
-        elif review['track'] == 'system_design':
+        else:
             # System design reviews: use practice questions
-            # Use topic + review_type + due_date as seed for consistent question selection
             seed = hash(f"{review['topic']}_{review['review_type']}_{review['due_date']}")
             practice_questions = select_review_questions(review['topic'], review['track'], review['review_type'], seed=seed)
             review['practice_questions'] = practice_questions
@@ -851,30 +909,24 @@ def dashboard():
                 review['benchmarks'] = get_system_design_benchmarks(practice_questions, review['review_type'])
             else:
                 review['benchmarks'] = None
-        else:
-            review['problems'] = None
-            review['practice_questions'] = None
-            review['benchmarks'] = None
 
     # Calculate total time estimate
     total_time = 0
-    if coding_topic and not coding_topic_completed:
-        total_time += coding_topic.get('time_estimate', 45)
-    if system_design_topic and not system_design_topic_completed:
-        total_time += system_design_topic.get('time_estimate', 45)
+    for track in tracks:
+        data = track_data[track]
+        if data['topic'] and not data['completed']:
+            total_time += data['topic'].get('time_estimate', 45)
 
     # Add review time (estimated 10 min per review)
     total_time += len(due_reviews) * 10
 
     return render_template('dashboard.html',
                          today=today,
-                         current_day=max(coding_day, system_design_day),
-                         coding_topic=coding_topic,
-                         system_design_topic=system_design_topic,
-                         coding_topic_completed=coding_topic_completed,
-                         system_design_topic_completed=system_design_topic_completed,
-                         coding_completion_data=coding_completion_data,
-                         system_design_completion_data=system_design_completion_data,
+                         current_day=max_day,
+                         track_group=track_group,
+                         track_group_name=TRACK_GROUPS[track_group]['name'],
+                         tracks=tracks,
+                         track_data=track_data,
                          due_reviews=due_reviews,
                          total_time=total_time,
                          active_page='dashboard')
@@ -886,40 +938,58 @@ def day_view(day_number):
     if day_number < 1 or day_number > 28:
         return redirect(url_for('dashboard'))
 
-    # Get topics for this specific day
-    coding_topic = get_topic_for_day('coding', day_number)
-    system_design_topic = get_topic_for_day('system_design', day_number)
+    # Get current track group and its configuration
+    track_group = get_track_group()
+    tracks = TRACK_GROUPS[track_group]['tracks']
 
-    # Check if topics are completed (on ANY date, not just that day)
-    progress_data = load_json_data(PROGRESS_FILE)
-    coding_topic_completed = False
-    system_design_topic_completed = False
-    coding_completion_data = None
-    system_design_completion_data = None
+    # Get track group specific data paths
+    paths = get_data_paths(track_group)
+    progress_data = load_json_data(paths['progress_file'])
+    config = load_config(track_group)
 
-    for completion in progress_data.get('completions', []):
-        if completion['track'] == 'coding' and coding_topic and completion['topic'] == coding_topic['topic']:
-            coding_topic_completed = True
-            coding_completion_data = completion
-        elif completion['track'] == 'system_design' and system_design_topic and completion['topic'] == system_design_topic['topic']:
-            system_design_topic_completed = True
-            system_design_completion_data = completion
+    # Build track data dynamically for all tracks in the group
+    track_data = {}
+    earliest_start = None
 
-    # Calculate the calendar date for this day based on start dates
-    config = load_config()
-    coding_start = datetime.strptime(config['study_plan']['coding']['start_date'], '%Y-%m-%d').date()
-    system_design_start = datetime.strptime(config['study_plan']['system_design']['start_date'], '%Y-%m-%d').date()
+    for track in tracks:
+        topic = get_topic_for_day(track, day_number, track_group)
 
-    # Use the earlier start date for display
-    earliest_start = min(coding_start, system_design_start)
+        # Check if topic is completed (on ANY date)
+        topic_completed = False
+        completion_data = None
+
+        for completion in progress_data.get('completions', []):
+            if completion['track'] == track and topic and completion['topic'] == topic['topic']:
+                topic_completed = True
+                completion_data = completion
+                break
+
+        # Track the earliest start date for calendar calculation
+        track_start = datetime.strptime(config['study_plan'][track]['start_date'], '%Y-%m-%d').date()
+        if earliest_start is None or track_start < earliest_start:
+            earliest_start = track_start
+
+        # Get current day number for this track
+        current_day = get_day_number(track)
+
+        track_data[track] = {
+            'topic': topic,
+            'completed': topic_completed,
+            'completion_data': completion_data,
+            'current_day': current_day
+        }
+
+    # Calculate the calendar date for this day
     day_date = (earliest_start + timedelta(days=day_number - 1)).strftime('%Y-%m-%d')
 
     # Get reviews that were due on this day
-    due_reviews = get_due_reviews(day_date)
+    due_reviews = get_due_reviews(day_date, track_group)
 
     # Enhance each review with practice problems and time benchmarks
     for review in due_reviews:
-        if review['track'] == 'coding':
+        is_coding_type = review['track'] in ['coding', 'ml_algorithms']
+
+        if is_coding_type:
             problems = get_topic_problems(review['topic'], review['track'])
             review['problems'] = problems
             review['practice_questions'] = None
@@ -927,8 +997,7 @@ def day_view(day_number):
                 review['benchmarks'] = get_time_benchmarks(problems)
             else:
                 review['benchmarks'] = None
-        elif review['track'] == 'system_design':
-            # Use topic + review_type + due_date as seed for consistent question selection
+        else:
             seed = hash(f"{review['topic']}_{review['review_type']}_{review['due_date']}")
             practice_questions = select_review_questions(review['topic'], review['track'], review['review_type'], seed=seed)
             review['practice_questions'] = practice_questions
@@ -937,37 +1006,35 @@ def day_view(day_number):
                 review['benchmarks'] = get_system_design_benchmarks(practice_questions, review['review_type'])
             else:
                 review['benchmarks'] = None
-        else:
-            review['problems'] = None
-            review['practice_questions'] = None
-            review['benchmarks'] = None
 
     # Calculate total time estimate
     total_time = 0
-    if coding_topic and not coding_topic_completed:
-        total_time += coding_topic.get('time_estimate', 45)
-    if system_design_topic and not system_design_topic_completed:
-        total_time += system_design_topic.get('time_estimate', 45)
+    for track in tracks:
+        data = track_data[track]
+        if data['topic'] and not data['completed']:
+            total_time += data['topic'].get('time_estimate', 45)
     total_time += len(due_reviews) * 10
-
-    # Get current day numbers for both tracks
-    current_coding_day = get_day_number('coding')
-    current_system_design_day = get_day_number('system_design')
 
     return render_template('day_view.html',
                          day_number=day_number,
                          day_date=day_date,
-                         coding_topic=coding_topic,
-                         system_design_topic=system_design_topic,
-                         coding_topic_completed=coding_topic_completed,
-                         system_design_topic_completed=system_design_topic_completed,
-                         coding_completion_data=coding_completion_data,
-                         system_design_completion_data=system_design_completion_data,
+                         track_group=track_group,
+                         track_group_name=TRACK_GROUPS[track_group]['name'],
+                         tracks=tracks,
+                         track_data=track_data,
                          due_reviews=due_reviews,
                          total_time=total_time,
-                         current_coding_day=current_coding_day,
-                         current_system_design_day=current_system_design_day,
                          active_page='day_view')
+
+@app.route('/switch-track-group/<track_group>')
+def switch_track_group(track_group):
+    """Switch between track groups (general_swe or ml_specialist)"""
+    if track_group in TRACK_GROUPS:
+        session['track_group'] = track_group
+        logger.info(f"Switched track group to: {track_group}")
+    else:
+        logger.warning(f"Attempted to switch to invalid track group: {track_group}")
+    return redirect(url_for('dashboard'))
 
 @app.route('/complete', methods=['POST'])
 def mark_complete():
@@ -982,9 +1049,12 @@ def mark_complete():
 
     today = datetime.now().date().strftime('%Y-%m-%d')
 
+    # Get track group specific paths
+    paths = get_data_paths()
+
     if item_type == 'topic':
         # Save completion to progress
-        progress_data = load_json_data(PROGRESS_FILE)
+        progress_data = load_json_data(paths['progress_file'])
         if 'completions' not in progress_data:
             progress_data['completions'] = []
 
@@ -998,7 +1068,7 @@ def mark_complete():
             'timestamp': datetime.now().isoformat()
         }
         progress_data['completions'].append(completion)
-        save_json_data(PROGRESS_FILE, progress_data)
+        save_json_data(paths['progress_file'], progress_data)
 
         # Schedule reviews
         schedule_reviews(topic, track, today)
@@ -1009,7 +1079,7 @@ def mark_complete():
         problem_times = data.get('problem_times', [])  # Individual problem solve times
         suggested_rating = data.get('suggested_rating')  # Auto-calculated rating
 
-        reviews_data = load_json_data(REVIEWS_FILE)
+        reviews_data = load_json_data(paths['reviews_file'])
         for review in reviews_data.get('scheduled_reviews', []):
             if (review['topic'] == topic and
                 review['track'] == track and
@@ -1032,7 +1102,7 @@ def mark_complete():
                 if session_data:
                     review['session_data'] = session_data
                 break
-        save_json_data(REVIEWS_FILE, reviews_data)
+        save_json_data(paths['reviews_file'], reviews_data)
 
     return jsonify({'status': 'success'})
 
@@ -1123,8 +1193,9 @@ def calculate_sd_rating():
 @app.route('/history')
 def history():
     """Show completion history and stats"""
-    progress_data = load_json_data(PROGRESS_FILE)
-    reviews_data = load_json_data(REVIEWS_FILE)
+    paths = get_data_paths()
+    progress_data = load_json_data(paths['progress_file'])
+    reviews_data = load_json_data(paths['reviews_file'])
 
     # Get recent completions
     recent_completions = sorted(
@@ -1232,8 +1303,9 @@ def preview():
 @app.route('/analytics')
 def analytics():
     """Analytics dashboard with visualizations and insights"""
-    progress_data = load_json_data(PROGRESS_FILE)
-    reviews_data = load_json_data(REVIEWS_FILE)
+    paths = get_data_paths()
+    progress_data = load_json_data(paths['progress_file'])
+    reviews_data = load_json_data(paths['reviews_file'])
 
     # Calculate analytics data
     analytics_data = calculate_analytics(progress_data, reviews_data)
@@ -1903,8 +1975,9 @@ def weakest_problem():
     track = data.get('track', 'coding')
 
     # Load progress data to analyze ratings
-    progress_data = load_json_data(PROGRESS_FILE)
-    reviews_data = load_json_data(REVIEWS_FILE)
+    paths = get_data_paths()
+    progress_data = load_json_data(paths['progress_file'])
+    reviews_data = load_json_data(paths['reviews_file'])
 
     # Collect all ratings for topics
     topic_ratings = {}
@@ -2204,7 +2277,8 @@ def get_advancement_info():
 
         # Check if today's topic is completed
         today = datetime.now().date().strftime('%Y-%m-%d')
-        progress_data = load_json_data(PROGRESS_FILE)
+        paths = get_data_paths()
+        progress_data = load_json_data(paths['progress_file'])
         topic_completed = False
 
         if current_topic:
