@@ -805,6 +805,38 @@
       "due_date": "2025-11-02",
       "scheduled_date": "2025-10-19",
       "completed_date": null
+    },
+    {
+      "topic": "Greedy Algorithms",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-20",
+      "scheduled_date": "2025-10-19",
+      "completed_date": null
+    },
+    {
+      "topic": "Greedy Algorithms",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-22",
+      "scheduled_date": "2025-10-19",
+      "completed_date": null
+    },
+    {
+      "topic": "Greedy Algorithms",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-26",
+      "scheduled_date": "2025-10-19",
+      "completed_date": null
+    },
+    {
+      "topic": "Greedy Algorithms",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-11-02",
+      "scheduled_date": "2025-10-19",
+      "completed_date": null
     }
   ]
 }
