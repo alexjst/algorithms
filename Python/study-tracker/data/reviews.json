@@ -709,6 +709,38 @@
       "due_date": "2025-10-28",
       "scheduled_date": "2025-10-14",
       "completed_date": null
+    },
+    {
+      "topic": "Overlapping Intervals",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-19",
+      "scheduled_date": "2025-10-18",
+      "completed_date": null
+    },
+    {
+      "topic": "Overlapping Intervals",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-21",
+      "scheduled_date": "2025-10-18",
+      "completed_date": null
+    },
+    {
+      "topic": "Overlapping Intervals",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-25",
+      "scheduled_date": "2025-10-18",
+      "completed_date": null
+    },
+    {
+      "topic": "Overlapping Intervals",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-11-01",
+      "scheduled_date": "2025-10-18",
+      "completed_date": null
     }
   ]
 }
