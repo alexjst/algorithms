@@ -1,0 +1,1460 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+
+% Define colors
+\definecolor{priority1}{RGB}{255,200,200}
+\definecolor{priority2}{RGB}{255,235,200}
+\definecolor{priority3}{RGB}{200,255,200}
+
+\title{\textbf{ML Algorithm Study Guide} \\ \large Deep Learning \& Classical ML for Staff/Principal Interviews}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This study guide accompanies the \textit{ML Algorithm Templates} cheatsheet. Use this document to:
+\begin{itemize}
+\item Master deep learning architectures (CNNs, RNNs, Transformers, GANs)
+\item Solidify classical ML fundamentals (trees, boosting, SVMs)
+\item Track progress with spaced repetition for ML concepts
+\item Prepare systematically for Staff/Principal ML Engineer interviews at Google/Meta/FAANG
+\end{itemize}
+
+\textbf{Key Difference from SWE Interviews:}
+ML Engineer interviews test both:
+\begin{enumerate}
+\item \textbf{ML Fundamentals} - Algorithm implementations, math intuition, model selection
+\item \textbf{ML System Design} - Production ML infrastructure (covered in separate guide)
+\end{enumerate}
+
+\section{Study Strategy: Depth-First on Deep Learning}
+
+\subsection{Why Deep Learning First?}
+
+In 2025, \textbf{deep learning dominates} Staff/Principal ML interviews:
+\begin{itemize}
+\item \textbf{60\% of questions} involve neural networks, transformers, or deep learning concepts
+\item \textbf{Foundation for everything}: Understanding backprop helps you reason about gradient boosting
+\item \textbf{Differentiation factor}: Classical ML is table stakes; deep learning expertise sets you apart
+\item \textbf{Transfer learning era}: Most production ML uses pretrained models (BERT, ResNet, GPT)
+\end{itemize}
+
+\subsection{The Optimal Study Path}
+
+\textbf{Phase 1: Deep Learning Foundations (Days 1-7)}
+
+Focus on fundamentals that underpin all architectures:
+\begin{enumerate}
+\item \textbf{Neural Network Mechanics} (Days 1-2)
+\begin{itemize}
+\item Forward propagation, backpropagation (write from scratch)
+\item Activation functions (ReLU, Sigmoid, Tanh, Softmax)
+\item Loss functions (MSE, Cross-Entropy, Hinge)
+\item Initialization (Xavier, He), optimization (SGD, Adam)
+\item \textbf{Practice}: Implement 3-layer NN from scratch in NumPy
+\end{itemize}
+
+\item \textbf{Convolutional Networks} (Days 3-4)
+\begin{itemize}
+\item Conv layers, pooling, receptive fields
+\item Classic architectures (LeNet, VGG, ResNet)
+\item Batch normalization, residual connections
+\item \textbf{Practice}: Build CNN for CIFAR-10, understand ResNet blocks
+\end{itemize}
+
+\item \textbf{Recurrent Networks} (Day 5)
+\begin{itemize}
+\item RNN, LSTM, GRU architectures
+\item Vanishing/exploding gradients
+\item Bidirectional RNNs, encoder-decoder
+\item \textbf{Practice}: Implement LSTM for sentiment analysis
+\end{itemize}
+
+\item \textbf{Transformers \& Attention} (Days 6-7)
+\begin{itemize}
+\item Self-attention mechanism (critical!)
+\item Multi-head attention, positional encoding
+\item BERT vs GPT architectures
+\item Vision Transformers (ViT)
+\item \textbf{Practice}: Implement scaled dot-product attention from scratch
+\end{itemize}
+\end{enumerate}
+
+\textbf{Phase 2: Advanced Deep Learning (Days 8-10)}
+
+\begin{enumerate}
+\item \textbf{Generative Models} (Day 8)
+\begin{itemize}
+\item Autoencoders (AE, VAE, DAE)
+\item GANs (generator, discriminator, training dynamics)
+\item Diffusion models (conceptual understanding)
+\item \textbf{Practice}: Implement VAE for MNIST
+\end{itemize}
+
+\item \textbf{Optimization \& Regularization} (Day 9)
+\begin{itemize}
+\item Optimizers (SGD, Momentum, Adam, AdamW)
+\item Regularization (L1/L2, dropout, batch norm, early stopping)
+\item Learning rate schedules (step decay, cosine annealing)
+\item Gradient clipping, weight initialization
+\item \textbf{Practice}: Compare Adam vs SGD+Momentum empirically
+\end{itemize}
+
+\item \textbf{Transfer Learning \& Fine-tuning} (Day 10)
+\begin{itemize}
+\item Pretrained models (BERT, ResNet, GPT)
+\item Feature extraction vs fine-tuning
+\item Domain adaptation techniques
+\item \textbf{Practice}: Fine-tune BERT on custom classification task
+\end{itemize}
+\end{enumerate}
+
+\textbf{Phase 3: Classical ML (Days 11-14)}
+
+Now that you understand deep learning, classical ML is easier:
+
+\begin{enumerate}
+\item \textbf{Tree-Based Methods} (Days 11-12)
+\begin{itemize}
+\item Decision trees (Gini, entropy, information gain)
+\item Random forests (bagging, feature sampling)
+\item Gradient boosting (XGBoost, LightGBM, CatBoost)
+\item \textbf{Key insight}: Boosting = gradient descent in function space
+\item \textbf{Practice}: Kaggle tabular dataset with XGBoost
+\end{itemize}
+
+\item \textbf{Core Classical Algorithms} (Day 13)
+\begin{itemize}
+\item Linear/Logistic regression (closed form, gradient descent)
+\item SVMs (margin, kernel trick)
+\item K-Means, PCA (dimensionality reduction)
+\item Naive Bayes (for text classification)
+\item \textbf{Practice}: Implement logistic regression with L1/L2 regularization
+\end{itemize}
+
+\item \textbf{Evaluation \& Metrics} (Day 14)
+\begin{itemize}
+\item Classification metrics (precision, recall, F1, ROC-AUC)
+\item Regression metrics (MSE, MAE, R²)
+\item Cross-validation strategies
+\item Bias-variance tradeoff
+\item \textbf{Practice}: Debug a model with high bias vs high variance
+\end{itemize}
+\end{enumerate}
+
+\subsection{Spaced Repetition Schedule}
+
+For critical deep learning concepts (Priority 1), use this schedule:
+\begin{itemize}
+\item \textbf{Day 1}: Deep study + implement from scratch (2-3 hours)
+\item \textbf{Day 2}: Review notes + re-implement key parts (1 hour)
+\item \textbf{Day 4}: Quick review + whiteboard explanation (30 min)
+\item \textbf{Day 7}: Explain to someone else or write blog post (30 min)
+\item \textbf{Day 14}: Final review + practice problem (30 min)
+\end{itemize}
+
+This schedule is neurologically optimal for long-term retention.
+
+\section{Common Weak Spots for ML Engineers}
+
+Most candidates struggle with these (prioritize if time-limited):
+
+\subsection{Deep Learning Weak Spots}
+\begin{enumerate}
+\item \textbf{Backpropagation Math}
+\begin{itemize}
+\item Can't derive gradients for custom layers
+\item Confused about chain rule application
+\item \textbf{Fix}: Implement backprop for sigmoid and ReLU from scratch
+\end{itemize}
+
+\item \textbf{Attention Mechanism}
+\begin{itemize}
+\item Don't understand scaled dot-product attention formula
+\item Confused about Q, K, V matrices
+\item \textbf{Fix}: Implement attention step-by-step, visualize attention weights
+\end{itemize}
+
+\item \textbf{Normalization Techniques}
+\begin{itemize}
+\item Confused about Batch Norm vs Layer Norm vs Instance Norm
+\item Don't know when to use each
+\item \textbf{Fix}: Understand why Layer Norm works better for Transformers
+\end{itemize}
+
+\item \textbf{Vanishing/Exploding Gradients}
+\begin{itemize}
+\item Can't explain why RNNs suffer from this
+\item Don't know solutions (LSTM gates, gradient clipping, residual connections)
+\item \textbf{Fix}: Derive gradient flow through 10-layer tanh network
+\end{itemize}
+
+\item \textbf{GAN Training Dynamics}
+\begin{itemize}
+\item Don't understand Nash equilibrium concept
+\item Confused about mode collapse
+\item \textbf{Fix}: Implement simple GAN, observe training instability
+\end{itemize}
+\end{enumerate}
+
+\subsection{Classical ML Weak Spots}
+\begin{enumerate}
+\item \textbf{Bias-Variance Tradeoff}
+\begin{itemize}
+\item Can't diagnose whether model has high bias or high variance
+\item Don't know how to fix each problem
+\item \textbf{Fix}: Practice identifying from learning curves
+\end{itemize}
+
+\item \textbf{Regularization Intuition}
+\begin{itemize}
+\item Don't understand L1 vs L2 differences
+\item Can't explain why L1 induces sparsity
+\item \textbf{Fix}: Visualize L1/L2 penalty contours geometrically
+\end{itemize}
+
+\item \textbf{Kernel Trick in SVM}
+\begin{itemize}
+\item Can't explain how it makes data linearly separable
+\item Don't know when to use RBF vs polynomial kernel
+\item \textbf{Fix}: Work through kernel SVM example on XOR problem
+\end{itemize}
+
+\item \textbf{Tree Pruning}
+\begin{itemize}
+\item Don't know how to prevent overfitting in trees
+\item Confused about pre-pruning vs post-pruning
+\item \textbf{Fix}: Implement decision tree with max\_depth and min\_samples\_split
+\end{itemize}
+\end{enumerate}
+
+\section{Staff/Principal Level Expectations}
+
+\subsection{Beyond Implementation}
+
+At Staff/Principal level, you're expected to:
+
+\begin{enumerate}
+\item \textbf{Justify Architecture Choices}
+\begin{itemize}
+\item "Why CNN over RNN for this problem?"
+\item "When would you use LSTM vs Transformer?"
+\item "Why XGBoost instead of neural network for tabular data?"
+\item \textbf{Prepare}: Know trade-offs for every algorithm (see Quick Reference)
+\end{itemize}
+
+\item \textbf{Quantitative Analysis}
+\begin{itemize}
+\item Calculate model parameters (e.g., BERT has 110M parameters - why?)
+\item Estimate training time and memory requirements
+\item Compare computational complexity (Transformer is O(n²) in sequence length)
+\item \textbf{Practice}: Calculate FLOPs for ResNet-50 forward pass
+\end{itemize}
+
+\item \textbf{Debug ML Systems}
+\begin{itemize}
+\item "Model accuracy dropped from 95\% to 70\% - what's wrong?"
+\item "Training loss decreases but val loss increases - what to do?"
+\item "GAN not converging - how to fix?"
+\item \textbf{Prepare}: Common failure modes checklist (next section)
+\end{itemize}
+
+\item \textbf{Understand Recent Advances}
+\begin{itemize}
+\item Vision Transformers (ViT) vs CNNs
+\item GPT vs BERT (decoder-only vs encoder-only)
+\item Diffusion models vs GANs for generation
+\item \textbf{Prepare}: Read 5-10 key papers (see Reading List)
+\end{itemize}
+\end{enumerate}
+
+\subsection{Common Failure Modes \& Fixes}
+
+\textbf{Training Issues:}
+\begin{itemize}
+\item Loss is NaN → Gradient exploding (use gradient clipping, lower LR)
+\item Loss not decreasing → Learning rate too small, bad initialization, or gradient vanishing
+\item Training loss drops but val loss increases → Overfitting (add dropout, regularization, early stopping)
+\item Training very slow → Bottleneck in data loading, use smaller batches, gradient accumulation
+\end{itemize}
+
+\textbf{Model Performance Issues:}
+\begin{itemize}
+\item High bias (underfitting) → Use larger model, more features, less regularization
+\item High variance (overfitting) → More data, regularization, simpler model, data augmentation
+\item Poor generalization → Data leakage, distribution shift, need domain adaptation
+\item Class imbalance → Weighted loss, oversampling minority class, focal loss
+\end{itemize}
+
+\textbf{Deep Learning Specific:}
+\begin{itemize}
+\item RNN not learning long-term dependencies → Use LSTM/GRU or Transformer
+\item CNN not working on small dataset → Use transfer learning (pretrained ResNet)
+\item Transformer running out of memory → Reduce sequence length, use gradient checkpointing
+\item GAN mode collapse → Use different loss (WGAN), add noise, batch diversity
+\end{itemize}
+
+\newpage
+
+\section{Progress Tracking Table}
+
+Use this table to track your study progress. Fill in dates and check boxes as you complete each phase.
+
+\textbf{Priority Legend:}
+\begin{itemize}
+\item \colorbox{priority1}{\textbf{Priority 1 (🔴 P1)}}: Critical - Master with spaced repetition
+\item \colorbox{priority2}{\textbf{Priority 2 (🟡 P2)}}: Important - Solid understanding needed
+\item \colorbox{priority3}{\textbf{Priority 3 (🟢 P3)}}: Good to know - Quick review sufficient
+\end{itemize}
+
+\textbf{Note:} On B\&W printers, priorities show as: P1 (darkest gray), P2 (medium gray), P3 (lightest gray)
+
+\begin{center}
+\small
+\begin{longtable}{|p{3.5cm}|c|c|c|c|c|c|p{3cm}|}
+\hline
+\textbf{Algorithm/Concept} & \textbf{Pri} & \textbf{D1} & \textbf{D2} & \textbf{D4} & \textbf{D7} & \textbf{D14} & \textbf{Practice Notes} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Algorithm/Concept} & \textbf{Pri} & \textbf{D1} & \textbf{D2} & \textbf{D4} & \textbf{D7} & \textbf{D14} & \textbf{Practice Notes} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+% DEEP LEARNING FUNDAMENTALS
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{DEEP LEARNING FUNDAMENTALS}} \\
+\hline
+
+Neural Network (MLP) & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Backpropagation & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Activation Functions & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Loss Functions & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+% CONVOLUTIONAL NETWORKS
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{CONVOLUTIONAL NEURAL NETWORKS}} \\
+\hline
+
+CNN Basics & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Conv/Pooling Layers & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+ResNet (Skip Connections) & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Batch Normalization & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+% RECURRENT NETWORKS
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{RECURRENT NEURAL NETWORKS}} \\
+\hline
+
+RNN Basics & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+LSTM Architecture & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+GRU Architecture & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Bidirectional RNN & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Seq2Seq + Attention & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+% TRANSFORMERS
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{TRANSFORMERS \& ATTENTION}} \\
+\hline
+
+Self-Attention Mechanism & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Multi-Head Attention & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Positional Encoding & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Transformer Encoder & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+BERT Architecture & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+GPT Architecture & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Vision Transformer (ViT) & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+% GENERATIVE MODELS
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{GENERATIVE MODELS}} \\
+\hline
+
+Autoencoder & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+VAE (Variational AE) & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+GAN (Generator/Discriminator) & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Conditional GAN & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Diffusion Models (Conceptual) & P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+% OPTIMIZATION
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{OPTIMIZATION \& TRAINING}} \\
+\hline
+
+SGD + Momentum & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Adam Optimizer & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Learning Rate Schedules & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Gradient Clipping & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+% REGULARIZATION
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{REGULARIZATION}} \\
+\hline
+
+L1/L2 Regularization & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Dropout & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Batch/Layer Normalization & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Early Stopping & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Data Augmentation & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+% CLASSICAL ML
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{CLASSICAL MACHINE LEARNING}} \\
+\hline
+
+Linear Regression & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Logistic Regression & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Decision Trees & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Random Forest & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+XGBoost/LightGBM & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+SVM (Support Vector Machine) & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+K-Nearest Neighbors & P3 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Naive Bayes & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+K-Means Clustering & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+PCA (Dimensionality Reduction) & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+% EVALUATION
+\multicolumn{8}{|c|}{\cellcolor{gray!30}\textbf{EVALUATION \& METRICS}} \\
+\hline
+
+Precision/Recall/F1 & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+ROC-AUC & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Confusion Matrix & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+MSE/MAE/R² (Regression) & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Cross-Validation & P2 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+Bias-Variance Tradeoff & P1 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \\
+\hline
+
+\end{longtable}
+\end{center}
+
+\newpage
+
+\section{Algorithm Selection Quick Reference}
+
+\subsection{When to Use Each Algorithm}
+
+\textbf{Deep Learning:}
+\begin{itemize}
+\item \textbf{CNN}: Images, spatial data, computer vision tasks
+\item \textbf{RNN/LSTM}: Sequential data, time series, short text (< 512 tokens)
+\item \textbf{Transformer}: NLP, long sequences, any task where attention matters
+\item \textbf{VAE}: Generate similar samples, anomaly detection, compression
+\item \textbf{GAN}: Generate realistic images, data augmentation, style transfer
+\item \textbf{ResNet}: Image classification (transfer learning baseline)
+\item \textbf{BERT}: Text classification, NER, question answering (encoder tasks)
+\item \textbf{GPT}: Text generation, completion, few-shot learning (decoder tasks)
+\end{itemize}
+
+\textbf{Classical ML:}
+\begin{itemize}
+\item \textbf{XGBoost/LightGBM}: Tabular data, structured data, Kaggle competitions
+\item \textbf{Random Forest}: Baseline for tabular data, feature importance, robust to outliers
+\item \textbf{Logistic Regression}: Baseline classification, need interpretability
+\item \textbf{Linear Regression}: Continuous prediction, feature relationships
+\item \textbf{SVM}: Small/medium datasets, high-dimensional data, clear margin
+\item \textbf{Naive Bayes}: Text classification, spam detection, fast training
+\item \textbf{K-Means}: Customer segmentation, data exploration, clustering
+\item \textbf{PCA}: Dimensionality reduction, visualization, noise reduction
+\end{itemize}
+
+\subsection{Dataset Size Guidelines}
+
+\begin{itemize}
+\item \textbf{< 1K samples}: Classical ML (Random Forest, SVM) or transfer learning
+\item \textbf{1K - 10K}: Classical ML or small neural networks with regularization
+\item \textbf{10K - 100K}: Neural networks or gradient boosting
+\item \textbf{100K - 1M}: Deep learning with data augmentation
+\item \textbf{> 1M}: Deep learning, large models, distributed training
+\end{itemize}
+
+\subsection{Trade-off Cheatsheet}
+
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Algorithm} & \textbf{Pros} & \textbf{Cons} & \textbf{When to Use} \\
+\hline
+CNN & Great for images, translation invariant & Needs lots of data & Computer vision \\
+\hline
+LSTM & Handles sequences, memory & Slow, vanishing gradient & Short sequences \\
+\hline
+Transformer & Parallel, long-range deps & O(n²) memory & NLP, long sequences \\
+\hline
+XGBoost & Fast, tabular SOTA & No spatial/sequential & Tabular data \\
+\hline
+Random Forest & Robust, no tuning needed & Less accurate than XGBoost & Quick baseline \\
+\hline
+SVM & Works in high-dim & Slow on large data & Small datasets \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{Essential Math Review}
+
+\subsection{Calculus (for Backpropagation)}
+
+\textbf{Chain Rule:} $\frac{\partial L}{\partial w} = \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial w}$
+
+\textbf{Common Derivatives:}
+\begin{itemize}
+\item $\frac{d}{dx} \sigma(x) = \sigma(x)(1 - \sigma(x))$ \quad (Sigmoid)
+\item $\frac{d}{dx} \text{ReLU}(x) = \begin{cases} 1 & x > 0 \\ 0 & x \leq 0 \end{cases}$
+\item $\frac{d}{dx} \tanh(x) = 1 - \tanh^2(x)$
+\item $\frac{d}{dx} (Ax + b) = A$ \quad (Linear layer)
+\end{itemize}
+
+\subsection{Linear Algebra (for Neural Networks)}
+
+\textbf{Matrix Multiplication:}
+\begin{itemize}
+\item $(m \times n) \cdot (n \times p) = (m \times p)$
+\item Not commutative: $AB \neq BA$
+\item Associative: $(AB)C = A(BC)$
+\end{itemize}
+
+\textbf{Dot Product Attention:}
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+
+\subsection{Probability (for VAE, Naive Bayes)}
+
+\textbf{Bayes' Theorem:} $P(A|B) = \frac{P(B|A)P(A)}{P(B)}$
+
+\textbf{KL Divergence (VAE loss):}
+$$D_{KL}(P||Q) = \sum_i P(i) \log \frac{P(i)}{Q(i)}$$
+
+\section{Recommended Reading List}
+
+\subsection{Must-Read Papers (Priority Order)}
+
+\begin{enumerate}
+\item \textbf{Attention is All You Need} (Vaswani et al., 2017) - Transformer architecture
+\item \textbf{BERT: Pre-training of Deep Bidirectional Transformers} (Devlin et al., 2019)
+\item \textbf{Deep Residual Learning for Image Recognition} (He et al., 2015) - ResNet
+\item \textbf{Adam: A Method for Stochastic Optimization} (Kingma \& Ba, 2014)
+\item \textbf{Batch Normalization} (Ioffe \& Szegedy, 2015)
+\item \textbf{Auto-Encoding Variational Bayes} (Kingma \& Welling, 2013) - VAE
+\item \textbf{Generative Adversarial Networks} (Goodfellow et al., 2014) - GAN
+\item \textbf{An Image is Worth 16x16 Words} (Dosovitskiy et al., 2020) - Vision Transformer
+\item \textbf{XGBoost: A Scalable Tree Boosting System} (Chen \& Guestrin, 2016)
+\item \textbf{Dropout: A Simple Way to Prevent Neural Networks from Overfitting} (Srivastava et al., 2014)
+\end{enumerate}
+
+\subsection{Online Resources}
+
+\begin{itemize}
+\item \textbf{Stanford CS231n} (CNNs for Visual Recognition) - Free lecture videos
+\item \textbf{Stanford CS224n} (NLP with Deep Learning) - Covers Transformers well
+\item \textbf{Fast.ai Courses} - Practical deep learning
+\item \textbf{The Illustrated Transformer} (Jay Alammar's blog) - Best visual explanation
+\item \textbf{Distill.pub} - Interactive ML explanations
+\end{itemize}
+
+\section{Mock Interview Practice}
+
+\subsection{Sample ML Algorithm Questions}
+
+\textbf{Implementation Questions (60 min):}
+\begin{enumerate}
+\item Implement backpropagation for a 3-layer neural network from scratch
+\item Implement multi-head attention mechanism in NumPy
+\item Build a decision tree classifier with Gini impurity
+\item Implement Adam optimizer from scratch
+\item Code a VAE for MNIST digit generation
+\end{enumerate}
+
+\textbf{Conceptual Questions (30-45 min):}
+\begin{enumerate}
+\item Explain how LSTM solves the vanishing gradient problem
+\item Why does Batch Norm help training? What are alternatives?
+\item Compare BERT and GPT architectures - when to use each?
+\item Explain the reparameterization trick in VAE
+\item How does gradient boosting differ from random forest?
+\item Why is Transformer O(n²) in sequence length? How to reduce?
+\end{enumerate}
+
+\textbf{Debugging Questions (30 min):}
+\begin{enumerate}
+\item Training loss stuck at 0.69 for binary classification - what's wrong?
+\item Model works on training set but fails on validation - diagnose and fix
+\item GAN generator producing garbage - how to debug?
+\item RNN not learning dependencies beyond 10 timesteps - why?
+\end{enumerate}
+
+\subsection{Study Group Tips}
+
+If practicing with others:
+\begin{itemize}
+\item \textbf{Whiteboard sessions}: Explain algorithms without looking at notes
+\item \textbf{Code reviews}: Review each other's implementations
+\item \textbf{Paper reading}: Discuss one paper per week from reading list
+\item \textbf{Mock interviews}: Take turns being interviewer/candidate (45 min each)
+\end{itemize}
+
+\section{Staff/Principal Level: Beyond Prediction}
+
+At Staff/Principal level, interviewers expect you to go beyond "what model gives best accuracy" to "what is the causal effect of our intervention" and "how do we learn and adapt online."
+
+\subsection{Causal Inference \& Uplift Modeling}
+
+\textbf{The Critical Distinction: Correlation vs Causation}
+
+\textbf{Prediction (Correlation):}
+\begin{itemize}
+\item \textbf{Question}: Who will click on this ad?
+\item \textbf{Math}: $P(Y = 1 | X)$ where $X$ is user features
+\item \textbf{Example}: High-income users are more likely to buy luxury products
+\item \textbf{Problem}: They might buy anyway, even without seeing the ad!
+\end{itemize}
+
+\textbf{Causal Inference (Causation):}
+\begin{itemize}
+\item \textbf{Question}: Who will click \textit{because} they saw this ad?
+\item \textbf{Math}: $P(Y = 1 | do(X = 1)) - P(Y = 1 | do(X = 0))$
+\item \textbf{Example}: Which users are \textit{persuadable} by the ad?
+\item \textbf{Goal}: Maximize incremental impact, not just raw conversions
+\end{itemize}
+
+\textbf{Why This Matters:}
+
+\textbf{Scenario}: Ad targeting for e-commerce
+\begin{itemize}
+\item \textbf{Prediction model says}: Show ads to high-income users (they have 10\% conversion rate)
+\item \textbf{Problem}: High-income users have 9\% baseline conversion (without ads)
+\item \textbf{Incremental lift}: Only 1\% due to ads
+\item \textbf{Causal model says}: Show ads to mid-income users (5\% with ads, 1\% without = 4\% lift!)
+\item \textbf{Result}: 4× better ROI by targeting persuadable users
+\end{itemize}
+
+\textbf{Uplift Modeling Approaches:}
+
+\textbf{1. Two-Model Approach (T-Learner)}
+
+Train two separate models:
+\begin{lstlisting}[language=Python]
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+
+class UpliftTwoModel:
+    """Two-model approach for uplift modeling"""
+    def __init__(self):
+        self.model_treatment = RandomForestClassifier(n_estimators=100)
+        self.model_control = RandomForestClassifier(n_estimators=100)
+
+    def fit(self, X, y, treatment):
+        """
+        X: Features (n_samples, n_features)
+        y: Outcome (1 = conversion, 0 = no conversion)
+        treatment: Treatment indicator (1 = saw ad, 0 = no ad)
+        """
+        # Split data by treatment
+        X_treatment = X[treatment == 1]
+        y_treatment = y[treatment == 1]
+
+        X_control = X[treatment == 0]
+        y_control = y[treatment == 0]
+
+        # Train separate models
+        self.model_treatment.fit(X_treatment, y_treatment)
+        self.model_control.fit(X_control, y_control)
+
+    def predict_uplift(self, X):
+        """
+        Predict uplift: E[Y | T=1, X] - E[Y | T=0, X]
+        """
+        # Predict conversion probability in each scenario
+        p_treatment = self.model_treatment.predict_proba(X)[:, 1]
+        p_control = self.model_control.predict_proba(X)[:, 1]
+
+        # Uplift = difference
+        uplift = p_treatment - p_control
+
+        return uplift
+
+# Usage
+X_train = features  # User features
+y_train = conversions  # Did they convert?
+treatment = ad_shown  # Did they see the ad?
+
+model = UpliftTwoModel()
+model.fit(X_train, y_train, treatment)
+
+# Predict uplift for new users
+X_new = new_user_features
+uplift_scores = model.predict_uplift(X_new)
+
+# Target users with highest uplift
+high_uplift_users = X_new[uplift_scores > 0.05]  # > 5% incremental lift
+\end{lstlisting}
+
+\textbf{2. Single-Model Approach (S-Learner)}
+
+Train one model with treatment as a feature:
+\begin{lstlisting}[language=Python]
+class UpliftSingleModel:
+    """Single-model approach with treatment as feature"""
+    def __init__(self):
+        self.model = RandomForestClassifier(n_estimators=100)
+
+    def fit(self, X, y, treatment):
+        # Add treatment as a feature
+        X_with_treatment = np.column_stack([X, treatment])
+        self.model.fit(X_with_treatment, y)
+
+    def predict_uplift(self, X):
+        # Predict with treatment = 1
+        X_treatment = np.column_stack([X, np.ones(len(X))])
+        p_treatment = self.model.predict_proba(X_treatment)[:, 1]
+
+        # Predict with treatment = 0
+        X_control = np.column_stack([X, np.zeros(len(X))])
+        p_control = self.model.predict_proba(X_control)[:, 1]
+
+        # Uplift
+        uplift = p_treatment - p_control
+        return uplift
+\end{lstlisting}
+
+\textbf{3. Class Transformation Approach (Pessimistic Uplift)}
+
+Reframe as 4-class problem:
+\begin{itemize}
+\item \textbf{Persuadables}: $Y=0$ in control, $Y=1$ in treatment (want to target these!)
+\item \textbf{Sure Things}: $Y=1$ in both (waste of budget)
+\item \textbf{Lost Causes}: $Y=0$ in both (waste of budget)
+\item \textbf{Sleeping Dogs}: $Y=1$ in control, $Y=0$ in treatment (avoid these!)
+\end{itemize}
+
+\textbf{Evaluation Metrics for Uplift:}
+
+\textbf{Uplift Curve:}
+\begin{lstlisting}[language=Python]
+def uplift_curve(uplift_scores, y, treatment, num_bins=10):
+    """
+    Plot cumulative uplift vs % population targeted
+    """
+    import matplotlib.pyplot as plt
+
+    # Sort by uplift score (descending)
+    sorted_indices = np.argsort(uplift_scores)[::-1]
+    y_sorted = y[sorted_indices]
+    treatment_sorted = treatment[sorted_indices]
+
+    # Calculate cumulative uplift
+    cumulative_uplift = []
+    percentiles = np.linspace(0, 1, num_bins)
+
+    for p in percentiles:
+        n = int(p * len(y_sorted))
+        if n == 0:
+            cumulative_uplift.append(0)
+            continue
+
+        # Uplift = (conversion_rate_treatment - conversion_rate_control)
+        treated_mask = treatment_sorted[:n] == 1
+        control_mask = treatment_sorted[:n] == 0
+
+        if treated_mask.sum() == 0 or control_mask.sum() == 0:
+            cumulative_uplift.append(0)
+            continue
+
+        cr_treatment = y_sorted[:n][treated_mask].mean()
+        cr_control = y_sorted[:n][control_mask].mean()
+
+        uplift = cr_treatment - cr_control
+        cumulative_uplift.append(uplift)
+
+    # Plot
+    plt.plot(percentiles * 100, cumulative_uplift)
+    plt.xlabel('% Population Targeted')
+    plt.ylabel('Cumulative Uplift')
+    plt.title('Uplift Curve')
+    plt.grid(True)
+    plt.show()
+
+    return cumulative_uplift
+\end{lstlisting}
+
+\textbf{Qini Coefficient:}
+\begin{itemize}
+\item Analogous to AUC for uplift
+\item Area between uplift curve and random targeting
+\item Higher = better uplift model
+\end{itemize}
+
+\textbf{Interview Discussion Points:}
+\begin{itemize}
+\item \textbf{When to use uplift}: Ad targeting, promotional campaigns, content recommendations
+\item \textbf{Trade-offs}: Requires randomized experiment data (treatment + control groups)
+\item \textbf{A/B test design}: Need to log who was shown treatment vs control
+\item \textbf{Business impact}: "We increased ROI by 40\% by targeting persuadable users instead of high-propensity users"
+\end{itemize}
+
+\subsection{Advanced Exploration: Bandits \& Reinforcement Learning}
+
+\textbf{Problem with Static A/B Testing:}
+\begin{itemize}
+\item \textbf{Slow}: Wait 2-4 weeks for statistical significance
+\item \textbf{Wasteful}: Send 50\% traffic to inferior variant
+\item \textbf{Rigid}: Can't adapt to changing user preferences
+\end{itemize}
+
+\textbf{Solution: Online Learning with Multi-Armed Bandits}
+
+\textbf{The Explore-Exploit Dilemma:}
+\begin{itemize}
+\item \textbf{Exploit}: Show the item you think is best (maximize short-term reward)
+\item \textbf{Explore}: Try new items to learn (maximize long-term reward)
+\item \textbf{Goal}: Minimize regret (cumulative difference from optimal choice)
+\end{itemize}
+
+\textbf{1. Epsilon-Greedy}
+
+\textbf{Algorithm:}
+\begin{lstlisting}[language=Python]
+class EpsilonGreedy:
+    """Simplest bandit algorithm"""
+    def __init__(self, n_arms, epsilon=0.1):
+        self.n_arms = n_arms
+        self.epsilon = epsilon
+
+        # Track statistics
+        self.counts = np.zeros(n_arms)  # Times each arm was pulled
+        self.values = np.zeros(n_arms)  # Average reward for each arm
+
+    def select_arm(self):
+        """Select arm to pull"""
+        if np.random.random() < self.epsilon:
+            # Explore: random arm
+            return np.random.randint(self.n_arms)
+        else:
+            # Exploit: best arm so far
+            return np.argmax(self.values)
+
+    def update(self, arm, reward):
+        """Update statistics after observing reward"""
+        self.counts[arm] += 1
+
+        # Incremental average update
+        n = self.counts[arm]
+        old_value = self.values[arm]
+        self.values[arm] = old_value + (reward - old_value) / n
+
+# Example: Recommend one of 5 articles
+bandit = EpsilonGreedy(n_arms=5, epsilon=0.1)
+
+for user in users:
+    # Select article
+    article = bandit.select_arm()
+
+    # Show article, observe click (1) or no click (0)
+    reward = show_article_and_get_feedback(user, article)
+
+    # Update model
+    bandit.update(article, reward)
+\end{lstlisting}
+
+\textbf{Pros}: Simple, easy to implement \\
+\textbf{Cons}: Fixed exploration rate (doesn't reduce over time)
+
+\textbf{2. Upper Confidence Bound (UCB)}
+
+\textbf{Idea}: Be optimistic about uncertain arms
+
+\textbf{Formula:}
+$$\text{UCB}_i = \bar{x}_i + \sqrt{\frac{2 \log t}{n_i}}$$
+
+where:
+\begin{itemize}
+\item $\bar{x}_i$ = average reward for arm $i$
+\item $t$ = total number of pulls
+\item $n_i$ = number of pulls for arm $i$
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+class UCB:
+    """Upper Confidence Bound algorithm"""
+    def __init__(self, n_arms):
+        self.n_arms = n_arms
+        self.counts = np.zeros(n_arms)
+        self.values = np.zeros(n_arms)
+        self.total_pulls = 0
+
+    def select_arm(self):
+        # Initialize: pull each arm once
+        for arm in range(self.n_arms):
+            if self.counts[arm] == 0:
+                return arm
+
+        # UCB score for each arm
+        ucb_scores = []
+        for arm in range(self.n_arms):
+            avg_reward = self.values[arm]
+            exploration_bonus = np.sqrt(2 * np.log(self.total_pulls) / self.counts[arm])
+            ucb = avg_reward + exploration_bonus
+            ucb_scores.append(ucb)
+
+        # Select arm with highest UCB
+        return np.argmax(ucb_scores)
+
+    def update(self, arm, reward):
+        self.counts[arm] += 1
+        self.total_pulls += 1
+
+        n = self.counts[arm]
+        old_value = self.values[arm]
+        self.values[arm] = old_value + (reward - old_value) / n
+\end{lstlisting}
+
+\textbf{Pros}: Theoretical regret bounds, adaptive exploration \\
+\textbf{Cons}: Assumes rewards are bounded in [0, 1]
+
+\textbf{3. Thompson Sampling (Bayesian Approach)}
+
+\textbf{Idea}: Sample from posterior distribution of arm quality
+
+\begin{lstlisting}[language=Python]
+class ThompsonSampling:
+    """Bayesian bandit with Beta-Bernoulli"""
+    def __init__(self, n_arms):
+        self.n_arms = n_arms
+
+        # Beta distribution parameters (prior: Beta(1, 1) = Uniform)
+        self.alpha = np.ones(n_arms)  # Successes
+        self.beta = np.ones(n_arms)   # Failures
+
+    def select_arm(self):
+        # Sample from Beta distribution for each arm
+        samples = [
+            np.random.beta(self.alpha[arm], self.beta[arm])
+            for arm in range(self.n_arms)
+        ]
+
+        # Select arm with highest sample
+        return np.argmax(samples)
+
+    def update(self, arm, reward):
+        """Update Beta distribution"""
+        if reward > 0:
+            self.alpha[arm] += 1
+        else:
+            self.beta[arm] += 1
+
+# Example: Netflix thumbnail selection
+bandit = ThompsonSampling(n_arms=3)  # 3 thumbnail variants
+
+for user in users:
+    # Sample which thumbnail to show
+    thumbnail = bandit.select_arm()
+
+    # Show thumbnail, observe click
+    clicked = show_thumbnail_and_get_feedback(user, thumbnail)
+
+    # Update posterior
+    bandit.update(thumbnail, reward=clicked)
+\end{lstlisting}
+
+\textbf{Pros}: Best empirical performance, naturally balances exploration/exploitation \\
+\textbf{Cons}: Requires choosing prior distribution
+
+\textbf{4. Contextual Bandits}
+
+\textbf{Problem}: User preferences vary (one-size-fits-all doesn't work)
+
+\textbf{Solution}: Use user features to personalize
+
+\begin{lstlisting}[language=Python]
+class LinUCB:
+    """Contextual bandit with linear model"""
+    def __init__(self, n_arms, n_features, alpha=1.0):
+        self.n_arms = n_arms
+        self.n_features = n_features
+        self.alpha = alpha  # Exploration parameter
+
+        # For each arm, maintain linear regression
+        self.A = [np.identity(n_features) for _ in range(n_arms)]  # X^T X
+        self.b = [np.zeros(n_features) for _ in range(n_arms)]     # X^T y
+
+    def select_arm(self, context):
+        """
+        context: User features (n_features,)
+        """
+        ucb_scores = []
+
+        for arm in range(self.n_arms):
+            # Estimate: theta = A^-1 b
+            A_inv = np.linalg.inv(self.A[arm])
+            theta = A_inv.dot(self.b[arm])
+
+            # Predicted reward
+            predicted_reward = theta.dot(context)
+
+            # Confidence interval
+            uncertainty = np.sqrt(context.dot(A_inv).dot(context))
+
+            # UCB
+            ucb = predicted_reward + self.alpha * uncertainty
+            ucb_scores.append(ucb)
+
+        return np.argmax(ucb_scores)
+
+    def update(self, arm, context, reward):
+        """Update model for selected arm"""
+        self.A[arm] += np.outer(context, context)  # X^T X
+        self.b[arm] += reward * context             # X^T y
+
+# Usage: Personalized article recommendation
+linucb = LinUCB(n_arms=10, n_features=50, alpha=0.5)
+
+for user in users:
+    # Get user features
+    context = get_user_features(user)  # (50,)
+
+    # Select article
+    article = linucb.select_arm(context)
+
+    # Observe reward
+    reward = show_article(user, article)
+
+    # Update
+    linucb.update(article, context, reward)
+\end{lstlisting}
+
+\textbf{5. Introduction to Reinforcement Learning for Recommendations}
+
+\textbf{Framing Recommendations as RL:}
+
+\textbf{MDP (Markov Decision Process):}
+\begin{itemize}
+\item \textbf{State} $s_t$: User's history (last 10 items viewed, embeddings)
+\item \textbf{Action} $a_t$: Recommend item $i$
+\item \textbf{Reward} $r_t$: Immediate engagement (click, watch time)
+\item \textbf{Transition} $s_{t+1}$: User's updated state after seeing recommendation
+\end{itemize}
+
+\textbf{Goal}: Learn policy $\pi(a|s)$ that maximizes cumulative reward
+
+$$J = \mathbb{E}\left[\sum_{t=0}^T \gamma^t r_t\right]$$
+
+where $\gamma \in [0, 1]$ is discount factor
+
+\textbf{Why RL vs Supervised Learning?}
+\begin{itemize}
+\item \textbf{Sequential decisions}: Today's recommendation affects tomorrow's user state
+\item \textbf{Long-term reward}: Maximize lifetime value, not just immediate click
+\item \textbf{Exploration}: Discover new user preferences
+\end{itemize}
+
+\textbf{Simple RL Algorithm: Q-Learning}
+
+\begin{lstlisting}[language=Python]
+class QLearning:
+    """Tabular Q-learning for recommendations"""
+    def __init__(self, n_states, n_actions, lr=0.1, gamma=0.9, epsilon=0.1):
+        self.n_states = n_states
+        self.n_actions = n_actions
+        self.lr = lr          # Learning rate
+        self.gamma = gamma    # Discount factor
+        self.epsilon = epsilon
+
+        # Q-table: Q[s, a] = expected return from state s, taking action a
+        self.Q = np.zeros((n_states, n_actions))
+
+    def select_action(self, state):
+        """Epsilon-greedy action selection"""
+        if np.random.random() < self.epsilon:
+            return np.random.randint(self.n_actions)  # Explore
+        else:
+            return np.argmax(self.Q[state, :])  # Exploit
+
+    def update(self, state, action, reward, next_state):
+        """Q-learning update"""
+        # Current Q-value
+        current_q = self.Q[state, action]
+
+        # Target: r + gamma * max_a' Q(s', a')
+        max_next_q = np.max(self.Q[next_state, :])
+        target = reward + self.gamma * max_next_q
+
+        # Update Q-value
+        self.Q[state, action] = current_q + self.lr * (target - current_q)
+
+# Example (simplified)
+q_learning = QLearning(n_states=100, n_actions=50)
+
+state = get_user_state(user)  # Discretized user state
+action = q_learning.select_action(state)  # Select item
+reward = show_item_and_get_feedback(user, action)
+next_state = get_updated_state(user)
+
+q_learning.update(state, action, reward, next_state)
+\end{lstlisting}
+
+\textbf{Deep RL for Recommendations:}
+\begin{itemize}
+\item \textbf{DQN}: Deep Q-Network (replace Q-table with neural network)
+\item \textbf{Policy Gradient}: Directly learn policy $\pi_\theta(a|s)$
+\item \textbf{Actor-Critic}: Combine value function and policy
+\end{itemize}
+
+Used by: YouTube (REINFORCE), Alibaba (deep Q-learning)
+
+\textbf{Interview Discussion Points:}
+
+\textbf{Bandits:}
+\begin{itemize}
+\item \textbf{When to use}: Real-time personalization, A/B test optimization, content selection
+\item \textbf{Trade-offs}: UCB (theoretical guarantees) vs Thompson Sampling (best empirical)
+\item \textbf{Contextual}: When user features matter (personalization)
+\item \textbf{Example}: "At Netflix, we use Thompson Sampling for thumbnail selection, reducing time-to-first-watch by 15\%"
+\end{itemize}
+
+\textbf{RL:}
+\begin{itemize}
+\item \textbf{When to use}: Long-term user engagement, sequential recommendations
+\item \textbf{Challenges}: Delayed rewards, exploration cost, off-policy learning
+\item \textbf{Example}: "YouTube uses RL to optimize for long-term watch time, not just immediate clicks"
+\end{itemize}
+
+\subsection{Connecting the Dots: When to Use Uplift vs. Bandits vs. RL}
+
+\textbf{The Principal-Level Skill:} Knowing the tools is good. Knowing \textit{which tool to use for which business problem} is what separates Staff from Principal.
+
+This decision guide helps you quickly map business problems to the right technique in interviews.
+
+\textbf{Quick Decision Tree:}
+
+\begin{verbatim}
+Business Problem
+    |
+    ├─ Is the intervention costly/limited? (e.g., sending coupons)
+    |   └─ YES → Uplift Modeling
+    |       • Identify WHO to treat (persuadables)
+    |       • Optimize ROI of expensive interventions
+    |
+    ├─ Fixed set of choices, need to pick best option in real-time?
+    |   └─ YES → Contextual Bandits
+    |       • E.g., Which of 5 headlines to show?
+    |       • Minimize regret, maximize immediate reward
+    |
+    └─ Sequential decisions where today's action affects future state?
+        └─ YES → Reinforcement Learning
+            • E.g., Recommend series of videos to maximize session time
+            • Optimize long-term cumulative reward
+\end{verbatim}
+
+\textbf{Detailed Comparison Table:}
+
+\begin{tabular}{|p{2.5cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\textbf{Characteristic} & \textbf{Uplift Modeling} & \textbf{Contextual Bandits} & \textbf{Reinforcement Learning} \\
+\hline
+\textbf{Goal} & Identify users who respond to treatment & Select best action to maximize immediate reward & Maximize long-term cumulative reward \\
+\hline
+\textbf{Data} & Historical A/B test data (treatment/control) & Online interaction data (click/no-click) & Sequential interaction data \\
+\hline
+\textbf{Decision timing} & Offline (batch targeting) & Online (real-time per request) & Online (sequential decisions) \\
+\hline
+\textbf{Action space} & Binary (treat vs. don't treat) & Fixed set (e.g., 5-10 options) & Large/continuous (many possible actions) \\
+\hline
+\textbf{Feedback} & Post-hoc analysis of RCT & Immediate (click/no-click) & Delayed (session reward) \\
+\hline
+\textbf{Complexity} & Medium & Low-Medium & High \\
+\hline
+\textbf{When to use} & Costly interventions, segment users & Real-time personalization, fixed choices & Sequential decisions, long-term optimization \\
+\hline
+\end{tabular}
+
+\textbf{Use Case 1: Marketing Campaign}
+
+\textbf{Problem:} "We have 10M users. Sending discount coupons costs \$5 each. How do we maximize ROI?"
+
+\textbf{Wrong approach:} Send to everyone → Waste money on users who'd convert anyway
+
+\textbf{Right approach: Uplift Modeling}
+\begin{itemize}
+\item \textbf{Why}: Intervention is costly (\$5), need to identify persuadables
+\item \textbf{Method}: Run A/B test on 100K users, train T-Learner
+\item \textbf{Outcome}: Target top 20\% by uplift → 4x ROI vs random targeting
+\item \textbf{Key metric}: Incremental conversions per dollar spent
+\end{itemize}
+
+\textbf{Interview answer:} "I'd use uplift modeling to identify the persuadable segment. Train on historical coupon experiment data, predict uplift score for each user, target top 20\% by predicted incremental conversion probability. This maximizes ROI by avoiding 'sure things' who'd buy anyway and 'lost causes' who won't buy even with discount."
+
+\textbf{Use Case 2: Homepage Personalization}
+
+\textbf{Problem:} "Which of 5 hero images should we show each user on homepage?"
+
+\textbf{Wrong approach:} Static A/B test takes 4 weeks to find best image
+
+\textbf{Right approach: Contextual Bandit (Thompson Sampling)}
+\begin{itemize}
+\item \textbf{Why}: Fixed choices (5 images), real-time decision, want to minimize regret
+\item \textbf{Method}: Thompson Sampling with user features (location, device, time)
+\item \textbf{Outcome}: Converge to best image in 3 days instead of 4 weeks, adapt to user context
+\item \textbf{Key metric}: Cumulative regret (clicks lost vs. optimal policy)
+\end{itemize}
+
+\textbf{Interview answer:} "I'd use LinUCB or Thompson Sampling bandit. Initialize with uniform exploration, then adaptively allocate traffic to winning images. Include user context (new vs. returning, mobile vs. desktop) to personalize. This finds the optimal policy 10x faster than A/B testing and minimizes opportunity cost."
+
+\textbf{Use Case 3: Video Recommendation Sequence}
+
+\textbf{Problem:} "Recommend next video to maximize user's entire session watch time"
+
+\textbf{Wrong approach:} Maximize immediate click probability → Clickbait videos, short sessions
+
+\textbf{Right approach: Reinforcement Learning (DQN or Policy Gradient)}
+\begin{itemize}
+\item \textbf{Why}: Sequential decisions, long-term reward (session time), state transitions matter
+\item \textbf{Method}: Model as MDP, state = user history, action = next video, reward = watch time
+\item \textbf{Outcome}: Optimize for 30-min session, not 3-min video
+\item \textbf{Key metric}: Total session watch time, retention rate
+\end{itemize}
+
+\textbf{Interview answer:} "I'd frame this as an RL problem with state = [last 10 videos watched, time on platform], action = next video to recommend, reward = total session watch time. Use off-policy learning (importance sampling) to train from logged data, then deploy with epsilon-greedy for online exploration. This optimizes for long-term engagement, not just immediate clicks."
+
+\textbf{Hybrid Approaches (Advanced):}
+
+In practice, you often **combine** these techniques:
+
+\textbf{Example: E-commerce Personalization}
+\begin{enumerate}
+\item \textbf{Uplift model}: Decide WHETHER to show discount banner (costly intervention)
+\item \textbf{Bandit}: Select WHICH product to feature in banner (5 options)
+\item \textbf{RL}: Optimize product browsing sequence for long-term purchase intent
+\end{enumerate}
+
+\textbf{Implementation:}
+\begin{lstlisting}[language=Python]
+# Step 1: Uplift - Should we show discount?
+uplift_score = uplift_model.predict_uplift(user_features)
+if uplift_score > threshold:
+    show_discount = True
+else:
+    show_discount = False
+
+# Step 2: Bandit - Which product to feature?
+if show_discount:
+    # Use contextual bandit to select product
+    product = bandit.select_arm(user_context)
+
+# Step 3: RL - Optimize browsing sequence
+# State: user's current session history
+# Action: which category to recommend next
+# Reward: eventual purchase value
+next_category = rl_agent.select_action(session_state)
+\end{lstlisting}
+
+\textbf{Interview Gold - The Framework:}
+
+When asked "Design a personalization system," use this framework:
+
+\begin{enumerate}
+\item \textbf{Identify the intervention}:
+\begin{itemize}
+\item Is it costly? → Uplift might be needed
+\item Is it free? → Bandits or RL can explore aggressively
+\end{itemize}
+
+\item \textbf{Understand the action space}:
+\begin{itemize}
+\item Fixed small set (< 20 options)? → Bandits work well
+\item Large/continuous? → RL or approximate methods
+\end{itemize}
+
+\item \textbf{Consider time horizon}:
+\begin{itemize}
+\item Immediate reward? → Bandits optimize this
+\item Long-term reward? → RL required
+\end{itemize}
+
+\item \textbf{Check data availability}:
+\begin{itemize}
+\item Have historical RCT data? → Uplift modeling ready to go
+\item Need to learn online? → Bandits/RL
+\end{itemize}
+
+\item \textbf{Evaluate complexity vs. value}:
+\begin{itemize}
+\item Simple problem → Start with bandits
+\item Complex sequential problem + high value → Justify RL investment
+\end{itemize}
+\end{enumerate}
+
+\textbf{Common Pitfalls to Avoid:}
+
+\begin{itemize}
+\item \textbf{Using RL when bandits suffice}: "Recommend next video" → If reward is immediate click, bandits work fine. Only use RL if optimizing session-level metrics.
+\item \textbf{Using bandits for costly interventions}: "Which users to send \$50 gift card?" → Use uplift, not bandits. Exploration is too expensive.
+\item \textbf{Using uplift for real-time decisions}: "Which ad to show?" → Uplift is for batch targeting, use bandits for real-time.
+\item \textbf{Ignoring offline evaluation}: Always validate on historical data before deploying RL/bandits online.
+\end{itemize}
+
+\textbf{Summary - Quick Reference:}
+
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Technique} & \textbf{Best For} & \textbf{Interview Keywords} \\
+\hline
+Uplift Modeling & Costly interventions, & "Persuadables," "incremental," \\
+ & segment targeting & "ROI optimization," "T-Learner" \\
+\hline
+Contextual Bandits & Real-time choices, & "Regret minimization," \\
+ & fixed action space & "Thompson Sampling," "UCB" \\
+\hline
+Reinforcement Learning & Sequential decisions, & "Long-term reward," "MDP," \\
+ & state transitions & "Q-Learning," "policy gradient" \\
+\hline
+\end{tabular}
+
+\textbf{Final Interview Tip:}
+
+When you mention these techniques, immediately clarify \textit{why} you chose them:
+
+\textit{"I'd use uplift modeling here because we're dealing with a costly intervention—sending physical mailers at \$2 each. The goal is to identify the persuadable segment, not just predict who will respond. Traditional classification would target 'sure things' who'd convert anyway, wasting budget."}
+
+This shows you understand the **business problem**, not just the technical solution.
+
+\section{Final Checklist Before Interviews}
+
+\subsection{Day Before Interview}
+
+$\square$ Review all Priority 1 algorithms (15 min each)
+
+$\square$ Practice whiteboarding one architecture from each category:
+\begin{itemize}
+\item Neural network (MLP with backprop)
+\item CNN (ResNet block)
+\item Transformer (attention mechanism)
+\item Classical ML (decision tree or XGBoost concept)
+\end{itemize}
+
+$\square$ Review common failure modes and debugging strategies
+
+$\square$ Prepare 3-5 questions about the team's ML stack
+
+\subsection{Common Interview Mistakes to Avoid}
+
+\begin{itemize}
+\item \textbf{Jumping to implementation too fast} - Always clarify the problem first
+\item \textbf{Not stating assumptions} - "Assuming we have labeled data..."
+\item \textbf{Ignoring trade-offs} - Every algorithm has pros/cons, discuss them
+\item \textbf{Not explaining your reasoning} - Think out loud during implementation
+\item \textbf{Forgetting to validate} - Always mention train/val/test split and metrics
+\item \textbf{Over-engineering} - Start simple, then optimize if asked
+\end{itemize}
+
+\section{Conclusion}
+
+This 14-day intensive plan focuses on \textbf{depth-first mastery of deep learning} followed by classical ML fundamentals. The key to success:
+
+\begin{enumerate}
+\item \textbf{Implement from scratch} - Don't just read, code it yourself
+\item \textbf{Spaced repetition} - Review on Days 1, 2, 4, 7, 14
+\item \textbf{Understand trade-offs} - Every algorithm has strengths and weaknesses
+\item \textbf{Practice debugging} - Most interviews test this more than implementation
+\end{enumerate}
+
+Good luck with your Staff/Principal ML Engineer interviews!
+
+\end{document}

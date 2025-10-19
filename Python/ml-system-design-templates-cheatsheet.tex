@@ -1,0 +1,1040 @@
+\documentclass[8pt,landscape]{article}
+\usepackage{multicol}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx,overpic}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+
+\geometry{top=.3in,left=.3in,right=.3in,bottom=.3in,footskip=10pt}
+
+% Configure page style with page numbers
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[C]{\scriptsize\thepage} % center page number in footer
+\renewcommand{\headrulewidth}{0pt} % remove header line
+\renewcommand{\footrulewidth}{0pt} % remove footer line
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\scriptsize\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+\begin{document}
+\raggedright
+\scriptsize
+\begin{multicols}{3}
+
+\setlength{\premulticols}{1pt}
+\setlength{\postmulticols}{1pt}
+\setlength{\multicolsep}{1pt}
+\setlength{\columnsep}{2pt}
+
+\begin{center}
+     \Large{\underline{ML System Design Templates}} \\
+     \small{Building Production ML Systems for Staff/Principal Interviews}
+\end{center}
+
+\section*{ML SYSTEM DESIGN FRAMEWORK}
+
+\subsection*{The MADE Framework}
+
+\textbf{M}odel - Training \& Architecture \\
+\textbf{A}PI - Inference \& Serving \\
+\textbf{D}ata - Pipelines \& Features \\
+\textbf{E}valuation - Metrics \& Monitoring
+
+For each ML system design:
+\begin{enumerate}
+\item \textbf{Clarify Requirements} (5 min)
+\begin{itemize}
+\item Use cases, scale, latency constraints
+\item Online vs offline, batch vs real-time
+\item Data availability, labeling budget
+\end{itemize}
+
+\item \textbf{Model Selection} (10 min)
+\begin{itemize}
+\item Algorithm choice \& justification
+\item Training infrastructure needs
+\item Model complexity vs latency trade-off
+\end{itemize}
+
+\item \textbf{Data Pipeline} (10 min)
+\begin{itemize}
+\item Feature engineering strategy
+\item Data collection \& labeling
+\item Feature store architecture
+\end{itemize}
+
+\item \textbf{Serving Architecture} (10 min)
+\begin{itemize}
+\item Real-time vs batch predictions
+\item Scaling \& latency optimizations
+\item Model deployment strategy
+\end{itemize}
+
+\item \textbf{Evaluation \& Monitoring} (10 min)
+\begin{itemize}
+\item Offline metrics, online A/B testing
+\item Model drift detection
+\item Feedback loops \& retraining
+\end{itemize}
+\end{enumerate}
+
+\section*{COMMON ML SYSTEM PATTERNS}
+
+\subsection*{1. Search \& Ranking Systems}
+\textbf{Examples:} Google Search, Amazon product ranking, YouTube recommendations
+
+\textbf{Architecture:}
+\begin{verbatim}
+Query → Candidate Generation (Fast, Broad)
+      ↓
+      Ranker (Slow, Precise)
+      ↓
+      Re-ranker (Personalization)
+      ↓
+      Results
+\end{verbatim}
+
+\textbf{Candidate Generation:}
+\begin{itemize}
+\item \textbf{Goal}: Reduce 1B items → 10K candidates (99.999\% reduction)
+\item \textbf{Methods}: ANN (FAISS), inverted index, embedding similarity
+\item \textbf{Latency}: < 10ms
+\end{itemize}
+
+\textbf{Ranking:}
+\begin{itemize}
+\item \textbf{Goal}: Rank 10K candidates → Top 100 results
+\item \textbf{Model}: XGBoost, LightGBM, or two-tower neural network
+\item \textbf{Features}: Query-doc relevance, user history, CTR, engagement
+\item \textbf{Latency}: < 100ms
+\end{itemize}
+
+\textbf{Re-ranking:}
+\begin{itemize}
+\item \textbf{Goal}: Personalization, diversity, business rules
+\item \textbf{Model}: Lightweight NN or rule-based
+\item \textbf{Latency}: < 10ms
+\end{itemize}
+
+\textbf{Key Metrics:}
+\begin{itemize}
+\item \textbf{Offline}: NDCG@10, MRR, Precision@K
+\item \textbf{Online}: CTR, time-to-click, bounce rate, revenue
+\end{itemize}
+
+\textbf{Scaling:}
+\begin{itemize}
+\item \textbf{Candidate generation}: Sharded by item ID, ANN index distributed
+\item \textbf{Ranking}: Model replicas behind load balancer
+\item \textbf{Caching}: Query cache (Redis), result cache
+\end{itemize}
+
+\subsection*{2. Recommendation Systems}
+\textbf{Examples:} Netflix, Spotify, TikTok, Amazon "You May Also Like"
+
+\textbf{Two-Stage Architecture:}
+\begin{verbatim}
+User → Candidate Generation
+     ↓
+     Ranking (Predicted Rating/CTR)
+     ↓
+     Top-N Recommendations
+\end{verbatim}
+
+\textbf{Candidate Generation Approaches:}
+
+\textbf{A. Collaborative Filtering}
+\begin{itemize}
+\item \textbf{Matrix Factorization}: Users × Items → User embeddings × Item embeddings
+\item \textbf{Pros}: Simple, works with implicit feedback
+\item \textbf{Cons}: Cold start problem
+\end{itemize}
+\begin{verbatim}
+# User-Item matrix factorization
+R ≈ U × V^T
+where U: (n_users, k), V: (n_items, k)
+
+# ALS (Alternating Least Squares)
+min ||R - UV^T||^2 + λ(||U||^2 + ||V||^2)
+\end{verbatim}
+
+\textbf{B. Two-Tower Neural Network}
+\begin{verbatim}
+User Features → User Tower (NN) → User Embedding
+Item Features → Item Tower (NN) → Item Embedding
+                                  ↓
+                        Dot Product → Score
+\end{verbatim}
+
+\textbf{C. Content-Based}
+\begin{itemize}
+\item \textbf{Method}: TF-IDF, BERT embeddings for item features
+\item \textbf{Similarity}: Cosine similarity between user profile \& items
+\end{itemize}
+
+\textbf{Ranking Model:}
+\begin{itemize}
+\item \textbf{Input}: User features, item features, context (time, device)
+\item \textbf{Model}: Deep \& Wide, DeepFM, xDeepFM
+\item \textbf{Objective}: Predict CTR, watch time, or rating
+\end{itemize}
+
+\textbf{Cold Start Solutions:}
+\begin{itemize}
+\item \textbf{New users}: Popular items, demographic-based, onboarding survey
+\item \textbf{New items}: Content-based, similar to trending items
+\end{itemize}
+
+\textbf{Key Metrics:}
+\begin{itemize}
+\item \textbf{Offline}: RMSE, Precision@K, Recall@K, NDCG
+\item \textbf{Online}: CTR, engagement time, conversion rate
+\item \textbf{Diversity}: Intra-list similarity (avoid filter bubble)
+\end{itemize}
+
+\textbf{Scaling:}
+\begin{itemize}
+\item \textbf{Embeddings}: Store in vector DB (Pinecone, Milvus, FAISS)
+\item \textbf{ANN search}: HNSW, ScaNN for nearest neighbor retrieval
+\item \textbf{Batch updates}: Recompute embeddings nightly
+\item \textbf{Real-time}: Stream processing (Kafka + Flink) for user events
+\end{itemize}
+
+\subsection*{3. Computer Vision Systems}
+
+\textbf{A. Image Classification}
+\textbf{Example:} Content moderation, medical diagnosis
+
+\textbf{Architecture:}
+\begin{verbatim}
+Image → Preprocessing → CNN → Softmax → Class
+         (Resize,         (ResNet,
+          Normalize)       EfficientNet)
+\end{verbatim}
+
+\textbf{Model Selection:}
+\begin{itemize}
+\item \textbf{High accuracy}: EfficientNet, Vision Transformer (ViT)
+\item \textbf{Low latency}: MobileNet, SqueezeNet
+\item \textbf{Transfer learning}: Pretrain on ImageNet, fine-tune on domain
+\end{itemize}
+
+\textbf{Data Pipeline:}
+\begin{itemize}
+\item \textbf{Augmentation}: Random crop, flip, rotation, color jitter
+\item \textbf{Labeling}: Mechanical Turk, active learning for hard examples
+\item \textbf{Class imbalance}: Weighted loss, oversampling minority class
+\end{itemize}
+
+\textbf{Serving:}
+\begin{itemize}
+\item \textbf{Batch}: Process uploaded images async (S3 → SQS → Lambda)
+\item \textbf{Real-time}: TensorFlow Serving, TorchServe on GPU instances
+\item \textbf{Edge}: Model quantization (INT8), TFLite for mobile
+\end{itemize}
+
+\textbf{B. Object Detection}
+\textbf{Example:} Self-driving cars, surveillance
+
+\textbf{Model Options:}
+\begin{itemize}
+\item \textbf{Two-stage}: Faster R-CNN (high accuracy, slow)
+\item \textbf{One-stage}: YOLO, SSD (fast, real-time)
+\item \textbf{Anchor-free}: FCOS, CenterNet
+\end{itemize}
+
+\textbf{Architecture (YOLO):}
+\begin{verbatim}
+Image → CNN Backbone → Feature Pyramid
+                     ↓
+              Bounding Box + Class Predictions
+              (Grid-based, Multi-scale)
+\end{verbatim}
+
+\textbf{Post-processing:}
+\begin{itemize}
+\item \textbf{NMS}: Non-max suppression (remove duplicate boxes)
+\item \textbf{Threshold}: Confidence score filtering
+\end{itemize}
+
+\textbf{C. Image Segmentation}
+\textbf{Example:} Medical imaging, autonomous driving
+
+\textbf{Architecture (U-Net):}
+\begin{verbatim}
+Image → Encoder (Downsample) → Bottleneck
+              ↓                    ↓
+           Skip Connections
+              ↓                    ↓
+        Decoder (Upsample) → Pixel-wise Prediction
+\end{verbatim}
+
+\subsection*{4. Natural Language Processing}
+
+\textbf{A. Text Classification}
+\textbf{Examples:} Sentiment analysis, spam detection, content categorization
+
+\textbf{Approaches:}
+
+\textbf{Classical (Small data, low latency):}
+\begin{verbatim}
+Text → TF-IDF / Bag-of-Words → Logistic Regression / SVM
+\end{verbatim}
+
+\textbf{Deep Learning (Large data, high accuracy):}
+\begin{verbatim}
+Text → Tokenization → BERT/RoBERTa → [CLS] token → FC → Softmax
+\end{verbatim}
+
+\textbf{Model Selection:}
+\begin{itemize}
+\item \textbf{High accuracy}: BERT-large, RoBERTa, DeBERTa
+\item \textbf{Low latency}: DistilBERT (40\% faster, 97\% accuracy)
+\item \textbf{Very low latency}: TF-IDF + Logistic Regression
+\end{itemize}
+
+\textbf{Serving:}
+\begin{itemize}
+\item \textbf{Real-time}: TorchServe, TensorFlow Serving
+\item \textbf{Batch}: Spark for large-scale processing
+\item \textbf{Optimization}: ONNX, TensorRT, quantization
+\end{itemize}
+
+\textbf{B. Named Entity Recognition (NER)}
+\textbf{Example:} Extract names, dates, locations from text
+
+\textbf{Architecture:}
+\begin{verbatim}
+Text → BERT → Token Embeddings → BiLSTM-CRF → BIO Tags
+                                    (or just FC layer)
+\end{verbatim}
+
+\textbf{Output Format:}
+\begin{itemize}
+\item \textbf{BIO tags}: B-PER, I-PER, B-ORG, I-ORG, B-LOC, O
+\item \textbf{Example}: "Barack Obama visited Paris"
+\item \textbf{Tags}: B-PER I-PER O B-LOC
+\end{itemize}
+
+\textbf{C. Question Answering}
+\textbf{Example:} Chatbots, search engines
+
+\textbf{Extractive QA (BERT-based):}
+\begin{verbatim}
+Question + Context → BERT → Start/End Logits → Answer Span
+\end{verbatim}
+
+\textbf{Generative QA (GPT-based):}
+\begin{verbatim}
+Question + Context → GPT → Generate Answer
+\end{verbatim}
+
+\textbf{Retrieval-Augmented (RAG):}
+\begin{verbatim}
+Question → Embedding → Vector DB Search → Top K Docs
+                                        ↓
+                                    LLM (GPT) → Answer
+\end{verbatim}
+
+\textbf{D. Machine Translation}
+\textbf{Architecture:}
+\begin{verbatim}
+Source → Encoder (Transformer) → Context
+                                   ↓
+                       Decoder (Transformer) → Target
+\end{verbatim}
+
+\textbf{Key Components:}
+\begin{itemize}
+\item \textbf{Encoder}: Self-attention on source sentence
+\item \textbf{Decoder}: Self-attention + cross-attention to encoder
+\item \textbf{Tokenization}: Byte-Pair Encoding (BPE), SentencePiece
+\item \textbf{Beam Search}: Generate top-K translations
+\end{itemize}
+
+\subsection*{5. Fraud Detection}
+\textbf{Examples:} Credit card fraud, fake accounts, click fraud
+
+\textbf{Architecture:}
+\begin{verbatim}
+Transaction → Feature Engineering → Model → Fraud Score
+            ↓                               ↓
+         Rules Engine                   Threshold → Block/Allow
+\end{verbatim}
+
+\textbf{Feature Engineering:}
+\begin{itemize}
+\item \textbf{Transaction features}: Amount, time, location, device
+\item \textbf{User features}: Account age, past behavior, velocity (txns/hour)
+\item \textbf{Graph features}: Social network, entity connections
+\item \textbf{Aggregations}: Rolling windows (1hr, 24hr, 7d)
+\end{itemize}
+
+\textbf{Model Selection:}
+\begin{itemize}
+\item \textbf{Traditional}: XGBoost, Random Forest (interpretable)
+\item \textbf{Deep Learning}: Autoencoders for anomaly detection
+\item \textbf{Graph}: Graph Neural Networks (GNN) for network fraud
+\end{itemize}
+
+\textbf{Handling Imbalance:}
+\begin{itemize}
+\item \textbf{Sampling}: SMOTE, undersampling majority class
+\item \textbf{Loss}: Focal loss, weighted cross-entropy
+\item \textbf{Metrics}: Precision-Recall curve (not accuracy!)
+\end{itemize}
+
+\textbf{Real-time Requirements:}
+\begin{itemize}
+\item \textbf{Latency}: < 100ms for payment approval
+\item \textbf{Serving}: Model in-memory, feature cache (Redis)
+\item \textbf{Fallback}: Rule-based system if model fails
+\end{itemize}
+
+\textbf{Key Metrics:}
+\begin{itemize}
+\item \textbf{Precision}: \% of flagged transactions that are actually fraud
+\item \textbf{Recall}: \% of fraud caught
+\item \textbf{F1-score}: Harmonic mean of precision/recall
+\item \textbf{Business}: False positive cost vs fraud loss prevented
+\end{itemize}
+
+\subsection*{6. Ad Click Prediction (CTR)}
+\textbf{Examples:} Google Ads, Facebook Ads
+
+\textbf{Architecture:}
+\begin{verbatim}
+User + Ad + Context → Feature Engineering → CTR Model → pCTR
+                                                      ↓
+                                              Auction (Bid × pCTR)
+\end{verbatim}
+
+\textbf{Feature Engineering:}
+\begin{itemize}
+\item \textbf{User}: Demographics, browsing history, interests
+\item \textbf{Ad}: Creative type, landing page, advertiser
+\item \textbf{Context}: Time, device, location, query
+\item \textbf{Cross-features}: User×Ad interactions (critical!)
+\end{itemize}
+
+\textbf{Model Architectures:}
+
+\textbf{A. Logistic Regression (Baseline)}
+\begin{verbatim}
+Features → One-hot encoding → Logistic Regression → pCTR
+\end{verbatim}
+\begin{itemize}
+\item \textbf{Pros}: Fast, interpretable, easy to debug
+\item \textbf{Cons}: Manual feature engineering, limited capacity
+\end{itemize}
+
+\textbf{B. Factorization Machines (FM)}
+\begin{verbatim}
+y = w0 + Σ wi*xi + Σ Σ <vi, vj> xi*xj
+         (linear)   (pairwise interactions)
+\end{verbatim}
+\begin{itemize}
+\item \textbf{Pros}: Captures feature interactions, sparse data
+\item \textbf{Cons}: Still limited to 2-way interactions
+\end{itemize}
+
+\textbf{C. Deep \& Wide}
+\begin{verbatim}
+Wide (Memorization): Cross-features → Linear
+                                        ↓
+                                     Combine → Output
+                                        ↓
+Deep (Generalization): Embeddings → DNN
+\end{verbatim}
+
+\textbf{D. DeepFM (Facebook)}
+\begin{verbatim}
+Features → Embeddings → FM Component (2-way)
+                      ↓
+                      DNN Component (high-order)
+                      ↓
+                    Sigmoid → pCTR
+\end{verbatim}
+
+\textbf{Training:}
+\begin{itemize}
+\item \textbf{Positive samples}: Clicked ads (rare, ~1-5\%)
+\item \textbf{Negative sampling}: Down-sample non-clicks (10:1 ratio)
+\item \textbf{Loss}: Weighted cross-entropy
+\item \textbf{Calibration}: Isotonic regression (adjust predicted probabilities)
+\end{itemize}
+
+\textbf{Serving:}
+\begin{itemize}
+\item \textbf{Latency}: < 10ms (ad auction is time-sensitive)
+\item \textbf{Throughput}: 100K+ QPS
+\item \textbf{Caching}: User embeddings, popular ad features
+\item \textbf{Model size}: Embedding tables can be 100GB+ (use parameter server)
+\end{itemize}
+
+\textbf{Key Metrics:}
+\begin{itemize}
+\item \textbf{Offline}: AUC-ROC, Log Loss, Calibration error
+\item \textbf{Online}: CTR, conversion rate, revenue per mille (RPM)
+\end{itemize}
+
+\subsection*{7. Feed Ranking (News/Social)}
+\textbf{Examples:} Facebook News Feed, Twitter Timeline, LinkedIn Feed
+
+\textbf{Objectives:}
+\begin{itemize}
+\item Maximize user engagement (likes, comments, shares, time spent)
+\item Balance relevance, recency, diversity, connections
+\end{itemize}
+
+\textbf{Architecture:}
+\begin{verbatim}
+User → Candidate Selection (1000s of posts)
+     ↓
+     Ranking Model (Engagement prediction)
+     ↓
+     Re-ranking (Diversity, Freshness)
+     ↓
+     Top N posts in feed
+\end{verbatim}
+
+\textbf{Candidate Selection:}
+\begin{itemize}
+\item \textbf{Sources}: Friends' posts, followed pages, ads, suggested content
+\item \textbf{Filtering}: Recent (last 7 days), not seen before
+\item \textbf{Reduce}: 100K candidates → 10K
+\end{itemize}
+
+\textbf{Ranking Model:}
+\textbf{Inputs:}
+\begin{itemize}
+\item \textbf{User features}: Demographics, interests, engagement history
+\item \textbf{Post features}: Type (photo/video/text), creator, topic, recency
+\item \textbf{User-Post}: Past interactions with creator, similar posts
+\end{itemize}
+
+\textbf{Multi-task Learning:}
+\begin{verbatim}
+Features → Shared Layers → Task-specific Heads:
+                              - Predict Like (binary)
+                              - Predict Comment (binary)
+                              - Predict Share (binary)
+                              - Predict Time Spent (regression)
+                              ↓
+                        Weighted Score = Σ wi * pi
+\end{verbatim}
+
+\textbf{Re-ranking Considerations:}
+\begin{itemize}
+\item \textbf{Diversity}: Avoid consecutive posts from same source
+\item \textbf{Freshness}: Boost recent posts (decay function)
+\item \textbf{Explore/Exploit}: 10\% random posts to discover new interests
+\end{itemize}
+
+\textbf{Key Metrics:}
+\begin{itemize}
+\item \textbf{Engagement}: Likes, comments, shares per user
+\item \textbf{Retention}: Daily active users (DAU), session time
+\item \textbf{Negative}: Hide/report rate (minimize)
+\end{itemize}
+
+\section*{ML INFRASTRUCTURE COMPONENTS}
+
+\subsection*{Feature Store}
+\textbf{Purpose:} Centralized repository for feature engineering
+
+\textbf{Architecture:}
+\begin{verbatim}
+Raw Data → Feature Engineering → Feature Store
+                                   ↓
+                         Offline (Training): S3/Hive
+                         Online (Serving): Redis/DynamoDB
+\end{verbatim}
+
+\textbf{Key Properties:}
+\begin{itemize}
+\item \textbf{Consistency}: Same features for training \& serving (avoid skew)
+\item \textbf{Versioning}: Track feature evolution
+\item \textbf{Monitoring}: Detect data drift, missing values
+\end{itemize}
+
+\textbf{Example (Feast, Tecton):}
+\begin{verbatim}
+# Define feature
+@feature_view(
+    entities=["user_id"],
+    ttl=timedelta(days=1)
+)
+def user_features(df):
+    return df.groupby("user_id").agg({
+        "purchase_count": "sum",
+        "avg_spend": "mean"
+    })
+
+# Fetch for training
+features = store.get_historical_features(
+    entity_df=entity_df,
+    features=["user_features:purchase_count"]
+)
+
+# Fetch for serving
+features = store.get_online_features(
+    features=["user_features:purchase_count"],
+    entity_rows=[{"user_id": "123"}]
+)
+\end{verbatim}
+
+\subsection*{Model Registry}
+\textbf{Purpose:} Version control for ML models
+
+\textbf{Components:}
+\begin{itemize}
+\item \textbf{Storage}: S3, GCS for model artifacts (.pkl, .h5, .onnx)
+\item \textbf{Metadata}: Model version, training params, metrics, dependencies
+\item \textbf{Lineage}: Track data → features → model → deployment
+\end{itemize}
+
+\textbf{Example (MLflow):}
+\begin{verbatim}
+import mlflow
+
+# Log model
+with mlflow.start_run():
+    mlflow.log_param("learning_rate", 0.01)
+    mlflow.log_metric("accuracy", 0.95)
+    mlflow.sklearn.log_model(model, "model")
+
+# Load model
+model = mlflow.sklearn.load_model("models:/my_model/production")
+\end{verbatim}
+
+\subsection*{Training Infrastructure}
+
+\textbf{Small Models (< 1GB):}
+\begin{itemize}
+\item \textbf{Single GPU}: NVIDIA V100, A100
+\item \textbf{Framework}: PyTorch, TensorFlow
+\item \textbf{Training time}: Hours to days
+\end{itemize}
+
+\textbf{Large Models (> 10GB):}
+\begin{itemize}
+\item \textbf{Distributed training}: Data parallelism (multiple GPUs)
+\item \textbf{Model parallelism}: For models larger than single GPU memory
+\item \textbf{Tools}: Horovod, PyTorch DDP, DeepSpeed
+\end{itemize}
+
+\textbf{Architecture:}
+\begin{verbatim}
+Parameter Server (PS) Architecture:
+Workers → Compute Gradients → PS → Aggregate → Update Model
+        ← Fetch Parameters  ←
+
+Ring-AllReduce (Horovod):
+Worker 1 ↔ Worker 2 ↔ Worker 3 ↔ Worker 4
+(All workers communicate in ring, no PS bottleneck)
+\end{verbatim}
+
+\textbf{Hyperparameter Tuning:}
+\begin{itemize}
+\item \textbf{Grid search}: Exhaustive, expensive
+\item \textbf{Random search}: Better than grid for high-dimensional
+\item \textbf{Bayesian optimization}: Optuna, Ray Tune
+\item \textbf{Early stopping}: Prune bad trials (ASHA, Hyperband)
+\end{itemize}
+
+\subsection*{Model Serving}
+
+\textbf{Online Serving (Real-time):}
+\begin{verbatim}
+Client → Load Balancer → Model Server (GPU/CPU)
+                       ↓
+                    Response (< 100ms)
+\end{verbatim}
+
+\textbf{Serving Options:}
+\begin{itemize}
+\item \textbf{TensorFlow Serving}: gRPC/REST, GPU support, batching
+\item \textbf{TorchServe}: PyTorch models, multi-model serving
+\item \textbf{ONNX Runtime}: Cross-framework, optimized inference
+\item \textbf{Custom}: Flask/FastAPI + model.predict()
+\end{itemize}
+
+\textbf{Optimization:}
+\begin{itemize}
+\item \textbf{Batching}: Group requests for GPU efficiency (trade latency for throughput)
+\item \textbf{Quantization}: FP32 → INT8 (4× smaller, 2-4× faster)
+\item \textbf{Model pruning}: Remove low-importance weights
+\item \textbf{Knowledge distillation}: Train small model to mimic large model
+\end{itemize}
+
+\textbf{Batch Serving (Offline):}
+\begin{verbatim}
+Scheduled Job (Airflow) → Spark → Model.predict(large_df)
+                                 ↓
+                          Write to DB/S3
+\end{verbatim}
+
+\textbf{Use cases:}
+\begin{itemize}
+\item \textbf{Precompute}: Daily recommendations, email digests
+\item \textbf{Batch scoring}: Risk scores for all users
+\end{itemize}
+
+\subsection*{Model Deployment Strategies}
+
+\textbf{Blue-Green Deployment:}
+\begin{verbatim}
+Production Traffic → Blue (Current Model v1)
+                   ↓
+                Switch after validation
+                   ↓
+Production Traffic → Green (New Model v2)
+\end{verbatim}
+
+\textbf{Canary Deployment:}
+\begin{verbatim}
+95% Traffic → Model v1 (Stable)
+5% Traffic  → Model v2 (Canary)
+             ↓
+       Monitor metrics
+             ↓
+     Gradually increase to 100%
+\end{verbatim}
+
+\textbf{Shadow Deployment:}
+\begin{verbatim}
+Production Traffic → Model v1 (Serve responses)
+                   ↓
+                 Model v2 (Log predictions, no serving)
+                   ↓
+            Compare predictions offline
+\end{verbatim}
+
+\textbf{A/B Testing:}
+\begin{verbatim}
+50% Users → Model A (Control)
+50% Users → Model B (Treatment)
+          ↓
+    Compare metrics (CTR, revenue)
+\end{verbatim}
+
+\section*{MONITORING \& EVALUATION}
+
+\subsection*{Offline Evaluation}
+
+\textbf{Train/Val/Test Split:}
+\begin{itemize}
+\item \textbf{Random split}: 70/15/15 (IID data)
+\item \textbf{Temporal split}: Train on past, test on future (time series)
+\item \textbf{Stratified}: Preserve class distribution (imbalanced data)
+\end{itemize}
+
+\textbf{Cross-Validation:}
+\begin{itemize}
+\item \textbf{K-fold}: 5-fold or 10-fold (small datasets)
+\item \textbf{Stratified K-fold}: Preserve class ratios
+\item \textbf{Time-series}: Expanding window (no future leakage)
+\end{itemize}
+
+\textbf{Metrics by Task:}
+
+\textbf{Classification:}
+\begin{itemize}
+\item \textbf{Binary}: Precision, Recall, F1, AUC-ROC, AUC-PR
+\item \textbf{Multi-class}: Accuracy, Macro/Micro F1, Confusion matrix
+\item \textbf{Imbalanced}: Precision-Recall curve (not ROC!)
+\end{itemize}
+
+\textbf{Ranking:}
+\begin{itemize}
+\item \textbf{NDCG@K}: Normalized Discounted Cumulative Gain
+\item \textbf{MRR}: Mean Reciprocal Rank
+\item \textbf{Precision@K, Recall@K}
+\end{itemize}
+
+\textbf{Regression:}
+\begin{itemize}
+\item \textbf{MSE, RMSE}: Sensitive to outliers
+\item \textbf{MAE}: Robust to outliers
+\item \textbf{R²}: Proportion of variance explained
+\item \textbf{MAPE}: Mean Absolute Percentage Error
+\end{itemize}
+
+\subsection*{Online Evaluation (A/B Testing)}
+
+\textbf{North Star Metrics:}
+\begin{itemize}
+\item \textbf{Search}: CTR, time-to-click, query reformulation rate
+\item \textbf{Recommendations}: CTR, watch time, conversion rate
+\item \textbf{Ads}: CTR, conversion rate, revenue per user
+\item \textbf{Social}: Engagement (likes, comments), DAU, session time
+\end{itemize}
+
+\textbf{Statistical Significance:}
+\begin{itemize}
+\item \textbf{Sample size}: Calculate required users for statistical power
+\item \textbf{Confidence}: 95\% confidence interval
+\item \textbf{P-value}: < 0.05 for significance
+\item \textbf{Duration}: Run for at least 1-2 weeks (account for weekly patterns)
+\end{itemize}
+
+\textbf{Guardrail Metrics:}
+\begin{itemize}
+\item \textbf{Latency}: p95, p99 latency should not increase
+\item \textbf{Error rate}: Should not increase
+\item \textbf{User complaints}: Monitor feedback, reports
+\end{itemize}
+
+\subsection*{Model Monitoring}
+
+\textbf{Data Drift:}
+\begin{itemize}
+\item \textbf{Feature distribution shift}: Track mean, std, quantiles over time
+\item \textbf{Detection}: KL divergence, Kolmogorov-Smirnov test
+\item \textbf{Action}: Retrain model on recent data
+\end{itemize}
+
+\textbf{Concept Drift:}
+\begin{itemize}
+\item \textbf{Definition}: Relationship between features and label changes
+\item \textbf{Example}: COVID changed travel patterns, broke travel models
+\item \textbf{Detection}: Monitor online metrics (CTR, accuracy) degradation
+\item \textbf{Action}: Retrain with new labels, add new features
+\end{itemize}
+
+\textbf{Prediction Drift:}
+\begin{itemize}
+\item \textbf{Monitor}: Distribution of predicted scores
+\item \textbf{Alert}: If predicted CTR drops from 5\% → 1\%
+\end{itemize}
+
+\textbf{Monitoring Dashboard:}
+\begin{verbatim}
+Grafana + Prometheus:
+- Prediction latency (p50, p95, p99)
+- QPS (queries per second)
+- Model accuracy over time
+- Feature distribution plots
+- Error rate, null predictions
+\end{verbatim}
+
+\subsection*{Retraining Strategy}
+
+\textbf{Periodic Retraining:}
+\begin{itemize}
+\item \textbf{Schedule}: Daily, weekly, or monthly
+\item \textbf{Trigger}: Cron job (Airflow, Kubernetes CronJob)
+\item \textbf{Use case}: Slowly changing data (e.g., content recommendations)
+\end{itemize}
+
+\textbf{Trigger-based Retraining:}
+\begin{itemize}
+\item \textbf{Metric degradation}: If AUC drops by > 5\%
+\item \textbf{Data drift detected}: Feature distribution change
+\item \textbf{Manual trigger}: New product launch, seasonal event
+\end{itemize}
+
+\textbf{Online Learning:}
+\begin{itemize}
+\item \textbf{Incremental updates}: Update model with new data (no full retrain)
+\item \textbf{Use case}: High-velocity data (ads, fraud detection)
+\item \textbf{Challenges}: Catastrophic forgetting, stability
+\end{itemize}
+
+\section*{CAPACITY ESTIMATION}
+
+\subsection*{Training Cost}
+
+\textbf{GPU Hours Estimation:}
+\begin{verbatim}
+Training time = (Dataset size × Epochs × FLOPs per sample)
+                / (GPU throughput × Batch size)
+\end{verbatim}
+
+\textbf{Example: ResNet-50 on ImageNet}
+\begin{itemize}
+\item \textbf{Dataset}: 1.2M images
+\item \textbf{Epochs}: 100
+\item \textbf{FLOPs}: 4 billion per image
+\item \textbf{GPU}: V100 (125 TFLOPS FP16)
+\item \textbf{Batch size}: 256
+\item \textbf{Time}: ~10 days on 8 V100s
+\end{itemize}
+
+\textbf{Cost:}
+\begin{itemize}
+\item \textbf{AWS p3.8xlarge}: 4× V100, \$12.24/hour
+\item \textbf{10 days}: 240 hours × \$12.24 = \textbf{\$2,938}
+\end{itemize}
+
+\subsection*{Serving Cost}
+
+\textbf{QPS to Instances:}
+\begin{verbatim}
+Instances = (Target QPS × Latency) / (Batch size × Parallelism)
+\end{verbatim}
+
+\textbf{Example: Image Classification Service}
+\begin{itemize}
+\item \textbf{Target QPS}: 1,000 requests/sec
+\item \textbf{Latency}: 50ms per image (with batching)
+\item \textbf{Batch size}: 32 images
+\item \textbf{GPU throughput}: 640 images/sec (32 × 20 batches/sec)
+\item \textbf{Instances needed}: 1000 / 640 = \textbf{2 GPUs}
+\end{itemize}
+
+\textbf{Cost:}
+\begin{itemize}
+\item \textbf{AWS g4dn.xlarge}: 1× T4 GPU, \$0.526/hour
+\item \textbf{Monthly (2 instances)}: 2 × 730 × \$0.526 = \textbf{\$768/month}
+\end{itemize}
+
+\subsection*{Storage}
+
+\textbf{Feature Store:}
+\begin{verbatim}
+Storage = Num users × Features per user × Bytes per feature
+
+Example (100M users, 500 features, 4 bytes each):
+= 100M × 500 × 4 bytes = 200 GB
+\end{verbatim}
+
+\textbf{Model Storage:}
+\begin{itemize}
+\item \textbf{BERT-base}: 440MB (110M parameters × 4 bytes)
+\item \textbf{GPT-3}: 700GB (175B parameters × 4 bytes)
+\item \textbf{ResNet-50}: 98MB (25M parameters × 4 bytes)
+\end{itemize}
+
+\textbf{Embedding Tables:}
+\begin{verbatim}
+Size = Num items × Embedding dim × 4 bytes
+
+Example (1B items, 128-dim embeddings):
+= 1B × 128 × 4 = 512 GB
+\end{verbatim}
+
+\section*{STAFF-LEVEL EXPECTATIONS}
+
+\subsection*{Trade-off Analysis}
+
+Always discuss:
+\begin{enumerate}
+\item \textbf{Accuracy vs Latency}
+\begin{itemize}
+\item \textbf{High accuracy}: BERT-large (slower)
+\item \textbf{Low latency}: DistilBERT, quantization
+\item \textbf{Decision}: Depends on use case (search ranking vs content moderation)
+\end{itemize}
+
+\item \textbf{Model Complexity vs Data Size}
+\begin{itemize}
+\item \textbf{Small data}: Simple model (avoid overfitting)
+\item \textbf{Large data}: Complex model (capture patterns)
+\end{itemize}
+
+\item \textbf{Real-time vs Batch}
+\begin{itemize}
+\item \textbf{Real-time}: Higher cost, lower latency (ad serving)
+\item \textbf{Batch}: Lower cost, higher latency (email recommendations)
+\end{itemize}
+
+\item \textbf{Precision vs Recall}
+\begin{itemize}
+\item \textbf{High precision}: Minimize false positives (fraud flagging)
+\item \textbf{High recall}: Catch all positives (medical diagnosis)
+\end{itemize}
+\end{enumerate}
+
+\subsection*{Failure Modes \& Mitigations}
+
+\textbf{Training Failures:}
+\begin{itemize}
+\item \textbf{Overfitting}: Add regularization, early stopping, more data
+\item \textbf{Underfitting}: Larger model, more features, less regularization
+\item \textbf{Class imbalance}: Weighted loss, SMOTE, focal loss
+\item \textbf{Data leakage}: Careful train/test split, temporal validation
+\end{itemize}
+
+\textbf{Serving Failures:}
+\begin{itemize}
+\item \textbf{Model server down}: Load balancer + multiple replicas
+\item \textbf{High latency spike}: Circuit breaker, fallback to simple model
+\item \textbf{OOM errors}: Batch size tuning, model sharding
+\item \textbf{Stale predictions}: Cache invalidation strategy
+\end{itemize}
+
+\textbf{Data Failures:}
+\begin{itemize}
+\item \textbf{Missing features}: Default values, imputation, robust model
+\item \textbf{Data drift}: Monitoring + auto-retrain pipeline
+\item \textbf{Label noise}: Confident learning, multi-annotator consensus
+\end{itemize}
+
+\subsection*{Real-World Considerations}
+
+\begin{itemize}
+\item \textbf{Cold start}: How to handle new users/items?
+\item \textbf{Fairness}: Avoid bias in gender, race (use fairness constraints)
+\item \textbf{Privacy}: Federated learning, differential privacy
+\item \textbf{Explainability}: SHAP, LIME for model interpretability
+\item \textbf{Feedback loops}: Positive feedback (recommendations) can create filter bubbles
+\item \textbf{Multi-objective}: Balance engagement, diversity, revenue
+\end{itemize}
+
+\section*{INTERVIEW TIPS}
+
+\subsection*{How to Approach ML System Design}
+
+\begin{enumerate}
+\item \textbf{Clarify (5 min)}
+\begin{itemize}
+\item Scale: 1M or 1B users?
+\item Latency: Real-time or batch?
+\item Data: Labeled? How much?
+\end{itemize}
+
+\item \textbf{High-level Design (10 min)}
+\begin{itemize}
+\item Draw 3-stage pipeline: Data → Model → Serving
+\item Identify key components
+\end{itemize}
+
+\item \textbf{Deep Dive (20 min)}
+\begin{itemize}
+\item Model selection + justification
+\item Feature engineering
+\item Serving architecture
+\item Metrics \& monitoring
+\end{itemize}
+
+\item \textbf{Trade-offs (10 min)}
+\begin{itemize}
+\item Discuss alternatives
+\item Justify your choices
+\item Address edge cases
+\end{itemize}
+\end{enumerate}
+
+\subsection*{Common Mistakes}
+
+\begin{itemize}
+\item \textbf{Jumping to model too fast}: Clarify requirements first!
+\item \textbf{Ignoring data pipeline}: Most time is spent on data, not modeling
+\item \textbf{Over-engineering}: Start simple, add complexity if needed
+\item \textbf{Not discussing metrics}: How do you know if model is good?
+\item \textbf{Forgetting monitoring}: Production models degrade over time
+\end{itemize}
+
+\end{multicols}
+\end{document}
