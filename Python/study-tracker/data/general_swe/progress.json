@@ -224,6 +224,15 @@
       "notes": "",
       "completed_on_time": null,
       "timestamp": "2025-10-19T14:54:16.737490"
+    },
+    {
+      "date": "2025-10-19",
+      "track": "coding",
+      "topic": "Week 3 Data Structures Integration",
+      "rating": 1,
+      "notes": "",
+      "completed_on_time": null,
+      "timestamp": "2025-10-19T17:49:26.717687"
     }
   ]
 }
