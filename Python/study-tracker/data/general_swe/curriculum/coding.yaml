@@ -196,10 +196,15 @@ weeks:
       description: Reverse every k nodes in linked list
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Cyclic Sort Pattern'
+    - title: 'NeetCode: Reverse Linked List'
       url: https://www.youtube.com/@NeetCode
-      duration: 10 min
-      description: In-place sorting for arrays with numbers 1 to n
+      duration: 8 min
+      description: Classic linked list reversal technique
+      priority: high
+    - title: 'Back To Back SWE: Advanced Linked List Reversal'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 15 min
+      description: Reverse in groups, advanced patterns
       priority: medium
   - day: 6
     topic: Binary Tree Traversal
@@ -237,15 +242,15 @@ weeks:
       description: Reconstruct tree from traversal sequences
     time_estimate: 50
     video_resources:
-    - title: 'NeetCode: Reverse Linked List'
+    - title: 'NeetCode: Binary Tree Level Order Traversal'
       url: https://www.youtube.com/@NeetCode
-      duration: 8 min
-      description: Iterative and recursive approaches
+      duration: 12 min
+      description: BFS traversal of trees
       priority: high
-    - title: 'Back To Back SWE: Advanced Linked List Reversal'
-      url: https://www.youtube.com/@BackToBackSWE
-      duration: 15 min
-      description: Reverse in groups and complex patterns
+    - title: 'William Fiset: Tree Traversal Algorithms'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 18 min
+      description: Inorder, preorder, postorder, level-order
       priority: medium
   - day: 7
     topic: Week 1 Fundamentals Integration
@@ -374,11 +379,16 @@ weeks:
       description: Find largest island area using DFS
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Binary Tree Level Order Traversal'
-      url: https://www.youtube.com/@NeetCode
-      duration: 10 min
-      description: BFS pattern for trees with queue
+    - title: 'William Fiset: DFS Graph Traversal'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 12 min
+      description: Depth-first search implementation
       priority: high
+    - title: 'NeetCode: Binary Tree DFS Patterns'
+      url: https://www.youtube.com/@NeetCode
+      duration: 14 min
+      description: DFS on trees and graphs
+      priority: medium
   - day: 9
     topic: BFS & Graph/Matrix Traversal
     activity: Master breadth-first search for shortest paths and level-by-level processing.
@@ -426,11 +436,16 @@ weeks:
       description: BFS for shortest transformation sequence
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Binary Tree DFS Patterns'
-      url: https://www.youtube.com/@NeetCode
-      duration: 15 min
-      description: Preorder, inorder, postorder traversals
+    - title: 'William Fiset: BFS Graph Traversal'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 14 min
+      description: Breadth-first search implementation
       priority: high
+    - title: 'NeetCode: Number of Islands'
+      url: https://www.youtube.com/@NeetCode
+      duration: 10 min
+      description: BFS on 2D grids
+      priority: medium
   - day: 10
     topic: Dynamic Programming
     activity: 'Master DP fundamentals: memoization, tabulation, and optimal substructure.
@@ -475,10 +490,15 @@ weeks:
       description: 'Unbounded knapsack: Minimum coins for target amount'
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Median from Data Stream'
+    - title: 'NeetCode: 1D DP Explained'
       url: https://www.youtube.com/@NeetCode
-      duration: 12 min
-      description: Using two heaps for streaming median
+      duration: 18 min
+      description: House Robber, climbing stairs patterns
+      priority: high
+    - title: 'Back To Back SWE: DP Fundamentals'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 25 min
+      description: Memoization, tabulation, state transitions
       priority: high
   - day: 11
     topic: Backtracking
@@ -520,11 +540,16 @@ weeks:
       description: Search for word in 2D grid using backtracking
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Stack Problems Explained'
+    - title: 'NeetCode: Backtracking Pattern'
       url: https://www.youtube.com/@NeetCode
-      duration: 18 min
-      description: Valid parentheses, next greater element, etc.
+      duration: 15 min
+      description: Subsets, permutations, combinations
       priority: high
+    - title: 'Back To Back SWE: Backtracking Deep Dive'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 30 min
+      description: N-Queens, Sudoku solver
+      priority: medium
   - day: 12
     topic: Bit Manipulation
     activity: Master bitwise operations and XOR tricks. Learn bit masking, counting
@@ -600,10 +625,15 @@ weeks:
       description: Find missing number using XOR or math
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Monotonic Stack Pattern'
+    - title: 'NeetCode: Bit Manipulation Tricks'
       url: https://www.youtube.com/@NeetCode
-      duration: 15 min
-      description: Stack for finding next greater/smaller element
+      duration: 12 min
+      description: XOR, AND, OR patterns for interviews
+      priority: high
+    - title: 'Back To Back SWE: Bit Manipulation Mastery'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 20 min
+      description: Counting bits, power of two, bit tricks
       priority: medium
   - day: 13
     topic: Prefix Sum
@@ -748,16 +778,16 @@ weeks:
       description: Efficient merging using min-heap
     time_estimate: 45
     video_resources:
-    - title: 'William Fiset: BFS Graph Traversal'
-      url: https://www.youtube.com/@WilliamFiset-videos
-      duration: 15 min
-      description: BFS visualization and applications
-      priority: high
-    - title: 'NeetCode: Number of Islands'
+    - title: 'NeetCode: Median from Data Stream'
       url: https://www.youtube.com/@NeetCode
-      duration: 10 min
-      description: Classic BFS graph problem
+      duration: 14 min
+      description: Using two heaps for running median
       priority: high
+    - title: 'William Fiset: Priority Queue / Heap'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 16 min
+      description: Heap operations, heapify, top-k problems
+      priority: medium
   - day: 16
     topic: Monotonic Stack
     activity: Master monotonic stacks for next/previous greater/smaller element problems.
@@ -805,11 +835,16 @@ weeks:
       description: Classic monotonic stack application
     time_estimate: 45
     video_resources:
-    - title: 'William Fiset: DFS Graph Traversal'
-      url: https://www.youtube.com/@WilliamFiset-videos
-      duration: 18 min
-      description: DFS with animations and topological sort
+    - title: 'NeetCode: Monotonic Stack Pattern'
+      url: https://www.youtube.com/@NeetCode
+      duration: 13 min
+      description: Next greater element, daily temperatures
       priority: high
+    - title: 'NeetCode: Stack Problems Explained'
+      url: https://www.youtube.com/@NeetCode
+      duration: 10 min
+      description: Valid parentheses, min stack
+      priority: medium
   - day: 17
     topic: Overlapping Intervals
     activity: 'Master interval problems: merging, scheduling, and conflict detection.
@@ -846,15 +881,15 @@ weeks:
       description: Minimum intervals to remove to make non-overlapping
     time_estimate: 45
     video_resources:
-    - title: 'William Fiset: Union Find Data Structure'
-      url: https://www.youtube.com/@WilliamFiset-videos
-      duration: 20 min
-      description: Disjoint set with path compression
-      priority: high
-    - title: 'Back To Back SWE: Union Find Explained'
-      url: https://www.youtube.com/@BackToBackSWE
+    - title: 'NeetCode: Interval Problems'
+      url: https://www.youtube.com/@NeetCode
       duration: 15 min
-      description: Applications in graph problems
+      description: Merge intervals, meeting rooms
+      priority: high
+    - title: 'Back To Back SWE: Overlapping Intervals'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 18 min
+      description: Insert interval, non-overlapping intervals
       priority: medium
   - day: 18
     topic: Trie Operations
@@ -906,11 +941,16 @@ weeks:
       description: Binary trie for bit manipulation
     time_estimate: 45
     video_resources:
-    - title: 'William Fiset: Topological Sort Algorithm'
-      url: https://www.youtube.com/@WilliamFiset-videos
-      duration: 12 min
-      description: Kahn's algorithm and DFS approach
+    - title: 'NeetCode: Implement Trie (Prefix Tree)'
+      url: https://www.youtube.com/@NeetCode
+      duration: 11 min
+      description: Trie insertion, search, prefix matching
       priority: high
+    - title: 'Back To Back SWE: Trie Data Structure'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 16 min
+      description: Word search, autocomplete with tries
+      priority: medium
   - day: 19
     topic: Union-Find
     activity: Master Union-Find (Disjoint Set) for connectivity problems. Learn path
@@ -962,15 +1002,15 @@ weeks:
       description: Union-Find for grouping related accounts
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Implement Trie (Prefix Tree)'
-      url: https://www.youtube.com/@NeetCode
-      duration: 15 min
-      description: Trie implementation and word search
-      priority: high
-    - title: 'Back To Back SWE: Trie Data Structure'
-      url: https://www.youtube.com/@BackToBackSWE
+    - title: 'William Fiset: Union Find Data Structure'
+      url: https://www.youtube.com/@WilliamFiset-videos
       duration: 18 min
-      description: Advanced trie applications
+      description: Disjoint set with path compression
+      priority: high
+    - title: 'Back To Back SWE: Union Find Explained'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 20 min
+      description: Connected components, cycle detection
       priority: medium
   - day: 20
     topic: Greedy Algorithms
@@ -1008,15 +1048,15 @@ weeks:
       description: Greedy circular array problem
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Backtracking Pattern'
+    - title: 'NeetCode: Greedy vs DP'
       url: https://www.youtube.com/@NeetCode
-      duration: 20 min
-      description: Permutations, combinations, subsets
+      duration: 14 min
+      description: When to use greedy algorithms
       priority: high
-    - title: 'Back To Back SWE: Backtracking Deep Dive'
+    - title: 'Back To Back SWE: Greedy Algorithms'
       url: https://www.youtube.com/@BackToBackSWE
-      duration: 25 min
-      description: Complex backtracking problems
+      duration: 22 min
+      description: Jump game, gas station, interval scheduling
       priority: medium
   - day: 21
     topic: Week 3 Data Structures Integration
@@ -1153,15 +1193,20 @@ weeks:
       description: Minimum spanning tree problem
     time_estimate: 50
     video_resources:
-    - title: 'NeetCode: 2D DP Patterns'
-      url: https://www.youtube.com/@NeetCode
-      duration: 22 min
-      description: Grid problems, LCS, edit distance
+    - title: 'William Fiset: Dijkstra''s Algorithm'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 16 min
+      description: Single-source shortest path with priority queue
       priority: high
-    - title: 'Back To Back SWE: 2D DP Mastery'
-      url: https://www.youtube.com/@BackToBackSWE
-      duration: 30 min
-      description: Advanced 2D DP techniques
+    - title: 'William Fiset: Floyd-Warshall Algorithm'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 10 min
+      description: All-pairs shortest path
+      priority: high
+    - title: 'William Fiset: Minimum Spanning Tree'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 12 min
+      description: Kruskal's and Prim's algorithms
       priority: medium
   - day: 24
     topic: Topological Sort
@@ -1206,11 +1251,16 @@ weeks:
       description: Derive character ordering using topological sort
     time_estimate: 45
     video_resources:
-    - title: 'NeetCode: Greedy vs DP'
-      url: https://www.youtube.com/@NeetCode
-      duration: 15 min
-      description: When to use greedy approach
+    - title: 'William Fiset: Topological Sort Algorithm'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 14 min
+      description: Kahn's algorithm, DFS-based topological sort
       priority: high
+    - title: 'NeetCode: Course Schedule'
+      url: https://www.youtube.com/@NeetCode
+      duration: 12 min
+      description: Topological sort in practice
+      priority: medium
   - day: 25
     topic: Complex Multi-Pattern Problems
     activity: Tackle problems requiring combination of multiple advanced patterns.
