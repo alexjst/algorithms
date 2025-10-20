@@ -1,1637 +1,1590 @@
-track: "coding"
-description: "28-day comprehensive coding interview preparation covering all 14 essential LeetCode patterns"
+track: coding
+description: 28-day comprehensive coding interview preparation covering all 14 essential
+  LeetCode patterns
 weeks:
   week1:
-    - day: 1
-      topic: "Two Pointers"
-      activity: "Master the two-pointer technique for array problems. Study the pattern: start with pointers at beginning/end or both at start, move based on conditions. Focus on sorted arrays and palindromes."
-      detailed_content: |
-        Two Pointer Template:
-        1. Initialize left = 0, right = len(arr) - 1 (or both at 0)
-        2. While left < right:
-           - Check current condition
-           - Move appropriate pointer based on target
-        3. Common patterns: opposite ends, same direction, fast/slow
+  - day: 1
+    topic: Two Pointers
+    activity: 'Master the two-pointer technique for array problems. Study the pattern:
+      start with pointers at beginning/end or both at start, move based on conditions.
+      Focus on sorted arrays and palindromes.'
+    detailed_content: "Two Pointer Template:\n1. Initialize left = 0, right = len(arr)\
+      \ - 1 (or both at 0)\n2. While left < right:\n   - Check current condition\n\
+      \   - Move appropriate pointer based on target\n3. Common patterns: opposite\
+      \ ends, same direction, fast/slow\n\nKey insights:\n- Reduces O(n²) brute force\
+      \ to O(n)\n- Works great with sorted arrays\n- Useful for sum problems, palindromes,\
+      \ subsequences\n"
+    problems:
+    - number: '167'
+      title: Two Sum II - Input Array Is Sorted
+      url: https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
+      difficulty: Medium
+      description: Find two numbers in sorted array that add to target
+    - number: '15'
+      title: 3Sum
+      url: https://leetcode.com/problems/3sum/
+      difficulty: Medium
+      description: Find all unique triplets that sum to zero
+    video_resources:
+    - title: 'NeetCode: Two Pointer Pattern Explained'
+      url: https://www.youtube.com/@NeetCode
+      duration: 15 min
+      description: Visual walkthrough of two pointer technique with examples
+      priority: high
+    - title: 'NeetCode: Two Sum II Solution'
+      url: https://www.youtube.com/@NeetCode
+      duration: 10 min
+      description: Step-by-step solution for Two Sum II
+      priority: high
+    - title: 'NeetCode: 3Sum Explained'
+      url: https://www.youtube.com/@NeetCode
+      duration: 12 min
+      description: How to avoid duplicates and optimize 3Sum
+      priority: high
+    time_estimate: 45
+  - day: 2
+    topic: Sliding Window
+    activity: Learn fixed and variable sliding window patterns. Master expanding/contracting
+      windows for substring and subarray problems.
+    detailed_content: 'Sliding Window Template:
 
-        Key insights:
-        - Reduces O(n²) brute force to O(n)
-        - Works great with sorted arrays
-        - Useful for sum problems, palindromes, subsequences
-      problems:
-        - number: "167"
-          title: "Two Sum II - Input Array Is Sorted"
-          url: "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/"
-          difficulty: "Medium"
-          description: "Find two numbers in sorted array that add to target"
-        - number: "15"
-          title: "3Sum"
-          url: "https://leetcode.com/problems/3sum/"
-          difficulty: "Medium"
-          description: "Find all unique triplets that sum to zero"
-      video_resources:
-        - title: "NeetCode: Two Pointer Pattern Explained"
-          url: "https://www.youtube.com/@NeetCode"
-          duration: "15 min"
-          description: "Visual walkthrough of two pointer technique with examples"
-          priority: "high"
-        - title: "NeetCode: Two Sum II Solution"
-          url: "https://www.youtube.com/@NeetCode"
-          duration: "10 min"
-          description: "Step-by-step solution for Two Sum II"
-          priority: "high"
-        - title: "NeetCode: 3Sum Explained"
-          url: "https://www.youtube.com/@NeetCode"
-          duration: "12 min"
-          description: "How to avoid duplicates and optimize 3Sum"
-          priority: "high"
-      time_estimate: 45
+      Fixed Size Window:
 
-    - day: 2
-      topic: "Sliding Window"
-      activity: "Learn fixed and variable sliding window patterns. Master expanding/contracting windows for substring and subarray problems."
-      detailed_content: |
-        Sliding Window Template:
-        Fixed Size Window:
-        1. Calculate window sum for first k elements
-        2. Slide window: remove left, add right
-        3. Track maximum/minimum as you go
+      1. Calculate window sum for first k elements
 
-        Variable Size Window:
-        1. Expand right while condition not met
-        2. Contract left while condition is met
-        3. Track optimal window size/content
+      2. Slide window: remove left, add right
 
-        Key patterns:
-        - Maximum/minimum subarray of size k
-        - Longest substring with constraints
-        - Substring with character frequency limits
-      problems:
-        - number: "3"
-          title: "Longest Substring Without Repeating Characters"
-          url: "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
-          difficulty: "Medium"
-          description: "Find length of longest substring without repeating characters"
-        - number: "76"
-          title: "Minimum Window Substring"
-          url: "https://leetcode.com/problems/minimum-window-substring/"
-          difficulty: "Hard"
-          description: "Find minimum window containing all characters of target string"
-      time_estimate: 45
+      3. Track maximum/minimum as you go
 
-    - day: 3
-      topic: "Binary Search"
-      activity: "Master binary search on arrays and abstract search spaces. Learn to identify 'search for answer' problems."
-      detailed_content: |
-        Binary Search Template:
-        1. left, right = 0, len(arr) - 1
-        2. while left <= right:
-           mid = left + (right - left) // 2
-           if target == arr[mid]: return mid
-           elif target < arr[mid]: right = mid - 1
-           else: left = mid + 1
-        3. return -1
 
-        Search Space Binary Search:
-        1. Define search range [min_answer, max_answer]
-        2. Check if mid value is valid solution
-        3. Narrow search based on feasibility
+      Variable Size Window:
 
-        Key insights:
-        - O(log n) time complexity
-        - Works on any monotonic function
-        - Can search for "first/last occurrence"
-        - Useful for optimization problems
-      problems:
-        - number: "33"
-          title: "Search in Rotated Sorted Array"
-          url: "https://leetcode.com/problems/search-in-rotated-sorted-array/"
-          difficulty: "Medium"
-          description: "Search target in rotated sorted array"
-        - number: "4"
-          title: "Median of Two Sorted Arrays"
-          url: "https://leetcode.com/problems/median-of-two-sorted-arrays/"
-          difficulty: "Hard"
-          description: "Advanced binary search to find median efficiently"
-      time_estimate: 45
+      1. Expand right while condition not met
 
-    - day: 4
-      topic: "Slow and Fast Pointers"
-      activity: "Master the tortoise and hare algorithm for cycle detection and finding middle elements. Essential for linked list problems."
-      detailed_content: |
-        Slow and Fast Pointer Template:
-        1. slow = fast = head
-        2. while fast and fast.next:
-           slow = slow.next
-           fast = fast.next.next
-           if slow == fast: return True  # Cycle detected
-        3. return False
+      2. Contract left while condition is met
 
-        Applications:
-        - Cycle Detection (Floyd's Algorithm)
-        - Finding Middle of Linked List
-        - Finding Start of Cycle
-        - Palindrome Linked List Detection
+      3. Track optimal window size/content
 
-        Key insights:
-        - O(1) space complexity
-        - Fast pointer moves 2x speed of slow
-        - When they meet, cycle exists
-        - Reset one pointer to find cycle start
-      problems:
-        - number: "141"
-          title: "Linked List Cycle"
-          url: "https://leetcode.com/problems/linked-list-cycle/"
-          difficulty: "Easy"
-          description: "Detect if linked list has cycle using two pointers"
-        - number: "142"
-          title: "Linked List Cycle II"
-          url: "https://leetcode.com/problems/linked-list-cycle-ii/"
-          difficulty: "Medium"
-          description: "Find where cycle begins in linked list"
-        - number: "876"
-          title: "Middle of the Linked List"
-          url: "https://leetcode.com/problems/middle-of-the-linked-list/"
-          difficulty: "Easy"
-          description: "Find middle node using slow/fast pointers"
-      time_estimate: 45
 
-    - day: 5
-      topic: "In-Place Linked List Reversal"
-      activity: "Learn to reverse linked lists without extra space. Master the three-pointer technique for partial and complete reversals."
-      detailed_content: |
-        Linked List Reversal Template:
-        1. prev = None, curr = head
-        2. while curr:
-           next_temp = curr.next
-           curr.next = prev
-           prev = curr
-           curr = next_temp
-        3. return prev
+      Key patterns:
 
-        Partial Reversal (m to n):
-        1. Use dummy node for easier handling
-        2. Find position m-1
-        3. Reverse from m to n
-        4. Connect reversed portion back
+      - Maximum/minimum subarray of size k
 
-        Key insights:
-        - O(1) space complexity
-        - Three pointers: prev, curr, next
-        - Handle edge cases (empty, single node)
-        - Dummy nodes simplify edge cases
-      problems:
-        - number: "206"
-          title: "Reverse Linked List"
-          url: "https://leetcode.com/problems/reverse-linked-list/"
-          difficulty: "Easy"
-          description: "Reverse entire linked list in-place"
-        - number: "92"
-          title: "Reverse Linked List II"
-          url: "https://leetcode.com/problems/reverse-linked-list-ii/"
-          difficulty: "Medium"
-          description: "Reverse linked list from position m to n"
-        - number: "25"
-          title: "Reverse Nodes in k-Group"
-          url: "https://leetcode.com/problems/reverse-nodes-in-k-group/"
-          difficulty: "Hard"
-          description: "Reverse every k nodes in linked list"
-      time_estimate: 45
+      - Longest substring with constraints
 
-    - day: 6
-      topic: "Binary Tree Traversal"
-      activity: "Master all tree traversal methods: preorder, inorder, postorder (recursive and iterative), and level-order traversal."
-      detailed_content: |
-        Tree Traversal Templates:
+      - Substring with character frequency limits
 
-        Recursive Inorder:
-        def inorder(root):
-            if not root: return []
-            return inorder(root.left) + [root.val] + inorder(root.right)
+      '
+    problems:
+    - number: '3'
+      title: Longest Substring Without Repeating Characters
+      url: https://leetcode.com/problems/longest-substring-without-repeating-characters/
+      difficulty: Medium
+      description: Find length of longest substring without repeating characters
+    - number: '76'
+      title: Minimum Window Substring
+      url: https://leetcode.com/problems/minimum-window-substring/
+      difficulty: Hard
+      description: Find minimum window containing all characters of target string
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Sliding Window Technique'
+      url: https://www.youtube.com/@NeetCode
+      duration: 18 min
+      description: Fixed vs variable window patterns explained
+      priority: high
+    - title: 'NeetCode: Longest Substring Without Repeating Characters'
+      url: https://www.youtube.com/@NeetCode
+      duration: 12 min
+      description: Classic sliding window problem walkthrough
+      priority: high
+  - day: 3
+    topic: Binary Search
+    activity: Master binary search on arrays and abstract search spaces. Learn to
+      identify 'search for answer' problems.
+    detailed_content: "Binary Search Template:\n1. left, right = 0, len(arr) - 1\n\
+      2. while left <= right:\n   mid = left + (right - left) // 2\n   if target ==\
+      \ arr[mid]: return mid\n   elif target < arr[mid]: right = mid - 1\n   else:\
+      \ left = mid + 1\n3. return -1\n\nSearch Space Binary Search:\n1. Define search\
+      \ range [min_answer, max_answer]\n2. Check if mid value is valid solution\n\
+      3. Narrow search based on feasibility\n\nKey insights:\n- O(log n) time complexity\n\
+      - Works on any monotonic function\n- Can search for \"first/last occurrence\"\
+      \n- Useful for optimization problems\n"
+    problems:
+    - number: '33'
+      title: Search in Rotated Sorted Array
+      url: https://leetcode.com/problems/search-in-rotated-sorted-array/
+      difficulty: Medium
+      description: Search target in rotated sorted array
+    - number: '4'
+      title: Median of Two Sorted Arrays
+      url: https://leetcode.com/problems/median-of-two-sorted-arrays/
+      difficulty: Hard
+      description: Advanced binary search to find median efficiently
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Binary Search Explained'
+      url: https://www.youtube.com/@NeetCode
+      duration: 15 min
+      description: Binary search template and common patterns
+      priority: high
+    - title: 'NeetCode: Search in Rotated Sorted Array'
+      url: https://www.youtube.com/@NeetCode
+      duration: 10 min
+      description: Advanced binary search technique
+      priority: high
+  - day: 4
+    topic: Slow and Fast Pointers
+    activity: Master the tortoise and hare algorithm for cycle detection and finding
+      middle elements. Essential for linked list problems.
+    detailed_content: "Slow and Fast Pointer Template:\n1. slow = fast = head\n2.\
+      \ while fast and fast.next:\n   slow = slow.next\n   fast = fast.next.next\n\
+      \   if slow == fast: return True  # Cycle detected\n3. return False\n\nApplications:\n\
+      - Cycle Detection (Floyd's Algorithm)\n- Finding Middle of Linked List\n- Finding\
+      \ Start of Cycle\n- Palindrome Linked List Detection\n\nKey insights:\n- O(1)\
+      \ space complexity\n- Fast pointer moves 2x speed of slow\n- When they meet,\
+      \ cycle exists\n- Reset one pointer to find cycle start\n"
+    problems:
+    - number: '141'
+      title: Linked List Cycle
+      url: https://leetcode.com/problems/linked-list-cycle/
+      difficulty: Easy
+      description: Detect if linked list has cycle using two pointers
+    - number: '142'
+      title: Linked List Cycle II
+      url: https://leetcode.com/problems/linked-list-cycle-ii/
+      difficulty: Medium
+      description: Find where cycle begins in linked list
+    - number: '876'
+      title: Middle of the Linked List
+      url: https://leetcode.com/problems/middle-of-the-linked-list/
+      difficulty: Easy
+      description: Find middle node using slow/fast pointers
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Floyd''s Cycle Detection'
+      url: https://www.youtube.com/@NeetCode
+      duration: 12 min
+      description: Tortoise and hare algorithm explained
+      priority: high
+  - day: 5
+    topic: In-Place Linked List Reversal
+    activity: Learn to reverse linked lists without extra space. Master the three-pointer
+      technique for partial and complete reversals.
+    detailed_content: "Linked List Reversal Template:\n1. prev = None, curr = head\n\
+      2. while curr:\n   next_temp = curr.next\n   curr.next = prev\n   prev = curr\n\
+      \   curr = next_temp\n3. return prev\n\nPartial Reversal (m to n):\n1. Use dummy\
+      \ node for easier handling\n2. Find position m-1\n3. Reverse from m to n\n4.\
+      \ Connect reversed portion back\n\nKey insights:\n- O(1) space complexity\n\
+      - Three pointers: prev, curr, next\n- Handle edge cases (empty, single node)\n\
+      - Dummy nodes simplify edge cases\n"
+    problems:
+    - number: '206'
+      title: Reverse Linked List
+      url: https://leetcode.com/problems/reverse-linked-list/
+      difficulty: Easy
+      description: Reverse entire linked list in-place
+    - number: '92'
+      title: Reverse Linked List II
+      url: https://leetcode.com/problems/reverse-linked-list-ii/
+      difficulty: Medium
+      description: Reverse linked list from position m to n
+    - number: '25'
+      title: Reverse Nodes in k-Group
+      url: https://leetcode.com/problems/reverse-nodes-in-k-group/
+      difficulty: Hard
+      description: Reverse every k nodes in linked list
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Cyclic Sort Pattern'
+      url: https://www.youtube.com/@NeetCode
+      duration: 10 min
+      description: In-place sorting for arrays with numbers 1 to n
+      priority: medium
+  - day: 6
+    topic: Binary Tree Traversal
+    activity: 'Master all tree traversal methods: preorder, inorder, postorder (recursive
+      and iterative), and level-order traversal.'
+    detailed_content: "Tree Traversal Templates:\n\nRecursive Inorder:\ndef inorder(root):\n\
+      \    if not root: return []\n    return inorder(root.left) + [root.val] + inorder(root.right)\n\
+      \nIterative Inorder:\ndef inorder(root):\n    result, stack = [], []\n    curr\
+      \ = root\n    while curr or stack:\n        while curr:\n            stack.append(curr)\n\
+      \            curr = curr.left\n        curr = stack.pop()\n        result.append(curr.val)\n\
+      \        curr = curr.right\n    return result\n\nLevel Order (BFS):\nfrom collections\
+      \ import deque\ndef levelOrder(root):\n    if not root: return []\n    queue\
+      \ = deque([root])\n    result = []\n    while queue:\n        level = []\n \
+      \       for _ in range(len(queue)):\n            node = queue.popleft()\n  \
+      \          level.append(node.val)\n            if node.left: queue.append(node.left)\n\
+      \            if node.right: queue.append(node.right)\n        result.append(level)\n\
+      \    return result\n\nKey patterns:\n- Preorder: Root → Left → Right\n- Inorder:\
+      \ Left → Root → Right\n- Postorder: Left → Right → Root\n- Level-order: BFS\
+      \ with queue\n"
+    problems:
+    - number: '94'
+      title: Binary Tree Inorder Traversal
+      url: https://leetcode.com/problems/binary-tree-inorder-traversal/
+      difficulty: Easy
+      description: Traverse tree inorder both recursively and iteratively
+    - number: '102'
+      title: Binary Tree Level Order Traversal
+      url: https://leetcode.com/problems/binary-tree-level-order-traversal/
+      difficulty: Medium
+      description: Level-by-level traversal using BFS
+    - number: '105'
+      title: Construct Binary Tree from Preorder and Inorder Traversal
+      url: https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/
+      difficulty: Medium
+      description: Reconstruct tree from traversal sequences
+    time_estimate: 50
+    video_resources:
+    - title: 'NeetCode: Reverse Linked List'
+      url: https://www.youtube.com/@NeetCode
+      duration: 8 min
+      description: Iterative and recursive approaches
+      priority: high
+    - title: 'Back To Back SWE: Advanced Linked List Reversal'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 15 min
+      description: Reverse in groups and complex patterns
+      priority: medium
+  - day: 7
+    topic: Week 1 Fundamentals Integration
+    activity: Combine all fundamental patterns. Practice identifying which technique
+      to use. Solve problems mixing multiple patterns.
+    detailed_content: 'Pattern Recognition Guide:
 
-        Iterative Inorder:
-        def inorder(root):
-            result, stack = [], []
-            curr = root
-            while curr or stack:
-                while curr:
-                    stack.append(curr)
-                    curr = curr.left
-                curr = stack.pop()
-                result.append(curr.val)
-                curr = curr.right
-            return result
 
-        Level Order (BFS):
-        from collections import deque
-        def levelOrder(root):
-            if not root: return []
-            queue = deque([root])
-            result = []
-            while queue:
-                level = []
-                for _ in range(len(queue)):
-                    node = queue.popleft()
-                    level.append(node.val)
-                    if node.left: queue.append(node.left)
-                    if node.right: queue.append(node.right)
-                result.append(level)
-            return result
+      Two Pointers:
 
-        Key patterns:
-        - Preorder: Root → Left → Right
-        - Inorder: Left → Root → Right
-        - Postorder: Left → Right → Root
-        - Level-order: BFS with queue
-      problems:
-        - number: "94"
-          title: "Binary Tree Inorder Traversal"
-          url: "https://leetcode.com/problems/binary-tree-inorder-traversal/"
-          difficulty: "Easy"
-          description: "Traverse tree inorder both recursively and iteratively"
-        - number: "102"
-          title: "Binary Tree Level Order Traversal"
-          url: "https://leetcode.com/problems/binary-tree-level-order-traversal/"
-          difficulty: "Medium"
-          description: "Level-by-level traversal using BFS"
-        - number: "105"
-          title: "Construct Binary Tree from Preorder and Inorder Traversal"
-          url: "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/"
-          difficulty: "Medium"
-          description: "Reconstruct tree from traversal sequences"
-      time_estimate: 50
+      - Sorted array + pair/triplet sums
 
-    - day: 7
-      topic: "Week 1 Fundamentals Integration"
-      activity: "Combine all fundamental patterns. Practice identifying which technique to use. Solve problems mixing multiple patterns."
-      detailed_content: |
-        Pattern Recognition Guide:
+      - Palindrome checking
 
-        Two Pointers:
-        - Sorted array + pair/triplet sums
-        - Palindrome checking
-        - Array partitioning
+      - Array partitioning
 
-        Sliding Window:
-        - Substring/subarray with constraints
-        - "Longest/shortest" with conditions
-        - Fixed window size problems
 
-        Binary Search:
-        - Sorted array search
-        - "Find first/last occurrence"
-        - Optimization problems (minimize/maximize)
+      Sliding Window:
 
-        Slow/Fast Pointers:
-        - Linked list cycles
-        - Finding middle elements
-        - Palindrome detection in linked lists
+      - Substring/subarray with constraints
 
-        Linked List Reversal:
-        - Reverse operations
-        - Reordering linked lists
-        - K-group operations
+      - "Longest/shortest" with conditions
 
-        Tree Traversal:
-        - Tree navigation patterns
-        - Level-by-level processing
-        - Recursive tree problems
-      problems:
-        - number: "11"
-          title: "Container With Most Water"
-          url: "https://leetcode.com/problems/container-with-most-water/"
-          difficulty: "Medium"
-          description: "Two pointers + optimization: Find max area between vertical lines"
-        - number: "424"
-          title: "Longest Repeating Character Replacement"
-          url: "https://leetcode.com/problems/longest-repeating-character-replacement/"
-          difficulty: "Medium"
-          description: "Sliding window + hash map: Replace k chars to get longest repeating substring"
-        - number: "234"
-          title: "Palindrome Linked List"
-          url: "https://leetcode.com/problems/palindrome-linked-list/"
-          difficulty: "Easy"
-          description: "Fast/slow pointers + reversal: Check if linked list is palindrome"
-        - number: "98"
-          title: "Validate Binary Search Tree"
-          url: "https://leetcode.com/problems/validate-binary-search-tree/"
-          difficulty: "Medium"
-          description: "Tree traversal: Validate BST using inorder properties"
-      time_estimate: 60
+      - Fixed window size problems
 
+
+      Binary Search:
+
+      - Sorted array search
+
+      - "Find first/last occurrence"
+
+      - Optimization problems (minimize/maximize)
+
+
+      Slow/Fast Pointers:
+
+      - Linked list cycles
+
+      - Finding middle elements
+
+      - Palindrome detection in linked lists
+
+
+      Linked List Reversal:
+
+      - Reverse operations
+
+      - Reordering linked lists
+
+      - K-group operations
+
+
+      Tree Traversal:
+
+      - Tree navigation patterns
+
+      - Level-by-level processing
+
+      - Recursive tree problems
+
+      '
+    problems:
+    - number: '11'
+      title: Container With Most Water
+      url: https://leetcode.com/problems/container-with-most-water/
+      difficulty: Medium
+      description: 'Two pointers + optimization: Find max area between vertical lines'
+    - number: '424'
+      title: Longest Repeating Character Replacement
+      url: https://leetcode.com/problems/longest-repeating-character-replacement/
+      difficulty: Medium
+      description: 'Sliding window + hash map: Replace k chars to get longest repeating
+        substring'
+    - number: '234'
+      title: Palindrome Linked List
+      url: https://leetcode.com/problems/palindrome-linked-list/
+      difficulty: Easy
+      description: 'Fast/slow pointers + reversal: Check if linked list is palindrome'
+    - number: '98'
+      title: Validate Binary Search Tree
+      url: https://leetcode.com/problems/validate-binary-search-tree/
+      difficulty: Medium
+      description: 'Tree traversal: Validate BST using inorder properties'
+    time_estimate: 60
+    video_resources:
+    - title: 'NeetCode: Top Patterns for Coding Interviews'
+      url: https://www.youtube.com/@NeetCode
+      duration: 20 min
+      description: Review of all Week 1 patterns
+      priority: high
   week2:
-    - day: 8
-      topic: "DFS Fundamentals"
-      activity: "Master depth-first search for trees and graphs. Learn recursive patterns and connected component problems."
-      detailed_content: |
-        Problem: Explore graph/tree by going as deep as possible before backtracking
-        (e.g., find paths, detect cycles, count connected components).
+  - day: 8
+    topic: DFS Fundamentals
+    activity: Master depth-first search for trees and graphs. Learn recursive patterns
+      and connected component problems.
+    detailed_content: "Problem: Explore graph/tree by going as deep as possible before\
+      \ backtracking\n(e.g., find paths, detect cycles, count connected components).\n\
+      \nDFS Template (Recursive):\ndef dfs(node, visited):\n    # node: Current node\
+      \ being explored\n    # visited: Set of nodes already processed\n    # graph:\
+      \ Adjacency list (e.g., {0: [1, 2], 1: [3], 2: [3], 3: []})\n\n    if node in\
+      \ visited:\n        return\n    visited.add(node)\n    # Process current node\
+      \ (e.g., count it, check condition, etc.)\n    for neighbor in graph[node]:\n\
+      \        dfs(neighbor, visited)\n\nDFS Template (Iterative):\ndef dfs(start):\n\
+      \    stack = [start]       # Stack for DFS (LIFO)\n    visited = set()     \
+      \  # Track processed nodes\n    while stack:\n        node = stack.pop()  #\
+      \ Get most recent node\n        if node not in visited:\n            visited.add(node)\n\
+      \            # Process node\n            for neighbor in graph[node]:\n    \
+      \            if neighbor not in visited:\n                    stack.append(neighbor)\n\
+      \nVariables explained:\n- node: Current vertex being processed (e.g., 0, 1,\
+      \ 2)\n- visited: Set tracking processed nodes to avoid cycles\n- graph: Dict\
+      \ mapping node to its neighbors (adjacency list)\n- stack: List storing nodes\
+      \ to explore (last-in, first-out)\n\nCommon DFS Applications:\n- Connected components\
+      \ counting\n- Path finding and validation\n- Cycle detection in graphs\n- Tree\
+      \ traversal and processing\n"
+    problems:
+    - number: '200'
+      title: Number of Islands
+      url: https://leetcode.com/problems/number-of-islands/
+      difficulty: Medium
+      description: Count islands using DFS on 2D grid
+    - number: '695'
+      title: Max Area of Island
+      url: https://leetcode.com/problems/max-area-of-island/
+      difficulty: Medium
+      description: Find largest island area using DFS
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Binary Tree Level Order Traversal'
+      url: https://www.youtube.com/@NeetCode
+      duration: 10 min
+      description: BFS pattern for trees with queue
+      priority: high
+  - day: 9
+    topic: BFS & Graph/Matrix Traversal
+    activity: Master breadth-first search for shortest paths and level-by-level processing.
+      Combine with matrix traversal patterns.
+    detailed_content: "Problem: Explore graph level-by-level for shortest paths or\
+      \ layer processing\n(e.g., shortest path in unweighted graph, level-order traversal).\n\
+      \nBFS Template:\nfrom collections import deque\ndef bfs(start):\n    # queue:\
+      \ Nodes to process (FIFO - first-in, first-out)\n    # visited: Tracks nodes\
+      \ already seen to avoid revisiting\n    # graph: Adjacency list {0: [1, 2],\
+      \ 1: [3], ...}\n\n    queue = deque([start])\n    visited = set([start])\n \
+      \   while queue:\n        node = queue.popleft()  # Process oldest node first\n\
+      \        # Process node (e.g., check condition, record distance)\n        for\
+      \ neighbor in graph[node]:\n            if neighbor not in visited:\n      \
+      \          visited.add(neighbor)\n                queue.append(neighbor)\n\n\
+      Matrix BFS (Multi-source):\ndef bfs_matrix(matrix):\n    queue = deque()\n \
+      \   # Add all starting positions (e.g., all rotten oranges)\n    for i in range(len(matrix)):\n\
+      \        for j in range(len(matrix[0])):\n            if matrix[i][j] == target:\n\
+      \                queue.append((i, j))\n\n    directions = [(0,1), (1,0), (0,-1),\
+      \ (-1,0)]  # Right, Down, Left, Up\n    while queue:\n        x, y = queue.popleft()\n\
+      \        for dx, dy in directions:\n            nx, ny = x + dx, y + dy\n  \
+      \          if 0 <= nx < len(matrix) and 0 <= ny < len(matrix[0]):\n        \
+      \        # Process neighbor (check validity, mark visited, add to queue)\n\n\
+      Variables explained:\n- queue: Deque storing nodes to visit (older nodes processed\
+      \ first)\n- visited: Set preventing cycles and duplicate processing\n- (x, y):\
+      \ Current cell coordinates in matrix\n- directions: List of (row_delta, col_delta)\
+      \ for 4-directional movement\n\nKey insights:\n- BFS finds shortest path in\
+      \ unweighted graphs\n- Level-by-level processing (all nodes at distance k before\
+      \ k+1)\n- Multi-source BFS for optimization (start from multiple points)\n-\
+      \ Direction arrays for matrix navigation\n"
+    problems:
+    - number: '542'
+      title: 01 Matrix
+      url: https://leetcode.com/problems/01-matrix/
+      difficulty: Medium
+      description: Multi-source BFS to find distance to nearest 0
+    - number: '994'
+      title: Rotting Oranges
+      url: https://leetcode.com/problems/rotting-oranges/
+      difficulty: Medium
+      description: Multi-source BFS for simultaneous spreading
+    - number: '127'
+      title: Word Ladder
+      url: https://leetcode.com/problems/word-ladder/
+      difficulty: Hard
+      description: BFS for shortest transformation sequence
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Binary Tree DFS Patterns'
+      url: https://www.youtube.com/@NeetCode
+      duration: 15 min
+      description: Preorder, inorder, postorder traversals
+      priority: high
+  - day: 10
+    topic: Dynamic Programming
+    activity: 'Master DP fundamentals: memoization, tabulation, and optimal substructure.
+      Learn to identify DP problems and common patterns.'
+    detailed_content: "Problem: Solve optimization problems by breaking into overlapping\
+      \ subproblems\n(e.g., find minimum cost, count ways, maximize profit).\n\nDP\
+      \ Approach:\n1. Identify optimal substructure (solution uses optimal solutions\
+      \ of subproblems)\n2. Define state and recurrence relation (how to build answer\
+      \ from smaller problems)\n3. Choose memoization (top-down) or tabulation (bottom-up)\n\
+      4. Optimize space if possible (e.g., only keep last 2 values)\n\nTop-down (Memoization\
+      \ - Fibonacci example):\ndef dp(n, memo={}):\n    # n: Current problem size\n\
+      \    # memo: Dict caching previously computed results\n    # Returns: nth Fibonacci\
+      \ number\n\n    if n in memo:          # Already computed\n        return memo[n]\n\
+      \    if n <= 1:             # Base case\n        return n\n    memo[n] = dp(n-1,\
+      \ memo) + dp(n-2, memo)  # Store result\n    return memo[n]\n\nBottom-up (Tabulation\
+      \ - Fibonacci example):\ndef dp(n):\n    # dp[i]: Answer for problem of size\
+      \ i\n    # Build from smallest to largest\n\n    if n <= 1: return n\n    dp\
+      \ = [0] * (n + 1)     # Table to store subproblem answers\n    dp[1] = 1   \
+      \           # Base cases\n    for i in range(2, n + 1):\n        dp[i] = dp[i-1]\
+      \ + dp[i-2]  # Fill using recurrence\n    return dp[n]\n\nVariables explained:\n\
+      - memo: Dictionary storing {problem_size: answer} to avoid recomputation\n-\
+      \ dp[i]: Answer for subproblem of size i (e.g., fib(i), ways to reach stair\
+      \ i)\n- n: Current problem size or target value\n\nCommon DP patterns:\n- Fibonacci-like\
+      \ (climbing stairs, decode ways)\n- House robber (adjacent constraints, skip\
+      \ patterns)\n- Coin change (unlimited supply, combinations)\n- Knapsack (limited\
+      \ items, weight/value optimization)\n"
+    problems:
+    - number: '70'
+      title: Climbing Stairs
+      url: https://leetcode.com/problems/climbing-stairs/
+      difficulty: Easy
+      description: 'Classic DP: Count ways to climb stairs'
+    - number: '198'
+      title: House Robber
+      url: https://leetcode.com/problems/house-robber/
+      difficulty: Medium
+      description: 'DP with constraints: Rob houses without adjacent ones'
+    - number: '322'
+      title: Coin Change
+      url: https://leetcode.com/problems/coin-change/
+      difficulty: Medium
+      description: 'Unbounded knapsack: Minimum coins for target amount'
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Median from Data Stream'
+      url: https://www.youtube.com/@NeetCode
+      duration: 12 min
+      description: Using two heaps for streaming median
+      priority: high
+  - day: 11
+    topic: Backtracking
+    activity: Master backtracking for generating all solutions. Learn constraint checking
+      and pruning techniques.
+    detailed_content: "Problem: Generate all valid solutions by exploring all possibilities\n\
+      and pruning invalid paths early (e.g., all permutations, all subsets).\n\nBacktracking\
+      \ Template:\ndef backtrack(path, remaining_choices):\n    # path: Current solution\
+      \ being built (list of choices made so far)\n    # remaining_choices: Options\
+      \ still available to choose from\n\n    if is_solution(path):\n        result.append(path[:])\
+      \  # Make copy of solution\n        return\n\n    for choice in remaining_choices:\n\
+      \        if is_valid(choice, path):  # Check constraints\n            path.append(choice)\
+      \      # Make choice\n            backtrack(path, new_remaining)  # Explore\n\
+      \            path.pop()               # Undo choice (backtrack)\n\nVariables\
+      \ explained:\n- path: Current partial solution (e.g., [1, 2] when building permutation)\n\
+      - remaining_choices: Unused elements (e.g., [3, 4] from original [1,2,3,4])\n\
+      - is_solution(): Checks if path is complete (e.g., path length equals target)\n\
+      - is_valid(): Checks if choice satisfies constraints (e.g., no duplicates)\n\
+      \nKey concepts:\n- Generate all possible solutions by trying every option\n\
+      - Prune invalid branches early to save time\n- Use recursion to manage state\
+      \ automatically\n- Always backtrack (undo) after recursive call to try next\
+      \ option\n\nCommon problems:\n- Permutations and combinations\n- Subset generation\n\
+      - N-Queens, Sudoku solving\n- Word search in grid\n"
+    problems:
+    - number: '46'
+      title: Permutations
+      url: https://leetcode.com/problems/permutations/
+      difficulty: Medium
+      description: Generate all permutations using backtracking
+    - number: '78'
+      title: Subsets
+      url: https://leetcode.com/problems/subsets/
+      difficulty: Medium
+      description: Generate all possible subsets
+    - number: '79'
+      title: Word Search
+      url: https://leetcode.com/problems/word-search/
+      difficulty: Medium
+      description: Search for word in 2D grid using backtracking
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Stack Problems Explained'
+      url: https://www.youtube.com/@NeetCode
+      duration: 18 min
+      description: Valid parentheses, next greater element, etc.
+      priority: high
+  - day: 12
+    topic: Bit Manipulation
+    activity: Master bitwise operations and XOR tricks. Learn bit masking, counting
+      bits, and elegant bit-based solutions.
+    detailed_content: 'Essential Bit Operations:
 
-        DFS Template (Recursive):
-        def dfs(node, visited):
-            # node: Current node being explored
-            # visited: Set of nodes already processed
-            # graph: Adjacency list (e.g., {0: [1, 2], 1: [3], 2: [3], 3: []})
+      - AND (&): Both bits are 1
 
-            if node in visited:
-                return
-            visited.add(node)
-            # Process current node (e.g., count it, check condition, etc.)
-            for neighbor in graph[node]:
-                dfs(neighbor, visited)
+      - OR (|): At least one bit is 1
 
-        DFS Template (Iterative):
-        def dfs(start):
-            stack = [start]       # Stack for DFS (LIFO)
-            visited = set()       # Track processed nodes
-            while stack:
-                node = stack.pop()  # Get most recent node
-                if node not in visited:
-                    visited.add(node)
-                    # Process node
-                    for neighbor in graph[node]:
-                        if neighbor not in visited:
-                            stack.append(neighbor)
+      - XOR (^): Bits are different
 
-        Variables explained:
-        - node: Current vertex being processed (e.g., 0, 1, 2)
-        - visited: Set tracking processed nodes to avoid cycles
-        - graph: Dict mapping node to its neighbors (adjacency list)
-        - stack: List storing nodes to explore (last-in, first-out)
+      - NOT (~): Flip all bits
 
-        Common DFS Applications:
-        - Connected components counting
-        - Path finding and validation
-        - Cycle detection in graphs
-        - Tree traversal and processing
-      problems:
-        - number: "200"
-          title: "Number of Islands"
-          url: "https://leetcode.com/problems/number-of-islands/"
-          difficulty: "Medium"
-          description: "Count islands using DFS on 2D grid"
-        - number: "695"
-          title: "Max Area of Island"
-          url: "https://leetcode.com/problems/max-area-of-island/"
-          difficulty: "Medium"
-          description: "Find largest island area using DFS"
-      time_estimate: 45
+      - Left shift (<<): Multiply by 2^n
 
-    - day: 9
-      topic: "BFS & Graph/Matrix Traversal"
-      activity: "Master breadth-first search for shortest paths and level-by-level processing. Combine with matrix traversal patterns."
-      detailed_content: |
-        Problem: Explore graph level-by-level for shortest paths or layer processing
-        (e.g., shortest path in unweighted graph, level-order traversal).
+      - Right shift (>>): Divide by 2^n
 
-        BFS Template:
-        from collections import deque
-        def bfs(start):
-            # queue: Nodes to process (FIFO - first-in, first-out)
-            # visited: Tracks nodes already seen to avoid revisiting
-            # graph: Adjacency list {0: [1, 2], 1: [3], ...}
 
-            queue = deque([start])
-            visited = set([start])
-            while queue:
-                node = queue.popleft()  # Process oldest node first
-                # Process node (e.g., check condition, record distance)
-                for neighbor in graph[node]:
-                    if neighbor not in visited:
-                        visited.add(neighbor)
-                        queue.append(neighbor)
+      XOR Properties:
 
-        Matrix BFS (Multi-source):
-        def bfs_matrix(matrix):
-            queue = deque()
-            # Add all starting positions (e.g., all rotten oranges)
-            for i in range(len(matrix)):
-                for j in range(len(matrix[0])):
-                    if matrix[i][j] == target:
-                        queue.append((i, j))
+      - a ^ a = 0
 
-            directions = [(0,1), (1,0), (0,-1), (-1,0)]  # Right, Down, Left, Up
-            while queue:
-                x, y = queue.popleft()
-                for dx, dy in directions:
-                    nx, ny = x + dx, y + dy
-                    if 0 <= nx < len(matrix) and 0 <= ny < len(matrix[0]):
-                        # Process neighbor (check validity, mark visited, add to queue)
+      - a ^ 0 = a
 
-        Variables explained:
-        - queue: Deque storing nodes to visit (older nodes processed first)
-        - visited: Set preventing cycles and duplicate processing
-        - (x, y): Current cell coordinates in matrix
-        - directions: List of (row_delta, col_delta) for 4-directional movement
+      - XOR is commutative and associative
 
-        Key insights:
-        - BFS finds shortest path in unweighted graphs
-        - Level-by-level processing (all nodes at distance k before k+1)
-        - Multi-source BFS for optimization (start from multiple points)
-        - Direction arrays for matrix navigation
-      problems:
-        - number: "542"
-          title: "01 Matrix"
-          url: "https://leetcode.com/problems/01-matrix/"
-          difficulty: "Medium"
-          description: "Multi-source BFS to find distance to nearest 0"
-        - number: "994"
-          title: "Rotting Oranges"
-          url: "https://leetcode.com/problems/rotting-oranges/"
-          difficulty: "Medium"
-          description: "Multi-source BFS for simultaneous spreading"
-        - number: "127"
-          title: "Word Ladder"
-          url: "https://leetcode.com/problems/word-ladder/"
-          difficulty: "Hard"
-          description: "BFS for shortest transformation sequence"
-      time_estimate: 45
+      - Useful for finding unique elements
 
-    - day: 10
-      topic: "Dynamic Programming"
-      activity: "Master DP fundamentals: memoization, tabulation, and optimal substructure. Learn to identify DP problems and common patterns."
-      detailed_content: |
-        Problem: Solve optimization problems by breaking into overlapping subproblems
-        (e.g., find minimum cost, count ways, maximize profit).
 
-        DP Approach:
-        1. Identify optimal substructure (solution uses optimal solutions of subproblems)
-        2. Define state and recurrence relation (how to build answer from smaller problems)
-        3. Choose memoization (top-down) or tabulation (bottom-up)
-        4. Optimize space if possible (e.g., only keep last 2 values)
+      Common Bit Tricks:
 
-        Top-down (Memoization - Fibonacci example):
-        def dp(n, memo={}):
-            # n: Current problem size
-            # memo: Dict caching previously computed results
-            # Returns: nth Fibonacci number
+      - Check if power of 2: n & (n-1) == 0
 
-            if n in memo:          # Already computed
-                return memo[n]
-            if n <= 1:             # Base case
-                return n
-            memo[n] = dp(n-1, memo) + dp(n-2, memo)  # Store result
-            return memo[n]
+      - Count set bits: bin(n).count(''1'')
 
-        Bottom-up (Tabulation - Fibonacci example):
-        def dp(n):
-            # dp[i]: Answer for problem of size i
-            # Build from smallest to largest
+      - Get rightmost set bit: n & -n
 
-            if n <= 1: return n
-            dp = [0] * (n + 1)     # Table to store subproblem answers
-            dp[1] = 1              # Base cases
-            for i in range(2, n + 1):
-                dp[i] = dp[i-1] + dp[i-2]  # Fill using recurrence
-            return dp[n]
+      - Clear rightmost set bit: n & (n-1)
 
-        Variables explained:
-        - memo: Dictionary storing {problem_size: answer} to avoid recomputation
-        - dp[i]: Answer for subproblem of size i (e.g., fib(i), ways to reach stair i)
-        - n: Current problem size or target value
+      - Check if bit i is set: (n >> i) & 1
 
-        Common DP patterns:
-        - Fibonacci-like (climbing stairs, decode ways)
-        - House robber (adjacent constraints, skip patterns)
-        - Coin change (unlimited supply, combinations)
-        - Knapsack (limited items, weight/value optimization)
-      problems:
-        - number: "70"
-          title: "Climbing Stairs"
-          url: "https://leetcode.com/problems/climbing-stairs/"
-          difficulty: "Easy"
-          description: "Classic DP: Count ways to climb stairs"
-        - number: "198"
-          title: "House Robber"
-          url: "https://leetcode.com/problems/house-robber/"
-          difficulty: "Medium"
-          description: "DP with constraints: Rob houses without adjacent ones"
-        - number: "322"
-          title: "Coin Change"
-          url: "https://leetcode.com/problems/coin-change/"
-          difficulty: "Medium"
-          description: "Unbounded knapsack: Minimum coins for target amount"
-      time_estimate: 45
 
-    - day: 11
-      topic: "Backtracking"
-      activity: "Master backtracking for generating all solutions. Learn constraint checking and pruning techniques."
-      detailed_content: |
-        Problem: Generate all valid solutions by exploring all possibilities
-        and pruning invalid paths early (e.g., all permutations, all subsets).
+      Bit Masking:
 
-        Backtracking Template:
-        def backtrack(path, remaining_choices):
-            # path: Current solution being built (list of choices made so far)
-            # remaining_choices: Options still available to choose from
+      - Use integers to represent sets
 
-            if is_solution(path):
-                result.append(path[:])  # Make copy of solution
-                return
+      - Each bit represents presence/absence
 
-            for choice in remaining_choices:
-                if is_valid(choice, path):  # Check constraints
-                    path.append(choice)      # Make choice
-                    backtrack(path, new_remaining)  # Explore
-                    path.pop()               # Undo choice (backtrack)
+      - Efficient for subset operations
 
-        Variables explained:
-        - path: Current partial solution (e.g., [1, 2] when building permutation)
-        - remaining_choices: Unused elements (e.g., [3, 4] from original [1,2,3,4])
-        - is_solution(): Checks if path is complete (e.g., path length equals target)
-        - is_valid(): Checks if choice satisfies constraints (e.g., no duplicates)
-
-        Key concepts:
-        - Generate all possible solutions by trying every option
-        - Prune invalid branches early to save time
-        - Use recursion to manage state automatically
-        - Always backtrack (undo) after recursive call to try next option
-
-        Common problems:
-        - Permutations and combinations
-        - Subset generation
-        - N-Queens, Sudoku solving
-        - Word search in grid
-      problems:
-        - number: "46"
-          title: "Permutations"
-          url: "https://leetcode.com/problems/permutations/"
-          difficulty: "Medium"
-          description: "Generate all permutations using backtracking"
-        - number: "78"
-          title: "Subsets"
-          url: "https://leetcode.com/problems/subsets/"
-          difficulty: "Medium"
-          description: "Generate all possible subsets"
-        - number: "79"
-          title: "Word Search"
-          url: "https://leetcode.com/problems/word-search/"
-          difficulty: "Medium"
-          description: "Search for word in 2D grid using backtracking"
-      time_estimate: 45
-
-    - day: 12
-      topic: "Bit Manipulation"
-      activity: "Master bitwise operations and XOR tricks. Learn bit masking, counting bits, and elegant bit-based solutions."
-      detailed_content: |
-        Essential Bit Operations:
-        - AND (&): Both bits are 1
-        - OR (|): At least one bit is 1
-        - XOR (^): Bits are different
-        - NOT (~): Flip all bits
-        - Left shift (<<): Multiply by 2^n
-        - Right shift (>>): Divide by 2^n
-
-        XOR Properties:
-        - a ^ a = 0
-        - a ^ 0 = a
-        - XOR is commutative and associative
-        - Useful for finding unique elements
-
-        Common Bit Tricks:
-        - Check if power of 2: n & (n-1) == 0
-        - Count set bits: bin(n).count('1')
-        - Get rightmost set bit: n & -n
-        - Clear rightmost set bit: n & (n-1)
-        - Check if bit i is set: (n >> i) & 1
-
-        Bit Masking:
-        - Use integers to represent sets
-        - Each bit represents presence/absence
-        - Efficient for subset operations
-      problems:
-        - number: "136"
-          title: "Single Number"
-          url: "https://leetcode.com/problems/single-number/"
-          difficulty: "Easy"
-          description: "Find unique number using XOR properties"
-        - number: "191"
-          title: "Number of 1 Bits"
-          url: "https://leetcode.com/problems/number-of-1-bits/"
-          difficulty: "Easy"
-          description: "Count set bits in integer"
-        - number: "338"
-          title: "Counting Bits"
-          url: "https://leetcode.com/problems/counting-bits/"
-          difficulty: "Easy"
-          description: "Count bits for range using DP and bit manipulation"
-        - number: "268"
-          title: "Missing Number"
-          url: "https://leetcode.com/problems/missing-number/"
-          difficulty: "Easy"
-          description: "Find missing number using XOR or math"
-      time_estimate: 45
-
-    - day: 13
-      topic: "Prefix Sum"
-      activity: "Master prefix sums for efficient range queries. Learn 1D and 2D prefix sums, and their applications to subarray problems."
-      detailed_content: |
-        1D Prefix Sum:
-        def build_prefix(nums):
-            prefix = [0] * (len(nums) + 1)
-            for i in range(len(nums)):
-                prefix[i + 1] = prefix[i] + nums[i]
-            return prefix
-
-        Range Sum Query:
-        def range_sum(prefix, left, right):
-            return prefix[right + 1] - prefix[left]
-
-        2D Prefix Sum:
-        def build_2d_prefix(matrix):
-            m, n = len(matrix), len(matrix[0])
-            prefix = [[0] * (n + 1) for _ in range(m + 1)]
-            for i in range(1, m + 1):
-                for j in range(1, n + 1):
-                    prefix[i][j] = (matrix[i-1][j-1] +
-                                   prefix[i-1][j] +
-                                   prefix[i][j-1] -
-                                   prefix[i-1][j-1])
-            return prefix
-
-        Applications:
-        - Range sum queries in O(1)
-        - Subarray sum problems
-        - 2D matrix region sums
-        - Cumulative frequency analysis
-      problems:
-        - number: "303"
-          title: "Range Sum Query - Immutable"
-          url: "https://leetcode.com/problems/range-sum-query-immutable/"
-          difficulty: "Easy"
-          description: "Basic prefix sum for range queries"
-        - number: "560"
-          title: "Subarray Sum Equals K"
-          url: "https://leetcode.com/problems/subarray-sum-equals-k/"
-          difficulty: "Medium"
-          description: "Prefix sum + hash map for subarray counting"
-        - number: "304"
-          title: "Range Sum Query 2D - Immutable"
-          url: "https://leetcode.com/problems/range-sum-query-2d-immutable/"
-          difficulty: "Medium"
-          description: "2D prefix sum for matrix region queries"
-      time_estimate: 45
-
-    - day: 14
-      topic: "Week 2 Algorithm Integration"
-      activity: "Solve complex problems combining DFS/BFS, DP, backtracking, bit manipulation, and prefix sums."
-      detailed_content: |
-        Advanced Problem-Solving Framework:
-
-        1. Problem Analysis:
-           - Identify constraints and objectives
-           - Recognize underlying patterns
-           - Estimate time/space complexity
-
-        2. Pattern Recognition:
-           - DFS/BFS: Tree/graph traversal, connectivity
-           - DP: Optimization with overlapping subproblems
-           - Backtracking: Generate all solutions, CSP
-           - Bit Manipulation: Set operations, unique elements
-           - Prefix Sum: Range queries, cumulative operations
-
-        3. Combination Strategies:
-           - DP with memoization for backtracking
-           - BFS/DFS with bit manipulation for state
-           - Prefix sum preprocessing for DP
-           - Multiple algorithms for different phases
-      problems:
-        - number: "72"
-          title: "Edit Distance"
-          url: "https://leetcode.com/problems/edit-distance/"
-          difficulty: "Hard"
-          description: "Advanced DP: Minimum operations to transform strings"
-        - number: "51"
-          title: "N-Queens"
-          url: "https://leetcode.com/problems/n-queens/"
-          difficulty: "Hard"
-          description: "Backtracking with bit manipulation optimization"
-        - number: "1000"
-          title: "Minimum Cost to Merge Stones"
-          url: "https://leetcode.com/problems/minimum-cost-to-merge-stones/"
-          difficulty: "Hard"
-          description: "Advanced DP with prefix sums"
-        - number: "847"
-          title: "Shortest Path Visiting All Nodes"
-          url: "https://leetcode.com/problems/shortest-path-visiting-all-nodes/"
-          difficulty: "Hard"
-          description: "BFS with bit manipulation for state compression"
-      time_estimate: 60
-
+      '
+    problems:
+    - number: '136'
+      title: Single Number
+      url: https://leetcode.com/problems/single-number/
+      difficulty: Easy
+      description: Find unique number using XOR properties
+    - number: '191'
+      title: Number of 1 Bits
+      url: https://leetcode.com/problems/number-of-1-bits/
+      difficulty: Easy
+      description: Count set bits in integer
+    - number: '338'
+      title: Counting Bits
+      url: https://leetcode.com/problems/counting-bits/
+      difficulty: Easy
+      description: Count bits for range using DP and bit manipulation
+    - number: '268'
+      title: Missing Number
+      url: https://leetcode.com/problems/missing-number/
+      difficulty: Easy
+      description: Find missing number using XOR or math
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Monotonic Stack Pattern'
+      url: https://www.youtube.com/@NeetCode
+      duration: 15 min
+      description: Stack for finding next greater/smaller element
+      priority: medium
+  - day: 13
+    topic: Prefix Sum
+    activity: Master prefix sums for efficient range queries. Learn 1D and 2D prefix
+      sums, and their applications to subarray problems.
+    detailed_content: "1D Prefix Sum:\ndef build_prefix(nums):\n    prefix = [0] *\
+      \ (len(nums) + 1)\n    for i in range(len(nums)):\n        prefix[i + 1] = prefix[i]\
+      \ + nums[i]\n    return prefix\n\nRange Sum Query:\ndef range_sum(prefix, left,\
+      \ right):\n    return prefix[right + 1] - prefix[left]\n\n2D Prefix Sum:\ndef\
+      \ build_2d_prefix(matrix):\n    m, n = len(matrix), len(matrix[0])\n    prefix\
+      \ = [[0] * (n + 1) for _ in range(m + 1)]\n    for i in range(1, m + 1):\n \
+      \       for j in range(1, n + 1):\n            prefix[i][j] = (matrix[i-1][j-1]\
+      \ +\n                           prefix[i-1][j] +\n                         \
+      \  prefix[i][j-1] -\n                           prefix[i-1][j-1])\n    return\
+      \ prefix\n\nApplications:\n- Range sum queries in O(1)\n- Subarray sum problems\n\
+      - 2D matrix region sums\n- Cumulative frequency analysis\n"
+    problems:
+    - number: '303'
+      title: Range Sum Query - Immutable
+      url: https://leetcode.com/problems/range-sum-query-immutable/
+      difficulty: Easy
+      description: Basic prefix sum for range queries
+    - number: '560'
+      title: Subarray Sum Equals K
+      url: https://leetcode.com/problems/subarray-sum-equals-k/
+      difficulty: Medium
+      description: Prefix sum + hash map for subarray counting
+    - number: '304'
+      title: Range Sum Query 2D - Immutable
+      url: https://leetcode.com/problems/range-sum-query-2d-immutable/
+      difficulty: Medium
+      description: 2D prefix sum for matrix region queries
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Hash Table Techniques'
+      url: https://www.youtube.com/@NeetCode
+      duration: 12 min
+      description: Using hash maps for O(1) lookups
+      priority: high
+  - day: 14
+    topic: Week 2 Algorithm Integration
+    activity: Solve complex problems combining DFS/BFS, DP, backtracking, bit manipulation,
+      and prefix sums.
+    detailed_content: "Advanced Problem-Solving Framework:\n\n1. Problem Analysis:\n\
+      \   - Identify constraints and objectives\n   - Recognize underlying patterns\n\
+      \   - Estimate time/space complexity\n\n2. Pattern Recognition:\n   - DFS/BFS:\
+      \ Tree/graph traversal, connectivity\n   - DP: Optimization with overlapping\
+      \ subproblems\n   - Backtracking: Generate all solutions, CSP\n   - Bit Manipulation:\
+      \ Set operations, unique elements\n   - Prefix Sum: Range queries, cumulative\
+      \ operations\n\n3. Combination Strategies:\n   - DP with memoization for backtracking\n\
+      \   - BFS/DFS with bit manipulation for state\n   - Prefix sum preprocessing\
+      \ for DP\n   - Multiple algorithms for different phases\n"
+    problems:
+    - number: '72'
+      title: Edit Distance
+      url: https://leetcode.com/problems/edit-distance/
+      difficulty: Hard
+      description: 'Advanced DP: Minimum operations to transform strings'
+    - number: '51'
+      title: N-Queens
+      url: https://leetcode.com/problems/n-queens/
+      difficulty: Hard
+      description: Backtracking with bit manipulation optimization
+    - number: '1000'
+      title: Minimum Cost to Merge Stones
+      url: https://leetcode.com/problems/minimum-cost-to-merge-stones/
+      difficulty: Hard
+      description: Advanced DP with prefix sums
+    - number: '847'
+      title: Shortest Path Visiting All Nodes
+      url: https://leetcode.com/problems/shortest-path-visiting-all-nodes/
+      difficulty: Hard
+      description: BFS with bit manipulation for state compression
+    time_estimate: 60
+    video_resources:
+    - title: 'NeetCode: Tree and Stack Patterns Review'
+      url: https://www.youtube.com/@NeetCode
+      duration: 20 min
+      description: Consolidate Week 2 learnings
+      priority: high
   week3:
-    - day: 15
-      topic: "Top K Elements / Heaps"
-      activity: "Master min/max heaps for priority problems. Learn heap construction, k-element problems, and priority queue applications."
-      detailed_content: |
-        Heap Fundamentals:
+  - day: 15
+    topic: Top K Elements / Heaps
+    activity: Master min/max heaps for priority problems. Learn heap construction,
+      k-element problems, and priority queue applications.
+    detailed_content: 'Heap Fundamentals:
 
-        Python heapq (min-heap):
-        import heapq
-        heap = []
-        heapq.heappush(heap, item)
-        min_item = heapq.heappop(heap)
 
-        Max-heap (negate values):
-        heapq.heappush(max_heap, -item)
-        max_item = -heapq.heappop(max_heap)
+      Python heapq (min-heap):
 
-        K Elements Pattern:
-        1. Use min-heap of size k for k largest
-        2. Use max-heap of size k for k smallest
-        3. Maintain heap size by popping when > k
+      import heapq
 
-        Applications:
-        - Top/bottom k elements
-        - Merge k sorted lists
-        - Running median
-        - CPU scheduling simulation
-      problems:
-        - number: "215"
-          title: "Kth Largest Element in an Array"
-          url: "https://leetcode.com/problems/kth-largest-element-in-an-array/"
-          difficulty: "Medium"
-          description: "Find kth largest using min-heap"
-        - number: "347"
-          title: "Top K Frequent Elements"
-          url: "https://leetcode.com/problems/top-k-frequent-elements/"
-          difficulty: "Medium"
-          description: "Find k most frequent elements using heap"
-        - number: "23"
-          title: "Merge k Sorted Lists"
-          url: "https://leetcode.com/problems/merge-k-sorted-lists/"
-          difficulty: "Hard"
-          description: "Efficient merging using min-heap"
-      time_estimate: 45
+      heap = []
 
-    - day: 16
-      topic: "Monotonic Stack"
-      activity: "Master monotonic stacks for next/previous greater/smaller element problems. Learn when and how to maintain stack properties."
-      detailed_content: |
-        Problem: Find next greater/smaller element for each position efficiently
-        (e.g., stock span, daily temperatures, histogram rectangles).
+      heapq.heappush(heap, item)
 
-        Monotonic Stack Template:
+      min_item = heapq.heappop(heap)
 
-        Next Greater Element:
-        def next_greater(nums):
-            # stack: Indices of elements waiting to find their next greater
-            # Stack maintains decreasing order (bottom to top)
-            # nums = [2,1,2,4,3] -> result = [4,2,4,-1,-1]
 
-            stack = []              # Stores indices (monotonic decreasing)
-            result = [-1] * len(nums)
-            for i, num in enumerate(nums):
-                # Pop elements smaller than current (they found their answer)
-                while stack and nums[stack[-1]] < num:
-                    idx = stack.pop()     # This index found its next greater
-                    result[idx] = num     # Record the answer
-                stack.append(i)          # Add current index to stack
-            return result
+      Max-heap (negate values):
 
-        Next Smaller Element:
-        def next_smaller(nums):
-            # Stack maintains increasing order for next smaller
-            stack = []              # Stores indices (monotonic increasing)
-            result = [-1] * len(nums)
-            for i, num in enumerate(nums):
-                # Pop elements greater than current (they found their answer)
-                while stack and nums[stack[-1]] > num:
-                    idx = stack.pop()
-                    result[idx] = num
-                stack.append(i)
-            return result
+      heapq.heappush(max_heap, -item)
 
-        Variables explained:
-        - stack: List of indices (not values!) waiting to find next greater/smaller
-        - result[i]: Answer for position i (next greater/smaller element)
-        - idx: Index that just found its answer (popped from stack)
-        - i, num: Current position and value being processed
+      max_item = -heapq.heappop(max_heap)
 
-        Key insights:
-        - Decreasing stack for "next greater" (pop when see larger)
-        - Increasing stack for "next smaller" (pop when see smaller)
-        - Store indices to know positions and access values
-        - Process in single pass O(n) - each element pushed/popped once
-      problems:
-        - number: "496"
-          title: "Next Greater Element I"
-          url: "https://leetcode.com/problems/next-greater-element-i/"
-          difficulty: "Easy"
-          description: "Basic next greater element using monotonic stack"
-        - number: "739"
-          title: "Daily Temperatures"
-          url: "https://leetcode.com/problems/daily-temperatures/"
-          difficulty: "Medium"
-          description: "Days until warmer temperature"
-        - number: "84"
-          title: "Largest Rectangle in Histogram"
-          url: "https://leetcode.com/problems/largest-rectangle-in-histogram/"
-          difficulty: "Hard"
-          description: "Classic monotonic stack application"
-      time_estimate: 45
 
-    - day: 17
-      topic: "Overlapping Intervals"
-      activity: "Master interval problems: merging, scheduling, and conflict detection. Learn sorting strategies and interval manipulation."
-      detailed_content: |
-        Interval Problems Pattern:
-        1. Sort intervals (usually by start time)
-        2. Iterate and compare current with previous
-        3. Merge, count conflicts, or schedule accordingly
+      K Elements Pattern:
 
-        Merge Intervals:
-        def merge(intervals):
-            intervals.sort(key=lambda x: x[0])
-            merged = [intervals[0]]
-            for current in intervals[1:]:
-                if current[0] <= merged[-1][1]:
-                    merged[-1][1] = max(merged[-1][1], current[1])
-                else:
-                    merged.append(current)
-            return merged
+      1. Use min-heap of size k for k largest
 
-        Insert Interval:
-        def insert(intervals, new_interval):
-            result = []
-            i = 0
-            # Add all intervals before new_interval
-            while i < len(intervals) and intervals[i][1] < new_interval[0]:
-                result.append(intervals[i])
-                i += 1
-            # Merge overlapping intervals
-            while i < len(intervals) and intervals[i][0] <= new_interval[1]:
-                new_interval[0] = min(new_interval[0], intervals[i][0])
-                new_interval[1] = max(new_interval[1], intervals[i][1])
-                i += 1
-            result.append(new_interval)
-            # Add remaining intervals
-            result.extend(intervals[i:])
-            return result
-      problems:
-        - number: "56"
-          title: "Merge Intervals"
-          url: "https://leetcode.com/problems/merge-intervals/"
-          difficulty: "Medium"
-          description: "Merge overlapping intervals"
-        - number: "57"
-          title: "Insert Interval"
-          url: "https://leetcode.com/problems/insert-interval/"
-          difficulty: "Medium"
-          description: "Insert and merge new interval"
-        - number: "435"
-          title: "Non-overlapping Intervals"
-          url: "https://leetcode.com/problems/non-overlapping-intervals/"
-          difficulty: "Medium"
-          description: "Minimum intervals to remove to make non-overlapping"
-      time_estimate: 45
+      2. Use max-heap of size k for k smallest
 
-    - day: 18
-      topic: "Trie Operations"
-      activity: "Master trie (prefix tree) for string problems. Learn construction, search, and prefix matching applications."
-      detailed_content: |
-        Problem: Efficiently store and search strings with common prefixes
-        (e.g., autocomplete, spell checking, prefix matching).
+      3. Maintain heap size by popping when > k
 
-        Trie Implementation:
-        class TrieNode:
-            def __init__(self):
-                # children: Dict mapping char -> child TrieNode
-                # is_end: True if this node marks end of a word
-                self.children = {}      # e.g., {'a': node1, 'b': node2}
-                self.is_end = False     # Word boundary marker
 
-        class Trie:
-            def __init__(self):
-                self.root = TrieNode()  # Empty root node
+      Applications:
 
-            def insert(self, word):
-                # Insert word into trie character by character
-                node = self.root
-                for char in word:       # e.g., "cat" -> 'c', 'a', 't'
-                    if char not in node.children:
-                        node.children[char] = TrieNode()
-                    node = node.children[char]
-                node.is_end = True      # Mark end of word
+      - Top/bottom k elements
 
-            def search(self, word):
-                # Check if exact word exists in trie
-                node = self.root
-                for char in word:
-                    if char not in node.children:
-                        return False    # Character path doesn't exist
-                    node = node.children[char]
-                return node.is_end      # Must be marked as end
+      - Merge k sorted lists
 
-            def starts_with(self, prefix):
-                # Check if any word starts with prefix
-                node = self.root
-                for char in prefix:
-                    if char not in node.children:
-                        return False
-                    node = node.children[char]
-                return True             # Path exists (doesn't need is_end)
+      - Running median
 
-        Variables explained:
-        - node: Current position in trie while traversing
-        - children: Dict {char: TrieNode} for each possible next character
-        - is_end: Boolean marking if node completes a valid word
-        - root: Starting point of trie (empty node)
+      - CPU scheduling simulation
 
-        Time Complexity: O(m) for all operations (m = word/prefix length)
-        Space Complexity: O(total characters in all words)
-
-        Applications:
-        - Autocomplete systems (find all words with prefix)
-        - Word games (Boggle, word search with backtracking)
-        - IP routing tables (longest prefix matching)
-        - Spell checkers (find similar words)
-      problems:
-        - number: "208"
-          title: "Implement Trie (Prefix Tree)"
-          url: "https://leetcode.com/problems/implement-trie-prefix-tree/"
-          difficulty: "Medium"
-          description: "Basic trie implementation"
-        - number: "212"
-          title: "Word Search II"
-          url: "https://leetcode.com/problems/word-search-ii/"
-          difficulty: "Hard"
-          description: "Backtracking + Trie for efficient word search"
-        - number: "421"
-          title: "Maximum XOR of Two Numbers in an Array"
-          url: "https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/"
-          difficulty: "Medium"
-          description: "Binary trie for bit manipulation"
-      time_estimate: 45
-
-    - day: 19
-      topic: "Union-Find"
-      activity: "Master Union-Find (Disjoint Set) for connectivity problems. Learn path compression and union by rank optimizations."
-      detailed_content: |
-        Problem: Track and merge disjoint sets efficiently for connectivity queries
-        (e.g., are two nodes connected? how many separate components?).
-
-        Union-Find Implementation:
-        class UnionFind:
-            def __init__(self, n):
-                # parent[i]: Parent of node i (initially itself)
-                # rank[i]: Approximate depth of tree rooted at i
-                # components: Count of separate groups
-                self.parent = list(range(n))  # Each node is its own parent
-                self.rank = [0] * n           # All trees start with rank 0
-                self.components = n           # Initially n separate components
-
-            def find(self, x):
-                # Find root of x's component
-                # Path compression: make all nodes point directly to root
-                if self.parent[x] != x:
-                    self.parent[x] = self.find(self.parent[x])  # Compress path
-                return self.parent[x]
-
-            def union(self, x, y):
-                # Merge components containing x and y
-                root_x, root_y = self.find(x), self.find(y)
-                if root_x != root_y:
-                    # Union by rank: attach smaller tree to larger
-                    if self.rank[root_x] < self.rank[root_y]:
-                        self.parent[root_x] = root_y
-                    elif self.rank[root_x] > self.rank[root_y]:
-                        self.parent[root_y] = root_x
-                    else:
-                        self.parent[root_y] = root_x
-                        self.rank[root_x] += 1
-                    self.components -= 1  # Merged two components
-                    return True           # Union successful
-                return False              # Already in same component
-
-            def connected(self, x, y):
-                # Check if x and y are in same component
-                return self.find(x) == self.find(y)
-
-        Variables explained:
-        - parent[i]: Points to parent of node i (root points to itself)
-        - rank[i]: Tree depth heuristic for balancing (not exact depth)
-        - components: Number of separate groups/sets
-        - root_x/root_y: Representative elements of each set
-
-        Time Complexity: Nearly O(1) per operation with optimizations
-
-        Applications:
-        - Connected components in graphs (islands, friends)
-        - Minimum spanning trees (Kruskal's algorithm)
-        - Percolation problems (water flow, network connectivity)
-        - Social network analysis
-      problems:
-        - number: "547"
-          title: "Number of Provinces"
-          url: "https://leetcode.com/problems/number-of-provinces/"
-          difficulty: "Medium"
-          description: "Count connected components using Union-Find"
-        - number: "200"
-          title: "Number of Islands"
-          url: "https://leetcode.com/problems/number-of-islands/"
-          difficulty: "Medium"
-          description: "Alternative Union-Find solution to DFS approach"
-        - number: "721"
-          title: "Accounts Merge"
-          url: "https://leetcode.com/problems/accounts-merge/"
-          difficulty: "Medium"
-          description: "Union-Find for grouping related accounts"
-      time_estimate: 45
-
-    - day: 20
-      topic: "Greedy Algorithms"
-      activity: "Master greedy choice property for optimization problems. Learn when greedy works and common greedy patterns."
-      detailed_content: |
-        Greedy Algorithm Strategy:
-        1. Make locally optimal choice at each step
-        2. Never reconsider previous choices
-        3. Hope that local optimum leads to global optimum
-
-        When Greedy Works:
-        - Greedy choice property exists
-        - Optimal substructure present
-        - Problem has exchange argument
-
-        Common Greedy Patterns:
-
-        Activity Selection:
-        def activity_selection(activities):
-            activities.sort(key=lambda x: x[1])  # Sort by end time
-            result = [activities[0]]
-            last_end = activities[0][1]
-            for start, end in activities[1:]:
-                if start >= last_end:
-                    result.append((start, end))
-                    last_end = end
-            return result
-
-        Fractional Knapsack:
-        def fractional_knapsack(items, capacity):
-            items.sort(key=lambda x: x[1]/x[0], reverse=True)  # Sort by value/weight ratio
-            total_value = 0
-            for weight, value in items:
-                if capacity >= weight:
-                    capacity -= weight
-                    total_value += value
-                else:
-                    total_value += value * (capacity / weight)
-                    break
-            return total_value
-      problems:
-        - number: "455"
-          title: "Assign Cookies"
-          url: "https://leetcode.com/problems/assign-cookies/"
-          difficulty: "Easy"
-          description: "Greedy assignment problem"
-        - number: "435"
-          title: "Non-overlapping Intervals"
-          url: "https://leetcode.com/problems/non-overlapping-intervals/"
-          difficulty: "Medium"
-          description: "Greedy interval scheduling"
-        - number: "134"
-          title: "Gas Station"
-          url: "https://leetcode.com/problems/gas-station/"
-          difficulty: "Medium"
-          description: "Greedy circular array problem"
-      time_estimate: 45
-
-    - day: 21
-      topic: "Week 3 Data Structures Integration"
-      activity: "Combine advanced data structures. Solve problems requiring multiple data structures and sophisticated designs."
-      detailed_content: |
-        Multi-Data Structure Problems:
-
-        1. Design Patterns:
-           - Heap + Hash Map: Fast lookups with priority
-           - Trie + DFS: String search in complex spaces
-           - Union-Find + Sorting: Component-based processing
-           - Stack + Hash Map: Bracket matching with validation
-
-        2. Common Combinations:
-
-           LRU Cache:
-           - Hash map + Doubly linked list
-           - O(1) get/put operations
-
-           Twitter Feed:
-           - Hash map + Heap for each user's timeline
-           - Merge k sorted lists for combined feed
-
-           Autocomplete System:
-           - Trie for prefix matching
-           - Heap for top-k results
-           - Hash map for sentence frequency
-
-           Range Sum with Updates:
-           - Segment tree or Fenwick tree
-           - Support both range queries and updates
-
-        3. Problem-Solving Strategy:
-           - Identify core operations needed
-           - Choose data structures for each operation
-           - Consider space-time tradeoffs
-           - Implement incrementally and test
-      problems:
-        - number: "146"
-          title: "LRU Cache"
-          url: "https://leetcode.com/problems/lru-cache/"
-          difficulty: "Medium"
-          description: "Hash map + doubly linked list design"
-        - number: "355"
-          title: "Design Twitter"
-          url: "https://leetcode.com/problems/design-twitter/"
-          difficulty: "Medium"
-          description: "Hash map + heap for timeline design"
-        - number: "642"
-          title: "Design Search Autocomplete System"
-          url: "https://leetcode.com/problems/design-search-autocomplete-system/"
-          difficulty: "Hard"
-          description: "Trie + heap + hash map complex design"
-        - number: "295"
-          title: "Find Median from Data Stream"
-          url: "https://leetcode.com/problems/find-median-from-data-stream/"
-          difficulty: "Hard"
-          description: "Two heaps for running median"
-      time_estimate: 60
-
+      '
+    problems:
+    - number: '215'
+      title: Kth Largest Element in an Array
+      url: https://leetcode.com/problems/kth-largest-element-in-an-array/
+      difficulty: Medium
+      description: Find kth largest using min-heap
+    - number: '347'
+      title: Top K Frequent Elements
+      url: https://leetcode.com/problems/top-k-frequent-elements/
+      difficulty: Medium
+      description: Find k most frequent elements using heap
+    - number: '23'
+      title: Merge k Sorted Lists
+      url: https://leetcode.com/problems/merge-k-sorted-lists/
+      difficulty: Hard
+      description: Efficient merging using min-heap
+    time_estimate: 45
+    video_resources:
+    - title: 'William Fiset: BFS Graph Traversal'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 15 min
+      description: BFS visualization and applications
+      priority: high
+    - title: 'NeetCode: Number of Islands'
+      url: https://www.youtube.com/@NeetCode
+      duration: 10 min
+      description: Classic BFS graph problem
+      priority: high
+  - day: 16
+    topic: Monotonic Stack
+    activity: Master monotonic stacks for next/previous greater/smaller element problems.
+      Learn when and how to maintain stack properties.
+    detailed_content: "Problem: Find next greater/smaller element for each position\
+      \ efficiently\n(e.g., stock span, daily temperatures, histogram rectangles).\n\
+      \nMonotonic Stack Template:\n\nNext Greater Element:\ndef next_greater(nums):\n\
+      \    # stack: Indices of elements waiting to find their next greater\n    #\
+      \ Stack maintains decreasing order (bottom to top)\n    # nums = [2,1,2,4,3]\
+      \ -> result = [4,2,4,-1,-1]\n\n    stack = []              # Stores indices\
+      \ (monotonic decreasing)\n    result = [-1] * len(nums)\n    for i, num in enumerate(nums):\n\
+      \        # Pop elements smaller than current (they found their answer)\n   \
+      \     while stack and nums[stack[-1]] < num:\n            idx = stack.pop()\
+      \     # This index found its next greater\n            result[idx] = num   \
+      \  # Record the answer\n        stack.append(i)          # Add current index\
+      \ to stack\n    return result\n\nNext Smaller Element:\ndef next_smaller(nums):\n\
+      \    # Stack maintains increasing order for next smaller\n    stack = []   \
+      \           # Stores indices (monotonic increasing)\n    result = [-1] * len(nums)\n\
+      \    for i, num in enumerate(nums):\n        # Pop elements greater than current\
+      \ (they found their answer)\n        while stack and nums[stack[-1]] > num:\n\
+      \            idx = stack.pop()\n            result[idx] = num\n        stack.append(i)\n\
+      \    return result\n\nVariables explained:\n- stack: List of indices (not values!)\
+      \ waiting to find next greater/smaller\n- result[i]: Answer for position i (next\
+      \ greater/smaller element)\n- idx: Index that just found its answer (popped\
+      \ from stack)\n- i, num: Current position and value being processed\n\nKey insights:\n\
+      - Decreasing stack for \"next greater\" (pop when see larger)\n- Increasing\
+      \ stack for \"next smaller\" (pop when see smaller)\n- Store indices to know\
+      \ positions and access values\n- Process in single pass O(n) - each element\
+      \ pushed/popped once\n"
+    problems:
+    - number: '496'
+      title: Next Greater Element I
+      url: https://leetcode.com/problems/next-greater-element-i/
+      difficulty: Easy
+      description: Basic next greater element using monotonic stack
+    - number: '739'
+      title: Daily Temperatures
+      url: https://leetcode.com/problems/daily-temperatures/
+      difficulty: Medium
+      description: Days until warmer temperature
+    - number: '84'
+      title: Largest Rectangle in Histogram
+      url: https://leetcode.com/problems/largest-rectangle-in-histogram/
+      difficulty: Hard
+      description: Classic monotonic stack application
+    time_estimate: 45
+    video_resources:
+    - title: 'William Fiset: DFS Graph Traversal'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 18 min
+      description: DFS with animations and topological sort
+      priority: high
+  - day: 17
+    topic: Overlapping Intervals
+    activity: 'Master interval problems: merging, scheduling, and conflict detection.
+      Learn sorting strategies and interval manipulation.'
+    detailed_content: "Interval Problems Pattern:\n1. Sort intervals (usually by start\
+      \ time)\n2. Iterate and compare current with previous\n3. Merge, count conflicts,\
+      \ or schedule accordingly\n\nMerge Intervals:\ndef merge(intervals):\n    intervals.sort(key=lambda\
+      \ x: x[0])\n    merged = [intervals[0]]\n    for current in intervals[1:]:\n\
+      \        if current[0] <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1],\
+      \ current[1])\n        else:\n            merged.append(current)\n    return\
+      \ merged\n\nInsert Interval:\ndef insert(intervals, new_interval):\n    result\
+      \ = []\n    i = 0\n    # Add all intervals before new_interval\n    while i\
+      \ < len(intervals) and intervals[i][1] < new_interval[0]:\n        result.append(intervals[i])\n\
+      \        i += 1\n    # Merge overlapping intervals\n    while i < len(intervals)\
+      \ and intervals[i][0] <= new_interval[1]:\n        new_interval[0] = min(new_interval[0],\
+      \ intervals[i][0])\n        new_interval[1] = max(new_interval[1], intervals[i][1])\n\
+      \        i += 1\n    result.append(new_interval)\n    # Add remaining intervals\n\
+      \    result.extend(intervals[i:])\n    return result\n"
+    problems:
+    - number: '56'
+      title: Merge Intervals
+      url: https://leetcode.com/problems/merge-intervals/
+      difficulty: Medium
+      description: Merge overlapping intervals
+    - number: '57'
+      title: Insert Interval
+      url: https://leetcode.com/problems/insert-interval/
+      difficulty: Medium
+      description: Insert and merge new interval
+    - number: '435'
+      title: Non-overlapping Intervals
+      url: https://leetcode.com/problems/non-overlapping-intervals/
+      difficulty: Medium
+      description: Minimum intervals to remove to make non-overlapping
+    time_estimate: 45
+    video_resources:
+    - title: 'William Fiset: Union Find Data Structure'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 20 min
+      description: Disjoint set with path compression
+      priority: high
+    - title: 'Back To Back SWE: Union Find Explained'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 15 min
+      description: Applications in graph problems
+      priority: medium
+  - day: 18
+    topic: Trie Operations
+    activity: Master trie (prefix tree) for string problems. Learn construction, search,
+      and prefix matching applications.
+    detailed_content: "Problem: Efficiently store and search strings with common prefixes\n\
+      (e.g., autocomplete, spell checking, prefix matching).\n\nTrie Implementation:\n\
+      class TrieNode:\n    def __init__(self):\n        # children: Dict mapping char\
+      \ -> child TrieNode\n        # is_end: True if this node marks end of a word\n\
+      \        self.children = {}      # e.g., {'a': node1, 'b': node2}\n        self.is_end\
+      \ = False     # Word boundary marker\n\nclass Trie:\n    def __init__(self):\n\
+      \        self.root = TrieNode()  # Empty root node\n\n    def insert(self, word):\n\
+      \        # Insert word into trie character by character\n        node = self.root\n\
+      \        for char in word:       # e.g., \"cat\" -> 'c', 'a', 't'\n        \
+      \    if char not in node.children:\n                node.children[char] = TrieNode()\n\
+      \            node = node.children[char]\n        node.is_end = True      # Mark\
+      \ end of word\n\n    def search(self, word):\n        # Check if exact word\
+      \ exists in trie\n        node = self.root\n        for char in word:\n    \
+      \        if char not in node.children:\n                return False    # Character\
+      \ path doesn't exist\n            node = node.children[char]\n        return\
+      \ node.is_end      # Must be marked as end\n\n    def starts_with(self, prefix):\n\
+      \        # Check if any word starts with prefix\n        node = self.root\n\
+      \        for char in prefix:\n            if char not in node.children:\n  \
+      \              return False\n            node = node.children[char]\n      \
+      \  return True             # Path exists (doesn't need is_end)\n\nVariables\
+      \ explained:\n- node: Current position in trie while traversing\n- children:\
+      \ Dict {char: TrieNode} for each possible next character\n- is_end: Boolean\
+      \ marking if node completes a valid word\n- root: Starting point of trie (empty\
+      \ node)\n\nTime Complexity: O(m) for all operations (m = word/prefix length)\n\
+      Space Complexity: O(total characters in all words)\n\nApplications:\n- Autocomplete\
+      \ systems (find all words with prefix)\n- Word games (Boggle, word search with\
+      \ backtracking)\n- IP routing tables (longest prefix matching)\n- Spell checkers\
+      \ (find similar words)\n"
+    problems:
+    - number: '208'
+      title: Implement Trie (Prefix Tree)
+      url: https://leetcode.com/problems/implement-trie-prefix-tree/
+      difficulty: Medium
+      description: Basic trie implementation
+    - number: '212'
+      title: Word Search II
+      url: https://leetcode.com/problems/word-search-ii/
+      difficulty: Hard
+      description: Backtracking + Trie for efficient word search
+    - number: '421'
+      title: Maximum XOR of Two Numbers in an Array
+      url: https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/
+      difficulty: Medium
+      description: Binary trie for bit manipulation
+    time_estimate: 45
+    video_resources:
+    - title: 'William Fiset: Topological Sort Algorithm'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 12 min
+      description: Kahn's algorithm and DFS approach
+      priority: high
+  - day: 19
+    topic: Union-Find
+    activity: Master Union-Find (Disjoint Set) for connectivity problems. Learn path
+      compression and union by rank optimizations.
+    detailed_content: "Problem: Track and merge disjoint sets efficiently for connectivity\
+      \ queries\n(e.g., are two nodes connected? how many separate components?).\n\
+      \nUnion-Find Implementation:\nclass UnionFind:\n    def __init__(self, n):\n\
+      \        # parent[i]: Parent of node i (initially itself)\n        # rank[i]:\
+      \ Approximate depth of tree rooted at i\n        # components: Count of separate\
+      \ groups\n        self.parent = list(range(n))  # Each node is its own parent\n\
+      \        self.rank = [0] * n           # All trees start with rank 0\n     \
+      \   self.components = n           # Initially n separate components\n\n    def\
+      \ find(self, x):\n        # Find root of x's component\n        # Path compression:\
+      \ make all nodes point directly to root\n        if self.parent[x] != x:\n \
+      \           self.parent[x] = self.find(self.parent[x])  # Compress path\n  \
+      \      return self.parent[x]\n\n    def union(self, x, y):\n        # Merge\
+      \ components containing x and y\n        root_x, root_y = self.find(x), self.find(y)\n\
+      \        if root_x != root_y:\n            # Union by rank: attach smaller tree\
+      \ to larger\n            if self.rank[root_x] < self.rank[root_y]:\n       \
+      \         self.parent[root_x] = root_y\n            elif self.rank[root_x] >\
+      \ self.rank[root_y]:\n                self.parent[root_y] = root_x\n       \
+      \     else:\n                self.parent[root_y] = root_x\n                self.rank[root_x]\
+      \ += 1\n            self.components -= 1  # Merged two components\n        \
+      \    return True           # Union successful\n        return False        \
+      \      # Already in same component\n\n    def connected(self, x, y):\n     \
+      \   # Check if x and y are in same component\n        return self.find(x) ==\
+      \ self.find(y)\n\nVariables explained:\n- parent[i]: Points to parent of node\
+      \ i (root points to itself)\n- rank[i]: Tree depth heuristic for balancing (not\
+      \ exact depth)\n- components: Number of separate groups/sets\n- root_x/root_y:\
+      \ Representative elements of each set\n\nTime Complexity: Nearly O(1) per operation\
+      \ with optimizations\n\nApplications:\n- Connected components in graphs (islands,\
+      \ friends)\n- Minimum spanning trees (Kruskal's algorithm)\n- Percolation problems\
+      \ (water flow, network connectivity)\n- Social network analysis\n"
+    problems:
+    - number: '547'
+      title: Number of Provinces
+      url: https://leetcode.com/problems/number-of-provinces/
+      difficulty: Medium
+      description: Count connected components using Union-Find
+    - number: '200'
+      title: Number of Islands
+      url: https://leetcode.com/problems/number-of-islands/
+      difficulty: Medium
+      description: Alternative Union-Find solution to DFS approach
+    - number: '721'
+      title: Accounts Merge
+      url: https://leetcode.com/problems/accounts-merge/
+      difficulty: Medium
+      description: Union-Find for grouping related accounts
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Implement Trie (Prefix Tree)'
+      url: https://www.youtube.com/@NeetCode
+      duration: 15 min
+      description: Trie implementation and word search
+      priority: high
+    - title: 'Back To Back SWE: Trie Data Structure'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 18 min
+      description: Advanced trie applications
+      priority: medium
+  - day: 20
+    topic: Greedy Algorithms
+    activity: Master greedy choice property for optimization problems. Learn when
+      greedy works and common greedy patterns.
+    detailed_content: "Greedy Algorithm Strategy:\n1. Make locally optimal choice\
+      \ at each step\n2. Never reconsider previous choices\n3. Hope that local optimum\
+      \ leads to global optimum\n\nWhen Greedy Works:\n- Greedy choice property exists\n\
+      - Optimal substructure present\n- Problem has exchange argument\n\nCommon Greedy\
+      \ Patterns:\n\nActivity Selection:\ndef activity_selection(activities):\n  \
+      \  activities.sort(key=lambda x: x[1])  # Sort by end time\n    result = [activities[0]]\n\
+      \    last_end = activities[0][1]\n    for start, end in activities[1:]:\n  \
+      \      if start >= last_end:\n            result.append((start, end))\n    \
+      \        last_end = end\n    return result\n\nFractional Knapsack:\ndef fractional_knapsack(items,\
+      \ capacity):\n    items.sort(key=lambda x: x[1]/x[0], reverse=True)  # Sort\
+      \ by value/weight ratio\n    total_value = 0\n    for weight, value in items:\n\
+      \        if capacity >= weight:\n            capacity -= weight\n          \
+      \  total_value += value\n        else:\n            total_value += value * (capacity\
+      \ / weight)\n            break\n    return total_value\n"
+    problems:
+    - number: '455'
+      title: Assign Cookies
+      url: https://leetcode.com/problems/assign-cookies/
+      difficulty: Easy
+      description: Greedy assignment problem
+    - number: '435'
+      title: Non-overlapping Intervals
+      url: https://leetcode.com/problems/non-overlapping-intervals/
+      difficulty: Medium
+      description: Greedy interval scheduling
+    - number: '134'
+      title: Gas Station
+      url: https://leetcode.com/problems/gas-station/
+      difficulty: Medium
+      description: Greedy circular array problem
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Backtracking Pattern'
+      url: https://www.youtube.com/@NeetCode
+      duration: 20 min
+      description: Permutations, combinations, subsets
+      priority: high
+    - title: 'Back To Back SWE: Backtracking Deep Dive'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 25 min
+      description: Complex backtracking problems
+      priority: medium
+  - day: 21
+    topic: Week 3 Data Structures Integration
+    activity: Combine advanced data structures. Solve problems requiring multiple
+      data structures and sophisticated designs.
+    detailed_content: "Multi-Data Structure Problems:\n\n1. Design Patterns:\n   -\
+      \ Heap + Hash Map: Fast lookups with priority\n   - Trie + DFS: String search\
+      \ in complex spaces\n   - Union-Find + Sorting: Component-based processing\n\
+      \   - Stack + Hash Map: Bracket matching with validation\n\n2. Common Combinations:\n\
+      \n   LRU Cache:\n   - Hash map + Doubly linked list\n   - O(1) get/put operations\n\
+      \n   Twitter Feed:\n   - Hash map + Heap for each user's timeline\n   - Merge\
+      \ k sorted lists for combined feed\n\n   Autocomplete System:\n   - Trie for\
+      \ prefix matching\n   - Heap for top-k results\n   - Hash map for sentence frequency\n\
+      \n   Range Sum with Updates:\n   - Segment tree or Fenwick tree\n   - Support\
+      \ both range queries and updates\n\n3. Problem-Solving Strategy:\n   - Identify\
+      \ core operations needed\n   - Choose data structures for each operation\n \
+      \  - Consider space-time tradeoffs\n   - Implement incrementally and test\n"
+    problems:
+    - number: '146'
+      title: LRU Cache
+      url: https://leetcode.com/problems/lru-cache/
+      difficulty: Medium
+      description: Hash map + doubly linked list design
+    - number: '355'
+      title: Design Twitter
+      url: https://leetcode.com/problems/design-twitter/
+      difficulty: Medium
+      description: Hash map + heap for timeline design
+    - number: '642'
+      title: Design Search Autocomplete System
+      url: https://leetcode.com/problems/design-search-autocomplete-system/
+      difficulty: Hard
+      description: Trie + heap + hash map complex design
+    - number: '295'
+      title: Find Median from Data Stream
+      url: https://leetcode.com/problems/find-median-from-data-stream/
+      difficulty: Hard
+      description: Two heaps for running median
+    time_estimate: 60
+    video_resources:
+    - title: 'William Fiset: Graph Algorithms Playlist'
+      url: https://www.youtube.com/@WilliamFiset-videos
+      duration: 30 min
+      description: Comprehensive review of graph patterns
+      priority: high
   week4:
-    - day: 22
-      topic: "Advanced Dynamic Programming"
-      activity: "Master advanced DP patterns: 2D DP, state machines, digit DP, and DP on trees. Tackle complex optimization problems."
-      detailed_content: |
-        Advanced DP Patterns:
+  - day: 22
+    topic: Advanced Dynamic Programming
+    activity: 'Master advanced DP patterns: 2D DP, state machines, digit DP, and DP
+      on trees. Tackle complex optimization problems.'
+    detailed_content: "Advanced DP Patterns:\n\n2D DP Template:\ndef solve_2d(grid):\n\
+      \    m, n = len(grid), len(grid[0])\n    dp = [[0] * n for _ in range(m)]\n\
+      \    # Initialize base cases\n    dp[0][0] = grid[0][0]\n    # Fill first row\
+      \ and column\n    for i in range(1, m):\n        dp[i][0] = dp[i-1][0] + grid[i][0]\n\
+      \    for j in range(1, n):\n        dp[0][j] = dp[0][j-1] + grid[0][j]\n   \
+      \ # Fill remaining cells\n    for i in range(1, m):\n        for j in range(1,\
+      \ n):\n            dp[i][j] = min(dp[i-1][j], dp[i][j-1]) + grid[i][j]\n   \
+      \ return dp[m-1][n-1]\n\nState Machine DP:\ndef max_profit_with_cooldown(prices):\n\
+      \    held = -prices[0]  # State: holding stock\n    sold = 0           # State:\
+      \ just sold (cooldown)\n    rest = 0           # State: resting (can buy)\n\
+      \    for price in prices[1:]:\n        new_held = max(held, rest - price)\n\
+      \        new_sold = held + price\n        new_rest = max(rest, sold)\n     \
+      \   held, sold, rest = new_held, new_sold, new_rest\n    return max(sold, rest)\n\
+      \nDP on Trees:\ndef rob_tree(root):\n    def dfs(node):\n        if not node:\n\
+      \            return (0, 0)  # (rob, not_rob)\n        left_rob, left_not = dfs(node.left)\n\
+      \        right_rob, right_not = dfs(node.right)\n        rob = node.val + left_not\
+      \ + right_not\n        not_rob = max(left_rob, left_not) + max(right_rob, right_not)\n\
+      \        return (rob, not_rob)\n    return max(dfs(root))\n"
+    problems:
+    - number: '72'
+      title: Edit Distance
+      url: https://leetcode.com/problems/edit-distance/
+      difficulty: Hard
+      description: Classic 2D DP for string transformation
+    - number: '309'
+      title: Best Time to Buy and Sell Stock with Cooldown
+      url: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/
+      difficulty: Medium
+      description: State machine DP for trading with constraints
+    - number: '337'
+      title: House Robber III
+      url: https://leetcode.com/problems/house-robber-iii/
+      difficulty: Medium
+      description: DP on binary tree structure
+    time_estimate: 50
+    video_resources:
+    - title: 'NeetCode: 1D DP Explained'
+      url: https://www.youtube.com/@NeetCode
+      duration: 18 min
+      description: House robber, climbing stairs patterns
+      priority: high
+    - title: 'Back To Back SWE: DP Fundamentals'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 20 min
+      description: Building intuition for DP
+      priority: high
+  - day: 23
+    topic: Advanced Graph Algorithms
+    activity: Master shortest paths (Dijkstra, Floyd-Warshall), minimum spanning trees,
+      and advanced graph traversal techniques.
+    detailed_content: "Dijkstra's Algorithm:\nimport heapq\ndef dijkstra(graph, start):\n\
+      \    distances = {node: float('inf') for node in graph}\n    distances[start]\
+      \ = 0\n    pq = [(0, start)]\n\n    while pq:\n        current_dist, current\
+      \ = heapq.heappop(pq)\n        if current_dist > distances[current]:\n     \
+      \       continue\n        for neighbor, weight in graph[current]:\n        \
+      \    distance = current_dist + weight\n            if distance < distances[neighbor]:\n\
+      \                distances[neighbor] = distance\n                heapq.heappush(pq,\
+      \ (distance, neighbor))\n    return distances\n\nFloyd-Warshall (All-pairs shortest\
+      \ path):\ndef floyd_warshall(graph):\n    n = len(graph)\n    dist = [[float('inf')]\
+      \ * n for _ in range(n)]\n    # Initialize distances\n    for i in range(n):\n\
+      \        dist[i][i] = 0\n        for j, weight in graph[i]:\n            dist[i][j]\
+      \ = weight\n    # DP: try all intermediate vertices\n    for k in range(n):\n\
+      \        for i in range(n):\n            for j in range(n):\n              \
+      \  dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])\n    return dist\n\n\
+      Minimum Spanning Tree (Kruskal's):\ndef kruskal(edges, n):\n    uf = UnionFind(n)\n\
+      \    edges.sort()  # Sort by weight\n    mst = []\n    for weight, u, v in edges:\n\
+      \        if uf.union(u, v):\n            mst.append((u, v, weight))\n      \
+      \      if len(mst) == n - 1:\n                break\n    return mst\n"
+    problems:
+    - number: '743'
+      title: Network Delay Time
+      url: https://leetcode.com/problems/network-delay-time/
+      difficulty: Medium
+      description: Dijkstra's algorithm for shortest path
+    - number: '787'
+      title: Cheapest Flights Within K Stops
+      url: https://leetcode.com/problems/cheapest-flights-within-k-stops/
+      difficulty: Medium
+      description: Modified Dijkstra with constraints
+    - number: '1135'
+      title: Connecting Cities With Minimum Cost
+      url: https://leetcode.com/problems/connecting-cities-with-minimum-cost/
+      difficulty: Medium
+      description: Minimum spanning tree problem
+    time_estimate: 50
+    video_resources:
+    - title: 'NeetCode: 2D DP Patterns'
+      url: https://www.youtube.com/@NeetCode
+      duration: 22 min
+      description: Grid problems, LCS, edit distance
+      priority: high
+    - title: 'Back To Back SWE: 2D DP Mastery'
+      url: https://www.youtube.com/@BackToBackSWE
+      duration: 30 min
+      description: Advanced 2D DP techniques
+      priority: medium
+  - day: 24
+    topic: Topological Sort
+    activity: Master topological sorting for DAGs. Learn Kahn's algorithm and DFS-based
+      approaches for dependency resolution.
+    detailed_content: "Topological Sort (Kahn's Algorithm):\nfrom collections import\
+      \ deque, defaultdict\ndef topological_sort_kahn(n, edges):\n    graph = defaultdict(list)\n\
+      \    in_degree = [0] * n\n\n    # Build graph and calculate in-degrees\n   \
+      \ for u, v in edges:\n        graph[u].append(v)\n        in_degree[v] += 1\n\
+      \n    # Initialize queue with nodes having 0 in-degree\n    queue = deque([i\
+      \ for i in range(n) if in_degree[i] == 0])\n    result = []\n\n    while queue:\n\
+      \        node = queue.popleft()\n        result.append(node)\n        for neighbor\
+      \ in graph[node]:\n            in_degree[neighbor] -= 1\n            if in_degree[neighbor]\
+      \ == 0:\n                queue.append(neighbor)\n\n    return result if len(result)\
+      \ == n else []  # Check for cycle\n\nDFS-based Topological Sort:\ndef topological_sort_dfs(n,\
+      \ edges):\n    graph = defaultdict(list)\n    for u, v in edges:\n        graph[u].append(v)\n\
+      \n    visited = set()\n    rec_stack = set()\n    result = []\n\n    def dfs(node):\n\
+      \        if node in rec_stack:\n            return False  # Cycle detected\n\
+      \        if node in visited:\n            return True\n\n        visited.add(node)\n\
+      \        rec_stack.add(node)\n\n        for neighbor in graph[node]:\n     \
+      \       if not dfs(neighbor):\n                return False\n\n        rec_stack.remove(node)\n\
+      \        result.append(node)\n        return True\n\n    for i in range(n):\n\
+      \        if i not in visited:\n            if not dfs(i):\n                return\
+      \ []  # Cycle exists\n\n    return result[::-1]  # Reverse for correct order\n\
+      \nApplications:\n- Course scheduling\n- Build dependencies\n- Task ordering\n\
+      - Deadlock detection\n"
+    problems:
+    - number: '207'
+      title: Course Schedule
+      url: https://leetcode.com/problems/course-schedule/
+      difficulty: Medium
+      description: Cycle detection in directed graph
+    - number: '210'
+      title: Course Schedule II
+      url: https://leetcode.com/problems/course-schedule-ii/
+      difficulty: Medium
+      description: Find valid topological ordering
+    - number: '269'
+      title: Alien Dictionary
+      url: https://leetcode.com/problems/alien-dictionary/
+      difficulty: Hard
+      description: Derive character ordering using topological sort
+    time_estimate: 45
+    video_resources:
+    - title: 'NeetCode: Greedy vs DP'
+      url: https://www.youtube.com/@NeetCode
+      duration: 15 min
+      description: When to use greedy approach
+      priority: high
+  - day: 25
+    topic: Complex Multi-Pattern Problems
+    activity: Tackle problems requiring combination of multiple advanced patterns.
+      Develop systematic problem-solving approach.
+    detailed_content: "Multi-Pattern Problem-Solving Framework:\n\n1. Problem Decomposition:\n\
+      \   - Break complex problem into subproblems\n   - Identify which patterns apply\
+      \ to each part\n   - Consider optimal combination strategy\n\n2. Pattern Integration\
+      \ Strategies:\n   - Sequential: Use patterns one after another\n   - Nested:\
+      \ Apply one pattern within another\n   - Parallel: Use different patterns for\
+      \ different aspects\n   - Hybrid: Combine patterns in novel ways\n\n3. Common\
+      \ Multi-Pattern Combinations:\n\n   DP + Graph Traversal:\n   - Shortest path\
+      \ with state transitions\n   - Game theory problems\n   - Resource allocation\
+      \ with constraints\n\n   Backtracking + Pruning:\n   - Use additional data structures\
+      \ for pruning\n   - Memoization to avoid recomputation\n   - Constraint propagation\n\
+      \n   Divide & Conquer + Advanced Data Structures:\n   - Range queries with updates\n\
+      \   - Persistent data structures\n   - Parallel processing\n\n4. Optimization\
+      \ Techniques:\n   - Precomputation and caching\n   - Space-time tradeoffs\n\
+      \   - Approximation algorithms\n   - Randomization\n\n5. Implementation Best\
+      \ Practices:\n   - Modular design\n   - Clear separation of concerns\n   - Comprehensive\
+      \ testing\n   - Performance profiling\n"
+    problems:
+    - number: '140'
+      title: Word Break II
+      url: https://leetcode.com/problems/word-break-ii/
+      difficulty: Hard
+      description: DP + Backtracking for sentence segmentation
+    - number: '472'
+      title: Concatenated Words
+      url: https://leetcode.com/problems/concatenated-words/
+      difficulty: Hard
+      description: Trie + DP for word composition
+    - number: '1125'
+      title: Smallest Sufficient Team
+      url: https://leetcode.com/problems/smallest-sufficient-team/
+      difficulty: Hard
+      description: Bit manipulation + DP for set cover
+    - number: '843'
+      title: Guess the Word
+      url: https://leetcode.com/problems/guess-the-word/
+      difficulty: Hard
+      description: Interactive problem with optimal strategy
+    time_estimate: 60
+    video_resources:
+    - title: 'NeetCode: Interval Problems'
+      url: https://www.youtube.com/@NeetCode
+      duration: 18 min
+      description: Merge intervals, meeting rooms
+      priority: high
+  - day: 26
+    topic: Mock Interview 1
+    activity: Complete timed mock interview with multiple problems. Practice explaining
+      solutions and handling follow-up questions.
+    detailed_content: 'Mock Interview Structure:
 
-        2D DP Template:
-        def solve_2d(grid):
-            m, n = len(grid), len(grid[0])
-            dp = [[0] * n for _ in range(m)]
-            # Initialize base cases
-            dp[0][0] = grid[0][0]
-            # Fill first row and column
-            for i in range(1, m):
-                dp[i][0] = dp[i-1][0] + grid[i][0]
-            for j in range(1, n):
-                dp[0][j] = dp[0][j-1] + grid[0][j]
-            # Fill remaining cells
-            for i in range(1, m):
-                for j in range(1, n):
-                    dp[i][j] = min(dp[i-1][j], dp[i][j-1]) + grid[i][j]
-            return dp[m-1][n-1]
 
-        State Machine DP:
-        def max_profit_with_cooldown(prices):
-            held = -prices[0]  # State: holding stock
-            sold = 0           # State: just sold (cooldown)
-            rest = 0           # State: resting (can buy)
-            for price in prices[1:]:
-                new_held = max(held, rest - price)
-                new_sold = held + price
-                new_rest = max(rest, sold)
-                held, sold, rest = new_held, new_sold, new_rest
-            return max(sold, rest)
+      Problem 1 (15 minutes): Easy/Warm-up
 
-        DP on Trees:
-        def rob_tree(root):
-            def dfs(node):
-                if not node:
-                    return (0, 0)  # (rob, not_rob)
-                left_rob, left_not = dfs(node.left)
-                right_rob, right_not = dfs(node.right)
-                rob = node.val + left_not + right_not
-                not_rob = max(left_rob, left_not) + max(right_rob, right_not)
-                return (rob, not_rob)
-            return max(dfs(root))
-      problems:
-        - number: "72"
-          title: "Edit Distance"
-          url: "https://leetcode.com/problems/edit-distance/"
-          difficulty: "Hard"
-          description: "Classic 2D DP for string transformation"
-        - number: "309"
-          title: "Best Time to Buy and Sell Stock with Cooldown"
-          url: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/"
-          difficulty: "Medium"
-          description: "State machine DP for trading with constraints"
-        - number: "337"
-          title: "House Robber III"
-          url: "https://leetcode.com/problems/house-robber-iii/"
-          difficulty: "Medium"
-          description: "DP on binary tree structure"
-      time_estimate: 50
+      - Array or string manipulation
 
-    - day: 23
-      topic: "Advanced Graph Algorithms"
-      activity: "Master shortest paths (Dijkstra, Floyd-Warshall), minimum spanning trees, and advanced graph traversal techniques."
-      detailed_content: |
-        Dijkstra's Algorithm:
-        import heapq
-        def dijkstra(graph, start):
-            distances = {node: float('inf') for node in graph}
-            distances[start] = 0
-            pq = [(0, start)]
+      - Basic algorithm application
 
-            while pq:
-                current_dist, current = heapq.heappop(pq)
-                if current_dist > distances[current]:
-                    continue
-                for neighbor, weight in graph[current]:
-                    distance = current_dist + weight
-                    if distance < distances[neighbor]:
-                        distances[neighbor] = distance
-                        heapq.heappush(pq, (distance, neighbor))
-            return distances
+      - Focus on clean implementation
 
-        Floyd-Warshall (All-pairs shortest path):
-        def floyd_warshall(graph):
-            n = len(graph)
-            dist = [[float('inf')] * n for _ in range(n)]
-            # Initialize distances
-            for i in range(n):
-                dist[i][i] = 0
-                for j, weight in graph[i]:
-                    dist[i][j] = weight
-            # DP: try all intermediate vertices
-            for k in range(n):
-                for i in range(n):
-                    for j in range(n):
-                        dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
-            return dist
 
-        Minimum Spanning Tree (Kruskal's):
-        def kruskal(edges, n):
-            uf = UnionFind(n)
-            edges.sort()  # Sort by weight
-            mst = []
-            for weight, u, v in edges:
-                if uf.union(u, v):
-                    mst.append((u, v, weight))
-                    if len(mst) == n - 1:
-                        break
-            return mst
-      problems:
-        - number: "743"
-          title: "Network Delay Time"
-          url: "https://leetcode.com/problems/network-delay-time/"
-          difficulty: "Medium"
-          description: "Dijkstra's algorithm for shortest path"
-        - number: "787"
-          title: "Cheapest Flights Within K Stops"
-          url: "https://leetcode.com/problems/cheapest-flights-within-k-stops/"
-          difficulty: "Medium"
-          description: "Modified Dijkstra with constraints"
-        - number: "1135"
-          title: "Connecting Cities With Minimum Cost"
-          url: "https://leetcode.com/problems/connecting-cities-with-minimum-cost/"
-          difficulty: "Medium"
-          description: "Minimum spanning tree problem"
-      time_estimate: 50
+      Problem 2 (20 minutes): Medium/Core
 
-    - day: 24
-      topic: "Topological Sort"
-      activity: "Master topological sorting for DAGs. Learn Kahn's algorithm and DFS-based approaches for dependency resolution."
-      detailed_content: |
-        Topological Sort (Kahn's Algorithm):
-        from collections import deque, defaultdict
-        def topological_sort_kahn(n, edges):
-            graph = defaultdict(list)
-            in_degree = [0] * n
+      - Classic algorithm problem
 
-            # Build graph and calculate in-degrees
-            for u, v in edges:
-                graph[u].append(v)
-                in_degree[v] += 1
+      - Multiple possible approaches
 
-            # Initialize queue with nodes having 0 in-degree
-            queue = deque([i for i in range(n) if in_degree[i] == 0])
-            result = []
+      - Optimization discussions
 
-            while queue:
-                node = queue.popleft()
-                result.append(node)
-                for neighbor in graph[node]:
-                    in_degree[neighbor] -= 1
-                    if in_degree[neighbor] == 0:
-                        queue.append(neighbor)
 
-            return result if len(result) == n else []  # Check for cycle
+      Problem 3 (20 minutes): Hard/Advanced
 
-        DFS-based Topological Sort:
-        def topological_sort_dfs(n, edges):
-            graph = defaultdict(list)
-            for u, v in edges:
-                graph[u].append(v)
+      - Complex problem requiring multiple concepts
 
-            visited = set()
-            rec_stack = set()
-            result = []
+      - System design considerations
 
-            def dfs(node):
-                if node in rec_stack:
-                    return False  # Cycle detected
-                if node in visited:
-                    return True
+      - Edge case handling
 
-                visited.add(node)
-                rec_stack.add(node)
 
-                for neighbor in graph[node]:
-                    if not dfs(neighbor):
-                        return False
+      Follow-up Questions (5 minutes):
 
-                rec_stack.remove(node)
-                result.append(node)
-                return True
+      - Time/space complexity analysis
 
-            for i in range(n):
-                if i not in visited:
-                    if not dfs(i):
-                        return []  # Cycle exists
+      - Alternative approaches
 
-            return result[::-1]  # Reverse for correct order
+      - Real-world applications
 
-        Applications:
-        - Course scheduling
-        - Build dependencies
-        - Task ordering
-        - Deadlock detection
-      problems:
-        - number: "207"
-          title: "Course Schedule"
-          url: "https://leetcode.com/problems/course-schedule/"
-          difficulty: "Medium"
-          description: "Cycle detection in directed graph"
-        - number: "210"
-          title: "Course Schedule II"
-          url: "https://leetcode.com/problems/course-schedule-ii/"
-          difficulty: "Medium"
-          description: "Find valid topological ordering"
-        - number: "269"
-          title: "Alien Dictionary"
-          url: "https://leetcode.com/problems/alien-dictionary/"
-          difficulty: "Hard"
-          description: "Derive character ordering using topological sort"
-      time_estimate: 45
+      - Scalability considerations
 
-    - day: 25
-      topic: "Complex Multi-Pattern Problems"
-      activity: "Tackle problems requiring combination of multiple advanced patterns. Develop systematic problem-solving approach."
-      detailed_content: |
-        Multi-Pattern Problem-Solving Framework:
 
-        1. Problem Decomposition:
-           - Break complex problem into subproblems
-           - Identify which patterns apply to each part
-           - Consider optimal combination strategy
+      Interview Best Practices:
 
-        2. Pattern Integration Strategies:
-           - Sequential: Use patterns one after another
-           - Nested: Apply one pattern within another
-           - Parallel: Use different patterns for different aspects
-           - Hybrid: Combine patterns in novel ways
+      1. Think out loud
 
-        3. Common Multi-Pattern Combinations:
+      2. Ask clarifying questions
 
-           DP + Graph Traversal:
-           - Shortest path with state transitions
-           - Game theory problems
-           - Resource allocation with constraints
+      3. Start with brute force, then optimize
 
-           Backtracking + Pruning:
-           - Use additional data structures for pruning
-           - Memoization to avoid recomputation
-           - Constraint propagation
+      4. Test with examples
 
-           Divide & Conquer + Advanced Data Structures:
-           - Range queries with updates
-           - Persistent data structures
-           - Parallel processing
+      5. Handle edge cases
 
-        4. Optimization Techniques:
-           - Precomputation and caching
-           - Space-time tradeoffs
-           - Approximation algorithms
-           - Randomization
+      6. Discuss trade-offs
 
-        5. Implementation Best Practices:
-           - Modular design
-           - Clear separation of concerns
-           - Comprehensive testing
-           - Performance profiling
-      problems:
-        - number: "140"
-          title: "Word Break II"
-          url: "https://leetcode.com/problems/word-break-ii/"
-          difficulty: "Hard"
-          description: "DP + Backtracking for sentence segmentation"
-        - number: "472"
-          title: "Concatenated Words"
-          url: "https://leetcode.com/problems/concatenated-words/"
-          difficulty: "Hard"
-          description: "Trie + DP for word composition"
-        - number: "1125"
-          title: "Smallest Sufficient Team"
-          url: "https://leetcode.com/problems/smallest-sufficient-team/"
-          difficulty: "Hard"
-          description: "Bit manipulation + DP for set cover"
-        - number: "843"
-          title: "Guess the Word"
-          url: "https://leetcode.com/problems/guess-the-word/"
-          difficulty: "Hard"
-          description: "Interactive problem with optimal strategy"
-      time_estimate: 60
+      7. Write clean, readable code
 
-    - day: 26
-      topic: "Mock Interview 1"
-      activity: "Complete timed mock interview with multiple problems. Practice explaining solutions and handling follow-up questions."
-      detailed_content: |
-        Mock Interview Structure:
+      8. Be prepared for follow-ups
 
-        Problem 1 (15 minutes): Easy/Warm-up
-        - Array or string manipulation
-        - Basic algorithm application
-        - Focus on clean implementation
 
-        Problem 2 (20 minutes): Medium/Core
-        - Classic algorithm problem
-        - Multiple possible approaches
-        - Optimization discussions
+      Common Interview Topics:
 
-        Problem 3 (20 minutes): Hard/Advanced
-        - Complex problem requiring multiple concepts
-        - System design considerations
-        - Edge case handling
+      - Arrays and strings (40%)
 
-        Follow-up Questions (5 minutes):
-        - Time/space complexity analysis
-        - Alternative approaches
-        - Real-world applications
-        - Scalability considerations
+      - Trees and graphs (25%)
 
-        Interview Best Practices:
-        1. Think out loud
-        2. Ask clarifying questions
-        3. Start with brute force, then optimize
-        4. Test with examples
-        5. Handle edge cases
-        6. Discuss trade-offs
-        7. Write clean, readable code
-        8. Be prepared for follow-ups
+      - Dynamic programming (15%)
 
-        Common Interview Topics:
-        - Arrays and strings (40%)
-        - Trees and graphs (25%)
-        - Dynamic programming (15%)
-        - Linked lists (10%)
-        - System design (10%)
-      problems:
-        - number: "217"
-          title: "Contains Duplicate"
-          url: "https://leetcode.com/problems/contains-duplicate/"
-          difficulty: "Easy"
-          description: "Warm-up: Basic array problem with multiple solutions"
-        - number: "139"
-          title: "Word Break"
-          url: "https://leetcode.com/problems/word-break/"
-          difficulty: "Medium"
-          description: "Core: DP problem with clear optimization path"
-        - number: "297"
-          title: "Serialize and Deserialize Binary Tree"
-          url: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/"
-          difficulty: "Hard"
-          description: "Advanced: Design problem with multiple approaches"
-      time_estimate: 60
+      - Linked lists (10%)
 
-    - day: 27
-      topic: "Mock Interview 2"
-      activity: "Second timed mock interview focusing on different problem categories. Practice advanced problem-solving under pressure."
-      detailed_content: |
-        Advanced Mock Interview:
+      - System design (10%)
 
-        Problem 1 (15 minutes): String/Array
-        - Pattern matching or transformation
-        - Multiple solution approaches
-        - In-place vs extra space trade-offs
+      '
+    problems:
+    - number: '217'
+      title: Contains Duplicate
+      url: https://leetcode.com/problems/contains-duplicate/
+      difficulty: Easy
+      description: 'Warm-up: Basic array problem with multiple solutions'
+    - number: '139'
+      title: Word Break
+      url: https://leetcode.com/problems/word-break/
+      difficulty: Medium
+      description: 'Core: DP problem with clear optimization path'
+    - number: '297'
+      title: Serialize and Deserialize Binary Tree
+      url: https://leetcode.com/problems/serialize-and-deserialize-binary-tree/
+      difficulty: Hard
+      description: 'Advanced: Design problem with multiple approaches'
+    time_estimate: 60
+    video_resources:
+    - title: 'NeetCode: Bit Manipulation Tricks'
+      url: https://www.youtube.com/@NeetCode
+      duration: 12 min
+      description: XOR, counting bits, common patterns
+      priority: medium
+  - day: 27
+    topic: Mock Interview 2
+    activity: Second timed mock interview focusing on different problem categories.
+      Practice advanced problem-solving under pressure.
+    detailed_content: 'Advanced Mock Interview:
 
-        Problem 2 (25 minutes): Graph/Tree
-        - Traversal with complex constraints
-        - State tracking during traversal
-        - Multiple exit conditions
 
-        Problem 3 (20 minutes): System Design
-        - Design a simple system (cache, rate limiter)
-        - Discuss scalability and edge cases
-        - API design considerations
+      Problem 1 (15 minutes): String/Array
 
-        Advanced Interview Techniques:
-        1. Pattern recognition
-        2. Breaking down complex problems
-        3. Incremental optimization
-        4. Handling ambiguous requirements
-        5. Discussing system constraints
-        6. Code organization and modularity
-        7. Testing strategy
-        8. Performance analysis
+      - Pattern matching or transformation
 
-        Red Flags to Avoid:
-        - Silent coding
-        - Jumping to code without planning
-        - Ignoring edge cases
-        - Poor variable naming
-        - Not testing solution
-        - Inability to optimize
-        - Not asking questions
-        - Getting stuck on one approach
-      problems:
-        - number: "5"
-          title: "Longest Palindromic Substring"
-          url: "https://leetcode.com/problems/longest-palindromic-substring/"
-          difficulty: "Medium"
-          description: "String processing with multiple optimization levels"
-        - number: "124"
-          title: "Binary Tree Maximum Path Sum"
-          url: "https://leetcode.com/problems/binary-tree-maximum-path-sum/"
-          difficulty: "Hard"
-          description: "Tree traversal with global state tracking"
-        - number: "146"
-          title: "LRU Cache"
-          url: "https://leetcode.com/problems/lru-cache/"
-          difficulty: "Medium"
-          description: "System design with data structure implementation"
-      time_estimate: 60
+      - Multiple solution approaches
 
-    - day: 28
-      topic: "Final Integration & Comprehensive Review"
-      activity: "Complete review of all 14 patterns. Solve capstone problems that integrate multiple concepts. Prepare for real interviews."
-      detailed_content: |
-        Complete Pattern Mastery Review:
+      - In-place vs extra space trade-offs
 
-        Week 1 Fundamentals:
-        ✅ Two Pointers: Array pair/triplet problems
-        ✅ Sliding Window: Substring/subarray optimization
-        ✅ Binary Search: Search in sorted/rotated arrays
-        ✅ Slow/Fast Pointers: Linked list cycle detection
-        ✅ Linked List Reversal: In-place list manipulation
-        ✅ Binary Tree Traversal: All traversal methods
 
-        Week 2 Algorithms:
-        ✅ DFS: Tree/graph depth-first exploration
-        ✅ BFS: Level-by-level traversal, shortest paths
-        ✅ Dynamic Programming: Optimization problems
-        ✅ Backtracking: Generate all solutions
-        ✅ Bit Manipulation: XOR tricks, bit masking
-        ✅ Prefix Sum: Range queries, cumulative sums
+      Problem 2 (25 minutes): Graph/Tree
 
-        Week 3 Data Structures:
-        ✅ Heaps/Top K: Priority-based problems
-        ✅ Monotonic Stack: Next greater/smaller
-        ✅ Intervals: Merging, scheduling conflicts
-        ✅ Trie: Prefix matching, string search
-        ✅ Union-Find: Connectivity, components
-        ✅ Greedy: Local optimization strategies
+      - Traversal with complex constraints
 
-        Week 4 Advanced:
-        ✅ Advanced DP: 2D DP, state machines
-        ✅ Graph Algorithms: Shortest paths, MST
-        ✅ Topological Sort: Dependency resolution
-        ✅ Multi-Pattern Integration
+      - State tracking during traversal
 
-        Final Preparation Checklist:
-        - [ ] Review all pattern templates
-        - [ ] Practice time complexity analysis
-        - [ ] Master common optimization techniques
-        - [ ] Prepare for behavioral questions
-        - [ ] Set up interview environment
-        - [ ] Practice explaining solutions clearly
-        - [ ] Review company-specific patterns
-        - [ ] Schedule practice interviews
+      - Multiple exit conditions
 
-        Interview Day Strategy:
-        1. Stay calm and think clearly
-        2. Communicate throughout the process
-        3. Start simple, then optimize
-        4. Test thoroughly
-        5. Handle edge cases
-        6. Be open to hints and feedback
-        7. Ask good questions
-        8. Show enthusiasm for problem-solving
-      problems:
-        - number: "42"
-          title: "Trapping Rain Water"
-          url: "https://leetcode.com/problems/trapping-rain-water/"
-          difficulty: "Hard"
-          description: "Capstone: Multiple approaches (two pointers, stack, DP)"
-        - number: "127"
-          title: "Word Ladder"
-          url: "https://leetcode.com/problems/word-ladder/"
-          difficulty: "Hard"
-          description: "Integration: BFS + string manipulation + optimization"
-        - number: "84"
-          title: "Largest Rectangle in Histogram"
-          url: "https://leetcode.com/problems/largest-rectangle-in-histogram/"
-          difficulty: "Hard"
-          description: "Advanced: Monotonic stack mastery"
-        - number: "32"
-          title: "Longest Valid Parentheses"
-          url: "https://leetcode.com/problems/longest-valid-parentheses/"
-          difficulty: "Hard"
-          description: "Multi-approach: Stack, DP, and two-pass solutions"
-      time_estimate: 75
+
+      Problem 3 (20 minutes): System Design
+
+      - Design a simple system (cache, rate limiter)
+
+      - Discuss scalability and edge cases
+
+      - API design considerations
+
+
+      Advanced Interview Techniques:
+
+      1. Pattern recognition
+
+      2. Breaking down complex problems
+
+      3. Incremental optimization
+
+      4. Handling ambiguous requirements
+
+      5. Discussing system constraints
+
+      6. Code organization and modularity
+
+      7. Testing strategy
+
+      8. Performance analysis
+
+
+      Red Flags to Avoid:
+
+      - Silent coding
+
+      - Jumping to code without planning
+
+      - Ignoring edge cases
+
+      - Poor variable naming
+
+      - Not testing solution
+
+      - Inability to optimize
+
+      - Not asking questions
+
+      - Getting stuck on one approach
+
+      '
+    problems:
+    - number: '5'
+      title: Longest Palindromic Substring
+      url: https://leetcode.com/problems/longest-palindromic-substring/
+      difficulty: Medium
+      description: String processing with multiple optimization levels
+    - number: '124'
+      title: Binary Tree Maximum Path Sum
+      url: https://leetcode.com/problems/binary-tree-maximum-path-sum/
+      difficulty: Hard
+      description: Tree traversal with global state tracking
+    - number: '146'
+      title: LRU Cache
+      url: https://leetcode.com/problems/lru-cache/
+      difficulty: Medium
+      description: System design with data structure implementation
+    time_estimate: 60
+    video_resources:
+    - title: 'NeetCode: Math Problems for Interviews'
+      url: https://www.youtube.com/@NeetCode
+      duration: 15 min
+      description: Prime numbers, GCD, geometry basics
+      priority: medium
+  - day: 28
+    topic: Final Integration & Comprehensive Review
+    activity: Complete review of all 14 patterns. Solve capstone problems that integrate
+      multiple concepts. Prepare for real interviews.
+    detailed_content: 'Complete Pattern Mastery Review:
+
+
+      Week 1 Fundamentals:
+
+      ✅ Two Pointers: Array pair/triplet problems
+
+      ✅ Sliding Window: Substring/subarray optimization
+
+      ✅ Binary Search: Search in sorted/rotated arrays
+
+      ✅ Slow/Fast Pointers: Linked list cycle detection
+
+      ✅ Linked List Reversal: In-place list manipulation
+
+      ✅ Binary Tree Traversal: All traversal methods
+
+
+      Week 2 Algorithms:
+
+      ✅ DFS: Tree/graph depth-first exploration
+
+      ✅ BFS: Level-by-level traversal, shortest paths
+
+      ✅ Dynamic Programming: Optimization problems
+
+      ✅ Backtracking: Generate all solutions
+
+      ✅ Bit Manipulation: XOR tricks, bit masking
+
+      ✅ Prefix Sum: Range queries, cumulative sums
+
+
+      Week 3 Data Structures:
+
+      ✅ Heaps/Top K: Priority-based problems
+
+      ✅ Monotonic Stack: Next greater/smaller
+
+      ✅ Intervals: Merging, scheduling conflicts
+
+      ✅ Trie: Prefix matching, string search
+
+      ✅ Union-Find: Connectivity, components
+
+      ✅ Greedy: Local optimization strategies
+
+
+      Week 4 Advanced:
+
+      ✅ Advanced DP: 2D DP, state machines
+
+      ✅ Graph Algorithms: Shortest paths, MST
+
+      ✅ Topological Sort: Dependency resolution
+
+      ✅ Multi-Pattern Integration
+
+
+      Final Preparation Checklist:
+
+      - [ ] Review all pattern templates
+
+      - [ ] Practice time complexity analysis
+
+      - [ ] Master common optimization techniques
+
+      - [ ] Prepare for behavioral questions
+
+      - [ ] Set up interview environment
+
+      - [ ] Practice explaining solutions clearly
+
+      - [ ] Review company-specific patterns
+
+      - [ ] Schedule practice interviews
+
+
+      Interview Day Strategy:
+
+      1. Stay calm and think clearly
+
+      2. Communicate throughout the process
+
+      3. Start simple, then optimize
+
+      4. Test thoroughly
+
+      5. Handle edge cases
+
+      6. Be open to hints and feedback
+
+      7. Ask good questions
+
+      8. Show enthusiasm for problem-solving
+
+      '
+    problems:
+    - number: '42'
+      title: Trapping Rain Water
+      url: https://leetcode.com/problems/trapping-rain-water/
+      difficulty: Hard
+      description: 'Capstone: Multiple approaches (two pointers, stack, DP)'
+    - number: '127'
+      title: Word Ladder
+      url: https://leetcode.com/problems/word-ladder/
+      difficulty: Hard
+      description: 'Integration: BFS + string manipulation + optimization'
+    - number: '84'
+      title: Largest Rectangle in Histogram
+      url: https://leetcode.com/problems/largest-rectangle-in-histogram/
+      difficulty: Hard
+      description: 'Advanced: Monotonic stack mastery'
+    - number: '32'
+      title: Longest Valid Parentheses
+      url: https://leetcode.com/problems/longest-valid-parentheses/
+      difficulty: Hard
+      description: 'Multi-approach: Stack, DP, and two-pass solutions'
+    time_estimate: 75
+    video_resources:
+    - title: 'Cracking FAANG: Mock Coding Interview'
+      url: https://www.youtube.com/@CrackingFAANG
+      duration: 45 min
+      description: Full mock interview with feedback
+      priority: high
+    - title: 'NeetCode: Interview Tips and Strategies'
+      url: https://www.youtube.com/@NeetCode
+      duration: 20 min
+      description: How to communicate during interviews
+      priority: high
