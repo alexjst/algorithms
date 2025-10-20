@@ -28,6 +28,22 @@ weeks:
           url: "https://leetcode.com/problems/3sum/"
           difficulty: "Medium"
           description: "Find all unique triplets that sum to zero"
+      video_resources:
+        - title: "NeetCode: Two Pointer Pattern Explained"
+          url: "https://www.youtube.com/@NeetCode"
+          duration: "15 min"
+          description: "Visual walkthrough of two pointer technique with examples"
+          priority: "high"
+        - title: "NeetCode: Two Sum II Solution"
+          url: "https://www.youtube.com/@NeetCode"
+          duration: "10 min"
+          description: "Step-by-step solution for Two Sum II"
+          priority: "high"
+        - title: "NeetCode: 3Sum Explained"
+          url: "https://www.youtube.com/@NeetCode"
+          duration: "12 min"
+          description: "How to avoid duplicates and optimize 3Sum"
+          priority: "high"
       time_estimate: 45
 
     - day: 2
