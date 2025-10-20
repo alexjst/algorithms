@@ -311,6 +311,36 @@
             </div>
             {% endif %}
 
+            {# Video Resources Section - Watch BEFORE reading #}
+            {% if topic.video_resources %}
+            <div class="video-resources-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #ffd700;">
+                <h4 style="color: white; margin-top: 0;">📺 Watch First (20 min) - Visual Learning</h4>
+                <p style="color: #fff; opacity: 0.9; font-size: 14px; margin-bottom: 15px;">
+                    <strong>💡 Pro Tip:</strong> Watch these videos BEFORE reading the detailed guide below. You'll learn faster!
+                </p>
+                {% for video in topic.video_resources %}
+                <div class="video-item" style="background: rgba(255,255,255,0.15); padding: 12px; margin: 10px 0; border-radius: 6px; border-left: 3px solid {% if video.priority == 'high' %}#ffd700{% elif video.priority == 'medium' %}#90cdf4{% else %}#cbd5e0{% endif %};">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="flex: 1;">
+                            <a href="{{ video.url }}" target="_blank" style="color: white; font-weight: bold; text-decoration: none; font-size: 15px;">
+                                🎬 {{ video.title }}
+                            </a>
+                            <p style="color: #fff; opacity: 0.85; font-size: 13px; margin: 5px 0 0 0;">{{ video.description }}</p>
+                        </div>
+                        <div style="margin-left: 15px; text-align: right;">
+                            <span style="background: rgba(255,255,255,0.25); color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; white-space: nowrap;">
+                                ⏱️ {{ video.duration }}
+                            </span>
+                            {% if video.priority == 'high' %}
+                            <br><span style="color: #ffd700; font-size: 11px; font-weight: bold;">⭐ MUST WATCH</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             {% if topic.detailed_content %}
             <div class="detailed-content">
                 <h4>📖 Detailed Guide:</h4>
