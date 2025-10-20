@@ -383,7 +383,7 @@
         {% if data.topic %}
         {# Set track-specific variables #}
         {% set track_icon = '💻' if track == 'coding' else '🤖' if track == 'ml_algorithms' else '🏗️' if track in ['system_design', 'ml_system_design'] else '🎯' %}
-        {% set track_display_name = track.replace('_', ' ').title() %}
+        {% set track_display_name = track.replace('_', ' ').replace('ml ', 'ML ').replace('Ml ', 'ML ').title() if track.startswith('ml') else track.replace('_', ' ').title() %}
         {% set is_coding_type = track in ['coding', 'ml_algorithms'] %}
         {% set topic = data.topic %}
         {% set completed = data.completed %}
@@ -579,7 +579,7 @@
         <p style="color: var(--text-secondary); font-size: 14px;">These reviews were scheduled for {{ day_date }}</p>
         {% for review in due_reviews %}
         <div class="review" id="review-{{ loop.index }}">
-            <h4>{{ review.track.replace('_', ' ') | title }}: {{ review.topic }} ({{ review.review_type }} review)</h4>
+            <h4>{{ review.track.replace('_', ' ').replace('ml ', 'ML ').replace('Ml ', 'ML ') | title if review.track.startswith('ml') else review.track.replace('_', ' ') | title }}: {{ review.topic }} ({{ review.review_type }} review)</h4>
             <p>Originally completed: {{ review.scheduled_date }}</p>
 
             <div class="rating">
