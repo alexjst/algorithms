@@ -1,0 +1,1537 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{booktabs}
+
+% Colors
+\definecolor{primarycolor}{RGB}{0,102,204}
+\definecolor{sectioncolor}{RGB}{0,51,102}
+\definecolor{year2022}{RGB}{153,0,76}
+\definecolor{year2023}{RGB}{204,102,0}
+\definecolor{year2024}{RGB}{0,102,153}
+\definecolor{year2025}{RGB}{0,153,76}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primarycolor,
+    urlcolor=primarycolor,
+    citecolor=primarycolor
+}
+
+% Section formatting
+\titleformat{\section}{\Large\bfseries\color{sectioncolor}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{sectioncolor}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{sectioncolor}}{\thesubsubsection}{1em}{}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small SIGIR 2022-2025: AI/LLM for Search \& Discovery}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\title{\textbf{SIGIR 2022-2025:\\The Evolution of AI and LLM Technologies\\for Search and Discovery}\\
+\large A Comprehensive Survey of Industry-Relevant Research}
+\author{Research Compilation}
+\date{October 2024}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document provides a comprehensive survey of research from SIGIR conferences (2022-2025) documenting the evolution of artificial intelligence and large language model (LLM) applications in search and discovery systems. Spanning the critical period from pre-ChatGPT transformer-based retrieval (2022) through the explosion of LLM-augmented IR (2023-2025), this survey emphasizes practical, industry-applicable work in retrieval, ranking, query understanding, document understanding, RAG systems, and evaluation methodologies. The timeline captures the IR community's transformation: from BERT-based dense retrieval optimization (2022), through early LLM exploration for query generation and relevance feedback (2023), to mature LLM-integrated ranking systems and comprehensive RAG frameworks (2024-2025).
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+The period from 2022 to 2025 represents a transformative era in information retrieval research, marking the transition from neural retrieval methods to LLM-augmented search systems. This survey tracks the evolution across four SIGIR conferences:
+
+\subsection{Timeline of Key Developments}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{\textcolor{year2022}{SIGIR 2022}} (Madrid, Spain, July 11-15, 2022): The transformer and BERT era
+    \begin{itemize}
+        \item Foundation work in dense retrieval with pre-trained language models
+        \item Knowledge distillation for efficient neural rankers
+        \item Multi-stage ranking architectures becoming standard
+    \end{itemize}
+
+    \item \textbf{\textcolor{year2023}{SIGIR 2023}} (Taipei, Taiwan, July 23-27, 2023): Early LLM exploration
+    \begin{itemize}
+        \item ChatGPT released November 2022; first SIGIR post-ChatGPT
+        \item First Workshop on Generative Information Retrieval (Gen-IR)
+        \item LLMs for query generation, relevance feedback, and question answering
+        \item Sparse lexical representations with contextual embeddings
+    \end{itemize}
+
+    \item \textbf{\textcolor{year2024}{SIGIR 2024}} (Washington, D.C., USA, July 14-18, 2024): LLM maturation
+    \begin{itemize}
+        \item Dedicated Large Language Model Day
+        \item First Workshop on LLM Evaluation for IR (LLM4Eval)
+        \item Second Workshop on Generative IR
+        \item Scaling laws for dense retrieval established
+        \item RAG evaluation frameworks introduced
+    \end{itemize}
+
+    \item \textbf{\textcolor{year2025}{SIGIR 2025}} (Padua, Italy, July 13-18, 2025): Production-ready LLM-IR
+    \begin{itemize}
+        \item Robust RAG systems with collective intelligence
+        \item Efficiency optimizations for multi-vector retrieval
+        \item Zero-shot ranking with precomputed features
+        \item LLM-based generative recommendation systems
+    \end{itemize}
+\end{itemize}
+
+\subsection{Survey Scope and Focus}
+
+This survey emphasizes \textbf{top-tier, peer-reviewed research with clear paths to production deployment}, covering:
+
+\begin{itemize}[leftmargin=*]
+    \item Dense retrieval evolution and scaling laws
+    \item LLM-based ranking and reranking techniques
+    \item Retrieval-Augmented Generation (RAG) systems and evaluation
+    \item Generative retrieval and document representation
+    \item Query understanding, reformulation, and expansion
+    \item Evaluation metrics and methodologies for LLM-powered IR
+    \item Efficiency optimizations for neural ranking systems
+\end{itemize}
+
+\newpage
+
+\section{\textcolor{year2022}{SIGIR 2022: Foundation Era}}
+
+SIGIR 2022 occurred before the ChatGPT revolution but laid critical groundwork for LLM-augmented IR through transformer-based dense retrieval and neural ranking research.
+
+\subsection{Best Paper Awards}
+
+\subsubsection{Best Paper: Non-Factoid Question Answering}
+\textbf{Title:} A Non-Factoid Question-Answering Taxonomy\\
+\textbf{Authors:} Valeriia Bolotova, Vladislav Blinov, Falk Scholer, Bruce Croft, Mark Sanderson
+
+\textbf{Industry Relevance:} Provides framework for understanding diverse question types beyond simple factoid QA.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Comprehensive taxonomy of non-factoid questions (opinion, comparative, procedural)
+    \item Evaluation frameworks for complex question answering systems
+    \item Foundation for RAG systems handling diverse information needs
+\end{itemize}
+
+\subsubsection{Best Short Paper: Curriculum Learning for Dense Retrieval Distillation}
+\textbf{Authors:} Hansi Zeng, Hamed Zamani, Vishwa Vinay\\
+\textbf{Institution:} UMass Amherst CIIR, Adobe Research India\\
+\textbf{Code:} \href{https://github.com/HansiZeng/CL-DRD}{github.com/HansiZeng/CL-DRD}
+
+\textbf{Industry Relevance:} Enables efficient dense retrieval models through knowledge distillation from expensive cross-encoders.
+
+\textbf{Key Contribution: CL-DRD Framework}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Curriculum learning} for knowledge distillation: progressively increase training difficulty
+    \item \textbf{Iterative optimization:} Start with coarse-grained preference pairs, move to fine-grained ordering
+    \item \textbf{Teacher-student architecture:} Distill knowledge from cross-encoder (teacher) to bi-encoder (student)
+    \item Strong performance on MS MARCO, TREC'19, TREC'20 benchmarks
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Reduces inference cost: bi-encoders 100-1000x faster than cross-encoders
+    \item Maintains ranking quality while enabling real-time retrieval
+    \item Applicable to any dense retrieval model architecture
+    \item Foundation for modern multi-stage ranking pipelines
+\end{itemize}
+
+\subsection{Key Research Themes}
+
+\subsubsection{Pretrained Transformers for Text Ranking: BERT and Beyond}
+\textbf{Tutorial at SIGIR 2021/2022}\\
+\textbf{ArXiv:} \href{https://arxiv.org/abs/2010.06467}{2010.06467}
+
+\textbf{Industry Relevance:} Comprehensive guide to transformer-based ranking, still foundational in 2024.
+
+\textbf{Key Coverage:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Reranking architectures:} Cross-encoders for multi-stage pipelines
+    \item \textbf{Dense retrieval:} Bi-encoders for first-stage candidate generation
+    \item \textbf{Pre-training strategies:} BERT, RoBERTa, T5 for domain adaptation
+    \item \textbf{Efficiency-effectiveness tradeoffs:} Late interaction models (ColBERT)
+\end{itemize}
+
+\subsubsection{BERT-Based Dense Retrieval and Entity Ranking}
+\textbf{Notable accepted papers:}
+\begin{itemize}[leftmargin=*]
+    \item \textit{BERT-based Dense Intra-ranking and Contextualized Late Interaction} (Minghan Li, Eric Gaussier)
+    \item \textit{BERT-ER: Query-Specific BERT Entity Representations} (Shubham Chatterjee, Laura Dietz)
+\end{itemize}
+
+\textbf{Industry Impact:}
+\begin{itemize}[leftmargin=*]
+    \item Established contextualized embeddings as standard for dense retrieval
+    \item Entity-aware ranking for knowledge-intensive search (e.g., Wikipedia, enterprise search)
+    \item Late interaction patterns balance effectiveness and efficiency
+\end{itemize}
+
+\subsection{Production Insights from SIGIR 2022}
+
+\textbf{Multi-Stage Ranking Architecture (2022 Best Practice):}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Stage 1:} BM25 or dense retrieval (bi-encoder) for candidate generation (top-1000)
+    \item \textbf{Stage 2:} Cross-encoder reranking (top-100)
+    \item \textbf{Optimization:} Use curriculum learning distillation (CL-DRD) to create efficient student models
+\end{enumerate}
+
+\textbf{Key Takeaway:} SIGIR 2022 established transformer-based neural ranking as production-ready, setting the stage for LLM integration in subsequent years.
+
+\newpage
+
+\section{\textcolor{year2023}{SIGIR 2023: Early LLM Era}}
+
+SIGIR 2023 was the first conference after ChatGPT's November 2022 release, marking the beginning of systematic LLM exploration in information retrieval.
+
+\subsection{Best Paper Awards}
+
+\subsubsection{Best Paper: IR Experiment Platform}
+\textbf{Title:} The Information Retrieval Experiment Platform\\
+\textbf{Authors:} Maik Fröbe, Jan Heinrich Reimer, Sean MacAvaney, Niklas Deckers, Simon Reich, Janek Bevendorff, Benno Stein, Matthias Hagen, Martin Potthast
+
+\textbf{Industry Relevance:} Infrastructure for reproducible IR experiments, critical for LLM-IR research validation.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Standardized platform for IR experiment deployment and evaluation
+    \item Reproducibility tooling for neural ranking experiments
+    \item Foundation for comparing LLM-based vs. traditional IR approaches
+\end{itemize}
+
+\subsubsection{Best Student Paper: Dense Retrieval for Visual QA}
+\textbf{Title:} A Symmetric Dual Encoding Dense Retrieval Framework for Knowledge-Intensive Visual Question Answering\\
+\textbf{Authors:} Alireza Salemi, Juan Altmayer Pizzorno, Hamed Zamani\\
+\textbf{Institution:} UMass Amherst
+
+\textbf{Industry Relevance:} Multimodal retrieval for visual search and image-based Q\&A systems.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Symmetric dual encoding:} Unified representation for images and text
+    \item \textbf{Knowledge-intensive VQA:} Retrieval-augmented visual question answering
+    \item Dense retrieval for multimodal contexts (precursor to vision-language models)
+\end{itemize}
+
+\textbf{Note:} Same lead author (Alireza Salemi) would win SIGIR 2024 Best Short Paper for RAG evaluation (eRAG), showing research trajectory toward LLM-augmented retrieval.
+
+\subsubsection{Best Short Paper: SparseEmbed}
+\textbf{Title:} SparseEmbed: Learning Sparse Lexical Representations with Contextual Embeddings for Retrieval\\
+\textbf{Authors:} Weize Kong, Jeffrey M. Dudek, Cheng Li, Mingyang Zhang, Michael Bendersky
+
+\textbf{Industry Relevance:} Bridges lexical and semantic retrieval, combining inverted index efficiency with neural understanding.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Sparse lexical representations:} Learned term importance weights (similar to SPLADE)
+    \item \textbf{Contextual embeddings:} BERT-derived term representations
+    \item \textbf{Inverted index compatibility:} Works with existing search infrastructure
+    \item Hybrid approach: semantic understanding without dense embedding overhead
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Enables semantic search on traditional inverted indexes
+    \item Lower latency than dense retrieval for exact-match queries
+    \item Complementary to dense retrieval in hybrid systems
+\end{itemize}
+
+\subsection{LLM-Specific Research at SIGIR 2023}
+
+\subsubsection{First Workshop on Generative Information Retrieval (Gen-IR)}
+
+The inaugural Gen-IR workshop explored applying pre-trained generation models for IR tasks.
+
+\textbf{Key Themes:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Grounding challenges:} Ensuring generated answers are factually accurate
+    \item \textbf{Attribution:} Citing sources for generated content
+    \item \textbf{Bias mitigation:} Avoiding harmful or biased generations
+    \item Early generative retrieval models (document ID generation)
+\end{itemize}
+
+\subsubsection{Can ChatGPT Write a Good Boolean Query for Systematic Review Literature Search?}
+\textbf{Authors:} S. Wang, H. Scells, B. Koopman, G. Zuccon
+
+\textbf{Industry Relevance:} Academic and medical literature search, complex query formulation.
+
+\textbf{Key Findings:}
+\begin{itemize}[leftmargin=*]
+    \item ChatGPT can generate reasonable Boolean queries from natural language descriptions
+    \item Quality varies; requires expert validation for systematic reviews
+    \item Useful for query bootstrapping and ideation
+\end{itemize}
+
+\subsubsection{Can Generative LLMs Create Query Variants for Test Collections?}
+\textbf{Authors:} M. Alaofi et al.
+
+\textbf{Industry Relevance:} Test collection creation, query augmentation, evaluation datasets.
+
+\textbf{Key Findings:}
+\begin{itemize}[leftmargin=*]
+    \item LLMs can generate diverse query paraphrases
+    \item Useful for creating evaluation datasets without manual annotation
+    \item Foundation for synthetic query generation (precursor to DUQGen tutorial at SIGIR 2024)
+\end{itemize}
+
+\subsubsection{Generative Relevance Feedback with Large Language Models}
+\textbf{Authors:} Iain Mackie, Shubham Chatterjee, Jeffrey Dalton\\
+\textbf{Institution:} University of Edinburgh
+
+\textbf{Industry Relevance:} Query reformulation, interactive search, conversational IR.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{LLM-based relevance feedback:} Uses LLMs to reformulate queries based on initial results
+    \item \textbf{Generative approach:} Creates new query terms rather than selecting from corpus
+    \item Improves recall in interactive search sessions
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Reduces manual query refinement burden
+    \item Applicable to conversational search systems
+    \item Foundation for multi-turn retrieval dialogue
+\end{itemize}
+
+\subsection{Other Notable SIGIR 2023 Papers}
+
+\subsubsection{FiD-Light: Efficient Retrieval-Augmented Text Generation}
+\textbf{Authors:} Sebastian Hofstätter, Jiecao Chen, Karthik Raman, Hamed Zamani
+
+\textbf{Industry Relevance:} Early work on efficient RAG systems.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Optimizes Fusion-in-Decoder (FiD) architecture for efficiency
+    \item Reduces computational overhead of multi-document generation
+    \item Precursor to production RAG systems
+\end{itemize}
+
+\subsubsection{Lexically-Accelerated Dense Retrieval}
+\textbf{Authors:} Hrishikesh Kulkarni, Sean MacAvaney, Nazli Goharian, Ophir Frieder
+
+\textbf{Industry Relevance:} Hybrid retrieval combining lexical and dense approaches.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Uses lexical signals to accelerate dense retrieval
+    \item Reduces candidate set before dense scoring
+    \item Practical hybrid architecture for production systems
+\end{itemize}
+
+\subsection{Production Insights from SIGIR 2023}
+
+\textbf{Emerging Best Practices:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Hybrid retrieval dominates:} Combine BM25, sparse embeddings (SparseEmbed/SPLADE), and dense retrieval
+    \item \textbf{LLMs for query understanding:} ChatGPT and similar models useful for query generation and reformulation
+    \item \textbf{RAG architectures emerging:} FiD-Light and similar work lay groundwork for production RAG
+    \item \textbf{Evaluation challenges:} Generative IR requires new evaluation frameworks (addressed in SIGIR 2024)
+\end{itemize}
+
+\newpage
+
+\section{\textcolor{year2024}{SIGIR 2024: LLM Maturation Era}}
+
+SIGIR 2024 marked the maturation of LLM-augmented IR with dedicated workshops, comprehensive evaluation frameworks, and production-ready systems.
+
+\subsection{Conference Highlights}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Large Language Model Day:} Full day of LLM-focused presentations and panels
+    \item \textbf{LLM4Eval Workshop:} 50+ attendees, focus on LLM-based evaluation for IR
+    \item \textbf{Gen-IR Workshop (2nd edition):} Generative retrieval maturation
+    \item \textbf{IR-RAG Workshop:} Information retrieval's role in RAG systems
+\end{itemize}
+
+\subsection{Best Paper Awards}
+
+\subsubsection{Best Long Paper: Scaling Laws For Dense Retrieval}
+\textbf{Authors:} Yan Fang, Jingtao Zhan, Qingyao Ai, Jiaxin Mao, Weihang Su, Jia Chen, Yiqun Liu\\
+\textbf{Institutions:} Tsinghua University, Renmin University of China\\
+\textbf{ArXiv:} \href{https://arxiv.org/abs/2403.18684}{2403.18684}
+
+\textbf{Industry Relevance:} Provides critical insights for capacity planning and ROI analysis in dense retrieval systems.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item First comprehensive study of scaling laws in dense retrieval
+    \item Proposes \textbf{contrastive log-likelihood} as continuous evaluation metric
+    \item Extensive experiments across model sizes (millions to billions of parameters)
+    \item \textbf{Predictive framework:} Estimate performance gains before investing in larger models/datasets
+\end{itemize}
+
+\textbf{Key Findings:}
+\begin{itemize}[leftmargin=*]
+    \item Dense retrieval performance follows predictable scaling patterns (similar to language models)
+    \item Data scaling and model scaling have different efficiency curves
+    \item Contrastive log-likelihood correlates with downstream retrieval metrics
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Data-driven decisions: "Will doubling training data justify the cost?"
+    \item Model size selection: Tradeoff between effectiveness and inference latency
+    \item Benchmark for teams evaluating dense retrieval deployments
+\end{itemize}
+
+\subsubsection{Best Long Paper: Workbench for Autograding RAG Systems}
+\textbf{Author:} Laura Dietz\\
+\textbf{Institution:} University of New Hampshire
+
+\textbf{Industry Relevance:} Critical tooling for teams deploying RAG systems in production.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Automated evaluation framework for RAG pipelines
+    \item Evaluates both retrieval quality and generation quality
+    \item Production-ready tooling for CI/CD workflows
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Reduces manual evaluation burden in RAG development
+    \item Enables A/B testing of retrieval and generation configurations
+    \item Regression testing when updating components
+\end{itemize}
+
+\subsubsection{Best Short Paper: Evaluating Retrieval Quality in RAG}
+\textbf{Title:} Evaluating Retrieval Quality in Retrieval-Augmented Generation\\
+\textbf{Authors:} Alireza Salemi, Hamed Zamani\\
+\textbf{Institution:} UMass Amherst\\
+\textbf{ArXiv:} \href{https://arxiv.org/abs/2404.13781}{2404.13781}\\
+\textbf{Code:} \href{https://github.com/alirezasalemi7/eRAG}{github.com/alirezasalemi7/eRAG}
+
+\textbf{Industry Relevance:} Directly addresses the evaluation challenge faced by every RAG deployment team.
+
+\textbf{Problem Statement:}
+\begin{itemize}[leftmargin=*]
+    \item Traditional retrieval metrics (NDCG, MRR) show \textbf{weak correlation} with downstream RAG performance
+    \item End-to-end RAG evaluation is computationally prohibitive
+\end{itemize}
+
+\textbf{Key Contribution: eRAG Framework}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Document-level evaluation:} Each retrieved document individually fed to LLM
+    \item \textbf{Ground truth comparison:} Generated outputs evaluated against task labels
+    \item \textbf{Relevance from performance:} Downstream performance becomes relevance label
+    \item More efficient than full end-to-end evaluation
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Rapid iteration on retrieval without full RAG evaluation
+    \item Identifies which retrieved documents contribute to generation quality
+    \item Interpretable metrics for debugging RAG systems
+    \item Open-source implementation accelerates adoption
+\end{itemize}
+
+\subsubsection{Runner-up: Efficient Inverted Indexes for Learned Sparse Representations}
+\textbf{Author:} Sebastian Bruch et al.
+
+\textbf{Industry Relevance:} Learned sparse representations (SPLADE) with traditional index efficiency.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Optimized indexing structures for learned sparse models
+    \item Semantic search with inverted index performance
+    \item Enables hybrid retrieval architectures
+\end{itemize}
+
+\subsubsection{Runner-up: A Reproducibility Study of PLAID}
+\textbf{Authors:} Sean MacAvaney, Nicola Tonellotto
+
+\textbf{Industry Relevance:} PLAID (Performance-optimized Late Interaction Driver) for production dense retrieval.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Validates PLAID's performance claims
+    \item Deployment guidance and optimization insights
+    \item Reproducibility best practices for dense retrieval research
+\end{itemize}
+
+\subsection{LLM-Based Ranking and Reranking}
+
+\subsubsection{Leveraging LLMs for Unsupervised Dense Retriever Ranking}
+\textbf{Authors:} Ekaterina Khramtsova, Shengyao Zhuang, Mahsa Baktashmotlagh, Guido Zuccon\\
+\textbf{Institution:} University of Queensland
+
+\textbf{Industry Relevance:} Addresses cold-start problem, reduces reliance on labeled data.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Unsupervised approach:} LLMs rank dense retrieval candidates without manual labels
+    \item Combines dense retrieval (fast, semantic) with LLM reranking (accurate, nuanced)
+    \item Applicable to new domains/languages with limited training data
+\end{itemize}
+
+\subsubsection{A Setwise Approach for Zero-shot Ranking with LLMs}
+
+\textbf{Industry Relevance:} Zero-shot ranking enables immediate deployment.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Setwise ranking:} Multiple documents jointly rather than pairwise
+    \item Reduces computational overhead vs. pairwise
+    \item Balanced effectiveness-efficiency tradeoff
+\end{itemize}
+
+\textbf{Ranking Architecture Comparison:}
+\begin{center}
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Approach} & \textbf{Effectiveness} & \textbf{Efficiency} & \textbf{Use Case} \\
+\hline
+Pointwise & Moderate & High & First-stage retrieval \\
+Pairwise & High & Low & Final reranking (top-k) \\
+Setwise & High & Moderate & Mid-stage ranking \\
+Listwise & Very High & Very Low & Offline evaluation \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsubsection{RLCF: Reinforcement Learning from Contrastive Feedback}
+
+\textbf{Industry Relevance:} Unsupervised alignment for domain-specific ranking.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Unsupervised alignment:} LLMs for IR tasks without human feedback
+    \item Generates high-quality, context-specific responses
+    \item Uses contrastive feedback from retrieval context
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Reduces dependency on expensive RLHF
+    \item Continuous improvement from usage data
+    \item Adapts LLMs to domain-specific ranking preferences
+\end{itemize}
+
+\subsection{Retrieval-Augmented Generation (RAG)}
+
+\subsubsection{CorpusLM: Unified Model for RAG and Generative Retrieval}
+
+\textbf{Industry Relevance:} Unifies multiple retrieval paradigms in single model.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Unified architecture} for three modes:
+    \begin{itemize}
+        \item Generative retrieval (generates document IDs)
+        \item Closed-book generation (direct answer generation)
+        \item RAG (retrieve then generate)
+    \end{itemize}
+    \item Single greedy decoding process for all modes
+    \item Leverages external corpus for knowledge-intensive tasks
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Reduces model management overhead
+    \item Runtime switching between retrieval strategies
+    \item Potentially simpler deployment than multi-model RAG
+\end{itemize}
+
+\subsubsection{Workshop: IR-RAG @ SIGIR 2024}
+
+The workshop acknowledged that despite RAG's prominence, systems require substantial improvement.
+
+\textbf{Key Themes:}
+\begin{itemize}[leftmargin=*]
+    \item Retrieval quality is primary RAG bottleneck
+    \item Traditional IR metrics poorly predict RAG performance (addressed by eRAG)
+    \item Need for RAG-specific evaluation frameworks
+\end{itemize}
+
+\subsection{Generative Retrieval and Document Representation}
+
+\subsubsection{Workshop: Gen-IR @ SIGIR 2024 (2nd Edition)}
+
+Generative retrieval generates document identifiers autoregressively rather than retrieving from an index.
+
+\textbf{Core Challenge: Document Identifiers}
+
+Documents lack natural identifiers (unlike words in language modeling).
+
+\textbf{Identifier Strategies:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Unstructured atomic:} Random IDs (e.g., ``doc\_12345'')
+    \item \textbf{Semantically structured:} Hierarchical clustering-based IDs
+    \item \textbf{Title-based:} Article titles as document IDs
+    \item \textbf{URL-based:} Web URLs as natural identifiers
+    \item \textbf{Term-sets:} Representative terms as identifiers
+\end{itemize}
+
+\subsubsection{MERLIN: LLM-Generated Indices}
+\textbf{Authors:} Anirudh Ravichandran, Yidong Zou, Jayapragash Baskar, Anurag Beniwal
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Uses LLMs to generate semantically meaningful document identifiers
+    \item Multiple enhanced representations for diverse query types
+    \item Balances effectiveness and efficiency
+\end{itemize}
+
+\subsubsection{Generative Retrieval as Multi-Vector Dense Retrieval}
+
+\textbf{Key Insight:} Generative retrieval with atomic identifiers is \textbf{equivalent} to single-vector dense retrieval. With hierarchical semantic identifiers, it behaves like hierarchical search in dense retrieval.
+
+\textbf{Industry Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Theoretical foundation for choosing between dense and generative retrieval
+    \item Hierarchical identifiers enable interpretable retrieval paths
+    \item Unifies understanding of dense and generative paradigms
+\end{itemize}
+
+\subsection{Query Understanding and Reformulation}
+
+\subsubsection{LDRE: Divergent Reasoning for Composed Image Retrieval}
+\textbf{Authors:} Zhenyu Yang, Dizhan Xue, Shengsheng Qian, Weiming Dong, Changsheng Xu
+
+\textbf{Industry Relevance:} Multimodal query understanding for e-commerce, fashion, visual search.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Divergent reasoning:} Multiple interpretations of composed queries (image + text)
+    \item \textbf{Ensemble approach:} Combines multiple reasoning paths
+    \item \textbf{Zero-shot capability:} No training data for new query types
+\end{itemize}
+
+\textbf{Use Cases:}
+\begin{itemize}[leftmargin=*]
+    \item ``Show me shoes like this but in red'' (image + modification)
+    \item ``Find a sofa similar to this image but more modern''
+    \item Visual + textual constraint search
+\end{itemize}
+
+\subsubsection{Tutorial: DUQGen}
+\textbf{Title:} Effective Unsupervised Domain Adaptation of Neural Rankers by Diversifying Synthetic Query Generation
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Diversified query generation:} Varied synthetic queries covering domain language
+    \item \textbf{Unsupervised domain adaptation:} Adapt rankers to new domains without labels
+    \item Uses LLMs to generate realistic queries from documents
+\end{itemize}
+
+\textbf{Practical Workflow:}
+\begin{enumerate}[leftmargin=*]
+    \item Generate diverse synthetic queries from domain documents using LLMs
+    \item Train neural ranker on synthetic (query, document) pairs
+    \item Optionally refine with small amounts of real user queries
+\end{enumerate}
+
+\subsection{Evaluation: LLM4Eval Workshop}
+
+The First Workshop on LLM Evaluation for IR (50+ attendees) focused on evaluation methodologies.
+
+\textbf{Focus Areas:}
+\begin{itemize}[leftmargin=*]
+    \item LLM-based evaluation metrics for traditional IR
+    \item LLM-based evaluation metrics for generative IR
+    \item Effectiveness/efficiency of LLMs as relevance labelers
+    \item Effectiveness/efficiency of LLMs as ranking models
+\end{itemize}
+
+\subsubsection{Inter-Rater Reliability}
+
+\textbf{Metrics:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cohen's $\kappa$:} Inter-rater reliability (LLM vs. human)
+    \item \textbf{Kendall's $\tau$:} Agreement on system ranking order
+\end{itemize}
+
+\textbf{Findings:}
+\begin{itemize}[leftmargin=*]
+    \item Good agreement on system ordering (which systems perform better)
+    \item More variation in exact relevance labeling (absolute scores)
+    \item \textbf{Practical implication:} LLMs more reliable for \textbf{comparative evaluation} (A/B testing) than absolute judgments
+\end{itemize}
+
+\subsubsection{Effectiveness-Efficiency Tradeoffs}
+
+\textbf{Key Factors:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Model size:} Larger models (70B+) show better human agreement
+    \item \textbf{Token consumption:} Longer context windows improve quality but increase cost
+    \item \textbf{Latency:} Real-time evaluation requires optimized prompts
+    \item \textbf{Prompt engineering:} Few-shot examples improve consistency
+\end{itemize}
+
+\subsection{Dense Retrieval and Privacy}
+
+\subsubsection{Vec2Text Privacy Threat to Dense Retrieval}
+\textbf{Conference:} SIGIR-AP 2024
+
+\textbf{Problem:} Vec2Text can reconstruct original text from embeddings, raising privacy concerns for third-party embedding APIs (OpenAI, Cohere).
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Analysis of privacy risks in dense retrieval
+    \item Mitigation strategies (embedding perturbation, differential privacy)
+    \item Tradeoffs between privacy protection and retrieval quality
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Evaluate privacy risks before using third-party embedding services
+    \item Consider self-hosted embedding models for sensitive data
+    \item Implement protection mechanisms for regulated industries
+\end{itemize}
+
+\subsection{Production Insights from SIGIR 2024}
+
+\textbf{Recommended Multi-Stage Pipeline:}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Stage 1: Candidate Generation (Top-1000)}
+    \begin{itemize}
+        \item Hybrid: BM25 + Dense retrieval
+        \item Optional: Learned sparse (SPLADE) for semantic understanding
+        \item Latency target: <50ms
+    \end{itemize}
+
+    \item \textbf{Stage 2: Neural Reranking (Top-100)}
+    \begin{itemize}
+        \item Cross-encoder or pointwise LLM ranking
+        \item Latency target: <200ms
+    \end{itemize}
+
+    \item \textbf{Stage 3: LLM-Based Reranking (Top-10)}
+    \begin{itemize}
+        \item Pairwise or setwise LLM ranking
+        \item Optional: RAG for answer generation
+        \item Latency target: <1s
+    \end{itemize}
+\end{enumerate}
+
+\textbf{RAG Best Practices:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Retrieval-first optimization:} Improve retrieval before generation tuning
+    \item \textbf{Use eRAG framework:} Evaluate retrieval with downstream performance
+    \item \textbf{Monitor separately:} Track retrieval metrics and generation quality independently
+    \item \textbf{Self-refinement:} Implement iterative RAG with LLM feedback loops
+\end{itemize}
+
+\newpage
+
+\section{\textcolor{year2025}{SIGIR 2025: Production-Ready LLM-IR}}
+
+SIGIR 2025 represents the maturation of LLM-augmented IR into production-ready systems with focus on robustness, efficiency, and real-world deployment.
+
+\subsection{Key Conference Themes}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Robust RAG systems} with collective intelligence
+    \item \textbf{Efficiency optimizations} for multi-vector retrieval
+    \item \textbf{Zero-shot ranking} with precomputed features
+    \item \textbf{LLM-based generative recommendation}
+    \item \textbf{Fourth ReNeuIR Workshop:} Reaching efficiency in neural IR
+    \item \textbf{First Robust-IR Workshop:} Robustness across domains and adversarial settings
+\end{itemize}
+
+\subsection{Core RAG Research}
+
+\subsubsection{CIRAG: Collective Intelligence RAG}
+
+\textbf{Industry Relevance:} Multi-agent RAG systems for complex reasoning.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Integrates collective reasoning with retrieval
+    \item Multiple LLM agents collaborate on retrieval-augmented tasks
+    \item Improved performance on knowledge-intensive reasoning
+\end{itemize}
+
+\subsubsection{Predicting RAG Performance for Text Completion}
+
+\textbf{Industry Relevance:} Capacity planning and performance prediction for RAG deployments.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Framework for assessing RAG system performance before deployment
+    \item Predictive models for RAG effectiveness based on retrieval quality
+    \item Resource allocation guidance for production systems
+\end{itemize}
+
+\subsubsection{Unveiling Knowledge Utilization in RAG}
+
+\textbf{Industry Relevance:} Understanding how LLMs leverage retrieved information.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Analyzes how LLMs use retrieved documents
+    \item Identifies which retrieved information influences generation
+    \item Informs retrieval strategy optimization
+\end{itemize}
+
+\subsubsection{Robust Fine-tuning for RAG against Retrieval Defects}
+
+\textbf{Industry Relevance:} Production RAG systems must handle imperfect retrieval.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Improves resilience to noisy or irrelevant retrieved documents
+    \item Fine-tuning strategies for robust RAG
+    \item Handles retrieval failures gracefully
+\end{itemize}
+
+\subsubsection{The Viability of Crowdsourcing for RAG Evaluation}
+
+\textbf{Industry Relevance:} Scalable human evaluation for RAG systems.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Addresses human annotation challenges for RAG
+    \item Crowdsourcing methodologies for RAG evaluation
+    \item Cost-effective evaluation strategies
+\end{itemize}
+
+\subsection{Query Understanding and LLM Limitations}
+
+\subsubsection{LLM-based Query Expansion Fails for Unfamiliar and Ambiguous Queries}
+
+\textbf{Industry Relevance:} Identifies critical failure modes in LLM query processing.
+
+\textbf{Key Findings:}
+\begin{itemize}[leftmargin=*]
+    \item LLMs struggle with unfamiliar domain terminology
+    \item Ambiguous queries lead to inconsistent expansions
+    \item Hybrid approaches (LLM + traditional query expansion) recommended
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Don't rely solely on LLMs for query understanding
+    \item Combine LLM-based and traditional query expansion
+    \item Domain-specific fine-tuning improves LLM query handling
+\end{itemize}
+
+\subsubsection{Aligning Web Query Generation with Ranking Objectives}
+
+\textbf{Industry Relevance:} Optimizes synthetic query generation for ranking tasks.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Uses Direct Preference Optimization (DPO) for query synthesis
+    \item Aligns generated queries with ranking objectives
+    \item Improves quality of synthetic training data
+\end{itemize}
+
+\subsection{Dense and Sparse Retrieval Advances}
+
+\subsubsection{On the Scaling of Robustness and Effectiveness in Dense Retrieval}
+
+\textbf{Industry Relevance:} Extends scaling laws (SIGIR 2024) to robustness analysis.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Analyzes how model scaling affects robustness to domain shift
+    \item Tradeoffs between effectiveness and robustness
+    \item Guidance for model selection in production
+\end{itemize}
+
+\subsubsection{IGP: Efficient Multi-Vector Retrieval via Proximity Graph Index}
+
+\textbf{Industry Relevance:} Optimizes late interaction models (ColBERT-style).
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Proximity graph indexing for multi-vector retrieval
+    \item Reduces latency for ColBERT-style models
+    \item Production-ready infrastructure for multi-vector search
+\end{itemize}
+
+\subsubsection{WARP: Efficient Multi-Vector Retrieval Engine}
+
+\textbf{Industry Relevance:} Scalable multi-vector retrieval infrastructure.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Efficient engine for multi-vector retrieval
+    \item Handles large-scale deployments
+    \item Optimized for ColBERT and similar late interaction models
+\end{itemize}
+
+\subsection{Ranking and Reranking}
+
+\subsubsection{Reason-to-Rank: Distilling LLM Reasoning for Reranking}
+
+\textbf{Industry Relevance:} Extracts LLM reasoning for efficient ranking.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Distills direct and comparative reasoning from LLMs
+    \item Creates efficient rankers from LLM knowledge
+    \item Reduces inference cost while maintaining quality
+\end{itemize}
+
+\subsubsection{Zero-Shot Reranking with Precomputed Features}
+
+\textbf{Industry Relevance:} Combines LLM capabilities with precomputed ranking features for efficiency.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Hybrid approach: LLM zero-shot ranking + precomputed features
+    \item Reduces LLM inference cost
+    \item Maintains effectiveness through feature integration
+\end{itemize}
+
+\textbf{Practical Implications:}
+\begin{itemize}[leftmargin=*]
+    \item Enables LLM ranking at scale
+    \item Precompute features offline, use LLM for final scoring
+    \item Balances cost and quality
+\end{itemize}
+
+\subsubsection{Efficient Re-ranking via Early Exit}
+
+\textbf{Industry Relevance:} Accelerates cross-encoder reranking.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Early termination for confident predictions
+    \item Reduces average inference time for cross-encoders
+    \item Maintains ranking quality
+\end{itemize}
+
+\subsection{Generative Retrieval and Recommendation}
+
+\subsubsection{Information Retrieval in the Age of Generative AI: The RGB Model}
+
+\textbf{Industry Relevance:} Proposes new framework for generative retrieval.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item RGB (Retrieve, Generate, Blend) model
+    \item Unifies retrieval and generation paradigms
+    \item Theoretical framework for generative IR systems
+\end{itemize}
+
+\subsubsection{Constrained Auto-Regressive Decoding in Generative Retrieval}
+
+\textbf{Industry Relevance:} Analyzes limitations of autoregressive generation for retrieval.
+
+\textbf{Key Findings:}
+\begin{itemize}[leftmargin=*]
+    \item Autoregressive decoding constraints limit generative retrieval effectiveness
+    \item Beam search tradeoffs between diversity and precision
+    \item Guidance for generative retrieval system design
+\end{itemize}
+
+\subsubsection{Order-agnostic Identifier for LLM-based Generative Recommendation}
+
+\textbf{Industry Relevance:} Recommendation systems using generative models.
+
+\textbf{Key Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Position-invariant identifiers for item generation
+    \item Reduces ordering bias in generative recommendation
+    \item Applicable to product recommendation, content recommendation
+\end{itemize}
+
+\subsection{Efficiency and Robustness Workshops}
+
+\subsubsection{ReNeuIR 2025: Fourth Workshop on Efficiency}
+
+\textbf{Focus:} Holistic evaluation of neural IR methods including computational cost.
+
+\textbf{Key Themes:}
+\begin{itemize}[leftmargin=*]
+    \item Efficiency benchmarks for modern IR systems
+    \item Shared task on efficiency-oriented IR
+    \item Training and inference optimization strategies
+    \item Environmental impact of neural IR models
+\end{itemize}
+
+\subsubsection{Robust-IR 2025: First Workshop on Robustness}
+
+\textbf{Focus:} Robustness across domains, adversarial settings, and distribution shifts.
+
+\textbf{Key Themes:}
+\begin{itemize}[leftmargin=*]
+    \item Domain adaptation for neural rankers
+    \item Adversarial robustness in retrieval
+    \item Out-of-distribution generalization
+    \item Robustness evaluation methodologies
+\end{itemize}
+
+\subsection{Production Insights from SIGIR 2025}
+
+\textbf{RAG System Architecture (2025 Best Practice):}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Multi-agent RAG:} CIRAG-style collective intelligence for complex reasoning
+    \item \textbf{Robust retrieval:} Fine-tune for resilience to retrieval defects
+    \item \textbf{Predictive performance:} Use frameworks to predict RAG effectiveness before deployment
+    \item \textbf{Knowledge utilization analysis:} Monitor which retrieved information influences generation
+\end{itemize}
+
+\textbf{Ranking Optimization:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Zero-shot with features:} Combine LLM zero-shot ranking with precomputed features
+    \item \textbf{Early exit reranking:} Accelerate cross-encoders with confidence-based termination
+    \item \textbf{Distilled LLM reasoning:} Extract reasoning from LLMs into efficient rankers (Reason-to-Rank)
+\end{itemize}
+
+\textbf{Multi-Vector Retrieval:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Production infrastructure:} IGP and WARP for scalable ColBERT-style retrieval
+    \item \textbf{Proximity graph indexing:} Optimize multi-vector search latency
+    \item \textbf{Late interaction models:} Balance effectiveness (cross-encoder quality) with efficiency (bi-encoder speed)
+\end{itemize}
+
+\textbf{Query Understanding:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Hybrid query expansion:} Combine LLM-based and traditional methods (LLMs fail on unfamiliar/ambiguous queries)
+    \item \textbf{Alignment with ranking:} Use DPO to align query generation with ranking objectives
+    \item \textbf{Domain adaptation:} Fine-tune LLMs for domain-specific query understanding
+\end{itemize}
+
+\newpage
+
+\section{Cross-Year Analysis and Evolution}
+
+\subsection{Key Technology Transitions}
+
+\begin{center}
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Year} & \textbf{Dominant Technology} & \textbf{Key Innovation} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Year} & \textbf{Dominant Technology} & \textbf{Key Innovation} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+\textcolor{year2022}{2022} & BERT-based dense retrieval & Curriculum learning distillation (CL-DRD) for efficient bi-encoders \\
+\hline
+\textcolor{year2023}{2023} & Early LLM integration & Generative relevance feedback, sparse lexical embeddings (SparseEmbed) \\
+\hline
+\textcolor{year2024}{2024} & LLM-augmented ranking & Scaling laws, RAG evaluation (eRAG), LLM-based ranking \\
+\hline
+\textcolor{year2025}{2025} & Production LLM-IR & Robust RAG, efficient multi-vector retrieval, zero-shot with features \\
+\hline
+\end{longtable}
+\end{center}
+
+\subsection{Retrieval Architecture Evolution}
+
+\textbf{2022 Standard Architecture:}
+\begin{enumerate}
+    \item BM25 or dense bi-encoder (candidate generation)
+    \item Cross-encoder reranking
+    \item Optional: Knowledge distillation for efficiency (CL-DRD)
+\end{enumerate}
+
+\textbf{2023 Emerging Architecture:}
+\begin{enumerate}
+    \item Hybrid retrieval: BM25 + dense + sparse embeddings (SparseEmbed/SPLADE)
+    \item Cross-encoder or early LLM reranking
+    \item LLM-based query reformulation
+\end{enumerate}
+
+\textbf{2024 Best Practice Architecture:}
+\begin{enumerate}
+    \item Multi-stage hybrid: BM25 + dense + learned sparse
+    \item Pointwise/setwise LLM ranking (mid-stage)
+    \item Pairwise LLM reranking (final stage)
+    \item RAG for answer generation (optional)
+    \item Evaluation via eRAG framework
+\end{enumerate}
+
+\textbf{2025 Production Architecture:}
+\begin{enumerate}
+    \item Efficient multi-vector retrieval (WARP/IGP)
+    \item Zero-shot LLM ranking with precomputed features
+    \item Early exit cross-encoder reranking
+    \item Robust multi-agent RAG (CIRAG)
+    \item Continuous robustness monitoring
+\end{enumerate}
+
+\subsection{RAG Evolution Timeline}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{2022:} Foundational work (non-factoid QA taxonomy, efficient generation)
+    \item \textbf{2023:} Early RAG systems (FiD-Light), generative IR workshop
+    \item \textbf{2024:} RAG evaluation frameworks (eRAG), CorpusLM unified model, IR-RAG workshop
+    \item \textbf{2025:} Production-ready robust RAG (CIRAG), performance prediction, resilience to retrieval defects
+\end{itemize}
+
+\subsection{Evaluation Methodology Evolution}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{2022:} Traditional IR metrics (NDCG, MRR), reproducibility studies
+    \item \textbf{2023:} Early generative IR evaluation challenges identified
+    \item \textbf{2024:} LLM4Eval workshop, eRAG framework, LLM-based evaluation metrics, inter-rater reliability studies
+    \item \textbf{2025:} Crowdsourcing for RAG evaluation, robustness evaluation, efficiency benchmarks (ReNeuIR)
+\end{itemize}
+
+\subsection{Query Understanding Evolution}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{2022:} Traditional query expansion, entity-aware ranking
+    \item \textbf{2023:} LLM-based query generation (ChatGPT for Boolean queries), generative relevance feedback
+    \item \textbf{2024:} Synthetic query generation for domain adaptation (DUQGen), multimodal query understanding (LDRE)
+    \item \textbf{2025:} Limitations identified (LLMs fail on unfamiliar/ambiguous queries), alignment with ranking objectives (DPO)
+\end{itemize}
+
+\section{Practical Implementation Guide}
+
+\subsection{Choosing the Right Retrieval Architecture}
+
+\subsubsection{When to Use Dense Retrieval}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Use case:} Semantic search, concept matching, cross-lingual retrieval
+    \item \textbf{Best for:} Natural language queries, synonym matching
+    \item \textbf{2025 recommendation:} Combine with BM25 for hybrid approach
+    \item \textbf{Infrastructure:} WARP/IGP for multi-vector (ColBERT-style)
+\end{itemize}
+
+\subsubsection{When to Use Learned Sparse Retrieval}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Use case:} Balance semantic understanding with inverted index efficiency
+    \item \textbf{Best for:} Large-scale systems requiring both semantic and lexical matching
+    \item \textbf{Technology:} SparseEmbed (SIGIR 2023), SPLADE
+    \item \textbf{Advantage:} Works with existing search infrastructure
+\end{itemize}
+
+\subsubsection{When to Use Generative Retrieval}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Use case:} Experimental systems, small corpora, URL/title-based retrieval
+    \item \textbf{Best for:} Human-interpretable identifiers, hierarchical retrieval
+    \item \textbf{Limitation:} Constrained autoregressive decoding (SIGIR 2025 findings)
+    \item \textbf{Maturity:} Emerging technology, not yet production-standard for large scale
+\end{itemize}
+
+\subsection{LLM Ranking: Effectiveness vs. Cost}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Approach} & \textbf{Quality} & \textbf{Latency} & \textbf{Cost} & \textbf{Recommended Stage} \\
+\hline
+Pointwise & ++ & + & + & Stage 2 (top-100) \\
+Setwise & +++ & ++ & ++ & Stage 2-3 (top-50) \\
+Pairwise & ++++ & +++ & +++ & Stage 3 (top-10) \\
+Listwise & +++++ & ++++ & ++++ & Offline only \\
+\hline
+Zero-shot + Features & +++ & ++ & + & Stage 2 (SIGIR 2025) \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Key:} + (low) to +++++ (very high)
+
+\subsection{RAG System Design Checklist}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Retrieval optimization} (most important, per IR-RAG workshop):
+    \begin{itemize}
+        \item Hybrid retrieval (BM25 + dense + learned sparse)
+        \item Evaluate with eRAG framework (SIGIR 2024)
+        \item Monitor retrieval quality independently from generation
+    \end{itemize}
+
+    \item \textbf{Robustness} (SIGIR 2025):
+    \begin{itemize}
+        \item Fine-tune for resilience to retrieval defects
+        \item Handle noisy or irrelevant documents gracefully
+        \item Implement fallback strategies
+    \end{itemize}
+
+    \item \textbf{Multi-agent architecture} (optional, SIGIR 2025):
+    \begin{itemize}
+        \item CIRAG-style collective intelligence for complex reasoning
+        \item Multiple LLM agents for verification and cross-checking
+    \end{itemize}
+
+    \item \textbf{Evaluation}:
+    \begin{itemize}
+        \item Use eRAG for retrieval component evaluation
+        \item Separate metrics for retrieval and generation quality
+        \item Crowdsourcing for large-scale human evaluation (SIGIR 2025)
+    \end{itemize}
+
+    \item \textbf{Performance prediction} (SIGIR 2025):
+    \begin{itemize}
+        \item Use frameworks to predict RAG effectiveness before deployment
+        \item Capacity planning based on retrieval quality predictions
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Evaluation Strategy}
+
+\subsubsection{Offline Evaluation}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Retrieval:} Traditional IR metrics (NDCG, MRR) + eRAG downstream performance
+    \item \textbf{Ranking:} LLM-based evaluation (pointwise for speed, pairwise for accuracy)
+    \item \textbf{RAG:} eRAG framework, autograding workbench (SIGIR 2024)
+    \item \textbf{Agreement metrics:} Kendall's $\tau$ for system ranking, Cohen's $\kappa$ for labeling
+\end{itemize}
+
+\subsubsection{Online Evaluation}
+\begin{itemize}[leftmargin=*]
+    \item A/B testing with user engagement metrics
+    \item Click-through rate, dwell time, session success
+    \item Continuous monitoring of robustness (domain shift, adversarial queries)
+\end{itemize}
+
+\subsection{Scaling Considerations}
+
+\textbf{Data vs. Model Size} (from SIGIR 2024 scaling laws):
+\begin{itemize}[leftmargin=*]
+    \item Use contrastive log-likelihood for continuous scaling analysis
+    \item Quantify expected performance gains before scaling investments
+    \item ROI analysis: doubling training data vs. doubling model size
+    \item Diminishing returns at high scales
+\end{itemize}
+
+\textbf{Robustness vs. Effectiveness} (SIGIR 2025):
+\begin{itemize}[leftmargin=*]
+    \item Larger models more robust to domain shift
+    \item Tradeoff: effectiveness improvements vs. robustness gains
+    \item Consider deployment domain when selecting model size
+\end{itemize}
+
+\section{Future Directions and Open Challenges}
+
+\subsection{Emerging Trends (2025 and Beyond)}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Unified retrieval models:} Single models handling RAG, generative retrieval, and closed-book generation (CorpusLM trend)
+
+    \item \textbf{Multi-agent RAG:} Collective intelligence systems (CIRAG) for complex reasoning
+
+    \item \textbf{Efficient multi-vector retrieval:} Production infrastructure (WARP, IGP) enabling ColBERT-style models at scale
+
+    \item \textbf{Zero-shot ranking with features:} Combining LLM capabilities with precomputed signals for cost-effective ranking
+
+    \item \textbf{Robustness standardization:} Community-wide benchmarks for domain adaptation, adversarial robustness, OOD generalization
+
+    \item \textbf{Privacy-preserving embeddings:} Addressing Vec2Text-style attacks on dense retrieval
+
+    \item \textbf{Environmental impact:} Efficiency benchmarks (ReNeuIR) and environmental considerations
+\end{itemize}
+
+\subsection{Open Challenges}
+
+\subsubsection{Generative Retrieval}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Document identifier design:} No consensus on optimal identifier strategy
+    \item \textbf{Scaling to large corpora:} Constrained autoregressive decoding limits effectiveness (SIGIR 2025)
+    \item \textbf{Index updates:} Handling dynamic document collections
+\end{itemize}
+
+\subsubsection{RAG Systems}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Retrieval quality bottleneck:} Still the primary limitation (IR-RAG workshop consensus)
+    \item \textbf{Robustness:} Handling noisy, irrelevant, or contradictory retrieved documents
+    \item \textbf{Evaluation:} Need for standardized RAG benchmarks beyond eRAG
+    \item \textbf{Knowledge utilization:} Better understanding of how LLMs use retrieved information
+\end{itemize}
+
+\subsubsection{LLM-Based Ranking}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cost-effectiveness:} Balancing quality with inference costs
+    \item \textbf{Latency:} Meeting real-time ranking requirements (<100ms)
+    \item \textbf{Calibration:} LLMs poorly calibrated for relevance judgments
+    \item \textbf{Bias:} Position bias, length bias, popularity bias in LLM rankings
+\end{itemize}
+
+\subsubsection{Query Understanding}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{LLM limitations:} Failure on unfamiliar and ambiguous queries (SIGIR 2025)
+    \item \textbf{Domain adaptation:} Expensive fine-tuning for domain-specific terminology
+    \item \textbf{Multimodal queries:} Limited work on complex visual + text queries
+\end{itemize}
+
+\subsubsection{Evaluation}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{LLM evaluation reliability:} Better for comparative than absolute judgments
+    \item \textbf{RAG-specific metrics:} Beyond eRAG, need comprehensive evaluation frameworks
+    \item \textbf{Efficiency benchmarks:} Standardized evaluation including computational cost
+    \item \textbf{Robustness evaluation:} Methodologies for adversarial and OOD settings
+\end{itemize}
+
+\subsection{Research Priorities for Industry}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Hybrid retrieval optimization:} Finding optimal combination of BM25, dense, and learned sparse
+
+    \item \textbf{Efficient LLM ranking:} Reducing cost through distillation (Reason-to-Rank), early exit, feature integration
+
+    \item \textbf{Robust RAG:} Handling retrieval defects, improving resilience, multi-agent verification
+
+    \item \textbf{Multi-vector retrieval infrastructure:} Production-ready systems for ColBERT-style models
+
+    \item \textbf{Domain adaptation:} Cost-effective methods for adapting to new domains (synthetic query generation, few-shot learning)
+
+    \item \textbf{Privacy and security:} Protecting embeddings, secure retrieval APIs, differential privacy
+
+    \item \textbf{Evaluation tooling:} Automated, scalable evaluation for rapid iteration
+\end{enumerate}
+
+\section{Conclusion}
+
+The period from SIGIR 2022 to 2025 captures the complete transformation of information retrieval from neural ranking optimization to mature LLM-augmented search systems. Key insights for practitioners:
+
+\subsection{Core Lessons}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Hybrid retrieval is essential} (2022-2025 consensus):
+    \begin{itemize}
+        \item Combine BM25 (precision), dense retrieval (semantic), learned sparse (hybrid benefits)
+        \item No single approach dominates all scenarios
+    \end{itemize}
+
+    \item \textbf{Multi-stage ranking balances effectiveness and efficiency}:
+    \begin{itemize}
+        \item Fast candidate generation (top-1000): hybrid retrieval
+        \item Mid-stage reranking (top-100): cross-encoder or pointwise LLM
+        \item Final reranking (top-10): pairwise LLM with high-quality scoring
+    \end{itemize}
+
+    \item \textbf{RAG requires retrieval-first optimization}:
+    \begin{itemize}
+        \item Retrieval quality is the primary bottleneck (IR-RAG workshop)
+        \item Use eRAG framework for retrieval evaluation (SIGIR 2024)
+        \item Fine-tune for robustness to retrieval defects (SIGIR 2025)
+    \end{itemize}
+
+    \item \textbf{Scaling laws enable predictability} (SIGIR 2024):
+    \begin{itemize}
+        \item Data-driven decisions about model size and training data
+        \item Contrastive log-likelihood for continuous scaling analysis
+        \item ROI analysis before major investments
+    \end{itemize}
+
+    \item \textbf{LLM ranking requires careful cost management}:
+    \begin{itemize}
+        \item Use pointwise for speed, pairwise for accuracy
+        \item Zero-shot with precomputed features (SIGIR 2025)
+        \item Distill LLM reasoning into efficient models (Reason-to-Rank)
+    \end{itemize}
+
+    \item \textbf{Evaluation must evolve with technology}:
+    \begin{itemize}
+        \item Traditional IR metrics insufficient for RAG (use eRAG)
+        \item LLMs better for comparative than absolute evaluation
+        \item Monitor retrieval and generation quality separately
+    \end{itemize}
+
+    \item \textbf{Robustness is critical for production}:
+    \begin{itemize}
+        \item Domain adaptation challenges remain (SIGIR 2025)
+        \item Handle retrieval defects gracefully
+        \item Monitor for adversarial queries and distribution shift
+    \end{itemize}
+
+    \item \textbf{Efficiency considerations are paramount}:
+    \begin{itemize}
+        \item ReNeuIR workshop series (2023-2025) emphasizes computational cost
+        \item Environmental impact of neural IR models
+        \item Tradeoffs between effectiveness, efficiency, and robustness
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Technology Maturity Assessment}
+
+\begin{center}
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Technology} & \textbf{Maturity} & \textbf{Recommendation} \\
+\hline
+Dense retrieval & \textcolor{green}{Production-ready} & Deploy with hybrid approach \\
+\hline
+Learned sparse & \textcolor{green}{Production-ready} & Deploy for semantic + lexical \\
+\hline
+LLM reranking & \textcolor{orange}{Maturing} & Deploy with cost controls \\
+\hline
+RAG systems & \textcolor{orange}{Maturing} & Deploy with robust retrieval \\
+\hline
+Generative retrieval & \textcolor{red}{Experimental} & Research only, not production \\
+\hline
+Multi-agent RAG & \textcolor{orange}{Emerging} & Pilot for complex reasoning \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Final Recommendations}
+
+For practitioners building search and discovery systems in 2025 and beyond:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Start with hybrid retrieval:} BM25 + dense + learned sparse (SparseEmbed/SPLADE)
+
+    \item \textbf{Use multi-stage ranking:} Invest in fast candidate generation, reserve expensive LLM ranking for final stage
+
+    \item \textbf{Optimize retrieval before generation:} In RAG systems, focus on retrieval quality first
+
+    \item \textbf{Leverage scaling laws:} Use predictive frameworks (SIGIR 2024) for capacity planning
+
+    \item \textbf{Implement robust evaluation:} eRAG for RAG systems, LLM-based evaluation for comparative analysis
+
+    \item \textbf{Plan for efficiency:} Use distillation (CL-DRD), early exit, zero-shot with features to reduce costs
+
+    \item \textbf{Monitor robustness:} Test across domains, handle retrieval defects, watch for adversarial queries
+
+    \item \textbf{Stay hybrid:} Don't replace traditional IR wholesale; combine strengths of lexical, dense, and LLM approaches
+\end{enumerate}
+
+The research from SIGIR 2022-2025 provides a robust foundation for building production-grade search and discovery systems in the age of large language models. Success requires understanding the strengths and limitations of each approach, combining techniques strategically, and maintaining focus on the fundamentals: retrieval quality, efficiency, and robustness.
+
+\newpage
+
+\section{References}
+
+\subsection{SIGIR 2022}
+
+\begin{itemize}[leftmargin=*]
+    \item Valeriia Bolotova et al., ``A Non-Factoid Question-Answering Taxonomy,'' \textit{SIGIR '22}, July 2022. (Best Paper)
+
+    \item Hansi Zeng, Hamed Zamani, Vishwa Vinay, ``Curriculum Learning for Dense Retrieval Distillation,'' \textit{SIGIR '22}, July 2022. (Best Short Paper) Code: \url{https://github.com/HansiZeng/CL-DRD}
+
+    \item Andrew Yates et al., ``Pretrained Transformers for Text Ranking: BERT and Beyond,'' ArXiv: 2010.06467, Tutorial.
+
+    \item Minghan Li, Eric Gaussier, ``BERT-based Dense Intra-ranking and Contextualized Late Interaction,'' \textit{SIGIR '22}, July 2022.
+
+    \item Shubham Chatterjee, Laura Dietz, ``BERT-ER: Query-Specific BERT Entity Representations,'' \textit{SIGIR '22}, July 2022.
+\end{itemize}
+
+\subsection{SIGIR 2023}
+
+\begin{itemize}[leftmargin=*]
+    \item Maik Fröbe et al., ``The Information Retrieval Experiment Platform,'' \textit{SIGIR '23}, July 2023. (Best Paper)
+
+    \item Alireza Salemi, Juan Altmayer Pizzorno, Hamed Zamani, ``A Symmetric Dual Encoding Dense Retrieval Framework for Knowledge-Intensive Visual Question Answering,'' \textit{SIGIR '23}, July 2023. (Best Student Paper)
+
+    \item Weize Kong et al., ``SparseEmbed: Learning Sparse Lexical Representations with Contextual Embeddings for Retrieval,'' \textit{SIGIR '23}, July 2023. (Best Short Paper)
+
+    \item S. Wang, H. Scells, B. Koopman, G. Zuccon, ``Can ChatGPT Write a Good Boolean Query for Systematic Review Literature Search?'' \textit{SIGIR '23}, July 2023.
+
+    \item M. Alaofi et al., ``Can Generative LLMs Create Query Variants for Test Collections?'' \textit{SIGIR '23}, July 2023. (Short paper)
+
+    \item Iain Mackie, Shubham Chatterjee, Jeffrey Dalton, ``Generative Relevance Feedback with Large Language Models,'' \textit{SIGIR '23}, July 2023. (Short paper)
+
+    \item Sebastian Hofstätter et al., ``FiD-Light: Efficient Retrieval-Augmented Text Generation,'' \textit{SIGIR '23}, July 2023.
+
+    \item Hrishikesh Kulkarni et al., ``Lexically-Accelerated Dense Retrieval,'' \textit{SIGIR '23}, July 2023.
+
+    \item ``Gen-IR @ SIGIR 2023: The First Workshop on Generative Information Retrieval,'' July 2023.
+\end{itemize}
+
+\subsection{SIGIR 2024}
+
+\begin{itemize}[leftmargin=*]
+    \item Yan Fang et al., ``Scaling Laws For Dense Retrieval,'' \textit{SIGIR '24}, July 2024. ArXiv: 2403.18684. (Best Long Paper)
+
+    \item Laura Dietz, ``A Workbench for Autograding Retrieve/Generate Systems,'' \textit{SIGIR '24}, July 2024. (Best Long Paper)
+
+    \item Alireza Salemi, Hamed Zamani, ``Evaluating Retrieval Quality in Retrieval-Augmented Generation,'' \textit{SIGIR '24}, July 2024. ArXiv: 2404.13781. Code: \url{https://github.com/alirezasalemi7/eRAG} (Best Short Paper)
+
+    \item Sebastian Bruch et al., ``Efficient Inverted Indexes for Approximate Retrieval over Learned Sparse Representations,'' \textit{SIGIR '24}, July 2024. (Runner-up)
+
+    \item Sean MacAvaney, Nicola Tonellotto, ``A Reproducibility Study of PLAID,'' \textit{SIGIR '24}, July 2024. (Runner-up)
+
+    \item Ekaterina Khramtsova et al., ``Leveraging LLMs for Unsupervised Dense Retriever Ranking,'' \textit{SIGIR '24}, July 2024.
+
+    \item ``A Setwise Approach for Effective and Highly Efficient Zero-shot Ranking with Large Language Models,'' \textit{SIGIR '24}, July 2024.
+
+    \item ``RLCF: Reinforcement Learning from Contrastive Feedback,'' \textit{SIGIR '24}, July 2024.
+
+    \item ``CorpusLM: Unified Language Model using RAG and Generative Retrieval,'' \textit{SIGIR '24}, July 2024.
+
+    \item Anirudh Ravichandran et al., ``MERLIN: Multiple enhanced representations with LLM generated indices,'' \textit{SIGIR '24}, July 2024.
+
+    \item ``Generative Retrieval as Multi-Vector Dense Retrieval,'' \textit{SIGIR '24}, July 2024.
+
+    \item Zhenyu Yang et al., ``LDRE: LLM-based Divergent Reasoning and Ensemble for Zero-Shot Composed Image Retrieval,'' \textit{SIGIR '24}, July 2024.
+
+    \item ``DUQGen: Effective Unsupervised Domain Adaptation of Neural Rankers,'' Tutorial, \textit{SIGIR '24}, July 2024.
+
+    \item ``Understanding and Mitigating the Threat of Vec2Text to Dense Retrieval Systems,'' \textit{SIGIR-AP 2024}.
+
+    \item ``Report on the 1st Workshop on LLM for Evaluation in IR (LLM4Eval 2024),'' ArXiv: 2408.05388, August 2024.
+
+    \item ``Gen-IR @ SIGIR 2024: The Second Workshop on Generative Information Retrieval,'' July 2024.
+
+    \item ``IR-RAG @ SIGIR 2024: Information Retrieval's Role in RAG Systems,'' Workshop, July 2024.
+
+    \item ``Recent Advances in Generative Information Retrieval,'' Tutorial, \textit{SIGIR '24}, July 2024.
+
+    \item ``Robust Information Retrieval,'' Tutorial, \textit{SIGIR '24}, July 2024.
+
+    \item Zhai, ``Large Language Models and Future of Information Retrieval: Opportunities and Challenges,'' Keynote, \textit{SIGIR '24}, July 2024.
+\end{itemize}
+
+\subsection{SIGIR 2025}
+
+\begin{itemize}[leftmargin=*]
+    \item ``CIRAG: Retrieval-Augmented Language Model with Collective Intelligence,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Predicting RAG Performance for Text Completion,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Unveiling Knowledge Utilization Mechanisms in LLM-based RAG,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Robust Fine-tuning for RAG against Retrieval Defects,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``The Viability of Crowdsourcing for RAG Evaluation,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``LLM-based Query Expansion Fails for Unfamiliar and Ambiguous Queries,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Aligning Web Query Generation with Ranking Objectives via DPO,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``On the Scaling of Robustness and Effectiveness in Dense Retrieval,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``IGP: Efficient Multi-Vector Retrieval via Proximity Graph Index,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``WARP: An Efficient Engine for Multi-Vector Retrieval,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Reason-to-Rank: Distilling LLM Reasoning for Document Reranking,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Zero-Shot Reranking with LLMs and Precomputed Ranking Features,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Efficient Re-ranking with Cross-encoders via Early Exit,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Information Retrieval in the Age of Generative AI: The RGB Model,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Constrained Auto-Regressive Decoding Constrains Generative Retrieval,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``Order-agnostic Identifier for LLM-based Generative Recommendation,'' \textit{SIGIR '25}, July 2025.
+
+    \item ``ReNeuIR at SIGIR 2025: The Fourth Workshop on Reaching Efficiency in Neural IR,'' July 2025.
+
+    \item ``Robust-IR @ SIGIR 2025: The First Workshop on Robust IR,'' ArXiv: 2503.18426, July 2025.
+\end{itemize}
+
+\subsection{Conference Information}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{SIGIR 2022:} Madrid, Spain, July 11-15, 2022. \url{https://sigir.org/sigir2022/}
+
+    \item \textbf{SIGIR 2023:} Taipei, Taiwan, July 23-27, 2023. \url{https://sigir.org/sigir2023/}
+
+    \item \textbf{SIGIR 2024:} Washington, D.C., USA, July 14-18, 2024. \url{https://sigir-2024.github.io/}
+
+    \item \textbf{SIGIR 2025:} Padua, Italy, July 13-18, 2025. \url{https://sigir2025.dei.unipd.it/}
+\end{itemize}
+
+\end{document}

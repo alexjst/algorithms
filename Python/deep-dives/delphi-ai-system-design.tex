@@ -1,0 +1,1298 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{graphicx}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    columns=fullflexible
+}
+
+\title{\textbf{Delphi AI System Design} \\
+       \large Interview Preparation: Persona AI Clone Architecture}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Executive Summary}
+
+This document provides comprehensive system design problems and solutions tailored for \textbf{Delphi AI}, a platform that creates personalized AI clones of thought leaders, experts, and creators. Delphi's core technology involves ingesting personal content (documents, videos, podcasts, emails), extracting personality and knowledge patterns, and enabling AI clones to engage in text, voice, and video conversations that authentically represent the original person.
+
+\subsection{What Makes Delphi Unique}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Personality Capture}: Not just knowledge retrieval—captures communication style, reasoning patterns, values
+    \item \textbf{Multi-Modal Clones}: Text, voice, video interactions with consistent personality
+    \item \textbf{Scale}: 100M+ vectors across 12,000+ namespaces (Pinecone)
+    \item \textbf{Mathematical Reasoning}: Understanding principles and thought patterns to reason on new situations (not just regurgitation)
+    \item \textbf{Personalization}: Each clone is unique, trained on individual's content corpus
+\end{itemize}
+
+\subsection{What "Mathematical" Might Mean in Context}
+
+Given Basten mentioned the system design is "mathematical," likely areas of focus:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Embedding Similarity}: Cosine similarity, vector space geometry for retrieval
+    \item \textbf{Knowledge Graph Reasoning}: Graph algorithms (shortest path, PageRank) for concept relationships
+    \item \textbf{Attention Mechanisms}: Transformer math, softmax distributions, self-attention
+    \item \textbf{Semantic Similarity Metrics}: BM25, TF-IDF, semantic kernel methods
+    \item \textbf{Probabilistic Reasoning}: Bayesian inference for personality trait modeling
+    \item \textbf{Optimization}: Loss functions for fine-tuning LLMs, gradient descent, regularization
+\end{enumerate}
+
+\section{Problem 1: Design Delphi's Core AI Clone System}
+
+\subsection{Problem Statement}
+
+Design a system that ingests a creator's content (documents, videos, podcasts, emails) and generates an AI clone that can have personalized conversations mimicking their personality, knowledge, and reasoning style.
+
+\textbf{Requirements}:
+\begin{itemize}[leftmargin=*]
+    \item Support 10,000+ clones (creators)
+    \item Each clone has 1,000-100,000 pieces of content (documents, transcripts)
+    \item Handle text, audio, and video inputs
+    \item Real-time conversation: < 2 second response latency
+    \item Multi-modal output: text, voice (synthesized), video (future)
+    \item Personality consistency across conversations
+    \item Scale to 1M+ daily conversations
+\end{itemize}
+
+\subsection{High-Level Architecture}
+
+\begin{verbatim}
+┌─────────────────────────────────────────────────────────────────┐
+│                    Content Ingestion Pipeline                   │
+├─────────────────────────────────────────────────────────────────┤
+│  PDF/Docs → Text Extraction                                     │
+│  Audio/Video → Transcription (AssemblyAI/Whisper)              │
+│  Emails/Chats → Preprocessing                                   │
+│           ↓                                                      │
+│  Text Chunking (512-1024 tokens)                               │
+│           ↓                                                      │
+│  Embedding Generation (OpenAI/Cohere/Custom)                   │
+│           ↓                                                      │
+│  Vector Store (Pinecone: 100M+ vectors)                        │
+│           ↓                                                      │
+│  Knowledge Graph Construction (Personality Traits, Topics)      │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    Conversation Engine (RAG)                    │
+├─────────────────────────────────────────────────────────────────┤
+│  User Query → Query Embedding                                   │
+│           ↓                                                      │
+│  Hybrid Retrieval:                                             │
+│    - Semantic: ANN Search (Pinecone) - Top 50 chunks          │
+│    - Knowledge Graph: Reasoning paths for context             │
+│           ↓                                                      │
+│  Re-Ranking (Cross-Encoder): Top 5-10 chunks                  │
+│           ↓                                                      │
+│  Context Assembly + Personality Prompt                          │
+│           ↓                                                      │
+│  LLM Generation (GPT-4/Claude with clone persona)             │
+│           ↓                                                      │
+│  Response Post-Processing (style matching)                      │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    Voice/Video Synthesis                        │
+├─────────────────────────────────────────────────────────────────┤
+│  Text Response → Voice Cloning (ElevenLabs)                    │
+│  Text Response → Avatar Animation (D-ID/Synthesia)             │
+└─────────────────────────────────────────────────────────────────┘
+\end{verbatim}
+
+\subsection{Component 1: Content Ingestion \& Embedding}
+
+\subsubsection{Content Processing Pipeline}
+
+\textbf{Input Sources}:
+\begin{itemize}[leftmargin=*]
+    \item Documents: PDFs, Google Docs, Notion pages
+    \item Audio: Podcasts, voicemails, interviews
+    \item Video: YouTube videos, webinars, recordings
+    \item Text: Emails, Slack/WhatsApp messages, tweets
+\end{itemize}
+
+\textbf{Processing Steps}:
+\begin{lstlisting}[language=Python]
+# Step 1: Extract text from various formats
+def process_content(content_type, file_path):
+    if content_type == 'pdf':
+        text = extract_pdf_text(file_path)  # PyPDF2, pdfplumber
+    elif content_type == 'audio':
+        text = transcribe_audio(file_path)  # AssemblyAI, Whisper
+    elif content_type == 'video':
+        audio = extract_audio(file_path)
+        text = transcribe_audio(audio)
+    elif content_type == 'email':
+        text = parse_email(file_path)
+
+    return text
+
+# Step 2: Chunk text intelligently
+def chunk_text(text, chunk_size=1024, overlap=128):
+    """
+    Semantic chunking: preserve sentence/paragraph boundaries
+    chunk_size: tokens (not characters)
+    overlap: for context continuity
+    """
+    sentences = split_into_sentences(text)
+    chunks = []
+    current_chunk = []
+    current_tokens = 0
+
+    for sentence in sentences:
+        tokens = count_tokens(sentence)
+        if current_tokens + tokens > chunk_size and current_chunk:
+            chunks.append(' '.join(current_chunk))
+            # Keep last sentence for overlap
+            current_chunk = [sentence]
+            current_tokens = tokens
+        else:
+            current_chunk.append(sentence)
+            current_tokens += tokens
+
+    if current_chunk:
+        chunks.append(' '.join(current_chunk))
+
+    return chunks
+
+# Step 3: Generate embeddings
+def embed_chunks(chunks, model='openai-text-embedding-3-large'):
+    """
+    OpenAI: text-embedding-3-large (3072-dim, best quality)
+    Cohere: embed-english-v3.0 (1024-dim)
+    Custom: Fine-tuned Sentence-BERT
+    """
+    embeddings = []
+    for chunk in chunks:
+        embedding = openai.embeddings.create(
+            input=chunk,
+            model=model
+        ).data[0].embedding
+        embeddings.append(embedding)
+
+    return embeddings
+
+# Step 4: Store in Pinecone
+def store_in_pinecone(chunks, embeddings, metadata, clone_id):
+    index = pinecone.Index('delphi-clones')
+
+    vectors = []
+    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+        vectors.append({
+            'id': f'{clone_id}_{i}',
+            'values': embedding,
+            'metadata': {
+                'clone_id': clone_id,
+                'text': chunk,
+                'source': metadata['source'],
+                'timestamp': metadata['timestamp'],
+                'content_type': metadata['content_type']
+            }
+        })
+
+    # Upsert in batches
+    index.upsert(vectors=vectors, namespace=clone_id)
+\end{lstlisting}
+
+\subsubsection{Mathematical Consideration: Embedding Similarity}
+
+\textbf{Cosine Similarity}:
+\[
+\text{sim}(\vec{q}, \vec{d}) = \frac{\vec{q} \cdot \vec{d}}{\|\vec{q}\| \|\vec{d}\|} = \frac{\sum_{i=1}^{n} q_i d_i}{\sqrt{\sum_{i=1}^{n} q_i^2} \sqrt{\sum_{i=1}^{n} d_i^2}}
+\]
+
+\textbf{Why Cosine over Euclidean}:
+\begin{itemize}[leftmargin=*]
+    \item Embeddings are high-dimensional (1024-3072 dims)
+    \item Magnitude varies (document length affects $L_2$ norm)
+    \item Cosine measures \textit{direction} (semantic similarity), not magnitude
+    \item Range: $[-1, 1]$ (normalized), easier to interpret
+\end{itemize}
+
+\textbf{Dot Product (Pinecone Default)}:
+\[
+\text{score}(\vec{q}, \vec{d}) = \vec{q} \cdot \vec{d} = \sum_{i=1}^{n} q_i d_i
+\]
+
+If embeddings are normalized ($\|\vec{q}\| = \|\vec{d}\| = 1$), dot product = cosine similarity (faster computation).
+
+\subsection{Component 2: Knowledge Graph Construction}
+
+\textbf{Goal}: Capture relationships between concepts, personality traits, and recurring themes.
+
+\subsubsection{Graph Schema}
+
+\begin{verbatim}
+Nodes:
+  - Concept (e.g., "Leadership", "Remote Work")
+  - Personality Trait (e.g., "Direct Communicator", "Empathetic")
+  - Topic (e.g., "Product Management", "Fundraising")
+  - Document Chunk
+
+Edges:
+  - MENTIONS (Chunk → Concept)
+  - RELATED_TO (Concept ↔ Concept)
+  - EXHIBITS (Clone → Personality Trait)
+  - EXPERTISE_IN (Clone → Topic)
+  - CO_OCCURS (Concept ↔ Concept, weighted by frequency)
+\end{verbatim}
+
+\subsubsection{Graph Construction Pipeline}
+
+\begin{lstlisting}[language=Python]
+from neo4j import GraphDatabase
+import spacy
+
+# Step 1: Extract entities and relationships
+nlp = spacy.load('en_core_web_lg')
+
+def extract_knowledge_graph(text, clone_id):
+    doc = nlp(text)
+
+    # Extract named entities
+    entities = [(ent.text, ent.label_) for ent in doc.ents]
+
+    # Extract noun phrases (key concepts)
+    concepts = [chunk.text for chunk in doc.noun_chunks]
+
+    # Extract relationships (subject-verb-object triples)
+    triples = []
+    for sent in doc.sents:
+        for token in sent:
+            if token.dep_ == 'ROOT':  # Verb
+                subject = [t for t in token.lefts if t.dep_ == 'nsubj']
+                obj = [t for t in token.rights if t.dep_ in ['dobj', 'pobj']]
+                if subject and obj:
+                    triples.append((subject[0].text, token.text, obj[0].text))
+
+    return entities, concepts, triples
+
+# Step 2: Store in Neo4j
+def build_knowledge_graph(clone_id, chunks):
+    driver = GraphDatabase.driver("neo4j://localhost", auth=("neo4j", "password"))
+
+    with driver.session() as session:
+        # Create clone node
+        session.run("CREATE (c:Clone {id: $clone_id})", clone_id=clone_id)
+
+        for i, chunk in enumerate(chunks):
+            entities, concepts, triples = extract_knowledge_graph(chunk, clone_id)
+
+            # Create chunk node
+            session.run("""
+                CREATE (ch:Chunk {id: $chunk_id, text: $text, clone_id: $clone_id})
+            """, chunk_id=f"{clone_id}_{i}", text=chunk, clone_id=clone_id)
+
+            # Create concept nodes and relationships
+            for concept in concepts:
+                session.run("""
+                    MERGE (co:Concept {name: $concept})
+                    WITH co
+                    MATCH (ch:Chunk {id: $chunk_id})
+                    CREATE (ch)-[:MENTIONS]->(co)
+                """, concept=concept, chunk_id=f"{clone_id}_{i}")
+
+            # Create relationships between concepts
+            for subj, verb, obj in triples:
+                session.run("""
+                    MERGE (s:Concept {name: $subj})
+                    MERGE (o:Concept {name: $obj})
+                    CREATE (s)-[:RELATED_TO {relation: $verb}]->(o)
+                """, subj=subj, obj=obj, verb=verb)
+
+    driver.close()
+\end{lstlisting}
+
+\subsubsection{Mathematical Consideration: Graph Algorithms}
+
+\textbf{PageRank for Important Concepts}:
+\[
+PR(v) = \frac{1-d}{N} + d \sum_{u \in \text{in}(v)} \frac{PR(u)}{|\text{out}(u)|}
+\]
+
+Where:
+\begin{itemize}[leftmargin=*]
+    \item $d$: damping factor (0.85)
+    \item $N$: total number of nodes
+    \item $\text{in}(v)$: incoming edges to node $v$
+    \item $|\text{out}(u)|$: out-degree of node $u$
+\end{itemize}
+
+\textbf{Use Case}: Rank concepts by importance in clone's knowledge base. High PageRank = frequently mentioned and connected concepts.
+
+\textbf{Shortest Path for Context Reasoning}:
+\begin{lstlisting}[language=Python]
+# Find reasoning path between two concepts
+def find_reasoning_path(concept_a, concept_b):
+    query = """
+    MATCH (a:Concept {name: $concept_a}),
+          (b:Concept {name: $concept_b}),
+          path = shortestPath((a)-[*]-(b))
+    RETURN path
+    """
+    return session.run(query, concept_a=concept_a, concept_b=concept_b)
+
+# Example: User asks about "remote work" and "leadership"
+# System finds path: remote work → team building → leadership
+# Retrieves chunks along this path for context
+\end{lstlisting}
+
+\subsection{Component 3: RAG-Based Conversation Engine}
+
+\subsubsection{Hybrid Retrieval Strategy}
+
+\textbf{Stage 1: Broad Semantic Retrieval (Pinecone ANN)}
+\begin{lstlisting}[language=Python]
+def semantic_retrieval(query, clone_id, top_k=50):
+    # Embed query
+    query_embedding = openai.embeddings.create(
+        input=query,
+        model='text-embedding-3-large'
+    ).data[0].embedding
+
+    # Search Pinecone
+    index = pinecone.Index('delphi-clones')
+    results = index.query(
+        vector=query_embedding,
+        top_k=top_k,
+        namespace=clone_id,
+        include_metadata=True
+    )
+
+    return results['matches']
+\end{lstlisting}
+
+\textbf{Mathematical Detail: Approximate Nearest Neighbors (ANN)}
+
+Pinecone uses \textbf{HNSW} (Hierarchical Navigable Small World) algorithm:
+
+\textbf{Key Idea}: Multi-layer graph structure for fast search
+\begin{itemize}[leftmargin=*]
+    \item Layer 0 (bottom): All data points
+    \item Layer 1+: Sparse long-range connections
+    \item Search starts at top layer (coarse), descends to bottom (fine)
+\end{itemize}
+
+\textbf{Complexity}:
+\begin{itemize}[leftmargin=*]
+    \item Query time: $O(\log N)$ (vs $O(N)$ brute-force)
+    \item Space: $O(N \log N)$
+\end{itemize}
+
+\textbf{Trade-off}: Recall vs. latency (parameter: $ef\_search$)
+\[
+\text{Recall} = \frac{\text{\# true nearest neighbors found}}{\text{\# nearest neighbors requested}}
+\]
+
+Higher $ef\_search$ → better recall, slower query.
+
+\textbf{Stage 2: Knowledge Graph Augmentation}
+\begin{lstlisting}[language=Python]
+def knowledge_graph_retrieval(query, clone_id):
+    # Extract entities from query
+    entities = extract_entities(query)
+
+    # Find related concepts in KG
+    related_concepts = []
+    for entity in entities:
+        query = """
+        MATCH (c:Concept {name: $entity})-[:RELATED_TO*1..2]-(related)
+        WHERE related.clone_id = $clone_id
+        RETURN related.name, COUNT(*) as frequency
+        ORDER BY frequency DESC
+        LIMIT 10
+        """
+        results = session.run(query, entity=entity, clone_id=clone_id)
+        related_concepts.extend([r['related.name'] for r in results])
+
+    # Retrieve chunks mentioning these concepts
+    expanded_chunks = []
+    for concept in related_concepts:
+        query = """
+        MATCH (ch:Chunk)-[:MENTIONS]->(co:Concept {name: $concept})
+        WHERE ch.clone_id = $clone_id
+        RETURN ch.text, ch.id
+        """
+        results = session.run(query, concept=concept, clone_id=clone_id)
+        expanded_chunks.extend(results)
+
+    return expanded_chunks
+\end{lstlisting}
+
+\textbf{Stage 3: Cross-Encoder Re-Ranking}
+\begin{lstlisting}[language=Python]
+from sentence_transformers import CrossEncoder
+
+def rerank_chunks(query, chunks, top_k=10):
+    # Load cross-encoder (e.g., ms-marco-MiniLM-L-12-v2)
+    cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-12-v2')
+
+    # Score all query-chunk pairs
+    pairs = [(query, chunk['text']) for chunk in chunks]
+    scores = cross_encoder.predict(pairs)
+
+    # Sort by score
+    ranked_chunks = sorted(zip(chunks, scores), key=lambda x: x[1], reverse=True)
+
+    return [chunk for chunk, score in ranked_chunks[:top_k]]
+\end{lstlisting}
+
+\textbf{Mathematical Detail: Cross-Encoder Scoring}
+
+\textbf{Bi-Encoder} (Pinecone retrieval):
+\begin{align*}
+\vec{q} &= \text{Encoder}_Q(\text{query}) \\
+\vec{d} &= \text{Encoder}_D(\text{chunk}) \\
+\text{score} &= \vec{q} \cdot \vec{d}
+\end{align*}
+
+\textbf{Cross-Encoder} (re-ranking):
+\begin{align*}
+\text{input} &= [\text{CLS}] \, \text{query} \, [\text{SEP}] \, \text{chunk} \, [\text{SEP}] \\
+\text{score} &= \text{BERT}(\text{input}) \rightarrow \text{logit}
+\end{align*}
+
+\textbf{Key Difference}: Cross-encoder sees full interaction between query and chunk (attention mechanism), more accurate but slower.
+
+\subsubsection{Personality-Aware Prompt Engineering}
+
+\begin{lstlisting}[language=Python]
+def generate_response(query, retrieved_chunks, clone_profile):
+    # Assemble personality profile
+    personality_traits = clone_profile['traits']  # e.g., ["direct", "empathetic", "analytical"]
+    communication_style = clone_profile['style']  # e.g., "casual", "formal", "storyteller"
+
+    # Build context
+    context = '\n\n'.join([chunk['text'] for chunk in retrieved_chunks])
+
+    # Construct system prompt
+    system_prompt = f"""
+    You are an AI clone of {clone_profile['name']}.
+
+    Personality Traits: {', '.join(personality_traits)}
+    Communication Style: {communication_style}
+
+    Key Behaviors:
+    - Use first-person ("I think...", "In my experience...")
+    - Match {clone_profile['name']}'s tone and vocabulary
+    - Reference specific experiences from the context below
+    - Express opinions consistent with their values
+
+    Context from {clone_profile['name']}'s content:
+    {context}
+    """
+
+    # Generate response
+    response = openai.chat.completions.create(
+        model='gpt-4',
+        messages=[
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': query}
+        ],
+        temperature=0.7,  # Balance creativity and consistency
+        max_tokens=500
+    )
+
+    return response.choices[0].message.content
+\end{lstlisting}
+
+\textbf{Mathematical Consideration: Temperature Scaling}
+
+LLM sampling uses softmax with temperature $\tau$:
+\[
+P(w_i) = \frac{e^{z_i / \tau}}{\sum_{j} e^{z_j / \tau}}
+\]
+
+Where:
+\begin{itemize}[leftmargin=*]
+    \item $z_i$: logit for token $i$
+    \item $\tau$: temperature parameter
+\end{itemize}
+
+\textbf{Effect}:
+\begin{itemize}[leftmargin=*]
+    \item $\tau \to 0$: Deterministic (always pick argmax)
+    \item $\tau = 1$: Standard softmax
+    \item $\tau > 1$: More random, diverse outputs
+\end{itemize}
+
+For Delphi: $\tau \approx 0.7$ balances personality consistency (not too random) with natural variation (not robotic).
+
+\subsection{Component 4: Voice Cloning Integration}
+
+\begin{lstlisting}[language=Python]
+from elevenlabs import generate, set_api_key
+
+def generate_voice_response(text, voice_id):
+    """
+    ElevenLabs API for voice cloning
+    voice_id: Unique identifier for clone's voice model
+    """
+    set_api_key(os.environ['ELEVENLABS_API_KEY'])
+
+    audio = generate(
+        text=text,
+        voice=voice_id,
+        model='eleven_multilingual_v2'
+    )
+
+    return audio
+
+# Training custom voice
+def train_voice_model(audio_samples):
+    """
+    audio_samples: List of 10-30 min audio files with clear speech
+    Returns: voice_id for future synthesis
+    """
+    # Upload samples to ElevenLabs
+    # Platform trains custom voice model (takes 1-2 hours)
+    # Returns voice_id
+    pass
+\end{lstlisting}
+
+\subsection{Scalability Considerations}
+
+\textbf{Performance Requirements}:
+\begin{itemize}[leftmargin=*]
+    \item 10,000 clones × 10,000 chunks avg = 100M vectors
+    \item 1M conversations/day = 11.6 queries/sec average, 100+ peak QPS
+    \item Latency budget: 2 seconds total
+\end{itemize}
+
+\textbf{Latency Breakdown}:
+\begin{verbatim}
+Pinecone ANN search:      50-100 ms (50 chunks)
+Cross-encoder re-ranking: 100-200 ms (50 → 10 chunks)
+KG augmentation:          50-100 ms (graph queries)
+LLM generation:           1000-1500 ms (GPT-4)
+Voice synthesis:          300-500 ms (ElevenLabs)
+------------------------------------------------------
+Total:                    ~1500-2400 ms
+\end{verbatim}
+
+\textbf{Optimization Strategies}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Caching}: Cache responses for common questions (Redis)
+    \item \textbf{Model Selection}: Use GPT-3.5-turbo for simpler queries (300ms), GPT-4 for complex
+    \item \textbf{Parallel Processing}: Run KG query + Pinecone search concurrently
+    \item \textbf{Batch Inference}: Cross-encoder processes multiple chunks in batch
+    \item \textbf{Edge Caching}: CDN for frequently accessed clone responses
+\end{enumerate}
+
+\subsection{Mathematical Deep Dive: Attention Mechanism (Why LLMs Work)}
+
+\textbf{Self-Attention in Transformers}:
+
+Given input sequence $X = [x_1, x_2, \ldots, x_n]$:
+
+\begin{align*}
+Q &= XW_Q, \quad K = XW_K, \quad V = XW_V \\
+\text{Attention}(Q, K, V) &= \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V
+\end{align*}
+
+\textbf{Interpretation}:
+\begin{itemize}[leftmargin=*]
+    \item $Q$: Query matrix (what each token looks for)
+    \item $K$: Key matrix (what each token offers)
+    \item $V$: Value matrix (content of each token)
+    \item $\sqrt{d_k}$: Scaling factor (prevents gradient vanishing)
+\end{itemize}
+
+\textbf{Why This Matters for Delphi}:
+\begin{itemize}[leftmargin=*]
+    \item Attention captures \textit{relationships} between concepts
+    \item Model learns which past statements (in retrieved chunks) are relevant to current query
+    \item Personality consistency emerges from patterns in training data
+\end{itemize}
+
+\textbf{Example}: Query: "What's your view on remote work?"
+\begin{itemize}[leftmargin=*]
+    \item Attention focuses on chunks mentioning "remote work", "team collaboration", "productivity"
+    \item Assigns high weight to chunks with similar sentiment
+    \item Response reflects aggregated view weighted by attention scores
+\end{itemize}
+
+\section{Problem 2: Personality Trait Extraction \& Modeling}
+
+\subsection{Problem Statement}
+
+Design a system to automatically extract and model personality traits from a creator's content, ensuring the AI clone consistently exhibits these traits across conversations.
+
+\textbf{Challenges}:
+\begin{itemize}[leftmargin=*]
+    \item Personality is multi-dimensional (not a single label)
+    \item Traits manifest differently in different contexts
+    \item Must be quantifiable for consistency checks
+    \item Need explainability (why clone responded a certain way)
+\end{itemize}
+
+\subsection{Solution: Multi-Dimensional Personality Model}
+
+\subsubsection{Step 1: Trait Taxonomy (Big Five + Communication Style)}
+
+\textbf{Big Five Personality Traits}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Openness}: Creativity, curiosity, open to new ideas
+    \item \textbf{Conscientiousness}: Organized, responsible, detail-oriented
+    \item \textbf{Extraversion}: Sociable, energetic, assertive
+    \item \textbf{Agreeableness}: Compassionate, cooperative, empathetic
+    \item \textbf{Neuroticism}: Emotional stability, anxiety, stress response
+\end{enumerate}
+
+\textbf{Communication Style Dimensions}:
+\begin{itemize}[leftmargin=*]
+    \item Formality: casual ↔ formal
+    \item Directness: indirect ↔ direct
+    \item Emotiveness: reserved ↔ expressive
+    \item Verbosity: concise ↔ elaborate
+\end{itemize}
+
+\subsubsection{Step 2: Feature Extraction}
+
+\begin{lstlisting}[language=Python]
+import nltk
+from textblob import TextBlob
+
+def extract_linguistic_features(text):
+    features = {}
+
+    # Lexical features
+    features['avg_word_length'] = np.mean([len(w) for w in text.split()])
+    features['avg_sentence_length'] = np.mean([len(s.split()) for s in sent_tokenize(text)])
+    features['vocabulary_richness'] = len(set(text.split())) / len(text.split())
+
+    # Syntactic features
+    features['question_ratio'] = text.count('?') / len(sent_tokenize(text))
+    features['exclamation_ratio'] = text.count('!') / len(sent_tokenize(text))
+    features['first_person_ratio'] = (text.lower().count(' i ') + text.lower().count('my ')) / len(text.split())
+
+    # Sentiment features
+    blob = TextBlob(text)
+    features['polarity'] = blob.sentiment.polarity  # -1 (negative) to 1 (positive)
+    features['subjectivity'] = blob.sentiment.subjectivity  # 0 (objective) to 1 (subjective)
+
+    # Readability
+    features['flesch_reading_ease'] = textstat.flesch_reading_ease(text)
+
+    return features
+
+def extract_personality_indicators(corpus):
+    """
+    corpus: List of all text from clone's content
+    """
+    all_features = []
+    for text in corpus:
+        features = extract_linguistic_features(text)
+        all_features.append(features)
+
+    # Aggregate to personality profile
+    personality_profile = {
+        'openness': estimate_openness(all_features),
+        'conscientiousness': estimate_conscientiousness(all_features),
+        'extraversion': estimate_extraversion(all_features),
+        'agreeableness': estimate_agreeableness(all_features),
+        'neuroticism': estimate_neuroticism(all_features),
+        'communication_style': estimate_communication_style(all_features)
+    }
+
+    return personality_profile
+
+def estimate_openness(features):
+    """
+    High openness: diverse vocabulary, complex sentences, abstract concepts
+    """
+    avg_vocab_richness = np.mean([f['vocabulary_richness'] for f in features])
+    avg_word_length = np.mean([f['avg_word_length'] for f in features])
+
+    # Normalize to 0-1 scale
+    score = (avg_vocab_richness * 0.6 + (avg_word_length - 4) / 3 * 0.4)
+    return np.clip(score, 0, 1)
+
+def estimate_extraversion(features):
+    """
+    High extraversion: first-person, exclamations, positive sentiment
+    """
+    avg_first_person = np.mean([f['first_person_ratio'] for f in features])
+    avg_exclamation = np.mean([f['exclamation_ratio'] for f in features])
+    avg_polarity = np.mean([f['polarity'] for f in features])
+
+    score = avg_first_person * 0.4 + avg_exclamation * 10 * 0.3 + (avg_polarity + 1) / 2 * 0.3
+    return np.clip(score, 0, 1)
+\end{lstlisting}
+
+\subsubsection{Step 3: Fine-Tune LLM with Personality Constraints}
+
+\begin{lstlisting}[language=Python]
+def create_personality_training_data(clone_corpus, personality_profile):
+    """
+    Generate training examples that emphasize personality traits
+    """
+    training_examples = []
+
+    for text in clone_corpus:
+        # Extract key statements
+        statements = extract_key_statements(text)
+
+        for statement in statements:
+            # Create instruction-response pairs
+            instruction = generate_context_question(statement)
+            response = statement
+
+            # Add personality metadata
+            example = {
+                'instruction': instruction,
+                'response': response,
+                'personality': personality_profile,
+                'traits_exhibited': identify_traits_in_response(response, personality_profile)
+            }
+            training_examples.append(example)
+
+    return training_examples
+
+def fine_tune_with_personality(base_model, training_examples):
+    """
+    Fine-tune with personality-aware loss function
+    """
+    # Loss = Generation Loss + Personality Consistency Loss
+
+    def personality_loss(generated_text, target_personality):
+        # Extract features from generated text
+        generated_features = extract_linguistic_features(generated_text)
+        generated_personality = estimate_personality_from_features(generated_features)
+
+        # MSE between target and generated personality scores
+        loss = sum([(generated_personality[trait] - target_personality[trait])**2
+                    for trait in target_personality.keys()])
+
+        return loss
+
+    # Combined loss
+    for example in training_examples:
+        # Standard cross-entropy loss for generation
+        gen_loss = cross_entropy_loss(model_output, example['response'])
+
+        # Personality consistency loss
+        pers_loss = personality_loss(model_output, example['personality'])
+
+        # Weighted combination
+        total_loss = gen_loss + 0.3 * pers_loss
+
+        # Backprop
+        total_loss.backward()
+\end{lstlisting}
+
+\subsubsection{Mathematical Formulation}
+
+\textbf{Personality Vector}:
+\[
+\vec{p} = [p_O, p_C, p_E, p_A, p_N, s_f, s_d, s_e, s_v]^T \in [0,1]^9
+\]
+
+Where:
+\begin{itemize}[leftmargin=*]
+    \item $p_O, p_C, p_E, p_A, p_N$: Big Five scores
+    \item $s_f, s_d, s_e, s_v$: Communication style scores
+\end{itemize}
+
+\textbf{Consistency Metric}:
+\[
+\text{Consistency}(R_1, R_2, \ldots, R_n) = 1 - \frac{1}{n(n-1)} \sum_{i<j} \|\vec{p}_{R_i} - \vec{p}_{R_j}\|_2
+\]
+
+Where $\vec{p}_{R_i}$ is personality vector extracted from response $R_i$.
+
+\textbf{Goal}: Maximize consistency across all responses for a given clone.
+
+\subsection{Evaluation Metrics}
+
+\textbf{Personality Consistency Score}:
+\begin{lstlisting}[language=Python]
+def evaluate_personality_consistency(clone_id, num_queries=100):
+    # Generate diverse queries
+    queries = generate_test_queries(num_queries)
+
+    # Collect responses
+    responses = []
+    for query in queries:
+        response = generate_response(query, clone_id)
+        responses.append(response)
+
+    # Extract personality from each response
+    personality_vectors = []
+    for response in responses:
+        features = extract_linguistic_features(response)
+        personality = estimate_personality_from_features(features)
+        personality_vectors.append(personality)
+
+    # Compute pairwise consistency
+    n = len(personality_vectors)
+    total_distance = 0
+    for i in range(n):
+        for j in range(i+1, n):
+            distance = np.linalg.norm(personality_vectors[i] - personality_vectors[j])
+            total_distance += distance
+
+    consistency = 1 - total_distance / (n * (n - 1) / 2)
+    return consistency
+\end{lstlisting}
+
+\section{Problem 3: Real-Time Learning \& Conversation Memory}
+
+\subsection{Problem Statement}
+
+Design a system where the AI clone can learn from ongoing conversations and remember user-specific context across sessions, while maintaining the core personality.
+
+\textbf{Requirements}:
+\begin{itemize}[leftmargin=*]
+    \item Remember conversation history for each user
+    \item Update knowledge base with new information
+    \item Personalize responses based on user preferences
+    \item Avoid knowledge drift (clone shouldn't change personality over time)
+    \item Handle 1000+ concurrent conversations per clone
+\end{itemize}
+
+\subsection{Solution: Hierarchical Memory Architecture}
+
+\subsubsection{Memory Layers}
+
+\begin{verbatim}
+┌────────────────────────────────────────────────────────────┐
+│  Layer 1: Episodic Memory (Short-Term)                    │
+│  - Last 5-10 conversation turns                           │
+│  - Stored in session cache (Redis)                        │
+│  - TTL: 24 hours                                           │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│  Layer 2: Semantic Memory (Long-Term User Context)        │
+│  - User preferences, facts, history                        │
+│  - Stored in vector DB (Pinecone, separate namespace)     │
+│  - Persistent across sessions                              │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│  Layer 3: Core Knowledge (Clone's Original Content)       │
+│  - Immutable or slowly updated                             │
+│  - Weighted higher in retrieval                            │
+│  - Source of personality and expertise                     │
+└────────────────────────────────────────────────────────────┘
+\end{verbatim}
+
+\subsubsection{Implementation}
+
+\begin{lstlisting}[language=Python]
+class ConversationMemory:
+    def __init__(self, clone_id, user_id):
+        self.clone_id = clone_id
+        self.user_id = user_id
+        self.redis_client = redis.Redis()
+        self.pinecone_index = pinecone.Index('delphi-memory')
+
+    def add_turn(self, user_message, clone_response):
+        """Add conversation turn to episodic memory"""
+        session_key = f"session:{self.clone_id}:{self.user_id}"
+
+        turn = {
+            'user': user_message,
+            'clone': clone_response,
+            'timestamp': time.time()
+        }
+
+        # Store in Redis (last 10 turns)
+        self.redis_client.lpush(session_key, json.dumps(turn))
+        self.redis_client.ltrim(session_key, 0, 9)  # Keep only last 10
+        self.redis_client.expire(session_key, 86400)  # 24 hour TTL
+
+    def extract_user_facts(self, conversation_history):
+        """Extract facts about user from conversation"""
+        # Use LLM to extract structured facts
+        prompt = f"""
+        Extract key facts about the user from this conversation:
+        {conversation_history}
+
+        Format as JSON:
+        {{
+            "name": "...",
+            "occupation": "...",
+            "interests": [...],
+            "goals": [...],
+            "challenges": [...]
+        }}
+        """
+
+        facts = openai.chat.completions.create(
+            model='gpt-4',
+            messages=[{'role': 'user', 'content': prompt}]
+        ).choices[0].message.content
+
+        return json.loads(facts)
+
+    def update_semantic_memory(self, facts):
+        """Store user facts in long-term memory"""
+        # Create embedding
+        facts_text = json.dumps(facts)
+        embedding = openai.embeddings.create(
+            input=facts_text,
+            model='text-embedding-3-large'
+        ).data[0].embedding
+
+        # Store in Pinecone
+        self.pinecone_index.upsert(
+            vectors=[{
+                'id': f'user_fact_{self.user_id}_{uuid.uuid4()}',
+                'values': embedding,
+                'metadata': {
+                    'clone_id': self.clone_id,
+                    'user_id': self.user_id,
+                    'facts': facts,
+                    'type': 'user_context'
+                }
+            }],
+            namespace=f'user_memory_{self.clone_id}'
+        )
+
+    def retrieve_context(self, query):
+        """Retrieve relevant context for query"""
+        # Layer 1: Episodic (Redis)
+        session_key = f"session:{self.clone_id}:{self.user_id}"
+        recent_turns = self.redis_client.lrange(session_key, 0, -1)
+        recent_turns = [json.loads(t) for t in recent_turns]
+
+        # Layer 2: Semantic (Pinecone)
+        query_embedding = openai.embeddings.create(
+            input=query,
+            model='text-embedding-3-large'
+        ).data[0].embedding
+
+        user_context = self.pinecone_index.query(
+            vector=query_embedding,
+            top_k=5,
+            namespace=f'user_memory_{self.clone_id}',
+            filter={'user_id': self.user_id}
+        )
+
+        # Layer 3: Core knowledge (main namespace)
+        core_knowledge = self.pinecone_index.query(
+            vector=query_embedding,
+            top_k=10,
+            namespace=self.clone_id
+        )
+
+        # Combine with weights
+        context = {
+            'recent_conversation': recent_turns,
+            'user_context': [m['metadata'] for m in user_context['matches']],
+            'core_knowledge': [m['metadata'] for m in core_knowledge['matches']]
+        }
+
+        return context
+\end{lstlisting}
+
+\subsubsection{Mathematical Consideration: Weighted Retrieval}
+
+\textbf{Problem}: Balance between:
+\begin{itemize}[leftmargin=*]
+    \item Recent conversation (highly relevant but limited)
+    \item User-specific context (personalized but may be off-topic)
+    \item Core knowledge (authoritative but not personalized)
+\end{itemize}
+
+\textbf{Solution}: Weighted score combination
+
+\[
+\text{Score}(d) = \alpha \cdot s_{\text{recent}}(d) + \beta \cdot s_{\text{user}}(d) + \gamma \cdot s_{\text{core}}(d)
+\]
+
+Where:
+\begin{itemize}[leftmargin=*]
+    \item $s_{\text{recent}}(d)$: Recency-weighted similarity (exponential decay)
+    \item $s_{\text{user}}(d)$: Personalization score
+    \item $s_{\text{core}}(d)$: Core knowledge similarity
+    \item $\alpha + \beta + \gamma = 1$ (normalized weights)
+\end{itemize}
+
+\textbf{Recency Weighting}:
+\[
+s_{\text{recent}}(d) = \text{sim}(q, d) \cdot e^{-\lambda t}
+\]
+
+Where $t$ is time since document $d$ was mentioned, $\lambda$ is decay rate.
+
+\textbf{Example Parameters}:
+\begin{itemize}[leftmargin=*]
+    \item $\alpha = 0.3$: Recent conversation matters
+    \item $\beta = 0.2$: Some personalization
+    \item $\gamma = 0.5$: Core knowledge dominates (prevents drift)
+\end{itemize}
+
+\section{Problem 4: Multi-Modal Clone (Voice + Video)}
+
+\subsection{Problem Statement}
+
+Extend text-based clone to support voice conversations and video avatar, maintaining personality consistency across modalities.
+
+\textbf{Challenges}:
+\begin{itemize}[leftmargin=*]
+    \item Prosody matching (tone, pace, emphasis)
+    \item Video lip-sync with generated speech
+    \item Real-time processing (< 500ms for voice, < 3s for video)
+    \item Emotional consistency (facial expressions match voice tone)
+\end{itemize}
+
+\subsection{Solution: Multi-Modal Pipeline}
+
+\subsubsection{Component 1: Voice Cloning with Prosody Control}
+
+\begin{lstlisting}[language=Python]
+from elevenlabs import generate, Voice, VoiceSettings
+
+def generate_voice_with_prosody(text, voice_id, personality_profile):
+    """
+    Generate speech with personality-aware prosody
+    """
+    # Map personality traits to voice settings
+    settings = VoiceSettings(
+        stability=personality_profile['conscientiousness'],  # 0-1
+        similarity_boost=1.0,
+        style=personality_profile['extraversion'],  # 0-1 (more expressive if high)
+        use_speaker_boost=True
+    )
+
+    # Annotate text with SSML for prosody control
+    ssml_text = add_prosody_tags(text, personality_profile)
+
+    audio = generate(
+        text=ssml_text,
+        voice=Voice(
+            voice_id=voice_id,
+            settings=settings
+        ),
+        model='eleven_multilingual_v2'
+    )
+
+    return audio
+
+def add_prosody_tags(text, personality):
+    """
+    Add SSML tags for emphasis, pauses based on personality
+    """
+    # High extraversion → more emphasis and variation
+    if personality['extraversion'] > 0.7:
+        # Add emphasis to key words
+        text = emphasize_key_words(text)
+        # Add pauses for dramatic effect
+        text = add_dramatic_pauses(text)
+
+    # High conscientiousness → clear, deliberate speech
+    if personality['conscientiousness'] > 0.7:
+        text = add_clarity_pauses(text)
+
+    return text
+\end{lstlisting}
+
+\subsubsection{Component 2: Video Avatar Generation}
+
+\begin{lstlisting}[language=Python]
+import requests
+
+def generate_video_avatar(text, audio, avatar_id):
+    """
+    D-ID or Synthesia API for video avatar
+    """
+    # Upload audio
+    audio_url = upload_to_s3(audio)
+
+    # Create video with avatar
+    response = requests.post(
+        'https://api.d-id.com/talks',
+        headers={'Authorization': f'Bearer {D_ID_API_KEY}'},
+        json={
+            'script': {
+                'type': 'audio',
+                'audio_url': audio_url
+            },
+            'source_url': f'https://storage.delphi.ai/avatars/{avatar_id}.jpg',
+            'config': {
+                'fluent': True,
+                'pad_audio': 0.0,
+                'stitch': True  # Smooth transitions
+            }
+        }
+    )
+
+    video_id = response.json()['id']
+
+    # Poll for completion
+    while True:
+        status = requests.get(
+            f'https://api.d-id.com/talks/{video_id}',
+            headers={'Authorization': f'Bearer {D_ID_API_KEY}'}
+        ).json()
+
+        if status['status'] == 'done':
+            return status['result_url']
+        elif status['status'] == 'error':
+            raise Exception(f"Video generation failed: {status['error']}")
+
+        time.sleep(2)
+\end{lstlisting}
+
+\subsubsection{Mathematical Consideration: Lip-Sync Alignment}
+
+\textbf{Problem}: Align audio waveform with video frames such that lip movements match speech.
+
+\textbf{Wav2Lip Algorithm}:
+\begin{enumerate}[leftmargin=*]
+    \item Extract audio features: Mel-spectrogram
+    \[
+    S_{\text{mel}}(t, f) = \log\left(\sum_{k} H_{f,k} \cdot |X(t, k)|^2\right)
+    \]
+    Where $H$ is mel filter bank, $X$ is STFT of audio.
+
+    \item Extract video features: Face landmarks (68 points)
+
+    \item Train CNN to predict lip landmarks from audio:
+    \[
+    L_{\text{pred}} = f_{\text{CNN}}(S_{\text{mel}})
+    \]
+
+    \item Loss function:
+    \[
+    \mathcal{L} = \mathcal{L}_{\text{landmarks}} + \lambda_1 \mathcal{L}_{\text{sync}} + \lambda_2 \mathcal{L}_{\text{quality}}
+    \]
+    Where:
+    \begin{itemize}
+        \item $\mathcal{L}_{\text{landmarks}}$: MSE between predicted and ground-truth lip landmarks
+        \item $\mathcal{L}_{\text{sync}}$: Binary cross-entropy for audio-video sync detection
+        \item $\mathcal{L}_{\text{quality}}$: Perceptual loss (visual quality)
+    \end{itemize}
+\end{enumerate}
+
+\section{System Design Interview Tips}
+
+\subsection{What Interviewers Are Looking For}
+
+\textbf{Technical Depth}:
+\begin{itemize}[leftmargin=*]
+    \item Understanding of RAG architecture
+    \item Knowledge of embedding models and vector databases
+    \item Familiarity with LLM APIs and fine-tuning
+    \item Grasp of NLP fundamentals
+\end{itemize}
+
+\textbf{Mathematical Rigor}:
+\begin{itemize}[leftmargin=*]
+    \item Explain cosine similarity vs. dot product vs. Euclidean distance
+    \item Justify choice of similarity metric
+    \item Understand attention mechanism math
+    \item Know trade-offs in approximate search (recall vs. latency)
+\end{itemize}
+
+\textbf{Scalability}:
+\begin{itemize}[leftmargin=*]
+    \item How to handle 10K+ clones
+    \item Latency optimization strategies
+    \item Database sharding and caching
+    \item Cost considerations (OpenAI API, Pinecone, etc.)
+\end{itemize}
+
+\textbf{Practical Considerations}:
+\begin{itemize}[leftmargin=*]
+    \item Content moderation (inappropriate responses)
+    \item Privacy and data security
+    \item Monitoring and observability
+    \item A/B testing for quality improvements
+\end{itemize}
+
+\subsection{Sample Follow-Up Questions \& Answers}
+
+\textbf{Q1: Why use Pinecone instead of traditional databases?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item Traditional DBs (PostgreSQL, MySQL) support exact match queries
+    \item Semantic search requires \textit{approximate} nearest neighbors in high-dimensional space
+    \item Pinecone optimized for: (1) HNSW index, (2) horizontal scaling, (3) low-latency ANN
+    \item Alternative: pgvector (Postgres extension), but less mature for scale
+\end{itemize}
+
+\textbf{Q2: How do you prevent the clone from generating hallucinations?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item RAG grounds generation in retrieved documents
+    \item Use \texttt{max\_tokens} to limit response length
+    \item Instruction in system prompt: "Only answer based on provided context"
+    \item Post-processing: Check if response contains facts from retrieved chunks
+    \item Citation mechanism: Link each statement to source document
+\end{itemize}
+
+\textbf{Q3: What's the difference between fine-tuning and RAG?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Fine-tuning}: Update model weights on custom data (expensive, static knowledge)
+    \item \textbf{RAG}: Dynamically retrieve relevant context (flexible, up-to-date)
+    \item For Delphi: Use both! Fine-tune for personality, RAG for knowledge retrieval
+\end{itemize}
+
+\textbf{Q4: How do you handle context length limits (e.g., GPT-4 128K tokens)?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item Retrieve top-K chunks (K=5-10) instead of all content
+    \item Use re-ranking to select most relevant
+    \item Compress context with summarization (e.g., "Summarize these 10 chunks in 500 words")
+    \item Hierarchical retrieval: Coarse search → fine-grained search
+\end{itemize}
+
+\textbf{Q5: How would you evaluate clone quality?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Objective}: Perplexity, BLEU score vs. ground truth responses
+    \item \textbf{Subjective}: Human evaluation (Likert scale 1-5): accuracy, personality match, naturalness
+    \item \textbf{Turing Test}: Can users distinguish clone from real person?
+    \item \textbf{Consistency}: Personality metrics across 100 queries (as described earlier)
+\end{itemize}
+
+\section{Conclusion}
+
+Delphi AI's persona cloning system sits at the intersection of NLP, information retrieval, and machine learning. Success requires:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Strong RAG foundations}: Embedding, retrieval, re-ranking
+    \item \textbf{Mathematical depth}: Understand similarity metrics, attention, graph algorithms
+    \item \textbf{Personalization expertise}: Personality modeling, consistent generation
+    \item \textbf{Production engineering}: Scale, latency, cost optimization
+\end{enumerate}
+
+\textbf{Key Takeaways for Interview}:
+\begin{itemize}[leftmargin=*]
+    \item Start with high-level architecture diagram
+    \item Dive deep into 2-3 components (RAG, personality modeling, KG)
+    \item Show mathematical understanding (cosine similarity, PageRank, attention)
+    \item Discuss trade-offs (latency vs. accuracy, cost vs. quality)
+    \item Proactively mention edge cases and solutions
+\end{itemize}
+
+Good luck with your Delphi AI interview! 🚀
+
+\end{document}

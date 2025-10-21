@@ -1,0 +1,1396 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    columns=fullflexible
+}
+
+\title{\textbf{Recommender Systems Deep Dive} \\
+       \large Interview Preparation \& Research Foundations}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+This document provides a comprehensive overview of recommender systems, covering fundamental algorithms, deep learning approaches, evaluation metrics, and industry best practices. Whether preparing for research positions, ML engineering roles at companies like Netflix/Spotify, or deepening your understanding of personalization systems, this guide synthesizes key concepts from the RecSys community.
+
+\subsection{What This Document Covers}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Classical Methods}: Collaborative filtering (user-based, item-based, matrix factorization)
+    \item \textbf{Deep Learning}: Neural collaborative filtering, sequential models, transformers
+    \item \textbf{Hybrid Approaches}: Combining content-based and collaborative methods
+    \item \textbf{Evaluation}: Offline metrics, A/B testing, beyond-accuracy objectives
+    \item \textbf{Production Systems}: Candidate generation, ranking, re-ranking pipelines
+    \item \textbf{Research Trends}: Multi-stakeholder optimization, fairness, explainability
+\end{itemize}
+
+\subsection{Target Audience}
+
+This guide is designed for:
+\begin{itemize}[leftmargin=*]
+    \item ML engineers interviewing at Netflix, Spotify, YouTube, Amazon
+    \item Researchers preparing for RecSys conference submissions
+    \item Industry practitioners building production recommendation systems
+    \item Students wanting comprehensive RecSys foundations
+\end{itemize}
+
+\section{Recommended Reading List}
+
+\subsection{Priority 1: Essential Textbooks}
+
+\subsubsection*{1. Recommender Systems Handbook (3rd Edition, 2022)}
+\textbf{Authors}: Francesco Ricci, Lior Rokach, Bracha Shapira \\
+\textbf{Publisher}: Springer \\
+\textbf{Pages}: 1060 \\
+\textbf{Why Read}: The \textit{definitive} reference for recommender systems. Written by top researchers in the field.
+
+\textbf{Structure} (5 parts):
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{General Techniques}: Collaborative filtering, content-based, knowledge-based, hybrid methods
+    \item \textbf{Advanced Techniques}: Session-based, adversarial ML, group recommendations, cross-domain
+    \item \textbf{Value \& Impact}: Business metrics, user experience, long-term value
+    \item \textbf{Human-Computer Interaction}: Explanations, trust, control, transparency
+    \item \textbf{Applications}: E-commerce, music, video, social media, news
+\end{enumerate}
+
+\textbf{Key Topics Covered}:
+\begin{itemize}[leftmargin=*]
+    \item Neural networks and context-aware methods
+    \item Reciprocal recommender systems (two-way matching)
+    \item Natural language techniques for RecSys
+    \item Explainable AI for recommendations
+    \item Ethical and societal implications
+\end{itemize}
+
+\textbf{Interview Prep Value}: ⭐⭐⭐⭐⭐ \\
+Comprehensive coverage of everything from basics to cutting-edge research. Essential for senior roles.
+
+\textbf{Reading Strategy}:
+\begin{itemize}[leftmargin=*]
+    \item Week 1-2: Part 1 (General Techniques) - Chapters 1-10
+    \item Week 3: Part 2 (Advanced Techniques) - Focus on neural methods
+    \item Week 4: Part 3 (Evaluation) + Part 4 (HCI) - Critical for interviews
+    \item Reference: Part 5 (Applications) - Read chapters relevant to target company
+\end{itemize}
+
+\subsubsection*{2. Recommender Systems: The Textbook (2016)}
+\textbf{Author}: Charu C. Aggarwal \\
+\textbf{Publisher}: Springer \\
+\textbf{Pages}: 498 \\
+\textbf{Why Read}: Aggarwal is a master educator. Clearest explanations of fundamental algorithms.
+
+\textbf{Structure} (3 categories):
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Algorithms \& Evaluation}: Collaborative filtering, content-based, knowledge-based, ensemble methods, evaluation
+    \item \textbf{Domain-Specific Applications}: Location-based, social tagging, time series recommendations
+    \item \textbf{Advanced Topics}: Privacy, attack-resistant systems, context-aware recommendations
+\end{enumerate}
+
+\textbf{Strengths}:
+\begin{itemize}[leftmargin=*]
+    \item Mathematical rigor with intuitive explanations
+    \item Detailed coverage of matrix factorization (SVD, SVD++, NMF)
+    \item Excellent treatment of neighborhood methods
+    \item Strong focus on evaluation methodologies
+\end{itemize}
+
+\textbf{Interview Prep Value}: ⭐⭐⭐⭐⭐ \\
+Best for understanding \textit{how algorithms work}. Perfect for coding interview preparation.
+
+\textbf{Reading Strategy}:
+\begin{itemize}[leftmargin=*]
+    \item Essential: Chapters 2-3 (Collaborative Filtering), Chapter 6 (Evaluation)
+    \item Important: Chapters 4-5 (Content-based, Knowledge-based), Chapter 7 (Ensembles)
+    \item Advanced: Chapters 8-11 (Context-aware, Time-aware, Social)
+\end{itemize}
+
+\subsection{Priority 2: Deep Learning \& Modern Methods}
+
+\subsubsection*{3. Deep Learning for Recommender Systems (Survey Papers)}
+
+Since there's no single "Deep Learning RecSys" textbook yet, focus on these comprehensive surveys:
+
+\textbf{Zhang et al. (2019): "Deep Learning Based Recommender System: A Survey and New Perspectives"} \\
+ArXiv: \url{https://arxiv.org/abs/1707.07435}
+
+\textbf{Covers}:
+\begin{itemize}[leftmargin=*]
+    \item Neural Collaborative Filtering (NCF)
+    \item Autoencoders for collaborative filtering
+    \item CNNs for feature extraction from images/text
+    \item RNNs for sequential recommendations
+    \item Deep reinforcement learning for RecSys
+    \item Adversarial learning and GANs
+\end{itemize}
+
+\textbf{2024 Update: "In-depth Survey: Deep Learning in Recommender Systems"} \\
+Springer Neural Computing and Applications
+
+\textbf{New Topics}:
+\begin{itemize}[leftmargin=*]
+    \item Transformers for recommendations (BERT4Rec, SASRec)
+    \item Graph neural networks (LightGCN, PinSage)
+    \item Variational autoencoders (VAE) for collaborative filtering
+    \item Cross-domain transfer learning
+    \item Multi-task learning architectures
+\end{itemize}
+
+\textbf{Interview Prep Value}: ⭐⭐⭐⭐⭐ \\
+Essential for understanding Netflix/YouTube-style systems. Most interview questions come from these topics.
+
+\subsection{Priority 3: Industry Best Practices}
+
+\subsubsection*{4. Tech Company Blog Posts \& Papers}
+
+\textbf{Must-Read Industry Papers}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{YouTube} (2016): "Deep Neural Networks for YouTube Recommendations" - Two-stage architecture (candidate generation + ranking)
+    \item \textbf{Netflix} (2012): "Netflix Recommender System" - Matrix factorization at scale
+    \item \textbf{Spotify} (2020): "The Rise of the Recommendation Era" - Sequential models and explore-exploit
+    \item \textbf{Amazon} (2003): "Item-to-Item Collaborative Filtering" - Classic item-based CF
+    \item \textbf{Pinterest} (2018): "PinSage: Graph Convolutional Neural Networks for Web-Scale Recommender Systems"
+    \item \textbf{Meta} (2019): "Deep Learning Recommendation Model (DLRM)"
+\end{enumerate}
+
+\textbf{Why Read Industry Papers}:
+\begin{itemize}[leftmargin=*]
+    \item Understand production constraints (latency, scalability, freshness)
+    \item Learn real-world architectures (two-tower models, multi-stage funnels)
+    \item See how metrics connect to business goals
+    \item Prepare for system design interviews
+\end{itemize}
+
+\section{Core Recommender System Concepts}
+
+\subsection{The Recommendation Problem}
+
+Given:
+\begin{itemize}[leftmargin=*]
+    \item Set of users $U = \{u_1, u_2, \ldots, u_m\}$
+    \item Set of items $I = \{i_1, i_2, \ldots, i_n\}$
+    \item User-item interaction matrix $R \in \mathbb{R}^{m \times n}$ (typically 99\%+ sparse)
+\end{itemize}
+
+Goal: Predict relevance score $\hat{r}_{ui}$ for unobserved user-item pairs and recommend top-$k$ items.
+
+\subsection{Types of Feedback}
+
+\textbf{Explicit Feedback}:
+\begin{itemize}[leftmargin=*]
+    \item Star ratings (1-5 stars)
+    \item Thumbs up/down
+    \item Like/dislike
+\end{itemize}
+
+\textbf{Implicit Feedback}:
+\begin{itemize}[leftmargin=*]
+    \item Clicks, views, watches
+    \item Purchase history
+    \item Time spent on page
+    \item Skip behavior (negative signal)
+\end{itemize}
+
+\textbf{Key Difference}: Implicit feedback is abundant but noisy. No explicit negative feedback (absence doesn't mean dislike).
+
+\section{Collaborative Filtering}
+
+\subsection{User-Based Collaborative Filtering}
+
+\textbf{Core Idea}: Recommend items liked by similar users.
+
+\textbf{Algorithm}:
+\begin{enumerate}[leftmargin=*]
+    \item Compute user similarity: $\text{sim}(u, v) = \cos(\vec{r}_u, \vec{r}_v)$
+    \item Find $k$ nearest neighbors: $N_k(u) = \{v \mid \text{sim}(u,v) \text{ highest}\}$
+    \item Predict rating: $\hat{r}_{ui} = \bar{r}_u + \frac{\sum_{v \in N_k(u)} \text{sim}(u,v) \cdot (r_{vi} - \bar{r}_v)}{\sum_{v \in N_k(u)} |\text{sim}(u,v)|}$
+\end{enumerate}
+
+\textbf{Similarity Metrics}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cosine}: $\text{sim}(u,v) = \frac{\vec{r}_u \cdot \vec{r}_v}{\|\vec{r}_u\| \|\vec{r}_v\|}$
+    \item \textbf{Pearson Correlation}: Centered cosine (subtracts user mean)
+    \item \textbf{Jaccard}: For binary feedback (sets of items)
+\end{itemize}
+
+\textbf{Python Implementation}:
+\begin{lstlisting}[language=Python]
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+# R: user-item matrix (m x n)
+# users in rows, items in columns
+user_sim = cosine_similarity(R)
+
+def predict_user_based(user_id, item_id, k=20):
+    # Find k nearest neighbors who rated item_id
+    neighbors = user_sim[user_id].argsort()[::-1][1:k+1]
+    neighbors = [n for n in neighbors if R[n, item_id] > 0]
+
+    if not neighbors:
+        return R[user_id].mean()  # Fallback to user average
+
+    # Weighted average of neighbor ratings
+    sims = user_sim[user_id, neighbors]
+    ratings = R[neighbors, item_id]
+    return np.dot(sims, ratings) / sims.sum()
+\end{lstlisting}
+
+\textbf{Pros}:
+\begin{itemize}[leftmargin=*]
+    \item Simple, interpretable
+    \item No domain knowledge needed
+    \item Works well for niche items
+\end{itemize}
+
+\textbf{Cons}:
+\begin{itemize}[leftmargin=*]
+    \item Cold start for new users
+    \item Scalability: $O(m^2)$ similarity computation
+    \item Sparsity: Hard to find similar users
+\end{itemize}
+
+\subsection{Item-Based Collaborative Filtering}
+
+\textbf{Core Idea}: Recommend items similar to what user already likes.
+
+\textbf{Algorithm}:
+\begin{enumerate}[leftmargin=*]
+    \item Compute item similarity: $\text{sim}(i, j)$ based on users who rated both
+    \item For target item $i$, find $k$ nearest neighbors: $N_k(i)$
+    \item Predict: $\hat{r}_{ui} = \frac{\sum_{j \in N_k(i)} \text{sim}(i,j) \cdot r_{uj}}{\sum_{j \in N_k(i)} |\text{sim}(i,j)|}$
+\end{enumerate}
+
+\textbf{Why Item-Based Often Outperforms User-Based}:
+\begin{itemize}[leftmargin=*]
+    \item Items are more stable than users (user tastes change)
+    \item Fewer items than users in many domains ($n \ll m$)
+    \item Item similarities can be precomputed offline
+    \item Better scalability in production
+\end{itemize}
+
+\textbf{Amazon's Approach}:
+\begin{lstlisting}[language=Python]
+# Amazon's item-to-item CF (simplified)
+def recommend_items(user_id, purchased_items, k=10):
+    scores = {}
+    for item_i in purchased_items:
+        # Get k most similar items to item_i
+        similar_items = item_sim[item_i].argsort()[::-1][1:k+1]
+        for item_j in similar_items:
+            if item_j not in purchased_items:
+                scores[item_j] = scores.get(item_j, 0) + item_sim[item_i, item_j]
+
+    # Return top-N items by aggregated similarity
+    return sorted(scores.items(), key=lambda x: x[1], reverse=True)[:k]
+\end{lstlisting}
+
+\textbf{Production Optimizations}:
+\begin{itemize}[leftmargin=*]
+    \item Precompute top-$k$ similar items for each item
+    \item Store in key-value store (Redis) for fast lookup
+    \item Update similarities incrementally (online learning)
+\end{itemize}
+
+\subsection{Matrix Factorization}
+
+\textbf{Core Idea}: Decompose sparse user-item matrix into low-rank user and item latent factors.
+
+\textbf{Model}:
+\begin{align*}
+R &\approx P \times Q^T \\
+\hat{r}_{ui} &= \vec{p}_u^T \vec{q}_i = \sum_{f=1}^{k} p_{uf} \cdot q_{if}
+\end{align*}
+
+Where:
+\begin{itemize}[leftmargin=*]
+    \item $P \in \mathbb{R}^{m \times k}$: User latent factors
+    \item $Q \in \mathbb{R}^{n \times k}$: Item latent factors
+    \item $k$: Number of latent dimensions (typically 50-200)
+\end{itemize}
+
+\textbf{Optimization (Alternating Least Squares - ALS)}:
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+def matrix_factorization_als(R, k=50, lambda_reg=0.1, iterations=20):
+    m, n = R.shape
+    P = np.random.rand(m, k)
+    Q = np.random.rand(n, k)
+
+    # Mask for observed ratings
+    mask = (R > 0).astype(float)
+
+    for iteration in range(iterations):
+        # Fix Q, solve for P
+        for u in range(m):
+            Q_u = Q[mask[u] > 0]  # Items rated by user u
+            r_u = R[u, mask[u] > 0]
+            P[u] = np.linalg.solve(Q_u.T @ Q_u + lambda_reg * np.eye(k),
+                                    Q_u.T @ r_u)
+
+        # Fix P, solve for Q
+        for i in range(n):
+            P_i = P[mask[:, i] > 0]  # Users who rated item i
+            r_i = R[mask[:, i] > 0, i]
+            Q[i] = np.linalg.solve(P_i.T @ P_i + lambda_reg * np.eye(k),
+                                    P_i.T @ r_i)
+
+    return P, Q
+\end{lstlisting}
+
+\textbf{Stochastic Gradient Descent (SGD) Alternative}:
+\begin{lstlisting}[language=Python]
+def matrix_factorization_sgd(R, k=50, lr=0.001, lambda_reg=0.1, epochs=100):
+    m, n = R.shape
+    P = np.random.rand(m, k) * 0.1
+    Q = np.random.rand(n, k) * 0.1
+
+    for epoch in range(epochs):
+        for u, i in zip(*np.where(R > 0)):
+            # Compute error
+            error = R[u, i] - P[u].dot(Q[i])
+
+            # Update with gradient descent
+            P[u] += lr * (error * Q[i] - lambda_reg * P[u])
+            Q[i] += lr * (error * P[u] - lambda_reg * Q[i])
+
+    return P, Q
+\end{lstlisting}
+
+\textbf{Extensions}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{SVD++}: Incorporate implicit feedback
+    \item \textbf{Biased MF}: Add user/item bias terms: $\hat{r}_{ui} = \mu + b_u + b_i + \vec{p}_u^T \vec{q}_i$
+    \item \textbf{Temporal MF}: Time-aware factors
+    \item \textbf{NMF (Non-negative MF)}: Constrain $P, Q \geq 0$ for interpretability
+\end{itemize}
+
+\textbf{Netflix Prize Winning Approach}:
+\begin{itemize}[leftmargin=*]
+    \item Ensemble of 100+ models
+    \item Blend of matrix factorization variants
+    \item RBMs (Restricted Boltzmann Machines)
+    \item Temporal dynamics modeling
+    \item Final RMSE: 0.8567 (10\% improvement over baseline)
+\end{itemize}
+
+\section{Content-Based Filtering}
+
+\textbf{Core Idea}: Recommend items similar to what user has liked before, based on item features.
+
+\subsection{Feature Extraction}
+
+\textbf{Text Features} (movies, articles, products):
+\begin{itemize}[leftmargin=*]
+    \item TF-IDF vectors from descriptions
+    \item Word embeddings (Word2Vec, GloVe, BERT)
+    \item Topic models (LDA)
+\end{itemize}
+
+\textbf{Categorical Features}:
+\begin{itemize}[leftmargin=*]
+    \item Genre (one-hot encoding)
+    \item Director, actors (multi-hot encoding)
+    \item Tags, keywords
+\end{itemize}
+
+\textbf{Numerical Features}:
+\begin{itemize}[leftmargin=*]
+    \item Price, popularity, release year
+    \item Average rating
+\end{itemize}
+
+\subsection{Building Content-Based Recommender}
+
+\textbf{Algorithm}:
+\begin{enumerate}[leftmargin=*]
+    \item Build item profile: Feature vector $\vec{f}_i$ for each item
+    \item Build user profile: Aggregate features of items user liked
+    \item Compute similarity: $\text{sim}(\text{user\_profile}, \vec{f}_i)$
+    \item Rank items by similarity
+\end{enumerate}
+
+\textbf{Python Implementation}:
+\begin{lstlisting}[language=Python]
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Example: Movie recommendations based on plot descriptions
+movies = ['Movie A', 'Movie B', 'Movie C']
+descriptions = [
+    'Action thriller with car chases',
+    'Romantic comedy set in Paris',
+    'Action adventure with explosions'
+]
+
+# Extract TF-IDF features
+tfidf = TfidfVectorizer(stop_words='english')
+item_features = tfidf.fit_transform(descriptions)
+
+# User has watched Movie A and liked it
+user_profile = item_features[0]
+
+# Find most similar movies
+similarities = cosine_similarity(user_profile, item_features).flatten()
+recommendations = sorted(enumerate(similarities), key=lambda x: x[1], reverse=True)
+
+# Top recommendations (excluding Movie A)
+for idx, score in recommendations[1:]:
+    print(f"{movies[idx]}: {score:.3f}")
+\end{lstlisting}
+
+\textbf{Pros}:
+\begin{itemize}[leftmargin=*]
+    \item No cold start for items (can recommend new items immediately)
+    \item No need for user data from other users
+    \item Transparent recommendations (can explain via features)
+\end{itemize}
+
+\textbf{Cons}:
+\begin{itemize}[leftmargin=*]
+    \item Limited serendipity (filter bubble)
+    \item Requires rich item metadata
+    \item Cold start for new users
+    \item Over-specialization
+\end{itemize}
+
+\section{Neural Collaborative Filtering (NCF)}
+
+\textbf{Motivation}: Matrix factorization assumes linear interaction between user and item latent factors. Neural networks can model non-linear interactions.
+
+\subsection{NCF Architecture}
+
+\textbf{Paper}: He et al. (2017) - "Neural Collaborative Filtering"
+
+\textbf{Model}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Input Layer}: User ID and Item ID (one-hot encoded)
+    \item \textbf{Embedding Layer}: Map to dense vectors
+    \item \textbf{Neural CF Layers}: MLP to learn interaction function
+    \item \textbf{Output Layer}: Predicted rating or probability
+\end{enumerate}
+
+\textbf{PyTorch Implementation}:
+\begin{lstlisting}[language=Python]
+import torch
+import torch.nn as nn
+
+class NCF(nn.Module):
+    def __init__(self, num_users, num_items, embedding_dim=64, hidden_layers=[128, 64, 32]):
+        super(NCF, self).__init__()
+
+        # Embeddings
+        self.user_embedding = nn.Embedding(num_users, embedding_dim)
+        self.item_embedding = nn.Embedding(num_items, embedding_dim)
+
+        # MLP layers
+        layers = []
+        input_dim = embedding_dim * 2
+        for hidden_dim in hidden_layers:
+            layers.append(nn.Linear(input_dim, hidden_dim))
+            layers.append(nn.ReLU())
+            layers.append(nn.Dropout(0.2))
+            input_dim = hidden_dim
+
+        self.mlp = nn.Sequential(*layers)
+        self.output = nn.Linear(hidden_layers[-1], 1)
+
+    def forward(self, user_ids, item_ids):
+        user_embed = self.user_embedding(user_ids)
+        item_embed = self.item_embedding(item_ids)
+
+        # Concatenate embeddings
+        x = torch.cat([user_embed, item_embed], dim=1)
+
+        # Pass through MLP
+        x = self.mlp(x)
+        rating = self.output(x)
+
+        return rating.squeeze()
+
+# Training
+model = NCF(num_users=10000, num_items=5000)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+criterion = nn.MSELoss()
+
+for epoch in range(epochs):
+    for user_batch, item_batch, rating_batch in dataloader:
+        optimizer.zero_grad()
+        predictions = model(user_batch, item_batch)
+        loss = criterion(predictions, rating_batch)
+        loss.backward()
+        optimizer.step()
+\end{lstlisting}
+
+\subsection{Generalized Matrix Factorization (GMF)}
+
+NCF generalizes MF by using element-wise product instead of dot product:
+\begin{align*}
+\text{MF}: \quad &\hat{y}_{ui} = \vec{p}_u^T \vec{q}_i \\
+\text{GMF}: \quad &\hat{y}_{ui} = \sigma(\vec{h}^T (\vec{p}_u \odot \vec{q}_i))
+\end{align*}
+
+\subsection{NeuMF: Neural Matrix Factorization}
+
+Combine GMF and MLP paths:
+\begin{lstlisting}[language=Python]
+class NeuMF(nn.Module):
+    def __init__(self, num_users, num_items, gmf_dim=64, mlp_dim=64):
+        super(NeuMF, self).__init__()
+
+        # GMF path
+        self.gmf_user_embed = nn.Embedding(num_users, gmf_dim)
+        self.gmf_item_embed = nn.Embedding(num_items, gmf_dim)
+
+        # MLP path
+        self.mlp_user_embed = nn.Embedding(num_users, mlp_dim)
+        self.mlp_item_embed = nn.Embedding(num_items, mlp_dim)
+        self.mlp = nn.Sequential(
+            nn.Linear(mlp_dim * 2, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU()
+        )
+
+        # Combine GMF and MLP
+        self.output = nn.Linear(gmf_dim + 64, 1)
+
+    def forward(self, user_ids, item_ids):
+        # GMF path
+        gmf_u = self.gmf_user_embed(user_ids)
+        gmf_i = self.gmf_item_embed(item_ids)
+        gmf_output = gmf_u * gmf_i  # Element-wise product
+
+        # MLP path
+        mlp_u = self.mlp_user_embed(user_ids)
+        mlp_i = self.mlp_item_embed(item_ids)
+        mlp_input = torch.cat([mlp_u, mlp_i], dim=1)
+        mlp_output = self.mlp(mlp_input)
+
+        # Concatenate and predict
+        combined = torch.cat([gmf_output, mlp_output], dim=1)
+        rating = self.output(combined)
+
+        return rating.squeeze()
+\end{lstlisting}
+
+\section{Sequential Recommendations}
+
+\textbf{Problem}: Traditional CF ignores order of user interactions. Sequential models capture temporal dynamics.
+
+\subsection{RNN-Based Models}
+
+\textbf{GRU4Rec} (Hidasi et al., 2016):
+\begin{lstlisting}[language=Python]
+import torch.nn as nn
+
+class GRU4Rec(nn.Module):
+    def __init__(self, num_items, embedding_dim=100, hidden_dim=100):
+        super(GRU4Rec, self).__init__()
+        self.item_embedding = nn.Embedding(num_items, embedding_dim)
+        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, num_items)
+
+    def forward(self, item_sequence):
+        # item_sequence: (batch, seq_len)
+        embeds = self.item_embedding(item_sequence)
+        gru_out, _ = self.gru(embeds)
+
+        # Use last hidden state
+        last_hidden = gru_out[:, -1, :]
+        logits = self.fc(last_hidden)
+
+        return logits
+\end{lstlisting}
+
+\subsection{Transformer-Based Models}
+
+\textbf{SASRec} (Self-Attentive Sequential Recommendation):
+\begin{lstlisting}[language=Python]
+class SASRec(nn.Module):
+    def __init__(self, num_items, max_len=50, embedding_dim=64, num_heads=2, num_layers=2):
+        super(SASRec, self).__init__()
+        self.item_embedding = nn.Embedding(num_items + 1, embedding_dim, padding_idx=0)
+        self.pos_embedding = nn.Embedding(max_len, embedding_dim)
+
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=embedding_dim,
+            nhead=num_heads,
+            dim_feedforward=embedding_dim * 4,
+            dropout=0.2
+        )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.fc = nn.Linear(embedding_dim, num_items)
+
+    def forward(self, item_sequence):
+        # item_sequence: (batch, seq_len)
+        seq_len = item_sequence.size(1)
+        positions = torch.arange(seq_len).unsqueeze(0).to(item_sequence.device)
+
+        # Embeddings
+        item_embeds = self.item_embedding(item_sequence)
+        pos_embeds = self.pos_embedding(positions)
+        embeds = item_embeds + pos_embeds
+
+        # Transformer
+        embeds = embeds.transpose(0, 1)  # (seq_len, batch, dim)
+        mask = self.generate_square_subsequent_mask(seq_len).to(item_sequence.device)
+        transformer_out = self.transformer(embeds, mask=mask)
+        transformer_out = transformer_out.transpose(0, 1)  # (batch, seq_len, dim)
+
+        # Predict next item
+        logits = self.fc(transformer_out[:, -1, :])
+        return logits
+
+    def generate_square_subsequent_mask(self, sz):
+        mask = torch.triu(torch.ones(sz, sz), diagonal=1).bool()
+        return mask
+\end{lstlisting}
+
+\textbf{BERT4Rec} (Bidirectional Encoder):
+\begin{itemize}[leftmargin=*]
+    \item Masks random items in sequence
+    \item Predicts masked items using bidirectional context
+    \item Pre-training + fine-tuning approach
+\end{itemize}
+
+\section{Two-Stage Recommendation Architecture}
+
+\textbf{Problem}: Can't score millions of items for every user in real-time.
+
+\textbf{Solution}: Two-stage funnel (Candidate Generation → Ranking)
+
+\subsection{Stage 1: Candidate Generation (Retrieval)}
+
+\textbf{Goal}: Narrow down millions of items to hundreds of candidates (fast, approximate).
+
+\textbf{Methods}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Collaborative Filtering}: User's nearest neighbors' items
+    \item \textbf{ANN Search}: Find items with similar embeddings (FAISS, Annoy)
+    \item \textbf{Two-Tower Model}: Encode user and items separately, dot product similarity
+\end{enumerate}
+
+\textbf{Two-Tower Architecture} (YouTube):
+\begin{lstlisting}[language=Python]
+class TwoTowerModel(nn.Module):
+    def __init__(self, num_users, num_items, embedding_dim=128):
+        super(TwoTowerModel, self).__init__()
+
+        # User tower
+        self.user_embedding = nn.Embedding(num_users, embedding_dim)
+        self.user_mlp = nn.Sequential(
+            nn.Linear(embedding_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128)
+        )
+
+        # Item tower
+        self.item_embedding = nn.Embedding(num_items, embedding_dim)
+        self.item_mlp = nn.Sequential(
+            nn.Linear(embedding_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128)
+        )
+
+    def encode_user(self, user_ids):
+        u = self.user_embedding(user_ids)
+        return self.user_mlp(u)
+
+    def encode_item(self, item_ids):
+        i = self.item_embedding(item_ids)
+        return self.item_mlp(i)
+
+    def forward(self, user_ids, item_ids):
+        user_embeds = self.encode_user(user_ids)
+        item_embeds = self.encode_item(item_ids)
+
+        # Dot product similarity
+        scores = (user_embeds * item_embeds).sum(dim=1)
+        return scores
+
+# At serving time:
+# 1. Encode user once
+# 2. Use ANN (FAISS) to find top-k items by dot product
+# 3. Pass candidates to ranking model
+\end{lstlisting}
+
+\subsection{Stage 2: Ranking}
+
+\textbf{Goal}: Precisely rank candidates using rich features (slower, accurate).
+
+\textbf{Features}:
+\begin{itemize}[leftmargin=*]
+    \item User features: Demographics, historical behavior
+    \item Item features: Metadata, popularity, freshness
+    \item Context features: Time, device, location
+    \item Cross features: User-item interactions
+\end{itemize}
+
+\textbf{Deep \& Cross Network (DCN)}:
+\begin{lstlisting}[language=Python]
+class DCN(nn.Module):
+    def __init__(self, input_dim, cross_layers=3, deep_layers=[512, 256, 128]):
+        super(DCN, self).__init__()
+
+        # Cross Network
+        self.cross_layers = nn.ModuleList([
+            nn.Linear(input_dim, input_dim) for _ in range(cross_layers)
+        ])
+
+        # Deep Network
+        deep = []
+        for hidden_dim in deep_layers:
+            deep.append(nn.Linear(input_dim, hidden_dim))
+            deep.append(nn.ReLU())
+            deep.append(nn.Dropout(0.2))
+            input_dim = hidden_dim
+        self.deep = nn.Sequential(*deep)
+
+        # Combine
+        self.output = nn.Linear(input_dim + input_dim, 1)
+
+    def forward(self, x):
+        # Cross network
+        x_cross = x
+        for cross_layer in self.cross_layers:
+            x_cross = x * cross_layer(x_cross) + x_cross
+
+        # Deep network
+        x_deep = self.deep(x)
+
+        # Combine and predict
+        combined = torch.cat([x_cross, x_deep], dim=1)
+        return self.output(combined).squeeze()
+\end{lstlisting}
+
+\section{Evaluation Metrics}
+
+\subsection{Rating Prediction Metrics}
+
+For explicit feedback (1-5 star ratings):
+
+\textbf{RMSE (Root Mean Squared Error)}:
+\[
+\text{RMSE} = \sqrt{\frac{1}{|T|} \sum_{(u,i) \in T} (r_{ui} - \hat{r}_{ui})^2}
+\]
+
+\textbf{MAE (Mean Absolute Error)}:
+\[
+\text{MAE} = \frac{1}{|T|} \sum_{(u,i) \in T} |r_{ui} - \hat{r}_{ui}|
+\]
+
+\subsection{Ranking Metrics}
+
+For top-N recommendations:
+
+\textbf{Precision@K}:
+\[
+\text{Precision@K} = \frac{\text{\# relevant items in top-K}}{K}
+\]
+
+\textbf{Recall@K}:
+\[
+\text{Recall@K} = \frac{\text{\# relevant items in top-K}}{\text{Total \# relevant items}}
+\]
+
+\textbf{NDCG@K (Normalized Discounted Cumulative Gain)}:
+\[
+\text{NDCG@K} = \frac{\text{DCG@K}}{\text{IDCG@K}}
+\]
+\[
+\text{DCG@K} = \sum_{i=1}^{K} \frac{2^{rel_i} - 1}{\log_2(i+1)}
+\]
+
+\textbf{MRR (Mean Reciprocal Rank)}:
+\[
+\text{MRR} = \frac{1}{|U|} \sum_{u=1}^{|U|} \frac{1}{\text{rank of first relevant item}}
+\]
+
+\textbf{MAP (Mean Average Precision)}:
+\[
+\text{MAP} = \frac{1}{|U|} \sum_{u=1}^{|U|} \frac{1}{|R_u|} \sum_{k=1}^{K} \text{Precision@k} \cdot \text{rel}_k
+\]
+
+\subsection{Beyond-Accuracy Metrics}
+
+\textbf{Coverage}:
+\[
+\text{Coverage} = \frac{|\{i \mid i \text{ recommended to at least 1 user}\}|}{|I|}
+\]
+
+\textbf{Diversity} (Intra-List Diversity):
+\[
+\text{ILD} = \frac{2}{|L|(|L|-1)} \sum_{i \in L} \sum_{j \in L, j>i} (1 - \text{sim}(i, j))
+\]
+
+\textbf{Novelty}:
+\[
+\text{Novelty}(i) = -\log_2 \frac{\text{popularity}(i)}{|U|}
+\]
+
+\textbf{Serendipity}: Unexpected but relevant recommendations.
+
+\subsection{Python Evaluation Example}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+def ndcg_at_k(relevance_scores, k):
+    """
+    relevance_scores: list of relevance (1 for relevant, 0 for not)
+    k: cutoff
+    """
+    relevance_scores = np.array(relevance_scores)[:k]
+
+    # DCG
+    dcg = np.sum((2**relevance_scores - 1) / np.log2(np.arange(2, len(relevance_scores) + 2)))
+
+    # IDCG (ideal DCG - all relevant items first)
+    ideal_relevance = sorted(relevance_scores, reverse=True)
+    idcg = np.sum((2**ideal_relevance - 1) / np.log2(np.arange(2, len(ideal_relevance) + 2)))
+
+    return dcg / idcg if idcg > 0 else 0.0
+
+def precision_at_k(recommended, relevant, k):
+    recommended_k = set(recommended[:k])
+    return len(recommended_k & relevant) / k
+
+def recall_at_k(recommended, relevant, k):
+    recommended_k = set(recommended[:k])
+    return len(recommended_k & relevant) / len(relevant) if relevant else 0.0
+
+# Example usage
+recommended_items = [101, 205, 304, 112, 501]  # Top-5 recommendations
+relevant_items = {101, 304, 501, 999}  # Ground truth relevant
+
+print(f"Precision@5: {precision_at_k(recommended_items, relevant_items, 5):.3f}")
+print(f"Recall@5: {recall_at_k(recommended_items, relevant_items, 5):.3f}")
+
+# NDCG example
+relevance = [1, 0, 1, 0, 1]  # 1 if relevant, 0 if not (for top-5)
+print(f"NDCG@5: {ndcg_at_k(relevance, 5):.3f}")
+\end{lstlisting}
+
+\section{Production Challenges \& Solutions}
+
+\subsection{Cold Start Problem}
+
+\textbf{New User Cold Start}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Popular items}: Show trending/top-rated items
+    \item \textbf{Onboarding}: Ask user to rate a few items or select preferences
+    \item \textbf{Content-based}: Use demographics, device, location
+    \item \textbf{Meta-learning}: Learn from other users with similar signup behavior
+\end{itemize}
+
+\textbf{New Item Cold Start}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Content-based}: Use item metadata (genre, tags, price)
+    \item \textbf{Explore-exploit}: Show new items to some users (Thompson Sampling, UCB)
+    \item \textbf{Transfer learning}: Use embeddings from similar items
+\end{itemize}
+
+\subsection{Scalability}
+
+\textbf{Challenges}:
+\begin{itemize}[leftmargin=*]
+    \item 100M+ users, 10M+ items
+    \item Real-time inference (< 100ms)
+    \item Model retraining daily/hourly
+\end{itemize}
+
+\textbf{Solutions}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Approximate Nearest Neighbors (ANN)}: FAISS, Annoy, ScaNN
+    \item \textbf{Distributed Training}: Spark MLlib, Horovod, Ray
+    \item \textbf{Model Serving}: TensorFlow Serving, TorchServe, Triton
+    \item \textbf{Caching}: Redis for precomputed recommendations
+    \item \textbf{Sharding}: Partition users/items across servers
+\end{enumerate}
+
+\textbf{FAISS Example}:
+\begin{lstlisting}[language=Python]
+import faiss
+import numpy as np
+
+# Item embeddings (10M items, 128-dim)
+item_embeddings = np.random.randn(10_000_000, 128).astype('float32')
+
+# Build index
+index = faiss.IndexFlatIP(128)  # Inner product (for dot product similarity)
+index.add(item_embeddings)
+
+# Query: Find top-100 items for user
+user_embedding = np.random.randn(1, 128).astype('float32')
+k = 100
+scores, item_ids = index.search(user_embedding, k)
+
+print(f"Top-{k} items: {item_ids[0]}")
+print(f"Scores: {scores[0]}")
+\end{lstlisting}
+
+\subsection{Freshness vs. Accuracy Trade-off}
+
+\textbf{Problem}: User preferences change, items come and go. Stale recommendations hurt engagement.
+
+\textbf{Solutions}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Online learning}: Update models with streaming data (online SGD)
+    \item \textbf{Recency weighting}: Exponential decay of old interactions
+    \item \textbf{Time-aware features}: Hour of day, day of week, seasonality
+    \item \textbf{A/B testing}: Continuously validate model performance
+\end{itemize}
+
+\subsection{Diversity \& Filter Bubble}
+
+\textbf{Problem}: Pure accuracy optimization leads to echo chambers.
+
+\textbf{Solutions}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{MMR (Maximal Marginal Relevance)}: Balance relevance and diversity
+    \item \textbf{DPP (Determinantal Point Process)}: Probabilistic diverse subset selection
+    \item \textbf{Multi-objective optimization}: Accuracy + diversity + novelty
+    \item \textbf{Exploration}: $\epsilon$-greedy, Thompson Sampling
+\end{itemize}
+
+\textbf{MMR Algorithm}:
+\begin{lstlisting}[language=Python]
+def maximal_marginal_relevance(candidates, user_profile, lambda_param=0.5, k=10):
+    """
+    candidates: list of item embeddings
+    user_profile: user embedding
+    lambda_param: trade-off between relevance and diversity (0-1)
+    """
+    selected = []
+    remaining = list(range(len(candidates)))
+
+    for _ in range(k):
+        scores = []
+        for idx in remaining:
+            # Relevance to user
+            relevance = cosine_similarity(candidates[idx], user_profile)
+
+            # Max similarity to already selected items
+            if selected:
+                diversity = max(cosine_similarity(candidates[idx], candidates[s])
+                                for s in selected)
+            else:
+                diversity = 0
+
+            # MMR score
+            mmr = lambda_param * relevance - (1 - lambda_param) * diversity
+            scores.append((idx, mmr))
+
+        # Select item with max MMR
+        best_idx, _ = max(scores, key=lambda x: x[1])
+        selected.append(best_idx)
+        remaining.remove(best_idx)
+
+    return selected
+\end{lstlisting}
+
+\section{Advanced Topics}
+
+\subsection{Multi-Task Learning}
+
+\textbf{Goal}: Jointly optimize for multiple objectives (clicks, watch time, likes, shares).
+
+\textbf{YouTube Ranking Model}:
+\begin{lstlisting}[language=Python]
+class MultiTaskModel(nn.Module):
+    def __init__(self, input_dim, shared_layers=[256, 128], task_layers=[64, 32]):
+        super(MultiTaskModel, self).__init__()
+
+        # Shared bottom layers
+        shared = []
+        for hidden_dim in shared_layers:
+            shared.append(nn.Linear(input_dim, hidden_dim))
+            shared.append(nn.ReLU())
+            input_dim = hidden_dim
+        self.shared = nn.Sequential(*shared)
+
+        # Task-specific towers
+        self.click_tower = self.build_tower(input_dim, task_layers)
+        self.watch_time_tower = self.build_tower(input_dim, task_layers)
+        self.like_tower = self.build_tower(input_dim, task_layers)
+
+        # Output heads
+        self.click_head = nn.Linear(task_layers[-1], 1)  # Binary classification
+        self.watch_time_head = nn.Linear(task_layers[-1], 1)  # Regression
+        self.like_head = nn.Linear(task_layers[-1], 1)  # Binary classification
+
+    def build_tower(self, input_dim, layers):
+        tower = []
+        for hidden_dim in layers:
+            tower.append(nn.Linear(input_dim, hidden_dim))
+            tower.append(nn.ReLU())
+            input_dim = hidden_dim
+        return nn.Sequential(*tower)
+
+    def forward(self, x):
+        shared_repr = self.shared(x)
+
+        # Task-specific predictions
+        click_repr = self.click_tower(shared_repr)
+        watch_time_repr = self.watch_time_tower(shared_repr)
+        like_repr = self.like_tower(shared_repr)
+
+        click_prob = torch.sigmoid(self.click_head(click_repr))
+        watch_time = self.watch_time_head(watch_time_repr)
+        like_prob = torch.sigmoid(self.like_head(like_repr))
+
+        return click_prob, watch_time, like_prob
+
+# Training with multi-task loss
+def multi_task_loss(predictions, targets, weights=[1.0, 0.5, 0.3]):
+    click_pred, watch_time_pred, like_pred = predictions
+    click_target, watch_time_target, like_target = targets
+
+    click_loss = F.binary_cross_entropy(click_pred, click_target)
+    watch_time_loss = F.mse_loss(watch_time_pred, watch_time_target)
+    like_loss = F.binary_cross_entropy(like_pred, like_target)
+
+    return (weights[0] * click_loss +
+            weights[1] * watch_time_loss +
+            weights[2] * like_loss)
+\end{lstlisting}
+
+\subsection{Graph Neural Networks for RecSys}
+
+\textbf{Motivation}: User-item interactions form a bipartite graph. GNNs can propagate information through the graph.
+
+\textbf{LightGCN} (He et al., 2020):
+\begin{lstlisting}[language=Python]
+import torch
+import torch.nn as nn
+import torch_geometric
+from torch_geometric.nn import MessagePassing
+
+class LightGCN(nn.Module):
+    def __init__(self, num_users, num_items, embedding_dim=64, num_layers=3):
+        super(LightGCN, self).__init__()
+        self.num_users = num_users
+        self.num_items = num_items
+        self.num_layers = num_layers
+
+        # Embeddings (users and items share embedding space)
+        self.embedding = nn.Embedding(num_users + num_items, embedding_dim)
+        nn.init.normal_(self.embedding.weight, std=0.1)
+
+    def forward(self, edge_index):
+        # edge_index: user-item edges
+        embeddings = self.embedding.weight
+        all_embeddings = [embeddings]
+
+        # Graph convolution layers
+        for layer in range(self.num_layers):
+            embeddings = self.propagate(edge_index, embeddings)
+            all_embeddings.append(embeddings)
+
+        # Average embeddings across layers
+        final_embeddings = torch.stack(all_embeddings, dim=1).mean(dim=1)
+
+        user_embeddings = final_embeddings[:self.num_users]
+        item_embeddings = final_embeddings[self.num_users:]
+
+        return user_embeddings, item_embeddings
+
+    def propagate(self, edge_index, embeddings):
+        # Normalize by degree (symmetric normalization)
+        row, col = edge_index
+        deg = torch_geometric.utils.degree(row, embeddings.size(0))
+        deg_inv_sqrt = deg.pow(-0.5)
+        deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
+        norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
+
+        # Message passing
+        return torch_geometric.utils.scatter(embeddings[col] * norm.view(-1, 1), row,
+                                              dim=0, dim_size=embeddings.size(0), reduce='sum')
+
+    def predict(self, user_ids, item_ids, user_embeddings, item_embeddings):
+        user_embed = user_embeddings[user_ids]
+        item_embed = item_embeddings[item_ids]
+        return (user_embed * item_embed).sum(dim=1)
+\end{lstlisting}
+
+\subsection{Conversational Recommenders}
+
+\textbf{Goal}: Interactive recommendations through dialogue.
+
+\textbf{Approaches}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Critiquing}: "Show me similar but cheaper options"
+    \item \textbf{Preference elicitation}: Ask questions to narrow down options
+    \item \textbf{Explanations}: "Why did you recommend this?"
+    \item \textbf{Feedback loops}: Incorporate thumbs up/down in real-time
+\end{itemize}
+
+\subsection{Fairness in Recommendations}
+
+\textbf{Issues}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Popularity bias}: Rich get richer (Matthew effect)
+    \item \textbf{Filter bubbles}: Users see narrow content
+    \item \textbf{Demographic bias}: Gender, race, age discrimination
+    \item \textbf{Provider fairness}: Small creators don't get exposure
+\end{itemize}
+
+\textbf{Solutions}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Calibration}: Match recommendation distribution to user's historical distribution
+    \item \textbf{Re-ranking}: Post-process to ensure diversity/fairness
+    \item \textbf{Exposure control}: Guarantee minimum exposure for all items
+    \item \textbf{Adversarial debiasing}: Remove sensitive attributes from embeddings
+\end{itemize}
+
+\section{Interview Preparation Strategy}
+
+\subsection{Week 1: Foundations (Ricci Handbook Part 1)}
+
+\textbf{Topics}:
+\begin{itemize}[leftmargin=*]
+    \item Collaborative filtering (user-based, item-based)
+    \item Matrix factorization (SVD, ALS)
+    \item Content-based filtering
+    \item Hybrid methods
+\end{itemize}
+
+\textbf{Coding Practice}:
+\begin{itemize}[leftmargin=*]
+    \item Implement user-based CF from scratch (NumPy)
+    \item Implement matrix factorization with SGD
+    \item LeetCode: "Design a Recommender System" (Medium)
+\end{itemize}
+
+\subsection{Week 2: Deep Learning (Aggarwal + 2024 Surveys)}
+
+\textbf{Topics}:
+\begin{itemize}[leftmargin=*]
+    \item Neural Collaborative Filtering (NCF)
+    \item Two-tower models
+    \item Sequential models (RNN, Transformer)
+    \item Graph neural networks (LightGCN)
+\end{itemize}
+
+\textbf{Coding Practice}:
+\begin{itemize}[leftmargin=*]
+    \item Build NCF in PyTorch
+    \item Implement two-tower model with FAISS retrieval
+    \item Train GRU4Rec on MovieLens dataset
+\end{itemize}
+
+\subsection{Week 3: Production Systems (Industry Papers)}
+
+\textbf{Topics}:
+\begin{itemize}[leftmargin=*]
+    \item YouTube's two-stage architecture
+    \item Netflix's matrix factorization at scale
+    \item Spotify's sequential models
+    \item Pinterest's PinSage (GNN at scale)
+\end{itemize}
+
+\textbf{System Design Practice}:
+\begin{itemize}[leftmargin=*]
+    \item Design Netflix recommendation system
+    \item Design Spotify's "Discover Weekly"
+    \item Design Amazon's "Customers who bought this also bought..."
+\end{itemize}
+
+\subsection{Week 4: Evaluation \& Advanced Topics}
+
+\textbf{Topics}:
+\begin{itemize}[leftmargin=*]
+    \item Offline metrics (NDCG, MAP, Recall@K)
+    \item A/B testing for recommendations
+    \item Beyond-accuracy objectives (diversity, novelty, fairness)
+    \item Multi-task learning
+    \item Conversational recommenders
+\end{itemize}
+
+\textbf{Practice}:
+\begin{itemize}[leftmargin=*]
+    \item Implement NDCG, MAP, diversity metrics
+    \item Design A/B test for new ranking model
+    \item Discuss trade-offs: accuracy vs. diversity vs. serendipity
+\end{itemize}
+
+\section{Common Interview Questions}
+
+\subsection{Algorithmic Questions}
+
+\textbf{Q1: Explain the difference between user-based and item-based collaborative filtering. When would you use each?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{User-based}: Find similar users, recommend what they liked. Better for users with stable preferences.
+    \item \textbf{Item-based}: Find similar items, recommend similar to what user liked. Better when items are stable (movies vs. fashion).
+    \item \textbf{Scalability}: Item-based often better because \# items < \# users, item similarities can be precomputed.
+    \item \textbf{Example}: Amazon uses item-based ("Customers who bought this also bought...").
+\end{itemize}
+
+\textbf{Q2: How does matrix factorization work? What are its advantages over neighborhood methods?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{MF}: Decompose sparse $R$ into $P \times Q^T$ where $P$ is user factors, $Q$ is item factors.
+    \item \textbf{Advantages}: Handles sparsity better, captures latent patterns, scalable with ALS/SGD.
+    \item \textbf{Example}: Netflix Prize winner used ensemble of MF models.
+\end{itemize}
+
+\textbf{Q3: How would you handle cold start for new users and new items?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{New user}: Popular items, onboarding flow, content-based on demographics, meta-learning.
+    \item \textbf{New item}: Content-based on metadata, explore-exploit strategies, transfer learning from similar items.
+    \item \textbf{Hybrid}: Combine CF and content-based, gradually shift from content to CF as data accumulates.
+\end{itemize}
+
+\subsection{System Design Questions}
+
+\textbf{Q4: Design a recommendation system for YouTube videos.}
+
+\textbf{Answer}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Requirements}: 2B users, 800M videos, < 100ms latency, personalized homepage, watch next.
+    \item \textbf{Architecture}:
+    \begin{itemize}
+        \item \textbf{Candidate generation}: Two-tower model, retrieve top-1000 from billions using ANN (FAISS)
+        \item \textbf{Ranking}: Multi-task DNN predicting click, watch time, likes
+        \item \textbf{Re-ranking}: Diversity, freshness, fairness
+    \end{itemize}
+    \item \textbf{Features}: User watch history, video metadata, context (time, device), CTR, watch time
+    \item \textbf{Offline}: Batch training on TPUs, daily model updates
+    \item \textbf{Online}: TensorFlow Serving, Redis caching, A/B testing
+    \item \textbf{Metrics}: Click-through rate, watch time, engagement (likes, shares), return rate
+\end{enumerate}
+
+\textbf{Q5: How would you evaluate a new recommendation algorithm?}
+
+\textbf{Answer}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Offline evaluation}: Historical data, NDCG@K, Recall@K, coverage, diversity
+    \item \textbf{A/B testing}: 50/50 split, measure CTR, watch time, engagement, revenue
+    \item \textbf{Beyond-accuracy}: User satisfaction surveys, diversity, novelty, serendipity
+    \item \textbf{Long-term effects}: User retention, repeat visits, content discovery
+    \item \textbf{Iterate}: Start with offline → online A/B → gradual rollout → monitor long-term
+\end{enumerate}
+
+\subsection{Deep Learning Questions}
+
+\textbf{Q6: Explain Neural Collaborative Filtering (NCF). How does it differ from matrix factorization?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{MF}: Linear interaction (dot product): $\hat{y}_{ui} = \vec{p}_u^T \vec{q}_i$
+    \item \textbf{NCF}: Non-linear interaction via MLP: $\hat{y}_{ui} = \text{MLP}([\vec{p}_u; \vec{q}_i])$
+    \item \textbf{Advantage}: Can capture complex non-linear patterns
+    \item \textbf{NeuMF}: Combines GMF (generalized MF) and MLP paths
+\end{itemize}
+
+\textbf{Q7: How would you model sequential behavior in recommendations?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{RNN/GRU}: GRU4Rec encodes session sequence
+    \item \textbf{Transformer}: SASRec with self-attention captures long-range dependencies
+    \item \textbf{BERT4Rec}: Bidirectional encoding with masked item prediction
+    \item \textbf{Production}: Two-stage (sequence model for candidates → ranking model for final order)
+    \item \textbf{Example}: Spotify's "Discover Weekly" uses sequential models on listening history
+\end{itemize}
+
+\subsection{ML Engineering Questions}
+
+\textbf{Q8: How would you scale recommendations to 100M users and 10M items?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Candidate generation}: ANN with FAISS (100ms for top-1000 from 10M items)
+    \item \textbf{Model serving}: TensorFlow Serving on GPU, batch inference
+    \item \textbf{Caching}: Precompute recommendations for active users (Redis)
+    \item \textbf{Sharding}: Partition users across servers
+    \item \textbf{Training}: Distributed training on Spark, daily model updates
+    \item \textbf{Monitoring}: Track latency, throughput, model drift
+\end{itemize}
+
+\textbf{Q9: How do you handle the accuracy vs. diversity trade-off?}
+
+\textbf{Answer}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{MMR (Maximal Marginal Relevance)}: Balance relevance and diversity
+    \item \textbf{DPP (Determinantal Point Process)}: Probabilistic diverse subset
+    \item \textbf{Multi-objective}: Optimize weighted sum of accuracy + diversity + novelty
+    \item \textbf{Re-ranking}: Post-process to ensure categories/genres are covered
+    \item \textbf{Exploration}: $\epsilon$-greedy, Thompson Sampling for new items
+    \item \textbf{Example}: Netflix shows mix of popular + niche, recent + catalog
+\end{itemize}
+
+\section{RecSys Conference \& Community}
+
+\subsection{ACM RecSys Conference}
+
+\textbf{2024}: Bari, Italy (October 14-18) \\
+\textbf{2025}: Prague, Czech Republic (September 22-26)
+
+\textbf{Tracks}:
+\begin{itemize}[leftmargin=*]
+    \item Main research track (long/short papers)
+    \item Industry track (production systems)
+    \item Doctoral symposium
+    \item Workshops (fairness, explainability, session-based, etc.)
+    \item RecSys Challenge (annual competition by companies like Spotify, Twitter)
+\end{itemize}
+
+\textbf{Key Topics (2024-2025)}:
+\begin{itemize}[leftmargin=*]
+    \item Large language models for recommendations
+    \item Multi-stakeholder optimization
+    \item Conversational recommenders
+    \item Fairness and bias mitigation
+    \item Graph neural networks
+    \item Sequential and session-based recommendations
+\end{itemize}
+
+\subsection{Related Conferences}
+
+\textbf{WSDM} (Web Search and Data Mining): Feb/March \\
+\textbf{WWW} (The Web Conference): April/May \\
+\textbf{KDD} (Knowledge Discovery and Data Mining): August \\
+\textbf{CIKM} (Conference on Information and Knowledge Management): October \\
+\textbf{SIGIR} (Information Retrieval): July - some RecSys overlap
+
+\section{Conclusion}
+
+Recommender systems are at the intersection of machine learning, information retrieval, and user experience. Whether you're preparing for interviews at Netflix, building a production RecSys, or conducting research for RecSys 2025, this guide provides a comprehensive foundation.
+
+\textbf{Key Takeaways}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Start with fundamentals}: Collaborative filtering, matrix factorization
+    \item \textbf{Master deep learning}: NCF, two-tower models, sequential models
+    \item \textbf{Study production systems}: YouTube, Netflix, Spotify architectures
+    \item \textbf{Practice coding}: Implement algorithms from scratch, use real datasets
+    \item \textbf{Think beyond accuracy}: Diversity, fairness, explainability matter
+    \item \textbf{Stay current}: Read RecSys papers, follow industry blogs
+\end{enumerate}
+
+\textbf{Final Advice}: Recommender systems is a rapidly evolving field. The best way to learn is to build. Use MovieLens or Amazon Reviews datasets, implement various algorithms, compare results, and iterate. Good luck!
+
+\end{document}
