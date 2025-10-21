@@ -171,88 +171,123 @@ TOPIC_VIDEOS = {
     ],
     'graph_algorithms': [
         {
+            "title": "NeetCode: Network Delay Time (Dijkstra)",
+            "url": "https://www.youtube.com/@NeetCode",
+            "duration": "13 min",
+            "description": "Dijkstra's algorithm with Python implementation",
+            "priority": "high"
+        },
+        {
+            "title": "NeetCode: Cheapest Flights (Bellman-Ford)",
+            "url": "https://www.youtube.com/@NeetCode",
+            "duration": "14 min",
+            "description": "Shortest path with constraints in Python",
+            "priority": "high"
+        },
+        {
             "title": "William Fiset: Dijkstra's Algorithm",
             "url": "https://www.youtube.com/@WilliamFiset-videos",
             "duration": "16 min",
-            "description": "Single-source shortest path with priority queue",
-            "priority": "high"
+            "description": "Algorithmic foundation and pseudocode",
+            "priority": "medium"
         },
         {
             "title": "William Fiset: Floyd-Warshall Algorithm",
             "url": "https://www.youtube.com/@WilliamFiset-videos",
             "duration": "10 min",
-            "description": "All-pairs shortest path",
-            "priority": "high"
-        },
-        {
-            "title": "William Fiset: Minimum Spanning Tree",
-            "url": "https://www.youtube.com/@WilliamFiset-videos",
-            "duration": "12 min",
-            "description": "Kruskal's and Prim's algorithms",
+            "description": "All-pairs shortest path algorithm",
             "priority": "medium"
         }
     ],
     'topological_sort': [
         {
-            "title": "William Fiset: Topological Sort Algorithm",
-            "url": "https://www.youtube.com/@WilliamFiset-videos",
-            "duration": "14 min",
-            "description": "Kahn's algorithm, DFS-based topological sort",
-            "priority": "high"
-        },
-        {
             "title": "NeetCode: Course Schedule",
             "url": "https://www.youtube.com/@NeetCode",
             "duration": "12 min",
-            "description": "Topological sort in practice",
+            "description": "Topological sort in Python with interview examples",
+            "priority": "high"
+        },
+        {
+            "title": "NeetCode: Course Schedule II",
+            "url": "https://www.youtube.com/@NeetCode",
+            "duration": "11 min",
+            "description": "Return the actual ordering in Python",
+            "priority": "high"
+        },
+        {
+            "title": "William Fiset: Topological Sort Algorithm",
+            "url": "https://www.youtube.com/@WilliamFiset-videos",
+            "duration": "14 min",
+            "description": "Kahn's algorithm and DFS-based approaches",
             "priority": "medium"
         }
     ],
     'bfs_graph': [
         {
-            "title": "William Fiset: BFS Graph Traversal",
-            "url": "https://www.youtube.com/@WilliamFiset-videos",
-            "duration": "14 min",
-            "description": "Breadth-first search implementation",
-            "priority": "high"
-        },
-        {
             "title": "NeetCode: Number of Islands",
             "url": "https://www.youtube.com/@NeetCode",
             "duration": "10 min",
-            "description": "BFS on 2D grids",
+            "description": "BFS on 2D grids in Python",
+            "priority": "high"
+        },
+        {
+            "title": "NeetCode: Rotting Oranges",
+            "url": "https://www.youtube.com/@NeetCode",
+            "duration": "12 min",
+            "description": "Multi-source BFS with Python",
+            "priority": "high"
+        },
+        {
+            "title": "William Fiset: BFS Graph Traversal",
+            "url": "https://www.youtube.com/@WilliamFiset-videos",
+            "duration": "14 min",
+            "description": "BFS algorithm foundations",
             "priority": "medium"
         }
     ],
     'dfs_graph': [
         {
-            "title": "William Fiset: DFS Graph Traversal",
-            "url": "https://www.youtube.com/@WilliamFiset-videos",
-            "duration": "12 min",
-            "description": "Depth-first search implementation",
+            "title": "NeetCode: Clone Graph",
+            "url": "https://www.youtube.com/@NeetCode",
+            "duration": "9 min",
+            "description": "DFS on graphs with Python",
             "priority": "high"
         },
         {
-            "title": "NeetCode: Binary Tree DFS Patterns",
+            "title": "NeetCode: Pacific Atlantic Water Flow",
             "url": "https://www.youtube.com/@NeetCode",
-            "duration": "14 min",
-            "description": "DFS on trees and graphs",
+            "duration": "15 min",
+            "description": "DFS on 2D grids in Python",
+            "priority": "high"
+        },
+        {
+            "title": "William Fiset: DFS Graph Traversal",
+            "url": "https://www.youtube.com/@WilliamFiset-videos",
+            "duration": "12 min",
+            "description": "DFS algorithm foundations",
             "priority": "medium"
         }
     ],
     'union_find': [
         {
-            "title": "William Fiset: Union Find Data Structure",
-            "url": "https://www.youtube.com/@WilliamFiset-videos",
-            "duration": "18 min",
-            "description": "Disjoint set with path compression",
+            "title": "NeetCode: Redundant Connection",
+            "url": "https://www.youtube.com/@NeetCode",
+            "duration": "10 min",
+            "description": "Union Find implementation in Python",
             "priority": "high"
         },
         {
-            "title": "Back To Back SWE: Union Find Explained",
-            "url": "https://www.youtube.com/@BackToBackSWE",
-            "duration": "20 min",
-            "description": "Connected components, cycle detection",
+            "title": "NeetCode: Number of Connected Components",
+            "url": "https://www.youtube.com/@NeetCode",
+            "duration": "11 min",
+            "description": "Union Find for connected components in Python",
+            "priority": "high"
+        },
+        {
+            "title": "William Fiset: Union Find Data Structure",
+            "url": "https://www.youtube.com/@WilliamFiset-videos",
+            "duration": "18 min",
+            "description": "Disjoint set with path compression theory",
             "priority": "medium"
         }
     ]
