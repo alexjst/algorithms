@@ -1,0 +1,2088 @@
+% Faire Technical Interview Preparation Guide
+% Comprehensive guide for Software Engineer interviews at Faire
+
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+% Code listing style
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{white},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    tabsize=2,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=false,
+    escapeinside={(*@}{@*)},
+    morekeywords={self}
+}
+
+% Section formatting
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Faire Interview Prep}
+\lhead{\leftmark}
+\cfoot{\thepage}
+
+\title{\textbf{Faire Technical Interview Preparation Guide} \\
+\large Complete Prep for Software Engineer Roles}
+\author{Interview Focus: Algorithms, System Design (Search), ML Basics}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Executive Summary: About Faire}
+% ============================================================================
+
+\subsection{Company Overview}
+
+\textbf{Faire} is an online wholesale marketplace that connects independent retailers with unique brands. Founded in 2017 and based in San Francisco, Faire uses machine learning to match local retailers with brands and products that uniquely fit their stores.
+
+\textbf{Key Value Propositions:}
+\begin{itemize}
+    \item \textbf{For Retailers:} Discover unique products, net 60 payment terms, free returns on opening orders
+    \item \textbf{For Brands:} Access to 700,000+ retailers globally, data-driven insights, streamlined operations
+    \item \textbf{Two-Sided Marketplace:} Balance retailer needs (relevance, conversion, personalization) with brand needs (order volume, exposure)
+\end{itemize}
+
+\subsection{Core Technical Challenges}
+
+Based on Faire's product and engineering blog, their main technical challenges include:
+
+\begin{enumerate}
+    \item \textbf{Search \& Discovery:} Help retailers find relevant products among millions of SKUs
+    \item \textbf{Recommendations:} Inspire retailers in "browsing mode" with personalized suggestions
+    \item \textbf{Ranking:} Balance multiple stakeholders (retailers, brands, platform) in ranking algorithms
+    \item \textbf{Two-Sided Optimization:} Optimize for both retailer satisfaction and brand success
+    \item \textbf{Cold Start:} New retailers and new brands need quality recommendations immediately
+    \item \textbf{Real-Time Features:} Low-latency feature serving for ranking models
+\end{enumerate}
+
+% ============================================================================
+\section{Faire Tech Stack \& Architecture}
+% ============================================================================
+
+Understanding Faire's actual tech stack will help you tailor your answers and ask informed questions.
+
+\subsection{Backend \& Languages}
+
+\textbf{Primary Language: Kotlin}
+\begin{itemize}
+    \item Entire backend monolith written in Kotlin (migrated from Java)
+    \item Handles 1,000+ requests per second
+    \item Android app also in Kotlin
+    \item Allows for concise, type-safe code with null safety
+\end{itemize}
+
+\textbf{Why Kotlin?}
+\begin{itemize}
+    \item Interoperable with existing Java libraries (Hibernate for ORM, Guice for DI)
+    \item Modern language features (coroutines for async, data classes)
+    \item Strong community and tooling support
+\end{itemize}
+
+\subsection{Core Infrastructure}
+
+\textbf{Data Storage:}
+\begin{itemize}
+    \item \textbf{MySQL:} Primary relational database
+    \item \textbf{Redis:} Caching layer and feature store for ML models
+    \item \textbf{NoSQL:} For specific use cases
+\end{itemize}
+
+\textbf{Search:}
+\begin{itemize}
+    \item \textbf{ElasticSearch:} Product search with custom scoring functions
+    \item \textbf{Lucene:} Underlying search library
+\end{itemize}
+
+\textbf{Message Queues \& Streaming:}
+\begin{itemize}
+    \item \textbf{Amazon SQS:} Asynchronous job processing
+    \item \textbf{Kinesis Firehose:} Event streaming to data warehouse
+\end{itemize}
+
+\textbf{Compute \& Orchestration:}
+\begin{itemize}
+    \item \textbf{Kubernetes:} Container orchestration
+    \item \textbf{Nginx:} Load balancing and routing
+    \item \textbf{AWS ELB:} External load balancing
+\end{itemize}
+
+\subsection{Machine Learning Stack}
+
+\textbf{Models:}
+\begin{itemize}
+    \item \textbf{XGBoost:} Primary model for ranking (search and recommendations)
+    \item \textbf{Embedding Models:} Learn representations from user behavior (clicks, add-to-cart, orders)
+\end{itemize}
+
+\textbf{Feature Engineering:}
+\begin{itemize}
+    \item \textbf{Redis Feature Store:} Hundreds of features retrieved in real-time per product
+    \item Features include: retailer-product similarity, engagement signals, brand metadata, product attributes
+\end{itemize}
+
+\textbf{Data Infrastructure:}
+\begin{itemize}
+    \item \textbf{DBT:} Data transformation and modeling
+    \item \textbf{Tableau:} Business intelligence and analytics
+\end{itemize}
+
+\subsection{Two-Stage Ranking Architecture}
+
+Faire uses a classic retrieval + ranking pipeline:
+
+\textbf{Stage 1: Retrieval (Candidate Generation)}
+\begin{itemize}
+    \item ElasticSearch retrieves top 1,000 candidate products
+    \item Uses custom scoring function balancing precision/recall
+    \item Fast: optimized for low latency
+\end{itemize}
+
+\textbf{Stage 2: Ranking (Re-ranking)}
+\begin{itemize}
+    \item Retrieve hundreds of features per product from Redis
+    \item Score 1,000 candidates with XGBoost model
+    \item Rank products by predicted engagement/conversion
+\end{itemize}
+
+% ============================================================================
+\section{Interview Process Overview}
+% ============================================================================
+
+\subsection{Typical Interview Timeline}
+
+Based on candidate reports:
+
+\begin{enumerate}
+    \item \textbf{Recruiter Screen (30 min):} Align on basics, discuss role expectations
+    \item \textbf{Online Coding Assessment:} CodeSignal or similar (4 questions in 70 min)
+    \begin{itemize}
+        \item 2 easy LeetCode-level questions
+        \item 2 medium to hard LeetCode-level questions
+        \item Score 700+ typically required to proceed
+    \end{itemize}
+    \item \textbf{Technical Interviews (2-3 rounds):}
+    \begin{itemize}
+        \item 2 rounds: DSA/LeetCode-style coding (CoderPad)
+        \item 1 round: System Design (focus on backend/service scaling, 90\% backend)
+        \item Possibly 1 round: SQL/data modeling
+    \end{itemize}
+    \item \textbf{Manager Match (1 round):} Behavioral, culture fit, team alignment
+    \item \textbf{Timeline:} 2-4 weeks total
+\end{enumerate}
+
+\subsection{Difficulty Rating}
+
+\textbf{Glassdoor Rating:} 3.14/5.0
+
+\textbf{Coding Questions:} Straightforward medium/hard, not "insanely tricky"
+
+\textbf{System Design:} Backend-focused, emphasis on scalability and tradeoffs
+
+\subsection{What the Hiring Manager Said}
+
+Based on your conversation, expect:
+\begin{itemize}
+    \item \textbf{Algorithms:} LeetCode-style DSA questions
+    \item \textbf{System Design:} Main focus on \textit{search} systems (Faire's core product)
+    \item \textbf{ML Basics:} Evaluation metrics (precision, recall, NDCG, etc.)
+    \item \textbf{Culture Fit:} Alignment with Faire's values and mission
+\end{itemize}
+
+% ============================================================================
+\section{Part 1: Algorithm \& Coding Questions}
+% ============================================================================
+
+\subsection{Expected Difficulty}
+
+\textbf{Online Assessment:} 2 Easy + 2 Medium-Hard LeetCode
+
+\textbf{Live Coding Rounds:} Medium LeetCode problems (some harder variants)
+
+\textbf{Focus Areas:} Arrays, hashmaps, two pointers, trees, graphs, dynamic programming
+
+\subsection{Common LeetCode Patterns for Faire}
+
+Based on e-commerce/marketplace context, expect questions related to:
+
+\subsubsection{Pattern 1: Arrays \& Hashing}
+
+\textbf{Sample Problem:} Product Inventory Management
+
+\textit{Problem:} Given an array of product IDs representing items in a retailer's cart, find the most frequently purchased product. If there's a tie, return the product with the smallest ID.
+
+\begin{lstlisting}
+def most_frequent_product(cart):
+    """
+    Time: O(n), Space: O(n)
+    """
+    from collections import Counter
+
+    if not cart:
+        return -1
+
+    # Count frequencies
+    freq = Counter(cart)
+
+    # Find max frequency
+    max_freq = max(freq.values())
+
+    # Among products with max freq, return smallest ID
+    candidates = [pid for pid, count in freq.items()
+                  if count == max_freq]
+
+    return min(candidates)
+
+# Example
+cart = [101, 203, 101, 305, 203, 101, 203]
+print(most_frequent_product(cart))  # 101 (freq=3, but smaller ID)
+\end{lstlisting}
+
+\textbf{Follow-up:} What if we need to return top K products? Use a heap.
+
+\subsubsection{Pattern 2: Two Pointers}
+
+\textbf{Sample Problem:} Merge Brand Catalogs
+
+\textit{Problem:} Two brands have sorted arrays of product prices. Merge them into one sorted array.
+
+\begin{lstlisting}
+def merge_catalogs(prices1, prices2):
+    """
+    Two pointers to merge sorted arrays.
+    Time: O(m + n), Space: O(m + n)
+    """
+    result = []
+    i, j = 0, 0
+
+    while i < len(prices1) and j < len(prices2):
+        if prices1[i] <= prices2[j]:
+            result.append(prices1[i])
+            i += 1
+        else:
+            result.append(prices2[j])
+            j += 1
+
+    # Append remaining
+    result.extend(prices1[i:])
+    result.extend(prices2[j:])
+
+    return result
+\end{lstlisting}
+
+\subsubsection{Pattern 3: Binary Search}
+
+\textbf{Sample Problem:} Find Minimum Price in Rotated Catalog
+
+\textit{Problem:} A sorted price list was rotated. Find the minimum price.
+
+\begin{lstlisting}
+def find_min_price(prices):
+    """
+    Binary search on rotated sorted array.
+    Time: O(log n), Space: O(1)
+    """
+    left, right = 0, len(prices) - 1
+
+    while left < right:
+        mid = (left + right) // 2
+
+        # Right half is unsorted, min is in right half
+        if prices[mid] > prices[right]:
+            left = mid + 1
+        else:
+            # Left half is unsorted or mid is min
+            right = mid
+
+    return prices[left]
+
+# Example
+prices = [4.99, 5.99, 6.99, 1.99, 2.99, 3.99]
+print(find_min_price(prices))  # 1.99
+\end{lstlisting}
+
+\subsubsection{Pattern 4: Trees (Product Taxonomy)}
+
+\textbf{Sample Problem:} Category Tree Traversal
+
+\textit{Problem:} Faire has product categories organized in a tree. Count total products in a category and all subcategories.
+
+\begin{lstlisting}
+class CategoryNode:
+    def __init__(self, name, product_count):
+        self.name = name
+        self.product_count = product_count
+        self.children = []
+
+def count_products(root):
+    """
+    DFS to count products in category tree.
+    Time: O(n), Space: O(h) for recursion stack
+    """
+    if not root:
+        return 0
+
+    total = root.product_count
+
+    for child in root.children:
+        total += count_products(child)
+
+    return total
+
+# Example tree: Home Decor -> (Furniture, Lighting)
+root = CategoryNode("Home Decor", 100)
+furniture = CategoryNode("Furniture", 50)
+lighting = CategoryNode("Lighting", 30)
+root.children = [furniture, lighting]
+
+print(count_products(root))  # 180
+\end{lstlisting}
+
+\subsubsection{Pattern 5: Graphs (Retailer-Brand Network)}
+
+\textbf{Sample Problem:} Find Connected Retailers
+
+\textit{Problem:} Given a graph where nodes are retailers and edges connect retailers who order from the same brands, find the number of connected components (retailer communities).
+
+\begin{lstlisting}
+def count_communities(n, edges):
+    """
+    Union-Find to count connected components.
+    Time: O(n + e * alpha(n)), Space: O(n)
+    """
+    parent = list(range(n))
+
+    def find(x):
+        if parent[x] != x:
+            parent[x] = find(parent[x])  # Path compression
+        return parent[x]
+
+    def union(x, y):
+        root_x, root_y = find(x), find(y)
+        if root_x != root_y:
+            parent[root_x] = root_y
+
+    # Build connections
+    for u, v in edges:
+        union(u, v)
+
+    # Count unique roots
+    return len(set(find(i) for i in range(n)))
+
+# Example: 5 retailers, edges: [(0,1), (1,2), (3,4)]
+print(count_communities(5, [(0,1), (1,2), (3,4)]))  # 2 communities
+\end{lstlisting}
+
+\subsubsection{Pattern 6: Dynamic Programming}
+
+\textbf{Sample Problem:} Maximum Order Value (Knapsack Variant)
+
+\textit{Problem:} A retailer has a budget. Given products with prices and profit margins, maximize total profit without exceeding budget.
+
+\begin{lstlisting}
+def max_profit(budget, prices, profits):
+    """
+    0/1 Knapsack problem.
+    Time: O(n * budget), Space: O(budget)
+    """
+    n = len(prices)
+    dp = [0] * (budget + 1)
+
+    for i in range(n):
+        price = prices[i]
+        profit = profits[i]
+
+        # Traverse backwards to avoid using same item twice
+        for b in range(budget, price - 1, -1):
+            dp[b] = max(dp[b], dp[b - price] + profit)
+
+    return dp[budget]
+
+# Example
+budget = 100
+prices = [30, 40, 50, 60]
+profits = [10, 20, 25, 30]
+print(max_profit(budget, prices, profits))  # 50 (items 1 and 2)
+\end{lstlisting}
+
+\subsection{E-commerce Specific Coding Questions}
+
+These are deduced based on Faire's product:
+
+\subsubsection{Question 1: Product Search Ranking}
+
+\textit{Problem:} Given a search query and a list of products (each with name, description, price), return the top K most relevant products. Relevance is based on keyword matches (more matches = higher relevance). If tied, prioritize lower price.
+
+\begin{lstlisting}
+def search_products(query, products, k):
+    """
+    Time: O(n * m + n log n), where n = products, m = avg words
+    Space: O(n)
+    """
+    query_words = set(query.lower().split())
+
+    scored_products = []
+    for product in products:
+        text = (product['name'] + ' ' + product['description']).lower()
+        words = set(text.split())
+
+        # Count keyword matches
+        matches = len(query_words & words)
+
+        # Score: (matches, -price) for sorting
+        scored_products.append((matches, -product['price'], product))
+
+    # Sort by matches (desc), then price (asc)
+    scored_products.sort(key=lambda x: (x[0], -x[1]), reverse=True)
+
+    return [p[2] for p in scored_products[:k]]
+
+# Example
+products = [
+    {"name": "Vase", "description": "ceramic blue vase", "price": 25},
+    {"name": "Blue Pot", "description": "ceramic pot", "price": 20},
+    {"name": "Ceramic Bowl", "description": "handmade ceramic", "price": 30}
+]
+query = "blue ceramic"
+print(search_products(query, products, 2))
+# Returns: Blue Pot (2 matches, $20), Vase (2 matches, $25)
+\end{lstlisting}
+
+\subsubsection{Question 2: Order Fulfillment}
+
+\textit{Problem:} Faire processes orders from multiple retailers. Given an array of order timestamps (Unix time), find the maximum number of orders processed in any 1-hour window.
+
+\begin{lstlisting}
+def max_orders_in_hour(timestamps):
+    """
+    Sliding window approach.
+    Time: O(n log n + n), Space: O(1)
+    """
+    if not timestamps:
+        return 0
+
+    timestamps.sort()
+    max_count = 0
+
+    for i in range(len(timestamps)):
+        window_end = timestamps[i] + 3600  # 1 hour in seconds
+
+        # Binary search for end of window
+        left, right = i, len(timestamps) - 1
+        while left < right:
+            mid = (left + right + 1) // 2
+            if timestamps[mid] <= window_end:
+                left = mid
+            else:
+                right = mid - 1
+
+        count = left - i + 1
+        max_count = max(max_count, count)
+
+    return max_count
+
+# Example
+timestamps = [1000, 2000, 3000, 4500, 5000, 6000]
+print(max_orders_in_hour(timestamps))  # 4 orders
+\end{lstlisting}
+
+\subsection{SQL Questions}
+
+Faire emphasizes SQL and data modeling. Expect questions like:
+
+\subsubsection{Question 1: Top Brands by Revenue}
+
+\textit{Problem:} Given tables \texttt{orders(order\_id, brand\_id, amount, date)} and \texttt{brands(brand\_id, name)}, find the top 5 brands by total revenue in the last 30 days.
+
+\begin{lstlisting}[language=SQL]
+SELECT
+    b.name,
+    SUM(o.amount) AS total_revenue
+FROM orders o
+JOIN brands b ON o.brand_id = b.brand_id
+WHERE o.date >= CURRENT_DATE - INTERVAL 30 DAY
+GROUP BY b.brand_id, b.name
+ORDER BY total_revenue DESC
+LIMIT 5;
+\end{lstlisting}
+
+\subsubsection{Question 2: Retailer Churn Rate}
+
+\textit{Problem:} Calculate monthly churn rate. Tables: \texttt{retailers(retailer\_id, signup\_date)}, \texttt{orders(order\_id, retailer\_id, order\_date)}.
+
+\textit{Definition:} Churn = retailers who placed orders in month N but not in month N+1.
+
+\begin{lstlisting}[language=SQL]
+WITH monthly_active AS (
+    SELECT
+        retailer_id,
+        DATE_TRUNC('month', order_date) AS month
+    FROM orders
+    GROUP BY retailer_id, month
+),
+churned AS (
+    SELECT
+        m1.month,
+        m1.retailer_id
+    FROM monthly_active m1
+    LEFT JOIN monthly_active m2
+        ON m1.retailer_id = m2.retailer_id
+        AND m2.month = m1.month + INTERVAL '1 month'
+    WHERE m2.retailer_id IS NULL
+)
+SELECT
+    month,
+    COUNT(DISTINCT retailer_id) AS churned_retailers
+FROM churned
+GROUP BY month
+ORDER BY month;
+\end{lstlisting}
+
+% ============================================================================
+\section{Part 2: System Design - Search \& Recommendations}
+% ============================================================================
+
+\subsection{Why Search is Critical for Faire}
+
+The hiring manager specifically mentioned \textbf{search} as the main system design focus. This aligns with Faire's core value proposition:
+
+\begin{itemize}
+    \item \textbf{700K+ retailers} need to discover products from \textbf{100K+ brands}
+    \item \textbf{Millions of SKUs} across diverse categories (home decor, apparel, food, etc.)
+    \item \textbf{Two shopping modes:}
+    \begin{itemize}
+        \item \textit{Focused search:} "I need ceramic mugs for my coffee shop"
+        \item \textit{Inspirational browsing:} "Show me trending home decor"
+    \end{itemize}
+\end{itemize}
+
+\subsection{System Design Problem 1: Design Faire's Product Search}
+
+\subsubsection{Problem Statement}
+
+\textit{Design a search system for Faire's wholesale marketplace. Retailers should be able to search for products across millions of SKUs from 100K+ brands. The system should support:}
+
+\begin{itemize}
+    \item Keyword search with autocomplete
+    \item Filters (price, category, brand, location, minimum order, etc.)
+    \item Relevance ranking
+    \item Low latency (< 200ms p99)
+    \item Personalization based on retailer's store type and past orders
+    \item Handle 10,000 QPS at peak
+\end{itemize}
+
+\subsubsection{Clarifying Questions}
+
+\textbf{Ask the interviewer:}
+
+\begin{enumerate}
+    \item \textbf{Scale:} How many products? How many searches/day?
+    \item \textbf{Latency:} What's acceptable p50, p95, p99?
+    \item \textbf{Ranking:} Should we optimize for clicks? Add-to-cart? Orders?
+    \item \textbf{Personalization:} How much personalization vs. global relevance?
+    \item \textbf{Consistency:} Strong consistency needed or eventual consistency OK?
+    \item \textbf{Internationalization:} Multiple languages? Multiple currencies?
+\end{enumerate}
+
+\subsubsection{Requirements \& Scale Estimation}
+
+\textbf{Functional Requirements:}
+\begin{itemize}
+    \item Search products by keywords
+    \item Filter by attributes (price, category, brand, etc.)
+    \item Autocomplete search queries
+    \item Rank results by relevance
+    \item Personalize results per retailer
+\end{itemize}
+
+\textbf{Non-Functional Requirements:}
+\begin{itemize}
+    \item Low latency: < 200ms p99
+    \item High availability: 99.9\% uptime
+    \item Scalability: 10K QPS peak
+    \item Consistency: Eventual consistency OK for search index
+\end{itemize}
+
+\textbf{Scale Estimation:}
+\begin{itemize}
+    \item \textbf{Products:} 10M SKUs
+    \item \textbf{Brands:} 100K brands
+    \item \textbf{Retailers:} 700K active retailers
+    \item \textbf{Searches:} 1M searches/day = 12 QPS average, 120 QPS peak (10x)
+    \item \textbf{Index size:} Assume 10KB per product $\rightarrow$ 100GB index
+\end{itemize}
+
+\subsubsection{High-Level Architecture}
+
+\textbf{Components:}
+
+\begin{enumerate}
+    \item \textbf{API Gateway:} Load balancing, rate limiting, authentication
+    \item \textbf{Search Service:} Handles search requests, queries ElasticSearch
+    \item \textbf{ElasticSearch Cluster:} Inverted index for fast keyword search
+    \item \textbf{Ranking Service:} ML-based ranking (XGBoost)
+    \item \textbf{Feature Store (Redis):} Real-time features for ranking
+    \item \textbf{Autocomplete Service:} Trie-based prefix matching
+    \item \textbf{Personalization Service:} Retriever embeddings, user preferences
+    \item \textbf{Data Ingestion Pipeline:} Update search index from product catalog
+\end{enumerate}
+
+\textbf{Data Flow:}
+
+\begin{verbatim}
+Retailer -> API Gateway -> Search Service
+                              |
+                              v
+                         ElasticSearch (retrieve top 1000)
+                              |
+                              v
+                         Ranking Service (+ Redis features)
+                              |
+                              v
+                         XGBoost Model (re-rank to top 50)
+                              |
+                              v
+                         Personalization Layer
+                              |
+                              v
+                         Return ranked results
+\end{verbatim}
+
+\subsubsection{Detailed Component Design}
+
+\textbf{1. ElasticSearch Cluster}
+
+\textbf{Index Schema:}
+\begin{lstlisting}[language=json]
+{
+  "product_id": "12345",
+  "name": "Ceramic Mug Set",
+  "description": "Handmade ceramic mugs, set of 4",
+  "category": "Home & Kitchen > Drinkware",
+  "brand_id": "brand_789",
+  "brand_name": "ArtisanCraft Co",
+  "price": 45.99,
+  "tags": ["ceramic", "handmade", "eco-friendly"],
+  "min_order_quantity": 6,
+  "inventory_count": 150,
+  "brand_location": "Portland, OR",
+  "created_at": "2024-01-15T10:00:00Z",
+  "popularity_score": 8.5
+}
+\end{lstlisting}
+
+\textbf{Scoring Function:}
+
+ElasticSearch uses BM25 for text relevance, but we can customize:
+
+\begin{equation}
+\text{score} = \alpha \cdot \text{BM25}(q, d) + \beta \cdot \text{popularity}(d) + \gamma \cdot \text{recency}(d)
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $\text{BM25}(q, d)$: keyword match score
+    \item $\text{popularity}(d)$: click-through rate, order rate
+    \item $\text{recency}(d)$: boost newer products
+    \item $\alpha, \beta, \gamma$: learned weights
+\end{itemize}
+
+\textbf{Sharding Strategy:}
+\begin{itemize}
+    \item Shard by product ID hash (uniform distribution)
+    \item 10 shards for 10M products = 1M products/shard
+    \item 3 replicas per shard for high availability
+\end{itemize}
+
+\textbf{2. Ranking Service with XGBoost}
+
+After ElasticSearch retrieves 1,000 candidates, re-rank with ML model.
+
+\textbf{Features (hundreds per product):}
+\begin{itemize}
+    \item \textbf{Text relevance:} BM25 score, title match, description match
+    \item \textbf{Retailer-product similarity:} Embedding cosine similarity
+    \item \textbf{Engagement signals:} CTR, add-to-cart rate, purchase rate
+    \item \textbf{Product attributes:} Price, category, brand popularity, inventory
+    \item \textbf{Personalization:} Retailer's past category preferences, price sensitivity
+\end{itemize}
+
+\textbf{Model Training:}
+\begin{itemize}
+    \item \textbf{Objective:} Predict probability of order given search query
+    \item \textbf{Training data:} Search queries + clicked/ordered products (positive), random products (negative)
+    \item \textbf{Model:} XGBoost (gradient boosted trees)
+    \item \textbf{Offline evaluation:} NDCG@10, Precision@10, Recall@50
+    \item \textbf{Online evaluation:} A/B testing (CTR, conversion rate, revenue)
+\end{itemize}
+
+\textbf{Feature Retrieval:}
+\begin{itemize}
+    \item Store features in Redis (key: product\_id, value: feature vector)
+    \item Batch fetch 1,000 products' features in parallel
+    \item Latency: < 10ms for Redis lookup
+\end{itemize}
+
+\textbf{3. Autocomplete Service}
+
+\textbf{Data Structure: Trie (Prefix Tree)}
+
+\begin{lstlisting}
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
+        self.suggestions = []  # Top 5 completions
+
+class Autocomplete:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, query, frequency):
+        node = self.root
+        for char in query.lower():
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+
+        node.is_end_of_word = True
+        # Update top suggestions at this node
+        self.update_suggestions(node, query, frequency)
+
+    def search(self, prefix):
+        node = self.root
+        for char in prefix.lower():
+            if char not in node.children:
+                return []
+            node = node.children[char]
+
+        return node.suggestions[:5]
+\end{lstlisting}
+
+\textbf{Populating Autocomplete:}
+\begin{itemize}
+    \item Mine frequent queries from search logs
+    \item Use product names, brand names, category names
+    \item Update daily from offline job
+    \item Store in Redis for low-latency lookup
+\end{itemize}
+
+\textbf{4. Personalization Layer}
+
+Use \textbf{embedding-based retrieval} to personalize results.
+
+\textbf{Embeddings:}
+\begin{itemize}
+    \item \textbf{Retailer embeddings:} Learned from order history, clicks, store category
+    \item \textbf{Product embeddings:} Learned from co-purchase patterns, attributes
+    \item \textbf{Similarity:} Cosine similarity in embedding space
+\end{itemize}
+
+\textbf{Model:} Two-tower neural network (similar to YouTube's DNN)
+\begin{itemize}
+    \item \textbf{Retailer tower:} Encode retailer features $\rightarrow$ retailer embedding
+    \item \textbf{Product tower:} Encode product features $\rightarrow$ product embedding
+    \item \textbf{Training:} Maximize dot product for positive pairs (retailer ordered product)
+\end{itemize}
+
+\textbf{Personalization at Serving:}
+\begin{lstlisting}
+def personalize(ranked_products, retailer_embedding):
+    """
+    Re-weight top 50 products by retailer-product similarity.
+    """
+    for product in ranked_products:
+        similarity = cosine_similarity(
+            retailer_embedding,
+            product.embedding
+        )
+        product.score = 0.7 * product.score + 0.3 * similarity
+
+    return sorted(ranked_products, key=lambda p: p.score, reverse=True)
+\end{lstlisting}
+
+\subsubsection{Database Schema}
+
+\textbf{Products Table:}
+\begin{lstlisting}[language=SQL]
+CREATE TABLE products (
+    product_id BIGINT PRIMARY KEY,
+    brand_id BIGINT,
+    name VARCHAR(255),
+    description TEXT,
+    category_id INT,
+    price DECIMAL(10, 2),
+    min_order_qty INT,
+    inventory_count INT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    INDEX (brand_id),
+    INDEX (category_id)
+);
+\end{lstlisting}
+
+\textbf{Search Logs Table:}
+\begin{lstlisting}[language=SQL]
+CREATE TABLE search_logs (
+    log_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    retailer_id BIGINT,
+    query VARCHAR(500),
+    clicked_product_id BIGINT,
+    position INT,
+    timestamp TIMESTAMP,
+    INDEX (retailer_id, timestamp),
+    INDEX (query)
+);
+\end{lstlisting}
+
+\subsubsection{API Design}
+
+\textbf{Search API:}
+\begin{lstlisting}[language=json]
+GET /api/v1/search?q=ceramic+mugs&filters={"category":"drinkware","price_max":50}&page=1&size=20
+
+Response:
+{
+  "query": "ceramic mugs",
+  "total_results": 1523,
+  "page": 1,
+  "size": 20,
+  "products": [
+    {
+      "product_id": 12345,
+      "name": "Ceramic Mug Set",
+      "brand": "ArtisanCraft Co",
+      "price": 45.99,
+      "image_url": "https://...",
+      "min_order": 6
+    },
+    ...
+  ],
+  "facets": {
+    "categories": {"drinkware": 800, "home_decor": 300},
+    "price_ranges": {"0-25": 500, "25-50": 700, "50-100": 323}
+  }
+}
+\end{lstlisting}
+
+\textbf{Autocomplete API:}
+\begin{lstlisting}[language=json]
+GET /api/v1/autocomplete?q=cera
+
+Response:
+{
+  "suggestions": [
+    "ceramic mugs",
+    "ceramic vases",
+    "ceramic plates",
+    "ceramic bowls",
+    "ceramic decor"
+  ]
+}
+\end{lstlisting}
+
+\subsubsection{Optimizations \& Tradeoffs}
+
+\textbf{Caching Strategy:}
+\begin{itemize}
+    \item \textbf{CDN:} Cache popular search results (top 1000 queries)
+    \item \textbf{Redis:} Cache recent searches per retailer
+    \item \textbf{TTL:} 5 minutes for search results (balance freshness vs. performance)
+\end{itemize}
+
+\textbf{Cold Start Problem:}
+\begin{itemize}
+    \item \textbf{New retailers:} Use store category to initialize preferences
+    \item \textbf{New products:} Boost in ranking for visibility, collect data quickly
+\end{itemize}
+
+\textbf{Handling Spikes:}
+\begin{itemize}
+    \item Auto-scaling ElasticSearch cluster
+    \item Rate limiting per retailer (prevent abuse)
+    \item Degrade gracefully: skip personalization if Redis is slow
+\end{itemize}
+
+\textbf{Consistency Tradeoffs:}
+\begin{itemize}
+    \item Product updates: eventual consistency OK (few minutes delay)
+    \item Critical updates (out-of-stock): real-time update via pub/sub
+\end{itemize}
+
+\subsubsection{Metrics \& Monitoring}
+
+\textbf{System Metrics:}
+\begin{itemize}
+    \item Latency: p50, p95, p99
+    \item QPS, error rate, cache hit rate
+    \item ElasticSearch shard health
+\end{itemize}
+
+\textbf{Business Metrics:}
+\begin{itemize}
+    \item CTR (click-through rate) per search
+    \item Conversion rate (search $\rightarrow$ order)
+    \item Revenue per search
+    \item Zero-result rate (searches with no results)
+\end{itemize}
+
+\textbf{ML Metrics:}
+\begin{itemize}
+    \item NDCG@10 (offline)
+    \item Precision@5, Recall@20 (offline)
+    \item Online A/B testing (CTR, conversion)
+\end{itemize}
+
+\subsection{System Design Problem 2: Design Faire's Recommendation System}
+
+\subsubsection{Problem Statement}
+
+\textit{Design a recommendation system for Faire's homepage and product pages. When a retailer logs in, show personalized product recommendations. Also show "You may also like" on product detail pages.}
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Personalized homepage recommendations (50 products)
+    \item "Similar products" on product pages (10 products)
+    \item Handle cold start (new retailers, new products)
+    \item Low latency (< 100ms)
+    \item Optimize for order conversion, not just clicks
+\end{itemize}
+
+\subsubsection{Approach: Two-Stage Retrieval + Ranking}
+
+This mirrors Faire's actual architecture (based on their engineering blog).
+
+\textbf{Stage 1: Candidate Generation}
+\begin{itemize}
+    \item Retrieve 1,000 candidate products from multiple sources:
+    \begin{enumerate}
+        \item \textbf{Collaborative filtering:} Retailers similar to you ordered these
+        \item \textbf{Content-based:} Products similar to what you've ordered
+        \item \textbf{Trending:} Popular products in your category
+        \item \textbf{New arrivals:} Recently added products
+    \end{enumerate}
+\end{itemize}
+
+\textbf{Stage 2: Ranking}
+\begin{itemize}
+    \item Score 1,000 candidates with XGBoost
+    \item Features: retailer-product similarity, engagement, diversity
+    \item Return top 50
+\end{itemize}
+
+\subsubsection{Collaborative Filtering with Embeddings}
+
+Faire uses \textbf{embedding-based CF} learned from implicit feedback.
+
+\textbf{Training Data:}
+\begin{itemize}
+    \item \textbf{Positive:} (retailer, product) pairs from orders, add-to-cart, favorites
+    \item \textbf{Negative:} Random products (or hard negatives: clicked but not ordered)
+\end{itemize}
+
+\textbf{Model: Two-Tower DNN}
+
+\begin{lstlisting}
+import torch
+import torch.nn as nn
+
+class TwoTowerModel(nn.Module):
+    def __init__(self, num_retailers, num_products, embedding_dim=128):
+        super().__init__()
+
+        # Retailer tower
+        self.retailer_embedding = nn.Embedding(num_retailers, embedding_dim)
+        self.retailer_fc = nn.Sequential(
+            nn.Linear(embedding_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128)
+        )
+
+        # Product tower
+        self.product_embedding = nn.Embedding(num_products, embedding_dim)
+        self.product_fc = nn.Sequential(
+            nn.Linear(embedding_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128)
+        )
+
+    def forward(self, retailer_ids, product_ids):
+        # Encode retailer
+        retailer_emb = self.retailer_embedding(retailer_ids)
+        retailer_vec = self.retailer_fc(retailer_emb)
+
+        # Encode product
+        product_emb = self.product_embedding(product_ids)
+        product_vec = self.product_fc(product_emb)
+
+        # Dot product (similarity)
+        scores = (retailer_vec * product_vec).sum(dim=1)
+
+        return torch.sigmoid(scores)
+\end{lstlisting}
+
+\textbf{Loss Function:}
+\begin{equation}
+\mathcal{L} = -\sum_{(r,p) \in \text{positive}} \log \sigma(e_r \cdot e_p) - \sum_{(r,p') \in \text{negative}} \log(1 - \sigma(e_r \cdot e_{p'}))
+\end{equation}
+
+\textbf{Serving:}
+\begin{itemize}
+    \item Store product embeddings in FAISS (Approximate Nearest Neighbors)
+    \item Given retailer embedding, find top K nearest products
+    \item Latency: < 10ms for ANN search
+\end{itemize}
+
+\subsubsection{Product-to-Product Recommendations}
+
+For "You may also like" on product pages:
+
+\textbf{Approach 1: Co-Purchase Matrix}
+\begin{itemize}
+    \item Build matrix: product A $\times$ product B = count of co-purchases
+    \item Use collaborative filtering (item-item similarity)
+    \item Cosine similarity in co-purchase space
+\end{itemize}
+
+\textbf{Approach 2: Embedding Similarity}
+\begin{itemize}
+    \item Use product embeddings from two-tower model
+    \item For product P, find K nearest neighbors in embedding space
+    \item Pre-compute and cache in Redis
+\end{itemize}
+
+\subsubsection{Diversity \& Exploration}
+
+Avoid showing only similar products (filter bubble).
+
+\textbf{Diversity Technique: MMR (Maximal Marginal Relevance)}
+
+\begin{equation}
+\text{MMR}(p) = \lambda \cdot \text{relevance}(p) - (1 - \lambda) \cdot \max_{p' \in S} \text{similarity}(p, p')
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $S$: already selected products
+    \item $\lambda$: tradeoff between relevance and diversity (e.g., 0.7)
+\end{itemize}
+
+\textbf{Exploration: Thompson Sampling}
+\begin{itemize}
+    \item Occasionally show new/underexplored products
+    \item Use multi-armed bandit to balance exploration vs. exploitation
+\end{itemize}
+
+\subsubsection{Two-Sided Optimization}
+
+Faire must balance:
+\begin{itemize}
+    \item \textbf{Retailer utility:} Relevant, high-quality products
+    \item \textbf{Brand utility:} Sufficient exposure, especially for new brands
+\end{itemize}
+
+\textbf{Approach:}
+\begin{itemize}
+    \item Add \textbf{brand diversity} constraint: limit products per brand
+    \item Boost \textbf{new brands} in ranking (time decay)
+    \item Monitor brand-level metrics: impression share, order share
+\end{itemize}
+
+\subsection{Follow-Up Questions}
+
+Be prepared for these follow-ups:
+
+\begin{enumerate}
+    \item \textbf{How would you handle multi-language search?}
+    \begin{itemize}
+        \item Use language-specific analyzers in ElasticSearch
+        \item Cross-lingual embeddings for semantic search
+        \item Translate queries to English, then search
+    \end{itemize}
+
+    \item \textbf{How to prevent spam/fake products in search results?}
+    \begin{itemize}
+        \item ML classifier to detect spam (based on title, description patterns)
+        \item Human review queue for flagged products
+        \item Downrank products with low engagement or high return rate
+    \end{itemize}
+
+    \item \textbf{How to A/B test ranking algorithms?}
+    \begin{itemize}
+        \item Split traffic by retailer ID hash
+        \item Track metrics: CTR, conversion, revenue per search
+        \item Use statistical significance testing (t-test, chi-square)
+        \item Gradual rollout: 5\% $\rightarrow$ 10\% $\rightarrow$ 50\% $\rightarrow$ 100\%
+    \end{itemize}
+
+    \item \textbf{What if ElasticSearch goes down?}
+    \begin{itemize}
+        \item Fallback to cached popular queries
+        \item Degrade to simpler search (MySQL full-text search)
+        \item Show trending products as fallback
+        \item Alert on-call engineer, auto-restart nodes
+    \end{itemize}
+
+    \item \textbf{How to scale to 100K QPS?}
+    \begin{itemize}
+        \item Horizontal scaling: more ElasticSearch nodes
+        \item Read replicas for feature store (Redis)
+        \item CDN for static content and popular searches
+        \item Database sharding by geography or retailer segment
+    \end{itemize}
+\end{enumerate}
+
+% ============================================================================
+\section{Part 3: Machine Learning Basics \& Evaluation Metrics}
+% ============================================================================
+
+\subsection{Why ML Metrics Matter for Faire}
+
+Faire's search and recommendations are ML-powered. You need to:
+\begin{itemize}
+    \item Understand common ML evaluation metrics
+    \item Know when to use each metric
+    \item Articulate tradeoffs (precision vs. recall, etc.)
+    \item Relate metrics to business goals
+\end{itemize}
+
+\subsection{Classification Metrics}
+
+\subsubsection{Confusion Matrix}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+& \textbf{Predicted Positive} & \textbf{Predicted Negative} \\
+\hline
+\textbf{Actual Positive} & True Positive (TP) & False Negative (FN) \\
+\hline
+\textbf{Actual Negative} & False Positive (FP) & True Negative (TN) \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsubsection{Core Metrics}
+
+\textbf{1. Accuracy}
+\begin{equation}
+\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+
+\textbf{When to use:} Balanced classes
+
+\textbf{Limitation:} Misleading for imbalanced datasets (e.g., fraud detection: 99\% non-fraud)
+
+\textbf{2. Precision}
+\begin{equation}
+\text{Precision} = \frac{TP}{TP + FP}
+\end{equation}
+
+\textbf{Interpretation:} Of all predicted positives, how many are correct?
+
+\textbf{When to use:} Cost of FP is high (e.g., spam detection - don't mark legitimate emails as spam)
+
+\textbf{Faire Example:} Predicting "retailer will order this product"
+\begin{itemize}
+    \item High precision: most recommended products are relevant
+    \item Low precision: many irrelevant products shown
+\end{itemize}
+
+\textbf{3. Recall (Sensitivity, True Positive Rate)}
+\begin{equation}
+\text{Recall} = \frac{TP}{TP + FN}
+\end{equation}
+
+\textbf{Interpretation:} Of all actual positives, how many did we catch?
+
+\textbf{When to use:} Cost of FN is high (e.g., disease detection - don't miss sick patients)
+
+\textbf{Faire Example:} Search results
+\begin{itemize}
+    \item High recall: retrieve all relevant products
+    \item Low recall: miss many relevant products
+\end{itemize}
+
+\textbf{4. F1 Score}
+\begin{equation}
+F1 = 2 \cdot \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} = \frac{2TP}{2TP + FP + FN}
+\end{equation}
+
+\textbf{When to use:} Balance between precision and recall, imbalanced classes
+
+\textbf{Limitation:} Treats precision and recall equally (sometimes one matters more)
+
+\textbf{5. ROC-AUC}
+
+\textbf{ROC Curve:} Plot of True Positive Rate (Recall) vs. False Positive Rate at various thresholds
+
+\begin{equation}
+\text{FPR} = \frac{FP}{FP + TN}
+\end{equation}
+
+\textbf{AUC (Area Under Curve):} Probability that model ranks random positive higher than random negative
+
+\textbf{When to use:} Compare models, threshold-agnostic evaluation
+
+\textbf{Limitation:} Optimistic for imbalanced datasets (use PR-AUC instead)
+
+\subsubsection{Example Interview Question}
+
+\textit{Question:} Faire wants to predict which products a retailer will order. You build a model with 90\% accuracy. Is this good?
+
+\textbf{Answer:}
+\begin{itemize}
+    \item \textbf{Need more context:} What's the class distribution?
+    \item If only 5\% of shown products are ordered, a naive model (always predict "no order") has 95\% accuracy but is useless.
+    \item \textbf{Better metrics:} Precision@K, Recall@K (see ranking metrics below)
+    \item \textbf{Business metric:} Revenue per recommended product
+\end{itemize}
+
+\subsection{Ranking Metrics}
+
+For search and recommendations, we care about \textbf{order} of results, not just classification.
+
+\subsubsection{Precision@K and Recall@K}
+
+\textbf{Precision@K:}
+\begin{equation}
+\text{Precision@K} = \frac{\text{\# relevant items in top K}}{K}
+\end{equation}
+
+\textbf{Recall@K:}
+\begin{equation}
+\text{Recall@K} = \frac{\text{\# relevant items in top K}}{\text{total relevant items}}
+\end{equation}
+
+\textbf{Example:} Search for "ceramic mugs", 100 total relevant products
+
+Top 10 results: 7 relevant, 3 irrelevant
+\begin{itemize}
+    \item Precision@10 = 7/10 = 0.7
+    \item Recall@10 = 7/100 = 0.07
+\end{itemize}
+
+\textbf{Faire Use Case:} Precision@10 for search (top 10 results matter most)
+
+\subsubsection{Mean Average Precision (MAP)}
+
+\textbf{Average Precision (AP):} Average of precision values at each relevant position
+
+\begin{equation}
+AP = \frac{1}{|\text{relevant}|} \sum_{k=1}^{n} \text{Precision@k} \times \text{rel}(k)
+\end{equation}
+
+Where $\text{rel}(k) = 1$ if item at position $k$ is relevant, else 0.
+
+\textbf{MAP:} Average AP across multiple queries
+
+\textbf{Example:}
+
+Ranked list: [R, NR, R, R, NR, R] (R = relevant, NR = not relevant)
+
+Relevant positions: 1, 3, 4, 6
+
+Precision at each:
+\begin{itemize}
+    \item P@1 = 1/1 = 1.0
+    \item P@3 = 2/3 = 0.67
+    \item P@4 = 3/4 = 0.75
+    \item P@6 = 4/6 = 0.67
+\end{itemize}
+
+$AP = \frac{1}{4}(1.0 + 0.67 + 0.75 + 0.67) = 0.77$
+
+\textbf{Limitation:} Doesn't consider position (item at rank 1 vs. rank 10 weighted equally)
+
+\subsubsection{Normalized Discounted Cumulative Gain (NDCG)}
+
+\textbf{Why NDCG?} Addresses two issues:
+\begin{enumerate}
+    \item \textbf{Graded relevance:} Items can be highly relevant, somewhat relevant, or not relevant (not just binary)
+    \item \textbf{Position matters:} Higher-ranked items should be more relevant
+\end{enumerate}
+
+\textbf{Cumulative Gain (CG):}
+\begin{equation}
+CG@K = \sum_{i=1}^{K} \text{rel}_i
+\end{equation}
+
+Where $\text{rel}_i$ is relevance score of item at position $i$ (e.g., 0, 1, 2, 3)
+
+\textbf{Discounted Cumulative Gain (DCG):}
+\begin{equation}
+DCG@K = \sum_{i=1}^{K} \frac{\text{rel}_i}{\log_2(i + 1)}
+\end{equation}
+
+Position discount: items at lower ranks contribute less
+
+\textbf{Ideal DCG (IDCG):}
+
+DCG if items were perfectly ranked by relevance
+
+\textbf{Normalized DCG (NDCG):}
+\begin{equation}
+NDCG@K = \frac{DCG@K}{IDCG@K}
+\end{equation}
+
+Range: [0, 1], where 1 = perfect ranking
+
+\textbf{Example:}
+
+Ranked list with relevance scores: [3, 2, 0, 1, 2]
+
+$DCG@5 = \frac{3}{\log_2 2} + \frac{2}{\log_2 3} + \frac{0}{\log_2 4} + \frac{1}{\log_2 5} + \frac{2}{\log_2 6}$
+
+$DCG@5 = 3.0 + 1.26 + 0 + 0.43 + 0.77 = 5.46$
+
+Ideal ranking: [3, 2, 2, 1, 0]
+
+$IDCG@5 = 3.0 + 1.26 + 0.77 + 0.43 + 0 = 5.46$
+
+$NDCG@5 = 5.46 / 5.46 = 1.0$ (if we had perfect ranking)
+
+For actual ranking: $NDCG@5 = 5.46 / 5.46 = 1.0$ (happens to be perfect in this case)
+
+\textbf{Faire Use Case:} NDCG@10 for evaluating search ranking offline
+
+\subsubsection{Hit Rate (Recall@K for Recommendations)}
+
+\textbf{Definition:} Proportion of users who found at least one relevant item in top K recommendations
+
+\begin{equation}
+\text{Hit Rate@K} = \frac{\text{\# users with } \geq 1 \text{ relevant item in top K}}{\text{total users}}
+\end{equation}
+
+\textbf{Faire Example:}
+
+100 retailers, show top 10 recommendations
+\begin{itemize}
+    \item 80 retailers ordered at least one recommended product
+    \item Hit Rate@10 = 80/100 = 0.8
+\end{itemize}
+
+\subsection{Regression Metrics}
+
+If predicting continuous values (e.g., estimated order value):
+
+\subsubsection{Mean Absolute Error (MAE)}
+
+\begin{equation}
+MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
+\end{equation}
+
+\textbf{Pros:} Easy to interpret (average error in same units as target)
+
+\textbf{Cons:} Treats all errors equally (large errors not penalized more)
+
+\subsubsection{Mean Squared Error (MSE)}
+
+\begin{equation}
+MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+\end{equation}
+
+\textbf{Pros:} Penalizes large errors more heavily
+
+\textbf{Cons:} Units are squared (harder to interpret)
+
+\subsubsection{Root Mean Squared Error (RMSE)}
+
+\begin{equation}
+RMSE = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
+\end{equation}
+
+\textbf{Pros:} Same units as target, penalizes large errors
+
+\subsubsection{R-Squared ($R^2$)}
+
+\begin{equation}
+R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
+\end{equation}
+
+\textbf{Interpretation:} Proportion of variance explained by model
+
+\textbf{Range:} $(-\infty, 1]$, where 1 = perfect predictions, 0 = model is as good as mean baseline
+
+\subsection{A/B Testing \& Online Metrics}
+
+Offline metrics (NDCG, Precision@K) don't always correlate with business outcomes. Must A/B test.
+
+\subsubsection{Online Metrics for Search/Recommendations}
+
+\textbf{Engagement Metrics:}
+\begin{itemize}
+    \item \textbf{Click-Through Rate (CTR):} clicks / impressions
+    \item \textbf{Add-to-Cart Rate:} adds / impressions
+    \item \textbf{Conversion Rate:} orders / impressions
+\end{itemize}
+
+\textbf{Business Metrics:}
+\begin{itemize}
+    \item \textbf{Revenue per search}
+    \item \textbf{Average order value (AOV)}
+    \item \textbf{Customer lifetime value (LTV)}
+\end{itemize}
+
+\textbf{User Experience:}
+\begin{itemize}
+    \item \textbf{Session duration}
+    \item \textbf{Bounce rate}
+    \item \textbf{Zero-result rate} (searches with no results)
+\end{itemize}
+
+\subsubsection{A/B Test Design}
+
+\textbf{Hypothesis:} New ranking model increases conversion rate
+
+\textbf{Setup:}
+\begin{itemize}
+    \item \textbf{Control group:} 50\% of retailers see current ranking
+    \item \textbf{Treatment group:} 50\% see new ranking
+    \item \textbf{Randomization:} Hash retailer ID to assign group
+\end{itemize}
+
+\textbf{Duration:} Run for 2 weeks (capture weekly patterns)
+
+\textbf{Sample Size:} Calculate needed sample for statistical power
+
+\begin{equation}
+n = \frac{2(Z_{\alpha/2} + Z_\beta)^2 \sigma^2}{(\mu_1 - \mu_0)^2}
+\end{equation}
+
+\textbf{Statistical Test:}
+\begin{itemize}
+    \item \textbf{Metric:} Conversion rate (proportion)
+    \item \textbf{Test:} Two-proportion z-test
+    \item \textbf{Significance level:} $\alpha = 0.05$
+\end{itemize}
+
+\textbf{Decision:}
+\begin{itemize}
+    \item If $p < 0.05$ and treatment is better: ship new model
+    \item If not significant: keep investigating (longer test, larger sample)
+    \item Monitor for novelty effect (users like new things initially)
+\end{itemize}
+
+\subsection{Common ML Interview Questions}
+
+\subsubsection{Question 1: Precision vs. Recall Tradeoff}
+
+\textit{You're building a spam product detector for Faire. Would you optimize for precision or recall? Why?}
+
+\textbf{Answer:}
+
+\textbf{Optimize for precision} (minimize false positives).
+
+\textbf{Reasoning:}
+\begin{itemize}
+    \item \textbf{FP (false positive):} Legitimate product marked as spam
+    \begin{itemize}
+        \item Harm: Brand loses sales, may leave platform
+        \item High cost to business
+    \end{itemize}
+    \item \textbf{FN (false negative):} Spam product not caught
+    \begin{itemize}
+        \item Harm: Some low-quality products shown
+        \item Lower cost (can be caught by user reports)
+    \end{itemize}
+\end{itemize}
+
+\textbf{Approach:}
+\begin{itemize}
+    \item Set high threshold for spam classification (e.g., 0.95 probability)
+    \item Human review queue for borderline cases
+    \item Monitor precision/recall in production
+\end{itemize}
+
+\subsubsection{Question 2: Imbalanced Dataset}
+
+\textit{Only 2\% of shown products are actually ordered. How do you handle this in training?}
+
+\textbf{Answer:}
+
+\begin{enumerate}
+    \item \textbf{Resampling:}
+    \begin{itemize}
+        \item \textbf{Oversample} minority class (ordered products)
+        \item \textbf{Undersample} majority class (not ordered)
+        \item Use SMOTE (Synthetic Minority Over-sampling)
+    \end{itemize}
+
+    \item \textbf{Class Weights:}
+    \begin{itemize}
+        \item Assign higher weight to minority class in loss function
+        \item XGBoost: \texttt{scale\_pos\_weight} parameter
+    \end{itemize}
+
+    \item \textbf{Evaluation Metrics:}
+    \begin{itemize}
+        \item Don't use accuracy (misleading)
+        \item Use Precision@K, Recall@K, F1, AUC-PR
+    \end{itemize}
+
+    \item \textbf{Hard Negative Mining:}
+    \begin{itemize}
+        \item Sample negatives intelligently (products that were clicked but not ordered)
+        \item Harder negatives improve model discrimination
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Question 3: NDCG vs. MAP}
+
+\textit{When would you use NDCG instead of MAP for search evaluation?}
+
+\textbf{Answer:}
+
+\textbf{Use NDCG when:}
+\begin{enumerate}
+    \item \textbf{Graded relevance:} Products have different levels of relevance (highly relevant, somewhat relevant, not relevant)
+    \item \textbf{Position matters a lot:} Top results should be weighted much more than lower results
+    \item \textbf{Industry standard:} NDCG is more common in industry (Google, Bing, etc.)
+\end{enumerate}
+
+\textbf{Use MAP when:}
+\begin{enumerate}
+    \item \textbf{Binary relevance:} Items are either relevant or not (no grades)
+    \item \textbf{All relevant items matter:} Not just top K
+\end{enumerate}
+
+\textbf{For Faire search:} Use NDCG@10 (graded relevance, top 10 results critical)
+
+\subsection{ML System Design: Click Prediction Model}
+
+\textit{Design an ML system to predict click probability for search results at Faire.}
+
+\subsubsection{Problem Formulation}
+
+\textbf{Input:} (retailer, query, product)
+
+\textbf{Output:} P(click | retailer, query, product)
+
+\textbf{Training Data:} Search logs (query, shown products, clicked products)
+
+\subsubsection{Feature Engineering}
+
+\textbf{Query Features:}
+\begin{itemize}
+    \item Query length, word count
+    \item Query category (intent classification)
+    \item Historical CTR for this query
+\end{itemize}
+
+\textbf{Product Features:}
+\begin{itemize}
+    \item Price, category, brand
+    \item Popularity (orders, clicks, add-to-carts)
+    \item Image quality score
+    \item Inventory level
+\end{itemize}
+
+\textbf{Retailer Features:}
+\begin{itemize}
+    \item Store category, location
+    \item Past order history (categories, price range)
+    \item Account age, activity level
+\end{itemize}
+
+\textbf{Query-Product Features:}
+\begin{itemize}
+    \item Text match score (BM25)
+    \item Embedding similarity (query embedding · product embedding)
+    \item Position in search results (strong predictor!)
+\end{itemize}
+
+\textbf{Retailer-Product Features:}
+\begin{itemize}
+    \item Cosine similarity in embedding space
+    \item Did retailer order this category before?
+    \item Price relative to retailer's avg. order value
+\end{itemize}
+
+\subsubsection{Model Choice}
+
+\textbf{Option 1: XGBoost (Faire's choice)}
+\begin{itemize}
+    \item \textbf{Pros:} Fast training, handles tabular features well, interpretable
+    \item \textbf{Cons:} Doesn't capture complex interactions automatically
+\end{itemize}
+
+\textbf{Option 2: Deep Neural Network}
+\begin{itemize}
+    \item \textbf{Pros:} Learns feature interactions, works well with embeddings
+    \item \textbf{Cons:} Slower, harder to interpret, needs more data
+\end{itemize}
+
+\textbf{Hybrid:} Use embeddings from DNN as features in XGBoost
+
+\subsubsection{Training Pipeline}
+
+\begin{enumerate}
+    \item \textbf{Data Collection:} Stream search logs to data warehouse (Kinesis)
+    \item \textbf{Feature Engineering:} Daily batch job (Spark) to compute features
+    \item \textbf{Training:} Weekly re-train XGBoost on last 30 days of data
+    \item \textbf{Evaluation:} Offline: AUC, LogLoss; Online: A/B test CTR
+    \item \textbf{Deployment:} Export model to PMML, load in ranking service
+\end{enumerate}
+
+\subsubsection{Serving}
+
+\begin{lstlisting}
+def rank_search_results(retailer_id, query, candidates):
+    # Get retailer features from cache
+    retailer_features = redis.get(f"retailer:{retailer_id}")
+
+    # Compute query features
+    query_features = compute_query_features(query)
+
+    # For each candidate product
+    scored_products = []
+    for product in candidates:
+        # Get product features from cache
+        product_features = redis.get(f"product:{product.id}")
+
+        # Compute interaction features
+        interaction_features = compute_interaction_features(
+            retailer_features, query_features, product_features
+        )
+
+        # Combine all features
+        feature_vector = concatenate([
+            retailer_features,
+            query_features,
+            product_features,
+            interaction_features
+        ])
+
+        # Predict click probability
+        click_prob = xgboost_model.predict(feature_vector)
+
+        scored_products.append((product, click_prob))
+
+    # Sort by predicted click probability
+    scored_products.sort(key=lambda x: x[1], reverse=True)
+
+    return [p for p, score in scored_products]
+\end{lstlisting}
+
+\subsubsection{Position Bias Problem}
+
+\textbf{Issue:} Items at top positions get more clicks simply due to position, not relevance.
+
+\textbf{Solutions:}
+\begin{enumerate}
+    \item \textbf{Position feature:} Include position as feature (naive, doesn't fix bias)
+    \item \textbf{Inverse Propensity Weighting:} Weight training examples by $1/P(\text{position})$
+    \item \textbf{Randomization:} Randomly shuffle top results for small \% of traffic to collect unbiased data
+    \item \textbf{Examination hypothesis:} Model P(click) = P(relevant) $\times$ P(examined)
+\end{enumerate}
+
+% ============================================================================
+\section{Part 4: Behavioral \& Culture Fit}
+% ============================================================================
+
+\subsection{Faire's Mission \& Values}
+
+\textbf{Mission:} Empower entrepreneurs to chase their dreams
+
+\textbf{Vision:} Build the future of commerce where anyone can start and grow a business
+
+\textbf{Values (inferred from job descriptions and culture):}
+\begin{itemize}
+    \item \textbf{Customer obsession:} Retailers and brands are customers
+    \item \textbf{Ownership:} Engineers lead projects end-to-end
+    \item \textbf{Data-driven:} Decisions backed by metrics and experiments
+    \item \textbf{Collaboration:} Work with cross-functional teams
+    \item \textbf{Impact:} Ship features that matter to real businesses
+\end{itemize}
+
+\subsection{Common Behavioral Questions}
+
+\subsubsection{Question 1: Why Faire?}
+
+\textbf{Structure your answer:}
+\begin{enumerate}
+    \item \textbf{Mission alignment:} Why you care about supporting small businesses
+    \item \textbf{Technical challenge:} Excited about search/ML/two-sided marketplace problems
+    \item \textbf{Growth stage:} Opportunity to make impact at a scaling startup
+    \item \textbf{Personal connection:} Maybe you have friends who run small shops
+\end{enumerate}
+
+\textbf{Example Answer:}
+
+\textit{"I'm drawn to Faire because of the mission to empower independent retailers. My aunt runs a small boutique, and I've seen firsthand how challenging wholesale sourcing can be—long payment terms, high minimums, limited product discovery. Faire solves these pain points beautifully.}
+
+\textit{From a technical perspective, I'm excited about the search and recommendation challenges. Building ML systems that balance retailer preferences with brand visibility is a fascinating two-sided optimization problem. And as someone passionate about data-driven product development, Faire's focus on experimentation and metrics really resonates with me."}
+
+\subsubsection{Question 2: Tell me about a time you led a project}
+
+\textbf{Use STAR method:}
+\begin{itemize}
+    \item \textbf{Situation:} Set the context
+    \item \textbf{Task:} What needed to be done?
+    \item \textbf{Action:} What did YOU do? (focus on your contributions)
+    \item \textbf{Result:} Quantifiable impact
+\end{itemize}
+
+\textbf{Prepare examples for:}
+\begin{itemize}
+    \item Leading a technical project
+    \item Solving a challenging bug
+    \item Collaborating with non-engineers (PM, design)
+    \item Making a data-driven decision
+    \item Handling ambiguity or changing requirements
+    \item Dealing with a difficult teammate or situation
+\end{itemize}
+
+\subsubsection{Question 3: What metrics would you track for Faire?}
+
+This was mentioned as a common behavioral question. Show business acumen.
+
+\textbf{Retailer Metrics:}
+\begin{itemize}
+    \item \textbf{Acquisition:} New retailer signups, activation rate
+    \item \textbf{Engagement:} Monthly active retailers, searches per session
+    \item \textbf{Conversion:} Order conversion rate, avg. order value
+    \item \textbf{Retention:} Repeat purchase rate, churn rate, LTV
+\end{itemize}
+
+\textbf{Brand Metrics:}
+\begin{itemize}
+    \item \textbf{Acquisition:} New brand signups, catalog size
+    \item \textbf{Engagement:} Order volume, revenue
+    \item \textbf{Retention:} Brand churn, \% brands with repeat orders
+\end{itemize}
+
+\textbf{Platform Metrics:}
+\begin{itemize}
+    \item \textbf{GMV:} Gross Merchandise Value
+    \item \textbf{Take rate:} Platform revenue as \% of GMV
+    \item \textbf{Search quality:} Zero-result rate, CTR, conversion
+\end{itemize}
+
+\textbf{Two-Sided Health:}
+\begin{itemize}
+    \item \textbf{Liquidity:} \% retailers who find products to order
+    \item \textbf{Balance:} New brands getting orders vs. established brands
+\end{itemize}
+
+\subsection{Questions to Ask Interviewers}
+
+\textbf{About the Role:}
+\begin{itemize}
+    \item What does success look like in the first 3/6/12 months?
+    \item What are the biggest technical challenges the team is facing?
+    \item How does the team balance new features vs. tech debt?
+\end{itemize}
+
+\textbf{About the Team:}
+\begin{itemize}
+    \item How is the search team structured? (Frontend, backend, ML, data science?)
+    \item How do you collaborate with PM, design, and data science?
+    \item What's the on-call rotation like?
+\end{itemize}
+
+\textbf{About the Company:}
+\begin{itemize}
+    \item How has Faire's strategy evolved with the market?
+    \item What are the company's top priorities for the next year?
+    \item How do you balance retailer needs vs. brand needs in product decisions?
+\end{itemize}
+
+\textbf{Technical:}
+\begin{itemize}
+    \item What ML models are you currently using for search ranking?
+    \item How do you evaluate new ranking algorithms? (A/B testing process?)
+    \item What's the data infrastructure like? (Streaming vs. batch?)
+    \item How do you handle cold start for new retailers/brands?
+\end{itemize}
+
+% ============================================================================
+\section{Part 5: Preparation Strategy}
+% ============================================================================
+
+\subsection{4-Week Study Plan}
+
+\subsubsection{Week 1: Algorithms \& Data Structures}
+
+\textbf{Goal:} Solve 30 LeetCode problems (focus on medium difficulty)
+
+\textbf{Daily:} 2 hours
+\begin{itemize}
+    \item Day 1-2: Arrays \& Hashing (10 problems)
+    \item Day 3-4: Two Pointers, Sliding Window (10 problems)
+    \item Day 5: Binary Search (5 problems)
+    \item Day 6: Linked Lists (5 problems)
+    \item Day 7: Review \& mock interview
+\end{itemize}
+
+\textbf{Resources:}
+\begin{itemize}
+    \item LeetCode Blind 75
+    \item NeetCode (YouTube + roadmap)
+    \item Tech Interview Handbook
+\end{itemize}
+
+\subsubsection{Week 2: More Algorithms + SQL}
+
+\textbf{Goal:} 25 more problems + 10 SQL problems
+
+\textbf{Daily:} 2 hours
+\begin{itemize}
+    \item Day 1-2: Trees (BFS, DFS, BST) - 10 problems
+    \item Day 3: Graphs (BFS, DFS, Union-Find) - 5 problems
+    \item Day 4: Dynamic Programming (5 problems)
+    \item Day 5: SQL (10 problems on LeetCode)
+    \item Day 6: Heaps, Stacks, Queues (5 problems)
+    \item Day 7: Review \& mock interview
+\end{itemize}
+
+\subsubsection{Week 3: System Design}
+
+\textbf{Goal:} Master 4 system design problems + read about Faire's stack
+
+\textbf{Daily:} 2-3 hours
+\begin{itemize}
+    \item Day 1: Read Faire's engineering blog (craft.faire.com)
+    \item Day 2: Design search system (practice this guide's Problem 1)
+    \item Day 3: Design recommendation system (practice Problem 2)
+    \item Day 4: Design URL shortener (classic problem)
+    \item Day 5: Design Instagram/Twitter feed
+    \item Day 6: Review all designs, focus on tradeoffs
+    \item Day 7: Mock system design interview with friend
+\end{itemize}
+
+\textbf{Resources:}
+\begin{itemize}
+    \item Grokking the System Design Interview
+    \item System Design Primer (GitHub)
+    \item ByteByteGo (YouTube)
+\end{itemize}
+
+\subsubsection{Week 4: ML + Behavioral + Mock Interviews}
+
+\textbf{Goal:} Solidify ML metrics, prepare stories, simulate interviews
+
+\textbf{Daily:} 2-3 hours
+\begin{itemize}
+    \item Day 1: Study ML metrics (this guide's Part 3)
+    \item Day 2: Practice ML system design (click prediction, ranking)
+    \item Day 3: Prepare behavioral stories (STAR method, 5 stories)
+    \item Day 4: Mock coding interview (Pramp or friend)
+    \item Day 5: Mock system design interview
+    \item Day 6: Review all weak areas
+    \item Day 7: Rest, light review, prepare questions to ask
+\end{itemize}
+
+\subsection{Day Before Interview}
+
+\begin{itemize}
+    \item \textbf{Light review:} Skim your notes, don't cram
+    \item \textbf{Re-read this guide:} Sections 1, 2, 3 summaries
+    \item \textbf{Prepare questions:} Write down 5 questions to ask
+    \item \textbf{Logistics:} Test video/audio, charge laptop, have pen \& paper ready
+    \item \textbf{Mindset:} Get good sleep, stay confident!
+\end{itemize}
+
+\subsection{During the Interview}
+
+\textbf{Coding Interview:}
+\begin{enumerate}
+    \item \textbf{Clarify:} Ask questions, confirm input/output, edge cases
+    \item \textbf{Think aloud:} Explain your approach before coding
+    \item \textbf{Start simple:} Brute force first, then optimize
+    \item \textbf{Test:} Walk through examples, catch bugs
+    \item \textbf{Communicate:} If stuck, ask for hints (shows collaboration)
+\end{enumerate}
+
+\textbf{System Design Interview:}
+\begin{enumerate}
+    \item \textbf{Clarify requirements:} Functional, non-functional, scale
+    \item \textbf{High-level design first:} Draw boxes (API, DB, cache, etc.)
+    \item \textbf{Deep dive:} Pick 2-3 components to detail (interviewer will guide)
+    \item \textbf{Discuss tradeoffs:} SQL vs. NoSQL, sync vs. async, etc.
+    \item \textbf{Time management:} Don't spend 40 min on API design
+\end{enumerate}
+
+\textbf{Behavioral Interview:}
+\begin{enumerate}
+    \item \textbf{STAR method:} Structure answers clearly
+    \item \textbf{Quantify impact:} "Reduced latency by 40\%", "Increased CTR by 15\%"
+    \item \textbf{Show learning:} "This taught me to...", "I'd do X differently next time"
+    \item \textbf{Ask questions:} Show genuine interest in the role
+\end{enumerate}
+
+% ============================================================================
+\section{Appendix A: Faire-Specific Questions (To Be Added)}
+% ============================================================================
+
+\textit{This section will be populated with actual interview questions from Glassdoor, Prepfully, and InterviewQuery after you provide the content.}
+
+\subsection{Placeholder for Glassdoor Questions}
+
+\textit{[To be filled in after user provides Glassdoor content]}
+
+\subsection{Placeholder for Prepfully Questions}
+
+\textit{[To be filled in after user provides Prepfully content]}
+
+\subsection{Placeholder for InterviewQuery Content}
+
+\textit{[To be filled in after user provides InterviewQuery content]}
+
+% ============================================================================
+\section{Appendix B: Faire Engineering Blog Insights}
+% ============================================================================
+
+\subsection{Key Articles to Read}
+
+\begin{enumerate}
+    \item \textbf{"How data and machine learning shape Faire's marketplace"}
+    \begin{itemize}
+        \item URL: craft.faire.com/how-data-and-machine-learning-shape-faires-marketplace-510855c4a9bc
+        \item \textbf{Key takeaways:}
+        \begin{itemize}
+            \item Recommendation embeddings from clicks, add-to-cart, orders
+            \item Hybrid recommender system for cold start
+            \item XGBoost models for ranking
+            \item Redis feature store for real-time features
+            \item Balancing retailer and brand stakeholder needs
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{"Real-time ranking at Faire part 2: the feature store"}
+    \begin{itemize}
+        \item URL: craft.faire.com/real-time-ranking-at-faire-part-2-the-feature-store-3f1013d3fe5d
+        \item \textbf{Key takeaways:}
+        \begin{itemize}
+            \item Feature store architecture with Redis
+            \item Handling hundreds of features per product
+            \item Low-latency feature retrieval (< 10ms)
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Tech Stack Summary}
+
+\textbf{Languages:} Kotlin (backend), JavaScript/TypeScript (frontend)
+
+\textbf{Data:} MySQL, Redis, NoSQL, ElasticSearch, Kinesis, DBT
+
+\textbf{ML:} XGBoost, embeddings, collaborative filtering
+
+\textbf{Infrastructure:} Kubernetes, AWS (ELB, SQS), Nginx
+
+% ============================================================================
+\section{Appendix C: Additional Resources}
+% ============================================================================
+
+\subsection{Coding Practice}
+
+\begin{itemize}
+    \item \textbf{LeetCode:} leetcode.com (Blind 75, NeetCode 150)
+    \item \textbf{NeetCode:} neetcode.io (video solutions + roadmap)
+    \item \textbf{AlgoExpert:} algoexpert.io (paid, high quality)
+    \item \textbf{HackerRank:} hackerrank.com (SQL practice)
+\end{itemize}
+
+\subsection{System Design}
+
+\begin{itemize}
+    \item \textbf{Grokking the System Design Interview:} educative.io
+    \item \textbf{System Design Primer:} github.com/donnemartin/system-design-primer
+    \item \textbf{ByteByteGo:} bytebytego.com (Alex Xu's course)
+    \item \textbf{Designing Data-Intensive Applications:} Book by Martin Kleppmann
+\end{itemize}
+
+\subsection{Machine Learning}
+
+\begin{itemize}
+    \item \textbf{StatQuest:} youtube.com/@statquest (ML concepts)
+    \item \textbf{Google ML Crash Course:} developers.google.com/machine-learning/crash-course
+    \item \textbf{Chip Huyen's ML Interviews Book:} huyenchip.com/ml-interviews-book
+\end{itemize}
+
+\subsection{Behavioral}
+
+\begin{itemize}
+    \item \textbf{Tech Interview Handbook:} techinterviewhandbook.org/behavioral-interview
+    \item \textbf{Grokking the Behavioral Interview:} educative.io
+\end{itemize}
+
+% ============================================================================
+\section{Summary \& Final Tips}
+% ============================================================================
+
+\subsection{Key Takeaways}
+
+\begin{enumerate}
+    \item \textbf{Faire is a two-sided marketplace} connecting retailers and brands via search and recommendations
+
+    \item \textbf{Tech stack:} Kotlin, ElasticSearch, XGBoost, Redis, MySQL, Kubernetes
+
+    \item \textbf{Interview focus:}
+    \begin{itemize}
+        \item Algorithms: Medium LeetCode, 2 rounds DSA
+        \item System Design: Search systems (your main focus)
+        \item ML: Evaluation metrics (precision, recall, NDCG)
+        \item Behavioral: Culture fit, why Faire
+    \end{itemize}
+
+    \item \textbf{Search system design} is critical - know two-stage retrieval + ranking
+
+    \item \textbf{ML metrics:} Master NDCG, Precision@K, Recall@K for ranking problems
+
+    \item \textbf{Tradeoffs:} Be ready to discuss latency vs. accuracy, precision vs. recall, complexity vs. maintainability
+\end{enumerate}
+
+\subsection{The Night Before}
+
+\begin{itemize}
+    \item Review this guide's summaries (sections 2, 4, 5)
+    \item Re-read Faire's mission and engineering blog posts
+    \item Prepare 5 questions to ask
+    \item Get 8 hours of sleep
+\end{itemize}
+
+\subsection{You've Got This!}
+
+You've prepared thoroughly. Remember:
+\begin{itemize}
+    \item \textbf{Communication > perfection:} Interviewers want to see your thought process
+    \item \textbf{Ask questions:} Shows curiosity and collaboration
+    \item \textbf{Stay calm:} If stuck, take a breath, think aloud, ask for hints
+    \item \textbf{Be yourself:} Faire values authenticity and passion
+\end{itemize}
+
+\textbf{Good luck! You're going to do great! 🚀}
+
+\end{document}
