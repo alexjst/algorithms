@@ -176,62 +176,173 @@ Faire uses a classic retrieval + ranking pipeline:
 \end{itemize}
 
 % ============================================================================
-\section{Interview Process Overview}
+\section{OFFICIAL Interview Structure (From Recruiter)}
 % ============================================================================
 
-\subsection{Typical Interview Timeline}
+\subsection{Virtual Onsite - 5 Parts Over 2 Days}
 
-Based on candidate reports:
+This is the OFFICIAL interview structure provided by Faire's recruiting team for the Back-end Engineer - Search role.
 
-\begin{enumerate}
-    \item \textbf{Recruiter Screen (30 min):} Align on basics, discuss role expectations
-    \item \textbf{Online Coding Assessment:} CodeSignal or similar (4 questions in 70 min)
-    \begin{itemize}
-        \item 2 easy LeetCode-level questions
-        \item 2 medium to hard LeetCode-level questions
-        \item Score 700+ typically required to proceed
-    \end{itemize}
-    \item \textbf{Technical Interviews (2-3 rounds):}
-    \begin{itemize}
-        \item 2 rounds: DSA/LeetCode-style coding (CoderPad)
-        \item 1 round: System Design (focus on backend/service scaling, 90\% backend)
-        \item Possibly 1 round: SQL/data modeling
-    \end{itemize}
-    \item \textbf{Manager Match (1 round):} Behavioral, culture fit, team alignment
-    \item \textbf{Timeline:} 2-4 weeks total
-\end{enumerate}
+\subsubsection{Day 1: Technical Deep Dive (3 Hours Total)}
 
-\subsection{Difficulty Rating}
-
-\textbf{Glassdoor Rating:} 3.14/5.0
-
-\textbf{Coding Questions:} Straightforward medium/hard, not "insanely tricky"
-
-\textbf{System Design:} Backend-focused, emphasis on scalability and tradeoffs
-
-\subsection{What the Hiring Manager Said}
-
-Based on your conversation, expect:
+\textbf{Part 1: Programming Exercise [1 HOUR]}
 \begin{itemize}
-    \item \textbf{Algorithms:} LeetCode-style DSA questions
-    \item \textbf{System Design:} Main focus on \textit{search} systems (Faire's core product)
-    \item \textbf{ML Basics:} Evaluation metrics (precision, recall, NDCG, etc.)
-    \item \textbf{Culture Fit:} Alignment with Faire's values and mission
+    \item \textbf{Format:} Paired programming on CoderPad
+    \item \textbf{Goal:} Write a working solution to a coding problem
+    \item \textbf{Evaluation Criteria:}
+    \begin{enumerate}
+        \item \textit{Approach and Planning:} Ask clarifying questions before coding
+        \item \textit{Code Structure \& Cleanliness:} Write clean, readable code
+        \item \textit{Coachability:} Modify solution based on interviewer feedback
+        \item \textit{Debugging:} Account for edge cases and fix bugs
+        \item \textit{Testing:} Write test cases with good coverage
+    \end{enumerate}
 \end{itemize}
 
+\textbf{Part 2: Systems Design - Search [1 HOUR]}
+\begin{itemize}
+    \item \textbf{Focus:} Major components of an e-commerce search system
+    \item \textbf{Topics:}
+    \begin{itemize}
+        \item How data gets into the system, how it's processed, and how it's queried
+        \item Life of a product record from creation to search results
+        \item Life of a search query from user input to displayed results
+        \item Design tradeoffs and performance optimizations
+        \item Scaling considerations
+        \item High-level search algorithm concepts
+    \end{itemize}
+    \item \textbf{Important:} This is \textbf{NOT} about super-detailed ML knowledge
+    \item \textbf{Focus:} Architecture, data flows, and system components
+\end{itemize}
+
+\textbf{Part 3: Algorithm Interview [1 HOUR]}
+\begin{itemize}
+    \item \textbf{CRITICAL:} This is \textbf{NOT} a LeetCode-style coding interview!
+    \item \textbf{Format:} 1-2 questions with sub-questions
+    \item \textbf{NO CODE REQUIRED} (emphasized in official document)
+    \item \textbf{Goal:} Evaluate practical design knowledge for ML-powered systems
+    \item \textbf{What You'll Do:}
+    \begin{itemize}
+        \item Identify performance bottlenecks in EXISTING systems
+        \item Propose incremental improvements
+        \item Suggest architectural changes
+        \item Think about ML system improvements (NOT design from scratch)
+    \end{itemize}
+    \item \textbf{Example:} "Here's our current search ranking system. It has latency issues. What would you investigate and how would you improve it?"
+\end{itemize}
+
+\subsubsection{Day 2: Values \& Leadership (1.5 Hours Total)}
+
+\textbf{Part 4: Values Interview [30 MINUTES]}
+\begin{itemize}
+    \item \textbf{Format:} Behavioral questions
+    \item \textbf{Focus:} Alignment with Faire's 5 core values
+    \item \textbf{Example Topics:}
+    \begin{itemize}
+        \item Tell me about a complex problem you solved
+        \item Describe a positive/challenging working relationship
+        \item When did you think outside the box?
+        \item Why Faire? Why our mission?
+        \item Examples of impact, influence, ownership
+        \item How do you handle feedback and growth?
+    \end{itemize}
+\end{itemize}
+
+\textbf{Part 5: Levelling Deep Dive [1 HOUR]}
+\begin{itemize}
+    \item \textbf{Format:} Technical leadership discussion
+    \item \textbf{Focus:} Career history, technical depth, seniority calibration
+    \item \textbf{Topics:}
+    \begin{itemize}
+        \item Most complex system you've designed
+        \item Technical decisions and tradeoffs
+        \item How you've led projects or mentored others
+        \item Scaling challenges you've faced
+        \item Your technical growth trajectory
+    \end{itemize}
+\end{itemize}
+
+\subsection{Faire's Core Values (OFFICIAL)}
+
+Understanding these values is CRITICAL for the Values Interview (Part 4).
+
+\subsubsection{1. Be an Owner}
+\begin{itemize}
+    \item \textbf{Resourceful:} Find creative solutions with available resources
+    \item \textbf{Raise the Bar:} Set and maintain high standards
+    \item \textbf{Share Our Legos:} Build reusable systems, share knowledge
+\end{itemize}
+
+\subsubsection{2. Be Kind}
+\begin{itemize}
+    \item \textbf{Collaboration:} Work effectively with others
+    \item \textbf{Coachability:} Accept feedback and grow
+    \item \textbf{Inclusive:} Create welcoming environment for all
+\end{itemize}
+
+\subsubsection{3. Embrace the Adventure}
+\begin{itemize}
+    \item \textbf{Agility:} Adapt quickly to change
+    \item \textbf{Bias Towards Action:} Move fast, iterate, learn
+\end{itemize}
+
+\subsubsection{4. Seek the Truth}
+\begin{itemize}
+    \item \textbf{Decision-Making:} Make data-driven decisions
+    \item \textbf{Analytical Thinking:} Dig deep to understand root causes
+    \item \textbf{Communication:} Communicate clearly and transparently
+\end{itemize}
+
+\subsubsection{5. Serve Our Community}
+\begin{itemize}
+    \item \textbf{Customer Centricity:} Put retailers and brands first
+    \item \textbf{Prioritization:} Focus on highest-impact work
+    \item \textbf{Motivation:} Inspired by Faire's mission
+\end{itemize}
+
+\subsection{Company Mission \& Scale}
+
+\textbf{Mission:} Empower entrepreneurs everywhere to chase their dreams.
+
+\textbf{Scale:}
+\begin{itemize}
+    \item 350,000+ independent retailers on the platform
+    \item Independent retailers collectively larger than Amazon + Walmart combined
+    \item 40\% of wholesale buying moved online during COVID
+\end{itemize}
+
+\textbf{Growth Flywheel:}
+\begin{enumerate}
+    \item Brand onboards → Refers other retailers
+    \item Retailer onboards → Refers other brands
+    \item Network effects create virtuous cycle
+\end{enumerate}
+
+\textbf{Data Flywheel:}
+\begin{enumerate}
+    \item Better recommendations → Higher sell-through for retailers
+    \item Higher sell-through → More orders placed
+    \item More orders → More data for ML models
+    \item Better data → Better recommendations (cycle continues)
+\end{enumerate}
+
 % ============================================================================
-\section{Part 1: Algorithm \& Coding Questions}
+\section{Programming Exercise Prep (Interview Part 1)}
 % ============================================================================
+
+\textbf{Context:} This section covers the Programming Exercise (Part 1 of the interview), which is a 1-hour paired programming session on CoderPad where you write actual code.
+
+\textbf{DO NOT CONFUSE with:} The "Algorithm Interview" (Part 3), which does NOT require code!
 
 \subsection{Expected Difficulty}
 
-\textbf{Online Assessment:} 2 Easy + 2 Medium-Hard LeetCode
-
-\textbf{Live Coding Rounds:} Medium LeetCode problems (some harder variants)
+\textbf{Format:} Medium LeetCode-level problem, 45-60 minutes
 
 \textbf{Focus Areas:} Arrays, hashmaps, two pointers, trees, graphs, dynamic programming
 
-\subsection{Common LeetCode Patterns for Faire}
+\textbf{Evaluation:} Approach, code cleanliness, coachability, debugging, testing
+
+\subsection{Common LeetCode Patterns for E-Commerce}
 
 Based on e-commerce/marketplace context, expect questions related to:
 
@@ -569,12 +680,21 @@ ORDER BY month;
 \end{lstlisting}
 
 % ============================================================================
-\section{Part 2: System Design - Search \& Recommendations}
+\section{System Design - Search Prep (Interview Part 2)}
 % ============================================================================
+
+\textbf{Context:} This section covers the Systems Design - Search interview (Part 2 of the interview), which is a 1-hour system design discussion focused on e-commerce search architecture.
+
+\textbf{Key Guidance from Recruiter:}
+\begin{itemize}
+    \item Focus on major components of e-commerce search system
+    \item NOT about super-detailed ML knowledge
+    \item Emphasize: data flows, architecture, scaling, tradeoffs
+\end{itemize}
 
 \subsection{Why Search is Critical for Faire}
 
-The hiring manager specifically mentioned \textbf{search} as the main system design focus. This aligns with Faire's core value proposition:
+Search is the main system design focus. This aligns with Faire's core value proposition:
 
 \begin{itemize}
     \item \textbf{700K+ retailers} need to discover products from \textbf{100K+ brands}
@@ -1163,7 +1283,254 @@ Be prepared for these follow-ups:
 \end{enumerate}
 
 % ============================================================================
-\section{Part 3: Machine Learning Basics \& Evaluation Metrics}
+\section{Algorithm Interview Prep (Interview Part 3)}
+% ============================================================================
+
+\textbf{CRITICAL:} This is \textbf{NOT} a LeetCode coding interview! Read this section carefully.
+
+\subsection{What Makes This Different}
+
+\textbf{From Official Recruiter Document:}
+\begin{itemize}
+    \item \textbf{NO CODE REQUIRED} - This is a discussion, not a coding exercise
+    \item \textbf{Format:} 1-2 questions with sub-questions
+    \item \textbf{Goal:} Evaluate practical design knowledge for ML-powered systems
+    \item \textbf{Focus:} Improve EXISTING systems, not design from scratch
+    \item \textbf{Skills Tested:}
+    \begin{itemize}
+        \item Identify performance bottlenecks
+        \item Propose incremental improvements
+        \item Suggest architectural changes
+        \item Think critically about ML system tradeoffs
+    \end{itemize}
+\end{itemize}
+
+\subsection{Example Question Format}
+
+\textbf{Scenario:} "Here's our current search ranking system. It retrieves 1000 candidates from ElasticSearch, then re-ranks with XGBoost using 200 features from Redis. The system has the following issues:
+\begin{itemize}
+    \item P95 latency is 800ms (target: 300ms)
+    \item Cold-start retailers get poor recommendations
+    \item Feature drift - model trained 3 months ago, performance degrading
+\end{itemize}
+
+\textbf{Questions:}
+\begin{enumerate}
+    \item What would you investigate first to reduce latency?
+    \item How would you approach the cold-start problem?
+    \item What's your strategy for detecting and handling feature drift?
+    \item What incremental changes would you make vs. major architectural changes?
+\end{enumerate}
+
+\subsection{How to Approach This Interview}
+
+\subsubsection{Step 1: Understand the Existing System}
+
+Ask clarifying questions:
+\begin{itemize}
+    \item What are the main components? (retrieval, ranking, serving)
+    \item What's the current data flow?
+    \item What metrics are being optimized? (latency, relevance, etc.)
+    \item What's the scale? (QPS, data volume, model size)
+    \item What infrastructure is in place? (caching, load balancing, etc.)
+\end{itemize}
+
+\subsubsection{Step 2: Identify Bottlenecks}
+
+Think systematically:
+\begin{itemize}
+    \item \textbf{Data bottlenecks:} Slow feature retrieval, database queries
+    \item \textbf{Compute bottlenecks:} Model inference time, CPU/GPU utilization
+    \item \textbf{Network bottlenecks:} Inter-service latency, data transfer
+    \item \textbf{ML-specific:} Model size, feature dimensionality, batch size
+\end{itemize}
+
+\subsubsection{Step 3: Propose Solutions (Incremental + Architectural)}
+
+\textbf{Incremental Improvements} (quick wins):
+\begin{itemize}
+    \item Add caching layers (Redis for features, CDN for results)
+    \item Optimize database queries (indexes, denormalization)
+    \item Feature selection (reduce 200 features to 50 most important)
+    \item Model compression (quantization, pruning)
+    \item Batch processing where possible
+\end{itemize}
+
+\textbf{Architectural Changes} (longer-term):
+\begin{itemize}
+    \item Move from synchronous to asynchronous feature retrieval
+    \item Implement multi-stage ranking (fast initial filter, expensive final ranking)
+    \item Build feature store for offline/online consistency
+    \item Add monitoring and alerting for drift detection
+    \item Implement online learning or periodic retraining pipeline
+\end{itemize}
+
+\subsection{Practice Problems}
+
+\subsubsection{Problem 1: High Latency in Search Ranking}
+
+\textbf{System:} ElasticSearch retrieves 1000 candidates, XGBoost re-ranks using 300 features from Redis.
+
+\textbf{Issue:} P95 latency 1.2 seconds (target: 400ms)
+
+\textbf{Your task:}
+\begin{enumerate}
+    \item Where would you look for bottlenecks? (network, compute, data access)
+    \item What quick wins could reduce latency by 30\%?
+    \item What architectural changes for 3x improvement?
+\end{enumerate}
+
+\textbf{Example Answer:}
+
+\textit{Step 1: Identify bottlenecks}
+\begin{itemize}
+    \item Profile the request: measure time for retrieval vs. ranking vs. feature fetching
+    \item Likely culprit: fetching 300 features × 1000 candidates = 300K Redis lookups
+    \item Secondary issue: XGBoost inference on 1000 candidates might be slow
+\end{itemize}
+
+\textit{Step 2: Quick wins (30\% improvement)}
+\begin{itemize}
+    \item \textbf{Feature caching:} Cache popular product features (80/20 rule)
+    \item \textbf{Batch Redis reads:} Use pipelining to fetch features in parallel
+    \item \textbf{Reduce candidates:} Re-rank only top 500 instead of 1000
+    \item \textbf{Feature selection:} Use only top 100 features instead of 300
+\end{itemize}
+
+\textit{Step 3: Architectural changes (3x improvement)}
+\begin{itemize}
+    \item \textbf{Multi-stage ranking:}
+    \begin{enumerate}
+        \item Stage 1: Fast linear model on 20 features (1000 → 200 candidates)
+        \item Stage 2: Full XGBoost on 300 features (200 → final ranking)
+    \end{enumerate}
+    \item \textbf{Feature store:} Pre-compute and batch-update features (hourly instead of real-time)
+    \item \textbf{Model optimization:} Quantize XGBoost model (FP32 → FP16 or INT8)
+    \item \textbf{Async processing:} Return fast results, refine in background
+\end{itemize}
+
+\subsubsection{Problem 2: Cold-Start Recommendations}
+
+\textbf{System:} Collaborative filtering model recommends products based on retailer's purchase history.
+
+\textbf{Issue:} New retailers with 0-2 orders get irrelevant recommendations.
+
+\textbf{Your task:}
+\begin{enumerate}
+    \item Why does collaborative filtering fail for new users?
+    \item What signals can you use when there's no purchase history?
+    \item How would you blend multiple strategies?
+\end{enumerate}
+
+\textbf{Example Answer:}
+
+\textit{Step 1: Why it fails}
+\begin{itemize}
+    \item Collaborative filtering needs user-item interactions
+    \item New retailers have sparse or zero interaction data
+    \item Model can't find similar retailers to learn from
+\end{itemize}
+
+\textit{Step 2: Alternative signals}
+\begin{itemize}
+    \item \textbf{Content-based:} Use retailer profile (category, location, store size)
+    \item \textbf{Popularity:} Show trending/best-selling products in retailer's category
+    \item \textbf{Geographic:} Recommend products popular in retailer's region
+    \item \textbf{Onboarding data:} Ask preferences during signup (style, price range)
+\end{itemize}
+
+\textit{Step 3: Blended strategy}
+\begin{itemize}
+    \item Use a \textbf{multi-armed bandit} or \textbf{ensemble model}
+    \item Weight strategies by data availability:
+    \begin{itemize}
+        \item 0-5 orders: 70\% content + 30\% popularity
+        \item 5-20 orders: 50\% content + 30\% collaborative + 20\% popularity
+        \item 20+ orders: 80\% collaborative + 20\% content
+    \end{itemize}
+    \item \textbf{Exploration:} Inject 10-20\% random/diverse items to learn preferences faster
+\end{itemize}
+
+\subsubsection{Problem 3: Feature Drift Detection}
+
+\textbf{System:} XGBoost ranking model trained 6 months ago, performance degrading.
+
+\textbf{Issue:} Click-through rate dropped from 12\% to 9\% over 3 months.
+
+\textbf{Your task:}
+\begin{enumerate}
+    \item What causes feature drift?
+    \item How would you detect it?
+    \item What's your retraining strategy?
+\end{enumerate}
+
+\textbf{Example Answer:}
+
+\textit{Step 1: Causes of drift}
+\begin{itemize}
+    \item \textbf{Data distribution shift:} New products, seasonal changes, user behavior changes
+    \item \textbf{Feature distribution shift:} Price ranges changed, new brands added
+    \item \textbf{Concept drift:} Relationship between features and labels changed
+    \item Example: During COVID, "home office" products surged
+\end{itemize}
+
+\textit{Step 2: Detection strategies}
+\begin{itemize}
+    \item \textbf{Monitor feature distributions:} Compare train vs. live (KL divergence, PSI)
+    \item \textbf{Track model performance:} Daily CTR, NDCG, precision@K
+    \item \textbf{A/B test against random:} If model barely beats random, it's drifted
+    \item \textbf{Shadow models:} Train weekly model, compare performance to production
+\end{itemize}
+
+\textit{Step 3: Retraining strategy}
+\begin{itemize}
+    \item \textbf{Schedule:} Retrain monthly (or when drift detected)
+    \item \textbf{Data:} Use last 3-6 months of data (balance recency vs. volume)
+    \item \textbf{Validation:} A/B test new model before full rollout
+    \item \textbf{Gradual rollout:} 5\% → 25\% → 50\% → 100\% traffic
+    \item \textbf{Rollback plan:} Keep previous model ready for instant rollback
+    \item \textbf{Online learning:} Consider incremental updates between full retrains
+\end{itemize}
+
+\subsection{Key Concepts to Know}
+
+\subsubsection{ML System Performance Issues}
+\begin{itemize}
+    \item \textbf{Latency:} Model inference time, feature retrieval, batching
+    \item \textbf{Throughput:} QPS limits, model serving capacity
+    \item \textbf{Cost:} Compute costs (GPU), storage costs (feature store)
+    \item \textbf{Accuracy:} Drift, cold-start, data quality
+\end{itemize}
+
+\subsubsection{Common Optimization Techniques}
+\begin{itemize}
+    \item \textbf{Caching:} Feature caching, result caching, model caching
+    \item \textbf{Model compression:} Quantization, pruning, distillation
+    \item \textbf{Feature selection:} Reduce dimensionality, remove correlated features
+    \item \textbf{Multi-stage ranking:} Fast filter + expensive rerank
+    \item \textbf{Asynchronous processing:} Return fast results, refine later
+\end{itemize}
+
+\subsubsection{System Design Patterns for ML}
+\begin{itemize}
+    \item \textbf{Feature store:} Centralized feature management (offline + online)
+    \item \textbf{Model registry:} Versioning, A/B testing, rollback
+    \item \textbf{Monitoring:} Drift detection, performance tracking, alerting
+    \item \textbf{Feedback loops:} Log predictions, retrain with outcomes
+\end{itemize}
+
+\subsection{How to Prepare}
+
+\begin{enumerate}
+    \item \textbf{Study Faire's architecture:} Read their engineering blog (craft.faire.com)
+    \item \textbf{Practice system analysis:} Take existing ML systems (Netflix, Spotify), identify bottlenecks
+    \item \textbf{Learn optimization techniques:} Caching, model compression, multi-stage ranking
+    \item \textbf{Understand tradeoffs:} Latency vs. accuracy, cost vs. performance, complexity vs. maintainability
+    \item \textbf{Think incrementally:} Always propose quick wins before major rewrites
+\end{enumerate}
+
+% ============================================================================
+\section{Machine Learning Evaluation Metrics (For All Interviews)}
 % ============================================================================
 
 \subsection{Why ML Metrics Matter for Faire}
@@ -1707,23 +2074,111 @@ def rank_search_results(retailer_id, query, candidates):
 \end{enumerate}
 
 % ============================================================================
-\section{Part 4: Behavioral \& Culture Fit}
+\section{Values Interview Prep (Interview Part 4)}
 % ============================================================================
 
-\subsection{Faire's Mission \& Values}
+\textbf{Context:} This section covers the Values Interview (Part 4), a 30-minute behavioral interview focused on alignment with Faire's 5 core values.
 
-\textbf{Mission:} Empower entrepreneurs to chase their dreams
+\subsection{Faire's OFFICIAL Core Values}
 
-\textbf{Vision:} Build the future of commerce where anyone can start and grow a business
+These are the official values from the recruiter document. You MUST prepare stories for each value.
 
-\textbf{Values (inferred from job descriptions and culture):}
+\subsubsection{1. Be an Owner}
+
+\textbf{Sub-values:}
 \begin{itemize}
-    \item \textbf{Customer obsession:} Retailers and brands are customers
-    \item \textbf{Ownership:} Engineers lead projects end-to-end
-    \item \textbf{Data-driven:} Decisions backed by metrics and experiments
-    \item \textbf{Collaboration:} Work with cross-functional teams
-    \item \textbf{Impact:} Ship features that matter to real businesses
+    \item \textbf{Resourceful:} Find creative solutions with available resources
+    \item \textbf{Raise the Bar:} Set and maintain high standards
+    \item \textbf{Share Our Legos:} Build reusable systems, share knowledge
 \end{itemize}
+
+\textbf{Prepare a story about:}
+\begin{itemize}
+    \item Taking ownership of a complex problem end-to-end
+    \item Being resourceful when faced with constraints
+    \item Raising technical standards on your team
+    \item Building reusable infrastructure or tools
+\end{itemize}
+
+\subsubsection{2. Be Kind}
+
+\textbf{Sub-values:}
+\begin{itemize}
+    \item \textbf{Collaboration:} Work effectively with others
+    \item \textbf{Coachability:} Accept feedback and grow
+    \item \textbf{Inclusive:} Create welcoming environment for all
+\end{itemize}
+
+\textbf{Prepare a story about:}
+\begin{itemize}
+    \item A positive working relationship with a teammate
+    \item A challenging working relationship you navigated
+    \item Receiving feedback and how you improved
+    \item Making your team more inclusive or collaborative
+\end{itemize}
+
+\subsubsection{3. Embrace the Adventure}
+
+\textbf{Sub-values:}
+\begin{itemize}
+    \item \textbf{Agility:} Adapt quickly to change
+    \item \textbf{Bias Towards Action:} Move fast, iterate, learn
+\end{itemize}
+
+\textbf{Prepare a story about:}
+\begin{itemize}
+    \item Thinking outside the box to solve a problem
+    \item Adapting to a major change (requirements, tech stack, team)
+    \item Taking action despite uncertainty
+    \item Learning from failure and iterating quickly
+\end{itemize}
+
+\subsubsection{4. Seek the Truth}
+
+\textbf{Sub-values:}
+\begin{itemize}
+    \item \textbf{Decision-Making:} Make data-driven decisions
+    \item \textbf{Analytical Thinking:} Dig deep to understand root causes
+    \item \textbf{Communication:} Communicate clearly and transparently
+\end{itemize}
+
+\textbf{Prepare a story about:}
+\begin{itemize}
+    \item Using data to make a critical decision
+    \item Debugging a complex issue by digging into root causes
+    \item Communicating transparently about a problem or failure
+    \item Changing your mind based on evidence
+\end{itemize}
+
+\subsubsection{5. Serve Our Community}
+
+\textbf{Sub-values:}
+\begin{itemize}
+    \item \textbf{Customer Centricity:} Put retailers and brands first
+    \item \textbf{Prioritization:} Focus on highest-impact work
+    \item \textbf{Motivation:} Inspired by Faire's mission
+\end{itemize}
+
+\textbf{Prepare a story about:}
+\begin{itemize}
+    \item Prioritizing customer needs over technical elegance
+    \item Impact and influence - a high-impact project you led
+    \item Why you care about Faire's mission (empowering entrepreneurs)
+\end{itemize}
+
+\subsection{Faire's Mission \& Scale (Know This Cold)}
+
+\textbf{Mission:} Empower entrepreneurs everywhere to chase their dreams.
+
+\textbf{Scale:}
+\begin{itemize}
+    \item 350,000+ independent retailers
+    \item Independent retail sector larger than Amazon + Walmart combined
+    \item 40\% of wholesale buying moved online during COVID
+    \item Faire is uniquely positioned to serve this massive market
+\end{itemize}
+
+\textbf{Why it matters:} Small businesses are the backbone of local economies. Faire helps them compete.
 
 \subsection{Common Behavioral Questions}
 
