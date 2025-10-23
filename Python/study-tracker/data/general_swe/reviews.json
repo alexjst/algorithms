@@ -933,6 +933,38 @@
       "due_date": "2025-11-04",
       "scheduled_date": "2025-10-21",
       "completed_date": null
+    },
+    {
+      "topic": "Complex Multi-Pattern Problems",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-23",
+      "scheduled_date": "2025-10-22",
+      "completed_date": null
+    },
+    {
+      "topic": "Complex Multi-Pattern Problems",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-25",
+      "scheduled_date": "2025-10-22",
+      "completed_date": null
+    },
+    {
+      "topic": "Complex Multi-Pattern Problems",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-29",
+      "scheduled_date": "2025-10-22",
+      "completed_date": null
+    },
+    {
+      "topic": "Complex Multi-Pattern Problems",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-11-05",
+      "scheduled_date": "2025-10-22",
+      "completed_date": null
     }
   ]
 }
