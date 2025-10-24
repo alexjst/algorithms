@@ -965,6 +965,38 @@
       "due_date": "2025-11-05",
       "scheduled_date": "2025-10-22",
       "completed_date": null
+    },
+    {
+      "topic": "Mock Interview 1",
+      "track": "coding",
+      "review_type": "1-day",
+      "due_date": "2025-10-24",
+      "scheduled_date": "2025-10-23",
+      "completed_date": null
+    },
+    {
+      "topic": "Mock Interview 1",
+      "track": "coding",
+      "review_type": "3-day",
+      "due_date": "2025-10-26",
+      "scheduled_date": "2025-10-23",
+      "completed_date": null
+    },
+    {
+      "topic": "Mock Interview 1",
+      "track": "coding",
+      "review_type": "7-day",
+      "due_date": "2025-10-30",
+      "scheduled_date": "2025-10-23",
+      "completed_date": null
+    },
+    {
+      "topic": "Mock Interview 1",
+      "track": "coding",
+      "review_type": "14-day",
+      "due_date": "2025-11-06",
+      "scheduled_date": "2025-10-23",
+      "completed_date": null
     }
   ]
 }
