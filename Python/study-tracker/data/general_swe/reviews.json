@@ -940,7 +940,9 @@
       "review_type": "1-day",
       "due_date": "2025-10-23",
       "scheduled_date": "2025-10-22",
-      "completed_date": null
+      "completed_date": "2025-10-23",
+      "rating": 1,
+      "notes": ""
     },
     {
       "topic": "Complex Multi-Pattern Problems",
