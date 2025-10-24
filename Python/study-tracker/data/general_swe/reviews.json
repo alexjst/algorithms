@@ -884,7 +884,9 @@
       "review_type": "3-day",
       "due_date": "2025-10-23",
       "scheduled_date": "2025-10-20",
-      "completed_date": null
+      "completed_date": "2025-10-23",
+      "rating": 2,
+      "notes": ""
     },
     {
       "topic": "Advanced Dynamic Programming",
