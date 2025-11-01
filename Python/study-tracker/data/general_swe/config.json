@@ -1,12 +1,12 @@
 {
   "study_plan": {
     "coding": {
-      "start_date": "2025-09-28",
+      "start_date": "2025-11-01",
       "active": true,
       "acceleration_days": 0
     },
     "system_design": {
-      "start_date": "2025-09-28",
+      "start_date": "2025-11-01",
       "active": true,
       "acceleration_days": 0
     }
