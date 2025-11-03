@@ -1273,7 +1273,7 @@ def update_config():
     config['study_plan']['coding']['active'] = 'coding_active' in request.form
     config['study_plan']['system_design']['active'] = 'system_design_active' in request.form
 
-    save_json_data(CONFIG_FILE, config)
+    save_json_data(get_data_paths()['config_file'], config)
     return redirect(url_for('config_page'))
 
 @app.route('/preview')
@@ -2229,7 +2229,7 @@ def advance_day():
         config['study_plan'][track]['acceleration_days'] = config['study_plan'][track].get('acceleration_days', 0) + 1
 
         # Save updated config
-        save_json_data(CONFIG_FILE, config)
+        save_json_data(get_data_paths()['config_file'], config)
 
         # Get new day information
         new_day = get_day_number(track)
