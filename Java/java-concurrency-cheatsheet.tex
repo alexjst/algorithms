@@ -1,0 +1,854 @@
+\documentclass[10pt,landscape,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[landscape]{geometry}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{amssymb}
+
+\geometry{top=0.5cm,left=0.5cm,right=0.5cm,bottom=0.5cm}
+
+% Code listing style
+\lstset{
+    language=Java,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=none,
+    frame=none,
+    aboveskip=2pt,
+    belowskip=2pt
+}
+
+\setlist{nosep, leftmargin=*, itemsep=1pt}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+
+\begin{document}
+
+\begin{multicols*}{3}
+
+\begin{center}
+\Large{\textbf{Java Concurrency Cheatsheet}} \\
+\normalsize{Staff-Level Interview Prep}
+\end{center}
+
+\section*{Phase 1: Core Concepts}
+
+\subsection*{Race Conditions}
+When multiple threads access shared data and outcome depends on timing.
+
+\textbf{Example Problem:}
+\begin{lstlisting}
+if (balance < 100) {
+    balance++; // NOT ATOMIC
+}
+\end{lstlisting}
+
+\textbf{Solution:} Use synchronization primitives.
+
+\subsection*{synchronized Keyword}
+
+\textbf{On method (locks on \texttt{this}):}
+\begin{lstlisting}
+public synchronized void withdraw(int amt) {
+    if (balance >= amt) {
+        balance -= amt;
+    }
+}
+\end{lstlisting}
+
+\textbf{On block (explicit lock):}
+\begin{lstlisting}
+private final Object lock = new Object();
+public void withdraw(int amt) {
+    synchronized(lock) {
+        if (balance >= amt) balance -= amt;
+    }
+}
+\end{lstlisting}
+
+\textbf{Key Points:}
+\begin{itemize}
+\item Auto-releases lock on exception
+\item Instance methods lock on \texttt{this}
+\item Static methods lock on \texttt{Class} object
+\item Each instance has its own lock
+\end{itemize}
+
+\subsection*{ReentrantLock}
+
+\textbf{Manual lock/unlock:}
+\begin{lstlisting}
+private final ReentrantLock lock = 
+    new ReentrantLock();
+
+public void withdraw(int amt) {
+    lock.lock();
+    try {
+        if (balance >= amt) balance -= amt;
+    } finally {
+        lock.unlock(); // ALWAYS in finally
+    }
+}
+\end{lstlisting}
+
+\textbf{Advanced features:}
+\begin{lstlisting}
+// Try without blocking
+if (lock.tryLock()) {
+    try { /* ... */ } 
+    finally { lock.unlock(); }
+}
+
+// Try with timeout
+if (lock.tryLock(1, TimeUnit.SECONDS)) {
+    // ...
+}
+
+// Fair lock (FIFO ordering)
+new ReentrantLock(true);
+\end{lstlisting}
+
+\textbf{When to use:}
+\begin{itemize}
+\item Need \texttt{tryLock()} or timeout
+\item Need to interrupt waiting threads
+\item Need fair scheduling
+\item Multiple locks per class (fine-grained)
+\end{itemize}
+
+\textbf{Reentrant:} Same thread can lock multiple times (counter-based).
+
+\subsection*{volatile Keyword}
+
+\textbf{Ensures visibility across threads:}
+\begin{lstlisting}
+private volatile boolean stopped = false;
+
+public void stop() { stopped = true; }
+
+public void run() {
+    while (!stopped) { /* work */ }
+}
+\end{lstlisting}
+
+\textbf{Guarantees:}
+\begin{itemize}
+\item Writes immediately visible to all threads
+\item Prevents compiler/CPU reordering
+\item Does NOT provide atomicity for compound operations
+\end{itemize}
+
+\textbf{Use for:} Simple flags, status variables
+
+\textbf{Don't use for:} Compound operations like \texttt{count++}
+
+\subsection*{wait/notify/notifyAll}
+
+\textbf{Thread coordination (must be in synchronized):}
+\begin{lstlisting}
+// Bounded Queue Example
+private final Queue<T> queue = new LinkedList<>();
+private final int capacity = 10;
+
+public synchronized void put(T item) 
+    throws InterruptedException {
+    while (queue.size() >= capacity) {
+        wait(); // release lock, sleep
+    }
+    queue.add(item);
+    notifyAll(); // wake waiting threads
+}
+
+public synchronized T take() 
+    throws InterruptedException {
+    while (queue.isEmpty()) {
+        wait();
+    }
+    T item = queue.remove();
+    notifyAll();
+    return item;
+}
+\end{lstlisting}
+
+\textbf{Critical rules:}
+\begin{itemize}
+\item ALWAYS use \texttt{while}, not \texttt{if} with \texttt{wait()}
+\item Must be called inside \texttt{synchronized}
+\item \texttt{wait()} releases lock, blocks until notified
+\item \texttt{notifyAll()} safer than \texttt{notify()}
+\end{itemize}
+
+\subsection*{Memory Visibility \& Happens-Before}
+
+\textbf{Happens-Before Guarantee:}
+
+Action A happens-before B if B sees effects of A.
+
+\textbf{Key happens-before edges:}
+\begin{itemize}
+\item Program order: statement 1 → statement 2
+\item Lock release → next lock acquire (same lock)
+\item volatile write → volatile read (same variable)
+\item Thread start → first action in started thread
+\item Last action in thread → join() returns
+\item Transitivity: A→B and B→C implies A→C
+\end{itemize}
+
+\textbf{synchronized provides:}
+\begin{itemize}
+\item Lock release → writes visible to next lock acquirer
+\item Happens-before guarantee
+\end{itemize}
+
+\textbf{Without synchronization:} Threads may see stale cached values.
+
+\columnbreak
+
+\section*{Phase 2: Java Concurrency Toolkit}
+
+\subsection*{Executors \& Thread Pools}
+
+\textbf{Factory methods:}
+\begin{lstlisting}
+// Fixed size pool
+ExecutorService exec = 
+    Executors.newFixedThreadPool(4);
+
+// Single thread (sequential)
+ExecutorService exec = 
+    Executors.newSingleThreadExecutor();
+
+// Creates threads on demand, caches idle
+ExecutorService exec = 
+    Executors.newCachedThreadPool();
+
+// For scheduled tasks
+ScheduledExecutorService exec = 
+    Executors.newScheduledThreadPool(4);
+\end{lstlisting}
+
+\textbf{Submit tasks:}
+\begin{lstlisting}
+// Fire and forget
+exec.submit(() -> doWork());
+
+// Get result
+Future<Integer> future = exec.submit(() -> {
+    return 42;
+});
+Integer result = future.get(); // blocks
+
+// With timeout
+result = future.get(5, TimeUnit.SECONDS);
+\end{lstlisting}
+
+\textbf{Shutdown pattern:}
+\begin{lstlisting}
+exec.shutdown(); // no new tasks
+try {
+    if (!exec.awaitTermination(60, 
+            TimeUnit.SECONDS)) {
+        exec.shutdownNow(); // interrupt
+    }
+} catch (InterruptedException e) {
+    exec.shutdownNow();
+}
+\end{lstlisting}
+
+\textbf{Scheduled execution:}
+\begin{lstlisting}
+scheduler.scheduleAtFixedRate(
+    () -> cleanup(),
+    0,      // initial delay
+    60,     // period
+    TimeUnit.SECONDS
+);
+\end{lstlisting}
+
+\subsection*{Future Interface}
+
+\begin{lstlisting}
+Future<T> future = exec.submit(callable);
+
+T result = future.get(); // blocks
+T result = future.get(5, TimeUnit.SECONDS);
+boolean done = future.isDone();
+boolean cancelled = future.cancel(true);
+\end{lstlisting}
+
+\textbf{Exception handling:}
+\begin{lstlisting}
+try {
+    result = future.get();
+} catch (ExecutionException e) {
+    Throwable cause = e.getCause();
+}
+\end{lstlisting}
+
+\subsection*{Concurrent Collections}
+
+\textbf{ConcurrentHashMap:}
+\begin{lstlisting}
+ConcurrentHashMap<K, V> map = 
+    new ConcurrentHashMap<>();
+
+// Atomic operations
+map.putIfAbsent(key, value);
+map.computeIfAbsent(key, k -> compute());
+map.compute(key, (k,v) -> v == null ? 1 : v+1);
+map.replace(key, oldVal, newVal);
+\end{lstlisting}
+
+\textbf{Benefits over synchronized map:}
+\begin{itemize}
+\item Fine-grained locking (per bucket)
+\item Multiple readers without blocking
+\item Concurrent writes to different buckets
+\end{itemize}
+
+\textbf{BlockingQueue implementations:}
+\begin{lstlisting}
+// Bounded, array-backed
+BlockingQueue<T> q = 
+    new ArrayBlockingQueue<>(100);
+
+// Optionally bounded, linked nodes
+BlockingQueue<T> q = 
+    new LinkedBlockingQueue<>();
+
+// Priority-based
+BlockingQueue<T> q = 
+    new PriorityBlockingQueue<>();
+\end{lstlisting}
+
+\textbf{Operations:}
+\begin{lstlisting}
+q.put(item);    // blocks if full
+T item = q.take(); // blocks if empty
+
+q.offer(item);  // returns false if full
+T item = q.poll(); // returns null if empty
+
+// With timeout
+q.offer(item, 1, TimeUnit.SECONDS);
+T item = q.poll(1, TimeUnit.SECONDS);
+\end{lstlisting}
+
+\subsection*{Atomic Variables}
+
+\textbf{Lock-free thread-safe operations:}
+\begin{lstlisting}
+AtomicInteger counter = new AtomicInteger(0);
+
+counter.incrementAndGet(); // ++i
+counter.getAndIncrement(); // i++
+counter.addAndGet(5);      // i += 5
+counter.compareAndSet(10, 20); // CAS
+
+AtomicBoolean flag = new AtomicBoolean(false);
+flag.set(true);
+flag.compareAndSet(false, true);
+
+AtomicReference<T> ref = 
+    new AtomicReference<>(obj);
+ref.set(newObj);
+ref.compareAndSet(expected, newObj);
+\end{lstlisting}
+
+\textbf{Use when:} Single variable updates, high contention
+
+\textbf{Advantage:} No locks, uses CPU CAS instructions
+
+\textbf{Limitation:} Only for single variable atomicity
+
+\columnbreak
+
+\subsection*{ReadWriteLock}
+
+\textbf{Readers-writers optimization:}
+\begin{lstlisting}
+private final ReadWriteLock rwLock = 
+    new ReentrantReadWriteLock();
+private Data data;
+
+public Data read() {
+    rwLock.readLock().lock();
+    try {
+        return data;
+    } finally {
+        rwLock.readLock().unlock();
+    }
+}
+
+public void write(Data newData) {
+    rwLock.writeLock().lock();
+    try {
+        data = newData;
+    } finally {
+        rwLock.writeLock().unlock();
+    }
+}
+\end{lstlisting}
+
+\textbf{Key properties:}
+\begin{itemize}
+\item Multiple readers simultaneously
+\item Single writer (exclusive)
+\item Writer blocks all readers
+\item Best for read-heavy workloads
+\end{itemize}
+
+\subsection*{Coordination Tools}
+
+\textbf{CountDownLatch:}
+\begin{lstlisting}
+CountDownLatch latch = new CountDownLatch(3);
+
+// Workers
+exec.submit(() -> {
+    doWork();
+    latch.countDown();
+});
+
+// Main thread
+latch.await(); // blocks until count = 0
+\end{lstlisting}
+
+\textbf{Use case:} Wait for N tasks to complete
+
+\textbf{Semaphore:}
+\begin{lstlisting}
+Semaphore sem = new Semaphore(3); // 3 permits
+
+sem.acquire(); // get permit
+try {
+    // access limited resource
+} finally {
+    sem.release(); // return permit
+}
+
+// Non-blocking
+if (sem.tryAcquire()) { /* ... */ }
+\end{lstlisting}
+
+\textbf{Use case:} Limit concurrent access to N threads
+
+\textbf{CyclicBarrier:}
+\begin{lstlisting}
+CyclicBarrier barrier = 
+    new CyclicBarrier(3, () -> merge());
+
+// Each thread
+barrier.await(); // blocks until all arrive
+\end{lstlisting}
+
+\textbf{Use case:} Threads wait for each other at sync point
+
+\subsection*{Thread Interruption}
+
+\textbf{Cooperative cancellation mechanism:}
+\begin{lstlisting}
+// Check if interrupted
+if (Thread.currentThread().isInterrupted()) {
+    // cleanup and exit
+}
+
+// Interruptible operations throw
+try {
+    Thread.sleep(1000);
+    queue.take();
+} catch (InterruptedException e) {
+    // Restore interrupt status
+    Thread.currentThread().interrupt();
+    // cleanup and exit
+}
+\end{lstlisting}
+
+\textbf{Interrupting a thread:}
+\begin{lstlisting}
+thread.interrupt(); // sets interrupt flag
+\end{lstlisting}
+
+\textbf{Best practices:}
+\begin{itemize}
+\item Always restore interrupt status after catching
+\item Don't swallow InterruptedException
+\item Check interrupted() in long-running loops
+\item Use for graceful cancellation, not forced stop
+\end{itemize}
+
+\subsection*{Double-Checked Locking}
+
+\textbf{Broken pattern (without volatile):}
+\begin{lstlisting}
+// DON'T DO THIS - broken!
+if (instance == null) {
+    synchronized(lock) {
+        if (instance == null) {
+            instance = new Singleton(); // NOT atomic
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Fixed with volatile:}
+\begin{lstlisting}
+private volatile Singleton instance;
+
+if (instance == null) {
+    synchronized(lock) {
+        if (instance == null) {
+            instance = new Singleton();
+        }
+    }
+}
+return instance;
+\end{lstlisting}
+
+\textbf{Better: Holder idiom (no volatile needed):}
+\begin{lstlisting}
+class Singleton {
+    private static class Holder {
+        static final Singleton INSTANCE = new Singleton();
+    }
+    public static Singleton get() {
+        return Holder.INSTANCE;
+    }
+}
+\end{lstlisting}
+
+\subsection*{CompletableFuture}
+
+\textbf{Non-blocking async composition:}
+\begin{lstlisting}
+CompletableFuture<String> future = 
+    CompletableFuture.supplyAsync(() -> fetchData());
+
+// Chain transformations (non-blocking)
+future.thenApply(data -> process(data))
+      .thenAccept(result -> save(result))
+      .exceptionally(ex -> handleError(ex));
+
+// Combine multiple futures
+CompletableFuture<String> f1 = asyncOp1();
+CompletableFuture<String> f2 = asyncOp2();
+
+CompletableFuture.allOf(f1, f2)
+    .thenRun(() -> System.out.println("Both done"));
+
+// Get first completed
+CompletableFuture.anyOf(f1, f2)
+    .thenAccept(result -> process(result));
+\end{lstlisting}
+
+\textbf{Advantages over Future:}
+\begin{itemize}
+\item Non-blocking composition
+\item Built-in error handling
+\item Combine multiple async operations
+\item More functional programming style
+\end{itemize}
+
+\columnbreak
+
+\section*{Phase 3: Classic Problems}
+
+\subsection*{Producer-Consumer}
+
+\textbf{Pattern:} Data flow between threads via shared buffer
+
+\textbf{Solution 1 - Custom with wait/notify:}
+\begin{lstlisting}
+class BoundedQueue<T> {
+    private Queue<T> queue = new LinkedList<>();
+    private int capacity;
+    
+    public synchronized void put(T item) 
+        throws InterruptedException {
+        while (queue.size() >= capacity) {
+            wait();
+        }
+        queue.add(item);
+        notifyAll();
+    }
+    
+    public synchronized T take() 
+        throws InterruptedException {
+        while (queue.isEmpty()) {
+            wait();
+        }
+        T item = queue.remove();
+        notifyAll();
+        return item;
+    }
+}
+\end{lstlisting}
+
+\textbf{Solution 2 - BlockingQueue:}
+\begin{lstlisting}
+BlockingQueue<T> queue = 
+    new ArrayBlockingQueue<>(100);
+
+// Producer
+queue.put(item);
+
+// Consumer
+T item = queue.take();
+\end{lstlisting}
+
+\textbf{Priority variant:}
+\begin{lstlisting}
+PriorityBlockingQueue<Task> queue = 
+    new PriorityBlockingQueue<>();
+\end{lstlisting}
+
+\subsection*{Readers-Writers}
+
+\textbf{Problem:} Multiple readers safe, writers need exclusive access
+
+\textbf{Solution:}
+\begin{lstlisting}
+ReadWriteLock rwLock = 
+    new ReentrantReadWriteLock();
+
+// Read: multiple concurrent
+rwLock.readLock().lock();
+try { /* read */ } 
+finally { rwLock.readLock().unlock(); }
+
+// Write: exclusive
+rwLock.writeLock().lock();
+try { /* write */ } 
+finally { rwLock.writeLock().unlock(); }
+\end{lstlisting}
+
+\subsection*{Dining Philosophers}
+
+\textbf{Problem:} Deadlock when all grab left fork simultaneously
+
+\textbf{Solution 1 - Numbered resources:}
+\begin{lstlisting}
+// Always acquire lower-numbered fork first
+int first = Math.min(left, right);
+int second = Math.max(left, right);
+synchronized(forks[first]) {
+    synchronized(forks[second]) {
+        eat();
+    }
+}
+\end{lstlisting}
+
+\textbf{Solution 2 - Limit diners:}
+\begin{lstlisting}
+Semaphore seats = new Semaphore(4); // n-1
+seats.acquire();
+try {
+    pickUpForks();
+    eat();
+} finally {
+    seats.release();
+}
+\end{lstlisting}
+
+\textbf{Solution 3 - Asymmetry:}
+\begin{lstlisting}
+// Odd: left-right, Even: right-left
+if (id % 2 == 0) {
+    synchronized(leftFork) {
+        synchronized(rightFork) { eat(); }
+    }
+} else {
+    synchronized(rightFork) {
+        synchronized(leftFork) { eat(); }
+    }
+}
+\end{lstlisting}
+
+\section*{Advanced Topics}
+
+\subsection*{LongAdder vs AtomicLong}
+
+\textbf{Use LongAdder for high contention:}
+\begin{lstlisting}
+LongAdder counter = new LongAdder();
+counter.increment(); // split across cells
+long total = counter.sum(); // aggregate
+\end{lstlisting}
+
+\textbf{When:} Multiple threads frequently increment/decrement
+
+\textbf{Why:} Reduces contention by striping updates
+
+\subsection*{Lock-Free Algorithms}
+
+\textbf{Compare-and-swap (CAS):}
+\begin{lstlisting}
+AtomicReference<Node> head = new AtomicReference<>();
+
+// Lock-free stack push
+Node newNode = new Node(value);
+do {
+    newNode.next = head.get();
+} while (!head.compareAndSet(newNode.next, newNode));
+\end{lstlisting}
+
+\textbf{Trade-offs:}
+\begin{itemize}
+\item Pro: No blocking, better under contention
+\item Con: More complex, potential livelock, ABA problem
+\end{itemize}
+
+\section*{Red Flags to Avoid}
+
+\textbf{Common mistakes in interviews:}
+
+\textbf{1. Busy-wait spinning without yield}
+\begin{lstlisting}
+// BAD
+while (!ready) { } // burns CPU
+
+// BETTER  
+while (!ready) {
+    Thread.yield(); // or use wait/notify
+}
+\end{lstlisting}
+
+\textbf{2. Swallowing InterruptedException}
+\begin{lstlisting}
+// BAD
+try {
+    Thread.sleep(1000);
+} catch (InterruptedException e) {
+    // ignore - WRONG!
+}
+
+// GOOD
+} catch (InterruptedException e) {
+    Thread.currentThread().interrupt();
+    // cleanup
+}
+\end{lstlisting}
+
+\textbf{3. Synchronized on public/mutable object}
+\begin{lstlisting}
+// BAD - others can lock on this
+public synchronized void method() { }
+
+// BETTER - private lock
+private final Object lock = new Object();
+synchronized(lock) { }
+\end{lstlisting}
+
+\textbf{4. Nested locks without ordering}
+\begin{lstlisting}
+// BAD - potential deadlock
+synchronized(lockA) {
+    synchronized(lockB) { }
+}
+
+// BETTER - consistent lock ordering
+// always acquire lower-numbered lock first
+\end{lstlisting}
+
+\section*{Common Pitfalls}
+
+\textbf{1. Using \texttt{if} instead of \texttt{while} with \texttt{wait()}}
+
+\textbf{2. Forgetting \texttt{finally} block with ReentrantLock}
+
+\textbf{3. Calling \texttt{wait/notify} outside synchronized}
+
+\textbf{4. Assuming \texttt{volatile} makes compound ops atomic}
+
+\textbf{5. Not handling InterruptedException}
+
+\textbf{6. Forgetting to shutdown ExecutorService}
+
+\textbf{7. Using \texttt{synchronized(this)} when object exposed}
+
+\section*{Interview Strategy}
+
+\textbf{1. Identify the pattern:}
+\begin{itemize}
+\item Producer-Consumer?
+\item Readers-Writers?
+\item Resource contention?
+\item Coordination needed?
+\end{itemize}
+
+\textbf{2. Choose primitives:}
+\begin{itemize}
+\item Simple mutual exclusion → \texttt{synchronized}
+\item Need tryLock/timeout → \texttt{ReentrantLock}
+\item Read-heavy → \texttt{ReadWriteLock}
+\item Coordination → \texttt{wait/notify} or utilities
+\item Producer-consumer → \texttt{BlockingQueue}
+\end{itemize}
+
+\textbf{3. Consider:}
+\begin{itemize}
+\item Deadlock prevention
+\item Starvation
+\item Fairness
+\item Performance vs complexity
+\end{itemize}
+
+\textbf{4. Discuss trade-offs:}
+\begin{itemize}
+\item Lock granularity
+\item Built-in vs custom
+\item Simplicity vs optimization
+\end{itemize}
+
+\textbf{5. Ask clarifying questions:}
+\begin{itemize}
+\item Expected load (QPS/throughput)?
+\item Latency requirements (p50, p99)?
+\item Read-heavy or write-heavy?
+\item Strict ordering needed?
+\item Failure tolerance requirements?
+\end{itemize}
+
+\section*{Code Review Checklist}
+
+\textbf{Before submitting concurrent code:}
+
+$\Box$ All shared mutable state synchronized
+
+$\Box$ Locks released in finally blocks
+
+$\Box$ wait() always in while loop
+
+$\Box$ InterruptedException handled properly
+
+$\Box$ ExecutorService shut down in cleanup
+
+$\Box$ No nested locks without deadlock strategy
+
+$\Box$ Thread-safety documented in javadoc
+
+$\Box$ Atomic operations for check-then-act
+
+$\Box$ volatile not used for compound ops
+
+$\Box$ No sync on computed/mutable objects
+
+\section*{Key Imports}
+
+\begin{lstlisting}
+import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.atomic.*;
+\end{lstlisting}
+
+\end{multicols*}
+
+\end{document}

@@ -1,0 +1,756 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+
+\geometry{top=1cm,left=1.5cm,right=1.5cm,bottom=1.5cm}
+
+\lstset{
+    language=Java,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    tabsize=2,
+    captionpos=b
+}
+
+\setlist{nosep, leftmargin=*}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+\begin{center}
+\LARGE{\textbf{Java Concurrency: Complex Practical Examples}} \\
+\large{Integrating Multiple Concepts for Staff-Level Interviews}
+\end{center}
+
+\section{Example 1: Thread-Safe Cache with Expiration}
+
+\textbf{Requirements:}
+\begin{itemize}
+\item Multiple threads read frequently (optimize for reads)
+\item Occasional writes to update entries
+\item Entries expire after TTL (time-to-live)
+\item Background thread periodically removes expired entries
+\item Thread-safe statistics tracking (hits, misses)
+\end{itemize}
+
+\textbf{Concepts integrated:} ReadWriteLock, ScheduledExecutorService, AtomicLong, ConcurrentHashMap
+
+\begin{lstlisting}[caption={Thread-Safe Cache Implementation}]
+import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.atomic.*;
+
+class ExpiringCache<K, V> {
+    private static class CacheEntry<V> {
+        final V value;
+        final long expiryTime;
+        
+        CacheEntry(V value, long ttlMillis) {
+            this.value = value;
+            this.expiryTime = System.currentTimeMillis() + ttlMillis;
+        }
+        
+        boolean isExpired() {
+            return System.currentTimeMillis() > expiryTime;
+        }
+    }
+    
+    private final ConcurrentHashMap<K, CacheEntry<V>> cache;
+    private final AtomicLong hits = new AtomicLong(0);
+    private final AtomicLong misses = new AtomicLong(0);
+    private final ScheduledExecutorService cleaner;
+    private final long ttlMillis;
+    
+    public ExpiringCache(long ttlMillis, long cleanupIntervalMillis) {
+        this.cache = new ConcurrentHashMap<>();
+        this.ttlMillis = ttlMillis;
+        this.cleaner = Executors.newScheduledThreadPool(1);
+        
+        // Schedule periodic cleanup
+        cleaner.scheduleAtFixedRate(
+            this::removeExpiredEntries,
+            cleanupIntervalMillis,
+            cleanupIntervalMillis,
+            TimeUnit.MILLISECONDS
+        );
+    }
+    
+    public V get(K key) {
+        CacheEntry<V> entry = cache.get(key);
+        
+        if (entry == null || entry.isExpired()) {
+            misses.incrementAndGet();
+            if (entry != null) {
+                cache.remove(key, entry); // Remove expired
+            }
+            return null;
+        }
+        
+        hits.incrementAndGet();
+        return entry.value;
+    }
+    
+    public void put(K key, V value) {
+        cache.put(key, new CacheEntry<>(value, ttlMillis));
+    }
+    
+    private void removeExpiredEntries() {
+        cache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+    }
+    
+    public CacheStats getStats() {
+        long hitCount = hits.get();
+        long missCount = misses.get();
+        long total = hitCount + missCount;
+        double hitRate = total == 0 ? 0.0 : (double) hitCount / total;
+        
+        return new CacheStats(hitCount, missCount, hitRate, cache.size());
+    }
+    
+    public void shutdown() {
+        cleaner.shutdown();
+        try {
+            if (!cleaner.awaitTermination(5, TimeUnit.SECONDS)) {
+                cleaner.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            cleaner.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    static class CacheStats {
+        final long hits, misses;
+        final double hitRate;
+        final int size;
+        
+        CacheStats(long hits, long misses, double hitRate, int size) {
+            this.hits = hits;
+            this.misses = misses;
+            this.hitRate = hitRate;
+            this.size = size;
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Key design decisions:}
+\begin{itemize}
+\item \textbf{ConcurrentHashMap} for cache storage - allows concurrent reads/writes to different keys
+\item \textbf{AtomicLong} for hit/miss counters - lock-free increments under high contention
+\item \textbf{ScheduledExecutorService} for cleanup - better than manual thread + Timer
+\item \textbf{No ReadWriteLock on cache operations} - ConcurrentHashMap already optimized
+\item \textbf{Graceful shutdown} with timeout and force-stop fallback
+\item \textbf{Benign race in get():} Between checking isExpired() and removing, another thread might access the entry. This is acceptable - worst case is redundant removal. Alternative: \texttt{cache.computeIfPresent(key, (k,v) -> v.isExpired() ? null : v)} for atomic check-and-remove
+\end{itemize}
+
+\section{Example 2: Rate-Limited API Client}
+
+\textbf{Requirements:}
+\begin{itemize}
+\item Limit to N requests per second across all threads
+\item Block threads when rate limit exceeded
+\item Support burst capacity (can briefly exceed rate)
+\item Track and report throttling statistics
+\end{itemize}
+
+\textbf{Concepts integrated:} Semaphore, ScheduledExecutorService, AtomicInteger, synchronized blocks
+
+\begin{lstlisting}[caption={Token Bucket Rate Limiter}]
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+
+class RateLimitedApiClient {
+    private final Semaphore tokens;
+    private final int maxTokens;
+    private final int refillRate; // tokens per second
+    private final ScheduledExecutorService refiller;
+    private final AtomicInteger throttledRequests = new AtomicInteger(0);
+    
+    public RateLimitedApiClient(int maxTokens, int refillRate) {
+        this.maxTokens = maxTokens;
+        this.refillRate = refillRate;
+        this.tokens = new Semaphore(maxTokens);
+        this.refiller = Executors.newScheduledThreadPool(1);
+        
+        // Refill tokens every 100ms
+        long refillIntervalMs = 100;
+        int tokensPerInterval = Math.max(1, refillRate / 10);
+        
+        refiller.scheduleAtFixedRate(
+            () -> refillTokens(tokensPerInterval),
+            refillIntervalMs,
+            refillIntervalMs,
+            TimeUnit.MILLISECONDS
+        );
+    }
+    
+    public <T> T makeRequest(Callable<T> apiCall) 
+            throws Exception {
+        // Try to acquire token (blocks if none available)
+        boolean acquired = tokens.tryAcquire(5, TimeUnit.SECONDS);
+        
+        if (!acquired) {
+            throttledRequests.incrementAndGet();
+            throw new RateLimitException("Rate limit exceeded");
+        }
+        
+        try {
+            return apiCall.call();
+        } finally {
+            // Token not returned - consumed by rate limit
+        }
+    }
+    
+    private void refillTokens(int count) {
+        int available = tokens.availablePermits();
+        int toAdd = Math.min(count, maxTokens - available);
+        
+        if (toAdd > 0) {
+            tokens.release(toAdd);
+        }
+    }
+    
+    public RateLimitStats getStats() {
+        return new RateLimitStats(
+            tokens.availablePermits(),
+            throttledRequests.get()
+        );
+    }
+    
+    public void shutdown() {
+        refiller.shutdown();
+    }
+    
+    static class RateLimitStats {
+        final int availableTokens;
+        final int throttledRequests;
+        
+        RateLimitStats(int availableTokens, int throttledRequests) {
+            this.availableTokens = availableTokens;
+            this.throttledRequests = throttledRequests;
+        }
+    }
+    
+    static class RateLimitException extends Exception {
+        RateLimitException(String message) {
+            super(message);
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Usage example:}
+\begin{lstlisting}
+RateLimitedApiClient client = new RateLimitedApiClient(
+    100,  // max 100 tokens (burst capacity)
+    50    // refill 50 tokens/second
+);
+
+// Multiple threads making requests
+ExecutorService executor = Executors.newFixedThreadPool(20);
+for (int i = 0; i < 1000; i++) {
+    executor.submit(() -> {
+        try {
+            String result = client.makeRequest(() -> {
+                return callExternalApi();
+            });
+            System.out.println("Success: " + result);
+        } catch (RateLimitException e) {
+            System.out.println("Throttled!");
+        }
+    });
+}
+\end{lstlisting}
+
+\textbf{Key design decisions:}
+\begin{itemize}
+\item \textbf{Semaphore for token bucket} - naturally models available capacity
+\item \textbf{tryAcquire with timeout} - prevents indefinite blocking
+\item \textbf{Tokens not returned} after request - consumed by rate limit
+\item \textbf{Periodic refill} - scheduled task adds tokens back
+\item \textbf{Bounded refill} - never exceed maxTokens (prevents overflow)
+\end{itemize}
+
+\section{Example 3: Parallel File Processor with Work Stealing}
+
+\textbf{Requirements:}
+\begin{itemize}
+\item Process large directory of files in parallel
+\item Some files larger than others (imbalanced workload)
+\item Aggregate results from all files
+\item Track progress and report completion
+\item Handle errors gracefully
+\end{itemize}
+
+\textbf{Concepts integrated:} ExecutorService, CountDownLatch, ConcurrentHashMap, AtomicInteger, Future
+
+\begin{lstlisting}[caption={Parallel File Processor}]
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+import java.io.*;
+import java.nio.file.*;
+
+class ParallelFileProcessor {
+    private final ExecutorService executor;
+    private final ConcurrentHashMap<String, ProcessingResult> results;
+    private final AtomicInteger processed = new AtomicInteger(0);
+    private final AtomicInteger failed = new AtomicInteger(0);
+    
+    public ParallelFileProcessor(int threadCount) {
+        // Work-stealing pool for imbalanced workloads
+        this.executor = Executors.newWorkStealingPool(threadCount);
+        this.results = new ConcurrentHashMap<>();
+    }
+    
+    public AggregateResult processDirectory(Path directory) 
+            throws IOException, InterruptedException {
+        List<Path> files = Files.walk(directory)
+            .filter(Files::isRegularFile)
+            .toList();
+        
+        int totalFiles = files.size();
+        CountDownLatch latch = new CountDownLatch(totalFiles);
+        
+        // Submit all file processing tasks
+        List<Future<ProcessingResult>> futures = new ArrayList<>();
+        for (Path file : files) {
+            Future<ProcessingResult> future = executor.submit(() -> {
+                try {
+                    ProcessingResult result = processFile(file);
+                    results.put(file.toString(), result);
+                    processed.incrementAndGet();
+                    return result;
+                } catch (Exception e) {
+                    failed.incrementAndGet();
+                    System.err.println("Failed: " + file + " - " + e.getMessage());
+                    return ProcessingResult.error(file.toString(), e);
+                } finally {
+                    latch.countDown();
+                }
+            });
+            futures.add(future);
+        }
+        
+        // Progress reporting in separate thread
+        Thread progressThread = new Thread(() -> {
+            while (latch.getCount() > 0) {
+                reportProgress(totalFiles);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        });
+        progressThread.start();
+        
+        // Wait for all files to complete
+        latch.await();
+        progressThread.interrupt();
+        
+        // Aggregate results
+        return aggregateResults(files, futures);
+    }
+    
+    private ProcessingResult processFile(Path file) throws IOException {
+        // Simulate file processing
+        long wordCount = Files.lines(file).count();
+        long byteSize = Files.size(file);
+        return new ProcessingResult(file.toString(), wordCount, byteSize, true, null);
+    }
+    
+    private void reportProgress(int total) {
+        int done = processed.get();
+        int errors = failed.get();
+        double pct = (done + errors) * 100.0 / total;
+        System.out.printf("Progress: %.1f%% (%d/%d, %d errors)%n", 
+            pct, done, total, errors);
+    }
+    
+    private AggregateResult aggregateResults(List<Path> files, 
+            List<Future<ProcessingResult>> futures) {
+        long totalWords = 0;
+        long totalBytes = 0;
+        int successCount = 0;
+        List<String> errors = new ArrayList<>();
+        
+        for (Future<ProcessingResult> future : futures) {
+            try {
+                ProcessingResult result = future.get();
+                if (result.success) {
+                    totalWords += result.wordCount;
+                    totalBytes += result.byteSize;
+                    successCount++;
+                } else {
+                    errors.add(result.filename + ": " + result.error.getMessage());
+                }
+            } catch (Exception e) {
+                errors.add("Future failed: " + e.getMessage());
+            }
+        }
+        
+        return new AggregateResult(files.size(), successCount, 
+            totalWords, totalBytes, errors);
+    }
+    
+    public void shutdown() {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
+    }
+    
+    static class ProcessingResult {
+        final String filename;
+        final long wordCount;
+        final long byteSize;
+        final boolean success;
+        final Exception error;
+        
+        ProcessingResult(String filename, long wordCount, long byteSize, 
+                boolean success, Exception error) {
+            this.filename = filename;
+            this.wordCount = wordCount;
+            this.byteSize = byteSize;
+            this.success = success;
+            this.error = error;
+        }
+        
+        static ProcessingResult error(String filename, Exception error) {
+            return new ProcessingResult(filename, 0, 0, false, error);
+        }
+    }
+    
+    static class AggregateResult {
+        final int totalFiles;
+        final int successCount;
+        final long totalWords;
+        final long totalBytes;
+        final List<String> errors;
+        
+        AggregateResult(int totalFiles, int successCount, long totalWords, 
+                long totalBytes, List<String> errors) {
+            this.totalFiles = totalFiles;
+            this.successCount = successCount;
+            this.totalWords = totalWords;
+            this.totalBytes = totalBytes;
+            this.errors = errors;
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Key design decisions:}
+\begin{itemize}
+\item \textbf{newWorkStealingPool()} - threads steal work from each other when idle (good for imbalanced tasks)
+\item \textbf{CountDownLatch} - wait for all files to complete before aggregating
+\item \textbf{ConcurrentHashMap} - store results from multiple threads
+\item \textbf{AtomicInteger} - track progress without locks
+\item \textbf{Future list} - collect results for final aggregation
+\item \textbf{Separate progress thread} - non-blocking progress reporting
+\item \textbf{Graceful error handling} - failures don't stop other tasks
+\end{itemize}
+
+\section{Example 4: Connection Pool}
+
+\textbf{Requirements:}
+\begin{itemize}
+\item Fixed pool of N database connections
+\item Threads block when all connections in use
+\item Connections have idle timeout (close if unused)
+\item Health check connections periodically
+\item Track utilization statistics
+\end{itemize}
+
+\textbf{Concepts integrated:} BlockingQueue, ScheduledExecutorService, ReentrantLock, wait/notify
+
+\begin{lstlisting}[caption={Database Connection Pool}]
+import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
+import java.util.*;
+
+class ConnectionPool {
+    private final BlockingQueue<PooledConnection> available;
+    private final Set<PooledConnection> inUse;
+    private final Lock useLock = new ReentrantLock();
+    private final int maxSize;
+    private final long idleTimeoutMs;
+    private final ScheduledExecutorService healthChecker;
+    private volatile boolean isShutdown = false;
+    
+    public ConnectionPool(int maxSize, long idleTimeoutMs) {
+        this.maxSize = maxSize;
+        this.idleTimeoutMs = idleTimeoutMs;
+        this.available = new LinkedBlockingQueue<>();
+        this.inUse = new HashSet<>();
+        this.healthChecker = Executors.newScheduledThreadPool(1);
+        
+        // Initialize pool
+        for (int i = 0; i < maxSize; i++) {
+            available.offer(new PooledConnection(i));
+        }
+        
+        // Periodic health check and idle timeout
+        healthChecker.scheduleAtFixedRate(
+            this::maintainPool,
+            30, 30, TimeUnit.SECONDS
+        );
+    }
+    
+    public PooledConnection acquire() throws InterruptedException {
+        if (isShutdown) {
+            throw new IllegalStateException("Pool is shutdown");
+        }
+        
+        // Block until connection available
+        PooledConnection conn = available.take();
+        
+        useLock.lock();
+        try {
+            conn.markInUse();
+            inUse.add(conn);
+        } finally {
+            useLock.unlock();
+        }
+        
+        return conn;
+    }
+    
+    public PooledConnection tryAcquire(long timeout, TimeUnit unit) 
+            throws InterruptedException {
+        if (isShutdown) {
+            throw new IllegalStateException("Pool is shutdown");
+        }
+        
+        PooledConnection conn = available.poll(timeout, unit);
+        if (conn == null) {
+            return null; // Timeout
+        }
+        
+        useLock.lock();
+        try {
+            conn.markInUse();
+            inUse.add(conn);
+        } finally {
+            useLock.unlock();
+        }
+        
+        return conn;
+    }
+    
+    public void release(PooledConnection conn) {
+        if (conn == null) return;
+        
+        useLock.lock();
+        try {
+            if (!inUse.remove(conn)) {
+                throw new IllegalStateException("Connection not in use");
+            }
+            conn.markAvailable();
+        } finally {
+            useLock.unlock();
+        }
+        
+        available.offer(conn);
+    }
+    
+    private void maintainPool() {
+        useLock.lock();
+        try {
+            // Health check in-use connections
+            for (PooledConnection conn : inUse) {
+                if (!conn.isHealthy()) {
+                    System.err.println("Unhealthy connection: " + conn.id);
+                    // In real implementation: close and recreate
+                }
+            }
+            
+            // Check idle timeout for available connections
+            long now = System.currentTimeMillis();
+            Iterator<PooledConnection> iter = available.iterator();
+            while (iter.hasNext()) {
+                PooledConnection conn = iter.next();
+                if (now - conn.lastUsedTime > idleTimeoutMs) {
+                    iter.remove();
+                    conn.close();
+                    // Create new connection to maintain pool size
+                    available.offer(new PooledConnection(conn.id));
+                }
+            }
+        } finally {
+            useLock.unlock();
+        }
+    }
+    
+    public PoolStats getStats() {
+        useLock.lock();
+        try {
+            return new PoolStats(
+                available.size(),
+                inUse.size(),
+                maxSize
+            );
+        } finally {
+            useLock.unlock();
+        }
+    }
+    
+    public void shutdown() {
+        isShutdown = true;
+        healthChecker.shutdown();
+        
+        useLock.lock();
+        try {
+            for (PooledConnection conn : available) {
+                conn.close();
+            }
+            available.clear();
+        } finally {
+            useLock.unlock();
+        }
+    }
+    
+    static class PooledConnection {
+        final int id;
+        volatile long lastUsedTime;
+        volatile boolean inUse;
+        
+        PooledConnection(int id) {
+            this.id = id;
+            this.lastUsedTime = System.currentTimeMillis();
+            this.inUse = false;
+        }
+        
+        void markInUse() {
+            this.inUse = true;
+            this.lastUsedTime = System.currentTimeMillis();
+        }
+        
+        void markAvailable() {
+            this.inUse = false;
+            this.lastUsedTime = System.currentTimeMillis();
+        }
+        
+        boolean isHealthy() {
+            // Simulate health check
+            return true;
+        }
+        
+        void close() {
+            // Close actual connection
+        }
+        
+        public void execute(String sql) {
+            // Execute query
+        }
+    }
+    
+    static class PoolStats {
+        final int available;
+        final int inUse;
+        final int total;
+        
+        PoolStats(int available, int inUse, int total) {
+            this.available = available;
+            this.inUse = inUse;
+            this.total = total;
+        }
+        
+        public double getUtilization() {
+            return total == 0 ? 0.0 : (double) inUse / total;
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Usage pattern:}
+\begin{lstlisting}
+ConnectionPool pool = new ConnectionPool(10, 60000); // 10 conns, 60s idle
+
+// Thread-safe acquire/release
+PooledConnection conn = null;
+try {
+    conn = pool.acquire(); // blocks if none available
+    conn.execute("SELECT * FROM users");
+} finally {
+    if (conn != null) {
+        pool.release(conn); // Always return to pool
+    }
+}
+
+// With timeout
+conn = pool.tryAcquire(5, TimeUnit.SECONDS);
+if (conn != null) {
+    try {
+        conn.execute("SELECT * FROM orders");
+    } finally {
+        pool.release(conn);
+    }
+} else {
+    System.out.println("Could not acquire connection");
+}
+\end{lstlisting}
+
+\textbf{Key design decisions:}
+\begin{itemize}
+\item \textbf{BlockingQueue for available connections} - natural blocking behavior when pool exhausted
+\item \textbf{Set for in-use tracking} - fast lookup to validate release
+\item \textbf{ReentrantLock for state transitions} - protects inUse set modifications
+\item \textbf{ScheduledExecutorService} for maintenance - health checks and idle timeout
+\item \textbf{Try-acquire with timeout} - prevents indefinite blocking
+\item \textbf{Graceful shutdown} - close all connections, reject new acquires
+\end{itemize}
+
+\section{Interview Discussion Points}
+
+When presenting these examples in interviews, discuss:
+
+\textbf{Trade-offs made:}
+\begin{itemize}
+\item Why BlockingQueue vs custom wait/notify?
+\item When to use ConcurrentHashMap vs synchronized Map?
+\item Lock granularity: coarse-grained vs fine-grained
+\item Memory overhead vs performance
+\end{itemize}
+
+\textbf{Edge cases handled:}
+\begin{itemize}
+\item What happens during shutdown?
+\item How are errors propagated?
+\item What about thread interruption?
+\item Resource cleanup in finally blocks
+\end{itemize}
+
+\textbf{Scalability considerations:}
+\begin{itemize}
+\item How does it perform under high contention?
+\item Where are the bottlenecks?
+\item How would you monitor/tune in production?
+\end{itemize}
+
+\textbf{Alternative designs:}
+\begin{itemize}
+\item Could use different primitives?
+\item What about lock-free approaches?
+\item Trade-offs between approaches
+\end{itemize}
+
+\end{document}
