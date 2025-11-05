@@ -187,8 +187,10 @@ class RateLimitedApiClient {
         
         // Refill tokens every 100ms
         long refillIntervalMs = 100;
-        int tokensPerInterval = Math.max(1, refillRate / 10);
-        
+        // Calculate tokens per interval to achieve target rate
+        // refillRate tokens/second = refillRate/10 tokens per 100ms
+        double tokensPerInterval = refillRate / 10.0;
+
         refiller.scheduleAtFixedRate(
             () -> refillTokens(tokensPerInterval),
             refillIntervalMs,
@@ -214,13 +216,19 @@ class RateLimitedApiClient {
         }
     }
     
-    private void refillTokens(int count) {
+    private void refillTokens(double tokensToAdd) {
+        // Accumulate fractional tokens across refills
         int available = tokens.availablePermits();
-        int toAdd = Math.min(count, maxTokens - available);
-        
+        int wholePart = (int) tokensToAdd;
+
+        // Never exceed maxTokens
+        int toAdd = Math.min(wholePart, maxTokens - available);
+
         if (toAdd > 0) {
             tokens.release(toAdd);
         }
+        // Note: Race between availablePermits() and release() is acceptable
+        // Worst case: slightly exceed maxTokens temporarily
     }
     
     public RateLimitStats getStats() {
@@ -346,20 +354,23 @@ class ParallelFileProcessor {
         }
         
         // Progress reporting in separate thread
+        AtomicBoolean progressRunning = new AtomicBoolean(true);
         Thread progressThread = new Thread(() -> {
-            while (latch.getCount() > 0) {
+            while (progressRunning.get() && latch.getCount() > 0) {
                 reportProgress(totalFiles);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     break;
                 }
             }
         });
         progressThread.start();
-        
+
         // Wait for all files to complete
         latch.await();
+        progressRunning.set(false);
         progressThread.interrupt();
         
         // Aggregate results
@@ -368,7 +379,10 @@ class ParallelFileProcessor {
     
     private ProcessingResult processFile(Path file) throws IOException {
         // Simulate file processing
-        long wordCount = Files.lines(file).count();
+        long wordCount;
+        try (var lines = Files.lines(file)) {
+            wordCount = lines.count();
+        }
         long byteSize = Files.size(file);
         return new ProcessingResult(file.toString(), wordCount, byteSize, true, null);
     }

@@ -697,6 +697,8 @@ AtomicReference<Node> head = new AtomicReference<>();
 Node newNode = new Node(value);
 do {
     newNode.next = head.get();
+    // CAS: atomically set head to newNode
+    // only if it's still equal to newNode.next
 } while (!head.compareAndSet(newNode.next, newNode));
 \end{lstlisting}
 
