@@ -255,18 +255,19 @@ assert len(result) == 1 and len(result[0]) == 3
 
 \textit{Source: Full Stack New Grad (2023-2025)}
 
-\subsubsection{HTML Format Validation}
+\subsubsection{HTML Format Validation (Tag Validator)}
 
 \begin{problembox}
 \textbf{Problem Statement:}
 
-Given a string representing HTML-like tags with custom delimiters, determine if the tag structure is valid.
+Given a string with custom tag syntax, determine if all tags are properly matched and nested. This is NOT standard HTML - uses special \texttt{\{\{ \}\}} delimiters with \# and / prefixes.
 
-Tags are represented as:
+\textbf{Tag Format (from 1point3acres - Asked 5+ times):}
 \begin{itemize}
-    \item Opening tag: \texttt{\{\{tagName\}\}}
-    \item Closing tag: \texttt{\{\{/tagName\}\}}
-    \item Content: Any text between tags
+    \item Opening tag: \texttt{\{\{ \#tagname \}\}} (note the \# prefix and spaces)
+    \item Closing tag: \texttt{\{\{ /tagname \}\}} (note the / prefix and spaces)
+    \item Single braces \texttt{\{} or \texttt{\}} are treated as NORMAL TEXT (not tags)
+    \item Tags must be properly nested (LIFO order)
 \end{itemize}
 
 A valid structure must satisfy:
@@ -274,34 +275,42 @@ A valid structure must satisfy:
     \item Every opening tag has a matching closing tag
     \item Tags are properly nested (no overlapping)
     \item Closing tags match the most recent unclosed opening tag
+    \item Complete tags must have both \texttt{\{\{} and \texttt{\}\}}
 \end{itemize}
 
-\textbf{Example 1:}
+\textbf{Example 1 (Valid - from 1point3acres):}
 \begin{verbatim}
-Input: "{{div}} {{p}} Hello {{/p}} {{/div}}"
+Input: "{{ #abc }} {{ #cba }} hello world {{ /cba }} {{ /abc }}"
 Output: true
-Explanation: Tags are properly nested
+Explanation: Properly nested - #abc opens, #cba opens, /cba closes, /abc closes
 \end{verbatim}
 
-\textbf{Example 2:}
+\textbf{Example 2 (Valid - Single brace OK):}
 \begin{verbatim}
-Input: "{{div}} {{p}} Hello {{/div}} {{/p}}"
-Output: false
-Explanation: Tags overlap incorrectly
-\end{verbatim}
-
-\textbf{Example 3:}
-\begin{verbatim}
-Input: "{{div}} Hello {{/div}} {{p}} World {{/p}}"
+Input: "{{ #abc }} hello { world {{ /abc }}"
 Output: true
-Explanation: Two separate valid tag pairs
+Explanation: Single { is treated as normal text, not a tag
 \end{verbatim}
 
-\textbf{Example 4:}
+\textbf{Example 3 (Invalid - Incomplete tag):}
 \begin{verbatim}
-Input: "{{div}} Hello"
+Input: "{{ #abc }} hello world {{ /abc"
 Output: false
-Explanation: Missing closing tag
+Explanation: Missing closing }} for /abc tag
+\end{verbatim}
+
+\textbf{Example 4 (Invalid - Missing closing):}
+\begin{verbatim}
+Input: "{{ #abc }} {{ #cba }} hello {{ /cba }}"
+Output: false
+Explanation: #abc was opened but never closed
+\end{verbatim}
+
+\textbf{Example 5 (Invalid - Wrong order):}
+\begin{verbatim}
+Input: "{{ #abc }} {{ #cba }} hello {{ /abc }} {{ /cba }}"
+Output: false
+Explanation: Must close #cba before closing #abc (LIFO order)
 \end{verbatim}
 \end{problembox}
 
@@ -309,9 +318,13 @@ Explanation: Missing closing tag
 
 Use a stack to track opening tags:
 \begin{itemize}
-    \item Parse the string to identify tags
-    \item When encountering opening tag: push tag name to stack
-    \item When encountering closing tag: pop stack and verify match
+    \item Parse the string character by character
+    \item Look for \texttt{\{\{} to start a tag (not single \texttt{\{})
+    \item Find matching \texttt{\}\}} to complete the tag
+    \item Extract tag content and check for \# or / prefix
+    \item Opening tag (\#): push tag name to stack
+    \item Closing tag (/): pop stack and verify match
+    \item Single braces: ignore (treated as normal text)
     \item Final stack must be empty
     \item Time: $O(N)$ where N = length of string
     \item Space: $O(T)$ where T = number of tags
@@ -319,61 +332,83 @@ Use a stack to track opening tags:
 
 \begin{solutionbox}
 \begin{verbatim}
-def isValidHTML(s):
+def is_valid_tags(s):
+    if not s:
+        return True
+
     stack = []
     i = 0
 
     while i < len(s):
-        # Look for tag start
+        # Look for opening {{ (need at least 2 characters)
         if i < len(s) - 1 and s[i:i+2] == '{{':
-            # Find tag end
-            j = s.find('}}', i + 2)
-            if j == -1:
-                return False  # Malformed tag
+            # Find closing }}
+            j = i + 2
+            found_closing = False
 
-            tag = s[i+2:j]
+            while j < len(s) - 1:
+                if s[j:j+2] == '}}':
+                    # Extract tag content
+                    tag_content = s[i+2:j].strip()
 
-            if tag.startswith('/'):
-                # Closing tag
-                tag_name = tag[1:]
-                if not stack or stack[-1] != tag_name:
-                    return False
-                stack.pop()
-            else:
-                # Opening tag
-                stack.append(tag)
+                    # Check if valid tag (starts with # or /)
+                    if tag_content and tag_content[0] in '#/':
+                        if tag_content[0] == '#':
+                            # Opening tag
+                            tag_name = tag_content[1:].strip()
+                            stack.append(tag_name)
+                        else:  # tag_content[0] == '/'
+                            # Closing tag
+                            tag_name = tag_content[1:].strip()
+                            if not stack or stack[-1] != tag_name:
+                                return False
+                            stack.pop()
 
-            i = j + 2
+                    i = j + 2
+                    found_closing = True
+                    break
+                j += 1
+
+            if not found_closing:
+                return False  # Incomplete tag
         else:
-            # Regular content, skip
+            # Regular character or single {
             i += 1
 
     return len(stack) == 0
 
-# Test cases
-print(isValidHTML("{{div}} {{p}} Hello {{/p}} {{/div}}"))
+# Test cases (from 1point3acres)
+print(is_valid_tags("{{ #abc }} {{ #cba }} hello {{ /cba }} {{ /abc }}"))
 # True
-print(isValidHTML("{{div}} {{p}} Hello {{/div}} {{/p}}"))
-# False
-print(isValidHTML("{{div}} Hello"))
-# False
-print(isValidHTML("{{div}} {{/p}}"))
-# False (closing without opening)
+print(is_valid_tags("{{ #abc }} hello { world {{ /abc }}"))
+# True (single { is OK)
+print(is_valid_tags("{{ #abc }} {{ /abc"))
+# False (incomplete tag)
+print(is_valid_tags("{{ #abc }} {{ #cba }} {{ /abc }} {{ /cba }}"))
+# False (wrong order)
 \end{verbatim}
 \end{solutionbox}
 
 \begin{testbox}
-\textbf{Edge Cases:}
+\textbf{Edge Cases (Critical for Interview - from 1point3acres):}
 \begin{itemize}
     \item Empty string: \texttt{""} $\rightarrow$ \texttt{true}
     \item No tags, only content: \texttt{"Hello World"} $\rightarrow$ \texttt{true}
-    \item Unmatched opening: \texttt{"\{\{div\}\}"} $\rightarrow$ \texttt{false}
-    \item Unmatched closing: \texttt{"\{\{/div\}\}"} $\rightarrow$ \texttt{false}
-    \item Wrong order: \texttt{"\{\{div\}\} \{\{p\}\} \{\{/div\}\} \{\{/p\}\}"} $\rightarrow$ \texttt{false}
-    \item Nested same tags: \texttt{"\{\{div\}\} \{\{div\}\} \{\{/div\}\} \{\{/div\}\}"} $\rightarrow$ \texttt{true}
-    \item Malformed tags: \texttt{"\{\{div"} $\rightarrow$ \texttt{false}
-    \item Self-closing tags: Clarify requirements
-    \item Case sensitivity: Clarify if \texttt{\{\{Div\}\}} and \texttt{\{\{div\}\}} are different
+    \item Single braces: \texttt{"\{ text \}"} $\rightarrow$ \texttt{true} (NOT tags!)
+    \item Incomplete tag: \texttt{"\{\{ \#abc"} $\rightarrow$ \texttt{false} (missing \}\})
+    \item Only opening: \texttt{"\{\{ \#abc \}\}"} $\rightarrow$ \texttt{false}
+    \item Only closing: \texttt{"\{\{ /abc \}\}"} $\rightarrow$ \texttt{false}
+    \item Wrong order: \texttt{"\{\{ \#abc \}\} \{\{ \#def \}\} \{\{ /abc \}\} \{\{ /def \}\}"} $\rightarrow$ \texttt{false}
+    \item Nested same tags: \texttt{"\{\{ \#div \}\} \{\{ \#div \}\} \{\{ /div \}\} \{\{ /div \}\}"} $\rightarrow$ \texttt{true}
+    \item Extra closing: \texttt{"\{\{ \#abc \}\} \{\{ /abc \}\} \{\{ /abc \}\}"} $\rightarrow$ \texttt{false}
+    \item Double braces without space: \texttt{"\{\{\#abc\}\}"} - depends on implementation
+    \item Tag names with numbers: \texttt{"\{\{ \#tag123 \}\} \{\{ /tag123 \}\}"} $\rightarrow$ \texttt{true}
+\end{itemize}
+
+\textbf{Common Interview Question:} "What other edge cases can you think of?"
+\begin{itemize}
+    \item Be ready to discuss: incomplete tags, single braces, wrong nesting order
+    \item Interviewers specifically test punctuation/formatting edge cases
 \end{itemize}
 
 \textbf{Test Cases:}
@@ -411,216 +446,214 @@ test_html_validation()
 
 \textit{Source: Full Stack New Grad (2023-2025)}
 
-\subsubsection{Haiku Finder (5-7-5 Syllables)}
+\subsubsection{Haiku Finder - Find First Haiku in Sentence}
 
 \begin{problembox}
 \textbf{Problem Statement:}
 
-Given a list of words where each word has an associated syllable count, find all possible haiku formations. A haiku consists of three consecutive parts:
+Given a sentence (single string with mixed case and punctuation) and a syllable dictionary, find the FIRST haiku in the sentence. A haiku consists of 3 consecutive word sequences with syllable counts of 5-7-5.
+
+\textbf{Input:}
 \begin{itemize}
-    \item First line: exactly 5 syllables
-    \item Second line: exactly 7 syllables
-    \item Third line: exactly 5 syllables
+    \item A sentence string with words separated by spaces
+    \item Words may contain mixed case (e.g., "Simple", "HELLO")
+    \item Words may have trailing punctuation (e.g., "world.", "don't", "Void.")
+    \item A syllable dictionary mapping lowercase words to syllable counts
 \end{itemize}
 
-The three parts must be formed from consecutive words in the input list (no gaps allowed).
-
-\textbf{Input Format:}
-\begin{verbatim}
-words = ["hello", "world", "foo", "bar", "baz", "test", "data"]
-syllables = [2, 1, 1, 1, 1, 1, 2]
-\end{verbatim}
-
-\textbf{Output Format:}
-Return all valid haiku formations as tuples of (start\_idx, mid\_idx, end\_idx) where:
+\textbf{Output:}
 \begin{itemize}
-    \item words[start\_idx:mid\_idx] has 5 syllables
-    \item words[mid\_idx:end\_idx] has 7 syllables
-    \item words[end\_idx:end\_idx+k] has 5 syllables (where k determined by counting)
+    \item List of 3 strings representing the haiku lines (preserving original case \& punctuation)
+    \item Return None if no valid haiku exists
+    \item Return the FIRST (leftmost) haiku if multiple exist
 \end{itemize}
 
-Or return the actual word groups for each line.
-
-\textbf{Example 1:}
+\textbf{Example from 1point3acres (Actual Faire Interview):}
 \begin{verbatim}
-words = ["birds", "fly", "south", "in", "the", "winter", "cold"]
-syllables = [1, 1, 1, 1, 1, 2, 1]
+Input:
+sentence = "Internationalization a Simple flower Petals shine
+            Vibrant don't Pure Stares into Void. Return home"
+
+syllable_dict = {
+    "internationalization": 8, "a": 1, "simple": 2, "flower": 2,
+    "petals": 2, "shine": 1, "vibrant": 2, "don't": 1, "pure": 1,
+    "stares": 2, "into": 2, "void": 1, "return": 2, "home": 1
+}
 
 Output:
-[
-  [["birds", "fly", "south", "in"],     # 1+1+1+1 = 4? No
-   ["the", "winter"],                    # 1+2 = 3? No
-   ...]
-]
+["a Simple flower",                    # 1 + 2 + 2 = 5 syllables
+ "Petals shine Vibrant don't Pure",   # 2 + 1 + 2 + 1 + 1 = 7
+ "Stares into Void."]                 # 2 + 2 + 1 = 5
 
-Valid example:
-words = ["spring", "rain", "falls", "gently", "on",
-         "the", "garden", "flowers", "bloom"]
-syllables = [1, 1, 1, 2, 1, 1, 2, 2, 1]
+Explanation:
+- "Internationalization" (8 syllables) - too many for any line
+- Start from "a" (1) + "Simple" (2) + "flower" (2) = 5 [OK]
+- Continue with "Petals" (2) + "shine" (1) + "Vibrant" (2)
+  + "don't" (1) + "Pure" (1) = 7 [OK]
+- End with "Stares" (2) + "into" (2) + "Void." (1) = 5 [OK]
+- Original case and punctuation preserved in output
+\end{verbatim}
 
-One valid haiku:
-Line 1: ["spring", "rain", "falls", "gently"]  # 1+1+1+2 = 5
-Line 2: ["on", "the", "garden", "flowers"]     # 1+1+2+2 = 6? No
+\textbf{Example 2 - No Valid Haiku:}
+\begin{verbatim}
+Input:
+sentence = "Hello world"
+syllable_dict = {"hello": 2, "world": 1}
 
-Let me use a clearer example:
-words = ["I", "love", "to", "code", "all", "day",
-         "long", "writing", "Python"]
-syllables = [1, 1, 1, 1, 1, 1, 1, 2, 2]
-
-Valid haiku:
-Line 1: ["I", "love", "to", "code", "all"]     # 1+1+1+1+1 = 5
-Line 2: ["day", "long", "writing", "Python"]   # 1+1+2+2 = 6? No
-
-Simpler:
-words = ["a", "b", "c", "d", "e", "f", "g", "h", "i"]
-syllables = [1, 1, 1, 1, 1, 1, 1, 1, 1, ...]
-
-Line 1: words[0:5] = 5 syllables
-Line 2: words[5:12] = 7 syllables
-Line 3: words[12:17] = 5 syllables
+Output: None
+Explanation: Only 3 syllables total, cannot form 5-7-5 pattern
 \end{verbatim}
 \end{problembox}
 
 \textbf{Solution Approach:}
 
-Use prefix sums for efficient range queries:
-\begin{itemize}
-    \item Compute prefix sum array: prefix[i] = sum of syllables[0:i]
-    \item For each starting position i:
+\textbf{Key Implementation Steps:}
+\begin{enumerate}
+    \item \textbf{Parse words:} Split sentence by spaces
+    \item \textbf{Look up syllables:} For each word:
     \begin{itemize}
-        \item Use binary search or two pointers to find j where prefix[j] - prefix[i] = 5
-        \item Then find k where prefix[k] - prefix[j] = 7
-        \item Then find m where prefix[m] - prefix[k] = 5
-        \item If all three are found, record haiku
+        \item Strip trailing punctuation (keep for output)
+        \item Convert to lowercase for dictionary lookup
+        \item Get syllable count (0 if not in dict)
     \end{itemize}
-    \item Time: $O(N^2)$ with two pointers, or $O(N \log N)$ with binary search per position
-    \item Space: $O(N)$ for prefix sum array
+    \item \textbf{Build prefix sum array:} prefix[i] = total syllables of words[0:i]
+    \item \textbf{Use hash map:} Map each sum value to its index for O(1) lookup
+    \item \textbf{Find haiku pattern:} For each starting position i:
+    \begin{itemize}
+        \item Find j where prefix[j] - prefix[i] == 5 (end of line 1)
+        \item Find k where prefix[k] - prefix[j] == 7 (end of line 2)
+        \item Find m where prefix[m] - prefix[k] == 5 (end of line 3)
+        \item If all found and in order, return first haiku
+    \end{itemize}
+    \item \textbf{Reconstruct output:} Join words preserving original formatting
+\end{enumerate}
+
+\textbf{Complexity:}
+\begin{itemize}
+    \item Time: O(n) with prefix sums and hash map
+    \item Space: O(n) for words array, syllables, and prefix sums
+    \item Brute force: O(n²) or O(n³) trying all combinations
 \end{itemize}
 
 \begin{solutionbox}
 \begin{verbatim}
-def find_haikus(words, syllables):
-    n = len(words)
-    if n == 0:
-        return []
+import string
 
-    # Build prefix sum
-    prefix = [0]
+def find_haiku(sentence: str, syllable_dict: dict):
+    if not sentence:
+        return None
+
+    words = sentence.split()
+    if len(words) < 3:
+        return None
+
+    # Build syllable counts for each word
+    syllables = []
+    for word in words:
+        # Strip punctuation and convert to lowercase for lookup
+        clean_word = word.strip(string.punctuation).lower()
+        syl_count = syllable_dict.get(clean_word, 0)
+        syllables.append(syl_count)
+
+    # Build prefix sum array: prefix_sums[i] = sum of syllables[0:i]
+    prefix_sums = [0]
     for syl in syllables:
-        prefix.append(prefix[-1] + syl)
+        prefix_sums.append(prefix_sums[-1] + syl)
 
-    haikus = []
+    # Create hash map: sum -> first index with that sum
+    # Reverse iteration to get first occurrence for each sum
+    sum_to_index = {}
+    for i in range(len(prefix_sums) - 1, -1, -1):
+        sum_to_index[prefix_sums[i]] = i
 
-    # Try all starting positions
-    for i in range(n):
-        # Find end of line 1 (5 syllables)
-        for j in range(i + 1, n + 1):
-            if prefix[j] - prefix[i] == 5:
-                # Find end of line 2 (7 syllables)
-                for k in range(j + 1, n + 1):
-                    if prefix[k] - prefix[j] == 7:
-                        # Find end of line 3 (5 syllables)
-                        for m in range(k + 1, n + 1):
-                            if prefix[m] - prefix[k] == 5:
-                                haiku = [
-                                    words[i:j],
-                                    words[j:k],
-                                    words[k:m]
-                                ]
-                                haikus.append(haiku)
-                        break  # Only first valid line 3
-                break  # Only first valid line 2
-        # Note: Can remove breaks to find ALL combos
+    # Try each starting position
+    for i in range(len(prefix_sums)):
+        start_sum = prefix_sums[i]
 
-    return haikus
+        # Look for 5-7-5 pattern
+        target_sum1 = start_sum + 5
+        target_sum2 = start_sum + 12  # 5 + 7
+        target_sum3 = start_sum + 17  # 5 + 7 + 5
 
-# Optimized version with binary search
-from bisect import bisect_left
+        end_index1 = sum_to_index.get(target_sum1)
+        end_index2 = sum_to_index.get(target_sum2)
+        end_index3 = sum_to_index.get(target_sum3)
 
-def find_haikus_optimized(words, syllables):
-    n = len(words)
-    prefix = [0]
-    for syl in syllables:
-        prefix.append(prefix[-1] + syl)
+        # Check if all exist and are in correct order
+        if (end_index1 is not None and
+            end_index2 is not None and
+            end_index3 is not None and
+            i < end_index1 <= end_index2 <= end_index3):
 
-    haikus = []
+            # Found haiku! Reconstruct with original formatting
+            line1 = " ".join(words[i:end_index1])
+            line2 = " ".join(words[end_index1:end_index2])
+            line3 = " ".join(words[end_index2:end_index3])
 
-    for i in range(n):
-        # Find j: prefix[j] = prefix[i] + 5
-        target1 = prefix[i] + 5
-        j = bisect_left(prefix, target1, i + 1)
-        if j >= len(prefix) or prefix[j] != target1:
-            continue
+            return [line1, line2, line3]
 
-        # Find k: prefix[k] = prefix[j] + 7
-        target2 = prefix[j] + 7
-        k = bisect_left(prefix, target2, j + 1)
-        if k >= len(prefix) or prefix[k] != target2:
-            continue
-
-        # Find m: prefix[m] = prefix[k] + 5
-        target3 = prefix[k] + 5
-        m = bisect_left(prefix, target3, k + 1)
-        if m >= len(prefix) or prefix[m] != target3:
-            continue
-
-        haikus.append([words[i:j], words[j:k], words[k:m]])
-
-    return haikus
+    return None
 \end{verbatim}
 \end{solutionbox}
 
 \begin{testbox}
-\textbf{Edge Cases:}
+\textbf{Critical Edge Cases (from 1point3acres reports):}
 \begin{itemize}
-    \item Empty input: \texttt{words = []} $\rightarrow$ \texttt{[]}
-    \item Insufficient syllables: total < 17 $\rightarrow$ \texttt{[]}
-    \item Exact one haiku: all words form perfect 5-7-5
-    \item Multiple valid haikus: overlapping or non-overlapping
-    \item Single word with many syllables: e.g., "beautiful" (3 syllables)
-    \item Impossible to form 5-7-5: e.g., all words have 2 syllables (can't sum to 5 or 7)
-    \item Very long word list: performance considerations
+    \item \textbf{Punctuation:} Must strip before lookup but preserve in output
+    \item \textbf{Case sensitivity:} Convert to lowercase for lookup, preserve in output
+    \item \textbf{Missing words:} Words not in dictionary - treat as 0 syllables
+    \item \textbf{Empty/short input:} Empty string or < 3 words
+    \item \textbf{No valid haiku:} Total syllables < 17 or impossible pattern
+    \item \textbf{Multiple haikus:} Return FIRST (leftmost) one only
+    \item \textbf{Contractions:} "don't", "can't" - must handle punctuation correctly
 \end{itemize}
 
 \textbf{Test Cases:}
 \begin{verbatim}
 def test_haiku_finder():
-    # Test 1: Simple case with 1-syllable words
-    words1 = ["a"]*5 + ["b"]*7 + ["c"]*5
-    syls1 = [1]*17
-    result1 = find_haikus(words1, syls1)
-    assert len(result1) >= 1
+    # Test 1: Actual Faire example from 1point3acres
+    sentence = "Internationalization a Simple flower Petals " + \
+               "shine Vibrant don't Pure Stares into Void. Return home"
+    syllable_dict = {
+        "internationalization": 8, "a": 1, "simple": 2, "flower": 2,
+        "petals": 2, "shine": 1, "vibrant": 2, "don't": 1,
+        "pure": 1, "stares": 2, "into": 2, "void": 1,
+        "return": 2, "home": 1
+    }
+    result = find_haiku(sentence, syllable_dict)
+    expected = ["a Simple flower",
+                "Petals shine Vibrant don't Pure",
+                "Stares into Void."]
+    assert result == expected
 
-    # Test 2: No valid haiku
-    words2 = ["hello", "world"]
-    syls2 = [2, 1]  # Only 3 syllables total
-    result2 = find_haikus(words2, syls2)
-    assert result2 == []
+    # Test 2: No haiku possible
+    sentence2 = "Hello world"
+    dict2 = {"hello": 2, "world": 1}
+    assert find_haiku(sentence2, dict2) is None
 
-    # Test 3: Multiple word lengths
-    words3 = ["I", "love", "coding", "every", "single",
-              "day", "it", "makes", "me", "happy"]
-    syls3 = [1, 1, 2, 2, 2, 1, 1, 1, 1, 2]
-    result3 = find_haikus(words3, syls3)
-    # Check if valid haikus found
+    # Test 3: Punctuation handling
+    sentence3 = "Hello, world! Nice day. Very good, yes."
+    dict3 = {"hello": 2, "world": 1, "nice": 1, "day": 1,
+             "very": 2, "good": 1, "yes": 1}
+    result3 = find_haiku(sentence3, dict3)
+    # Should preserve punctuation if haiku found
 
     # Test 4: Empty input
-    assert find_haikus([], []) == []
-
-test_haiku_finder()
+    assert find_haiku("", {}) is None
+    assert find_haiku("a b", {"a": 1, "b": 1}) is None
 \end{verbatim}
 \end{testbox}
 
-\textbf{Interview Tips:}
+\textbf{Interview Insights from 1point3acres:}
 \begin{itemize}
-    \item Clarify if overlapping haikus are allowed
-    \item Ask if we need ALL haikus or just first/any one
-    \item Discuss prefix sum optimization
-    \item Mention binary search for faster lookups
-    \item For Faire: Thoroughly test edge cases (empty, impossible, etc.)
+    \item \textbf{High emphasis on test cases:} Multiple candidates mentioned interviewers using JUnit and asking "what other edge cases?"
+    \item \textbf{Optimization matters:} Brute force may pass basic tests but optimal O(n) solution expected
+    \item \textbf{Code quality critical:} Clean, readable code with proper error handling
+    \item \textbf{Common failure:} Not handling punctuation correctly or missing edge cases
+    \item \textbf{Verify correctness:} Run code with provided examples before submitting
 \end{itemize}
 
-\textit{Source: Backend/Full Stack Phone Screen (2024-2025)}
+\textit{Source: Multiple 1point3acres reports (2021-2025), confirmed by 5+ candidates across different interview rounds}
 
 \subsubsection{Funnel Problem}
 
@@ -1320,310 +1353,6 @@ test_course_schedule_time()
 
 \subsection{LeetCode-style Problems}
 
-\subsubsection{Max Consecutive Ones}
-
-\begin{problembox}
-\textbf{Problem Statement:}
-
-Given a binary array \texttt{nums}, return the maximum number of consecutive 1's in the array.
-
-\textbf{Example 1:}
-\begin{verbatim}
-Input: nums = [1,1,0,1,1,1]
-Output: 3
-Explanation: The first two digits or the last three digits
-             are consecutive 1s. The maximum is 3.
-\end{verbatim}
-
-\textbf{Example 2:}
-\begin{verbatim}
-Input: nums = [1,0,1,1,0,1]
-Output: 2
-Explanation: Maximum consecutive 1s is 2.
-\end{verbatim}
-
-\textbf{Example 3:}
-\begin{verbatim}
-Input: nums = [0,0,0]
-Output: 0
-Explanation: No 1s in the array.
-\end{verbatim}
-
-\textbf{Constraints:}
-\begin{itemize}
-    \item $1 \leq$ nums.length $\leq 10^5$
-    \item nums[i] is either 0 or 1
-\end{itemize}
-\end{problembox}
-
-\begin{solutionbox}
-\textbf{Solution Approach:}
-
-Single pass with counter:
-\begin{itemize}
-    \item Track current consecutive 1s count
-    \item Track maximum seen so far
-    \item Reset counter when encountering 0
-    \item Time: $O(N)$ where N = array length
-    \item Space: $O(1)$
-\end{itemize}
-
-\textbf{Python Solution:}
-\begin{verbatim}
-def findMaxConsecutiveOnes(nums):
-    max_count = 0
-    current_count = 0
-
-    for num in nums:
-        if num == 1:
-            current_count += 1
-            max_count = max(max_count, current_count)
-        else:
-            current_count = 0
-
-    return max_count
-
-# Alternative: More concise
-def findMaxConsecutiveOnes_v2(nums):
-    # Convert to string and split on '0'
-    return max(len(s) for s in ''.join(map(str, nums)).split('0'))
-
-# Tests
-print(findMaxConsecutiveOnes([1,1,0,1,1,1]))  # 3
-print(findMaxConsecutiveOnes([1,0,1,1,0,1]))  # 2
-print(findMaxConsecutiveOnes([0,0,0]))        # 0
-print(findMaxConsecutiveOnes([1]))            # 1
-\end{verbatim}
-\end{solutionbox}
-
-\begin{testbox}
-\textbf{Edge Cases \& Testing:}
-\begin{itemize}
-    \item All 1s: [1,1,1,1] $\rightarrow$ 4
-    \item All 0s: [0,0,0] $\rightarrow$ 0
-    \item Single element: [1] $\rightarrow$ 1, [0] $\rightarrow$ 0
-    \item Alternating: [1,0,1,0] $\rightarrow$ 1
-    \item Leading/trailing zeros: [0,1,1,0] $\rightarrow$ 2
-    \item Multiple sequences: [1,1,0,0,1,1,1,0,1] $\rightarrow$ 3
-\end{itemize}
-
-\textbf{Test Cases:}
-\begin{verbatim}
-def test_max_consecutive_ones():
-    assert findMaxConsecutiveOnes([1,1,0,1,1,1]) == 3
-    assert findMaxConsecutiveOnes([1,0,1,1,0,1]) == 2
-    assert findMaxConsecutiveOnes([0,0,0]) == 0
-    assert findMaxConsecutiveOnes([1,1,1,1]) == 4
-    assert findMaxConsecutiveOnes([1]) == 1
-    assert findMaxConsecutiveOnes([0]) == 0
-    assert findMaxConsecutiveOnes([1,0,1,0,1]) == 1
-
-test_max_consecutive_ones()
-\end{verbatim}
-
-\textbf{Interview Tips:}
-\begin{itemize}
-    \item Discuss streaming/online algorithm variant
-    \item Mention follow-up: max consecutive 1s with one flip allowed
-    \item Consider space-optimized approaches
-    \item For Faire: Test boundary cases
-\end{itemize}
-\end{testbox}
-
-\textit{Source: Coding interview (2024-2025), LeetCode 485}
-
-\subsection{Additional Coding Problems}
-
-\subsubsection{Date Format Function}
-
-\begin{problembox}
-\textbf{Problem Statement:}
-
-Implement a function to convert dates between different formats. Given a date string and its format, convert it to a target format.
-
-Support the following formats:
-\begin{itemize}
-    \item "MM/DD/YYYY" (e.g., "03/15/2024")
-    \item "YYYY-MM-DD" (e.g., "2024-03-15")
-    \item "DD.MM.YYYY" (e.g., "15.03.2024")
-    \item "Month DD, YYYY" (e.g., "March 15, 2024")
-\end{itemize}
-
-Return \texttt{None} or raise an error if the input date is invalid.
-
-\textbf{Example 1:}
-\begin{verbatim}
-Input: date = "03/15/2024", from_format = "MM/DD/YYYY",
-       to_format = "YYYY-MM-DD"
-Output: "2024-03-15"
-\end{verbatim}
-
-\textbf{Example 2:}
-\begin{verbatim}
-Input: date = "2024-02-29", from_format = "YYYY-MM-DD",
-       to_format = "MM/DD/YYYY"
-Output: "02/29/2024"
-Explanation: 2024 is a leap year, Feb 29 is valid.
-\end{verbatim}
-
-\textbf{Example 3:}
-\begin{verbatim}
-Input: date = "2023-02-29", from_format = "YYYY-MM-DD",
-       to_format = "MM/DD/YYYY"
-Output: None
-Explanation: 2023 is not a leap year, Feb 29 is invalid.
-\end{verbatim}
-
-\textbf{Constraints:}
-\begin{itemize}
-    \item Year range: 1000-9999
-    \item Validate month (1-12) and day based on month/year
-    \item Handle leap years correctly
-\end{itemize}
-\end{problembox}
-
-\begin{solutionbox}
-\textbf{Solution Approach:}
-
-Date validation and conversion:
-\begin{itemize}
-    \item Parse input format to extract day, month, year
-    \item Validate the date (check month range, day range, leap year)
-    \item Format according to target format
-    \item Time: $O(1)$ - constant time for parsing and formatting
-    \item Space: $O(1)$
-\end{itemize}
-
-\textbf{Python Solution:}
-\begin{verbatim}
-from datetime import datetime
-
-def is_leap_year(year):
-    """Check if year is a leap year"""
-    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
-
-def is_valid_date(day, month, year):
-    """Validate if date is valid"""
-    if month < 1 or month > 12:
-        return False
-    if year < 1000 or year > 9999:
-        return False
-
-    days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    if is_leap_year(year):
-        days_in_month[1] = 29
-
-    if day < 1 or day > days_in_month[month - 1]:
-        return False
-
-    return True
-
-def convert_date_format(date, from_format, to_format):
-    """Convert date from one format to another"""
-    month_names = {
-        'January': 1, 'February': 2, 'March': 3, 'April': 4,
-        'May': 5, 'June': 6, 'July': 7, 'August': 8,
-        'September': 9, 'October': 10, 'November': 11, 'December': 12
-    }
-    month_names_rev = {v: k for k, v in month_names.items()}
-
-    # Parse based on from_format
-    try:
-        if from_format == "MM/DD/YYYY":
-            parts = date.split('/')
-            month, day, year = int(parts[0]), int(parts[1]), int(parts[2])
-        elif from_format == "YYYY-MM-DD":
-            parts = date.split('-')
-            year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
-        elif from_format == "DD.MM.YYYY":
-            parts = date.split('.')
-            day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
-        elif from_format == "Month DD, YYYY":
-            parts = date.replace(',', '').split()
-            month = month_names[parts[0]]
-            day, year = int(parts[1]), int(parts[2])
-        else:
-            return None
-    except:
-        return None
-
-    # Validate
-    if not is_valid_date(day, month, year):
-        return None
-
-    # Format to target
-    if to_format == "MM/DD/YYYY":
-        return f"{month:02d}/{day:02d}/{year}"
-    elif to_format == "YYYY-MM-DD":
-        return f"{year}-{month:02d}-{day:02d}"
-    elif to_format == "DD.MM.YYYY":
-        return f"{day:02d}.{month:02d}.{year}"
-    elif to_format == "Month DD, YYYY":
-        return f"{month_names_rev[month]} {day:02d}, {year}"
-    else:
-        return None
-
-# Tests
-print(convert_date_format("03/15/2024", "MM/DD/YYYY", "YYYY-MM-DD"))
-# "2024-03-15"
-
-print(convert_date_format("2024-02-29", "YYYY-MM-DD", "MM/DD/YYYY"))
-# "02/29/2024"
-
-print(convert_date_format("2023-02-29", "YYYY-MM-DD", "MM/DD/YYYY"))
-# None (invalid)
-\end{verbatim}
-\end{solutionbox}
-
-\begin{testbox}
-\textbf{Edge Cases \& Testing:}
-\begin{itemize}
-    \item Leap year: Feb 29, 2024 (valid) vs Feb 29, 2023 (invalid)
-    \item Century leap year: Feb 29, 2000 (valid) vs Feb 29, 1900 (invalid)
-    \item Invalid month: 13/01/2024 $\rightarrow$ None
-    \item Invalid day: 02/31/2024 $\rightarrow$ None
-    \item Month boundaries: 30 vs 31 day months
-    \item Different delimiters: handle /, -, .
-\end{itemize}
-
-\textbf{Test Cases:}
-\begin{verbatim}
-def test_date_conversion():
-    # Valid conversions
-    assert convert_date_format("03/15/2024", "MM/DD/YYYY",
-                                "YYYY-MM-DD") == "2024-03-15"
-    assert convert_date_format("2024-02-29", "YYYY-MM-DD",
-                                "MM/DD/YYYY") == "02/29/2024"
-
-    # Invalid dates
-    assert convert_date_format("2023-02-29", "YYYY-MM-DD",
-                                "MM/DD/YYYY") is None
-    assert convert_date_format("13/01/2024", "MM/DD/YYYY",
-                                "YYYY-MM-DD") is None
-    assert convert_date_format("02/31/2024", "MM/DD/YYYY",
-                                "YYYY-MM-DD") is None
-
-    # Leap year edge cases
-    assert convert_date_format("2000-02-29", "YYYY-MM-DD",
-                                "MM/DD/YYYY") == "02/29/2000"
-    assert convert_date_format("1900-02-29", "YYYY-MM-DD",
-                                "MM/DD/YYYY") is None
-
-test_date_conversion()
-\end{verbatim}
-
-\textbf{Interview Tips:}
-\begin{itemize}
-    \item Discuss using datetime library vs manual validation
-    \item Clarify supported formats upfront
-    \item Ask about timezone handling
-    \item Mention error handling strategies
-    \item For Faire: Test leap year and boundary cases thoroughly
-\end{itemize}
-\end{testbox}
-
-\textit{Source: Frontend/Full Stack interview (2024)}
-
 \subsubsection{Maze with Portals}
 
 \begin{problembox}
@@ -1811,545 +1540,6 @@ test_maze_portals()
 \end{testbox}
 
 \textit{Source: Backend Engineer Phone Screen (2024)}
-
-\subsubsection{String Parsing Problem}
-
-\begin{problembox}
-\textbf{Problem Statement:}
-
-Parse a log file string containing structured data and extract specific information. Each log entry has the format:
-
-\texttt{[TIMESTAMP] LEVEL: message | key1=value1 key2=value2}
-
-Given a log string with multiple entries (separated by newlines), return a list of dictionaries where each dictionary contains:
-\begin{itemize}
-    \item \texttt{timestamp}: The timestamp string
-    \item \texttt{level}: The log level (INFO, ERROR, WARNING, DEBUG)
-    \item \texttt{message}: The message text
-    \item \texttt{metadata}: Dictionary of key-value pairs
-\end{itemize}
-
-\textbf{Example 1:}
-\begin{verbatim}
-Input:
-"[2024-01-15 10:30:00] INFO: User login | user_id=123 ip=192.168.1.1
-[2024-01-15 10:31:00] ERROR: Failed query | query_id=456 error_code=500"
-
-Output: [
-  {
-    'timestamp': '2024-01-15 10:30:00',
-    'level': 'INFO',
-    'message': 'User login',
-    'metadata': {'user_id': '123', 'ip': '192.168.1.1'}
-  },
-  {
-    'timestamp': '2024-01-15 10:31:00',
-    'level': 'ERROR',
-    'message': 'Failed query',
-    'metadata': {'query_id': '456', 'error_code': '500'}
-  }
-]
-\end{verbatim}
-
-\textbf{Constraints:}
-\begin{itemize}
-    \item 1 $\leq$ number of log entries $\leq 1000$
-    \item Metadata may have 0 or more key-value pairs
-    \item Keys and values do not contain spaces or special characters
-\end{itemize}
-\end{problembox}
-
-\begin{solutionbox}
-\textbf{Solution Approach:}
-
-String parsing with regex or manual parsing:
-\begin{itemize}
-    \item Split input by newlines to get individual log entries
-    \item For each entry, extract components using string operations or regex
-    \item Parse metadata by splitting on spaces and equals signs
-    \item Time: $O(N \times M)$ where N = entries, M = avg entry length
-    \item Space: $O(N \times M)$ for storing parsed results
-\end{itemize}
-
-\textbf{Python Solution:}
-\begin{verbatim}
-import re
-
-def parse_logs(log_string):
-    """Parse log entries from string"""
-    if not log_string.strip():
-        return []
-
-    entries = []
-    lines = log_string.strip().split('\n')
-
-    for line in lines:
-        if not line.strip():
-            continue
-
-        # Extract timestamp
-        timestamp_match = re.search(r'\[(.*?)\]', line)
-        if not timestamp_match:
-            continue
-        timestamp = timestamp_match.group(1)
-
-        # Extract level
-        level_match = re.search(r'\]\s+(\w+):', line)
-        if not level_match:
-            continue
-        level = level_match.group(1)
-
-        # Extract message and metadata
-        parts = line.split(':', 1)
-        if len(parts) < 2:
-            continue
-
-        remaining = parts[1].strip()
-        if '|' in remaining:
-            message, metadata_str = remaining.split('|', 1)
-            message = message.strip()
-            metadata = {}
-
-            # Parse metadata
-            metadata_pairs = metadata_str.strip().split()
-            for pair in metadata_pairs:
-                if '=' in pair:
-                    key, value = pair.split('=', 1)
-                    metadata[key] = value
-        else:
-            message = remaining.strip()
-            metadata = {}
-
-        entries.append({
-            'timestamp': timestamp,
-            'level': level,
-            'message': message,
-            'metadata': metadata
-        })
-
-    return entries
-
-# Alternative: Manual parsing without regex
-def parse_logs_manual(log_string):
-    """Parse without regex"""
-    entries = []
-    for line in log_string.strip().split('\n'):
-        if not line.strip():
-            continue
-
-        # Find timestamp
-        start = line.find('[')
-        end = line.find(']')
-        if start == -1 or end == -1:
-            continue
-        timestamp = line[start+1:end]
-
-        # Find level
-        colon_idx = line.find(':', end)
-        if colon_idx == -1:
-            continue
-        level = line[end+1:colon_idx].strip()
-
-        # Find message and metadata
-        remaining = line[colon_idx+1:].strip()
-        if '|' in remaining:
-            message, meta_str = remaining.split('|', 1)
-            metadata = {}
-            for pair in meta_str.strip().split():
-                if '=' in pair:
-                    k, v = pair.split('=', 1)
-                    metadata[k] = v
-        else:
-            message = remaining
-            metadata = {}
-
-        entries.append({
-            'timestamp': timestamp,
-            'level': level,
-            'message': message.strip(),
-            'metadata': metadata
-        })
-
-    return entries
-
-# Test
-log = """[2024-01-15 10:30:00] INFO: User login | user_id=123 ip=192.168.1.1
-[2024-01-15 10:31:00] ERROR: Failed query | query_id=456"""
-
-result = parse_logs(log)
-print(result[0]['timestamp'])  # '2024-01-15 10:30:00'
-print(result[0]['metadata']['user_id'])  # '123'
-\end{verbatim}
-\end{solutionbox}
-
-\begin{testbox}
-\textbf{Edge Cases \& Testing:}
-\begin{itemize}
-    \item Empty string: return []
-    \item Entry without metadata: only timestamp, level, message
-    \item Multiple metadata fields: parse all key-value pairs
-    \item Malformed entries: skip or handle gracefully
-    \item Special characters in message: preserve them
-    \item Empty metadata after pipe: handle empty dict
-\end{itemize}
-
-\textbf{Test Cases:}
-\begin{verbatim}
-def test_log_parsing():
-    # Test 1: Standard parsing
-    log1 = "[2024-01-15 10:30:00] INFO: Test | key=value"
-    result = parse_logs(log1)
-    assert result[0]['level'] == 'INFO'
-    assert result[0]['metadata']['key'] == 'value'
-
-    # Test 2: No metadata
-    log2 = "[2024-01-15 10:30:00] ERROR: Test message"
-    result = parse_logs(log2)
-    assert result[0]['message'] == 'Test message'
-    assert result[0]['metadata'] == {}
-
-    # Test 3: Multiple metadata
-    log3 = "[2024-01-15 10:30:00] DEBUG: Test | a=1 b=2 c=3"
-    result = parse_logs(log3)
-    assert len(result[0]['metadata']) == 3
-
-    # Test 4: Empty input
-    assert parse_logs("") == []
-
-test_log_parsing()
-\end{verbatim}
-
-\textbf{Interview Tips:}
-\begin{itemize}
-    \item Discuss regex vs manual parsing trade-offs
-    \item Ask about error handling for malformed entries
-    \item Clarify if metadata keys/values can have special chars
-    \item Mention performance for large log files
-    \item For Faire: Test edge cases thoroughly
-\end{itemize}
-\end{testbox}
-
-\textit{Source: Backend Engineer coding round (2024)}
-
-\section{Online Assessment (OA) - CodeSignal}
-
-\subsection{OA Format and Structure}
-\begin{itemize}
-    \item \textbf{Platform:} CodeSignal
-    \item \textbf{Number of Questions:} 4 coding questions
-    \item \textbf{Time Limit:} 70 minutes total
-    \item \textbf{Scoring:}
-    \begin{itemize}
-        \item Maximum score: 850 points
-        \item Passing threshold: 750+ points
-        \item Each question has multiple test cases
-        \item Partial credit given for passing some test cases
-    \end{itemize}
-    \item \textbf{Difficulty:} Mix of Easy to Medium-Hard LeetCode-style problems
-    \item \textbf{Note:} High passing bar - need to solve most questions completely or nearly completely
-\end{itemize}
-
-\subsection{OA Question Examples}
-
-\subsubsection{Array Divisibility Check}
-
-\begin{problembox}
-\textbf{Problem Statement:}
-
-Given an array of integers \texttt{arr} and an integer \texttt{k}, determine if you can partition the array into contiguous subarrays such that the sum of each subarray is divisible by \texttt{k}.
-
-Return \texttt{true} if such a partition exists, \texttt{false} otherwise.
-
-\textbf{Example 1:}
-\begin{verbatim}
-Input: arr = [3, 1, 2, 6, 4, 2], k = 3
-Output: true
-Explanation: [3] (sum=3, 3%3=0), [1,2] (sum=3, 3%3=0),
-             [6] (sum=6, 6%3=0), [4,2] (sum=6, 6%3=0)
-\end{verbatim}
-
-\textbf{Example 2:}
-\begin{verbatim}
-Input: arr = [1, 2, 3], k = 5
-Output: false
-Explanation: Total sum = 6, cannot partition into sums
-             divisible by 5
-\end{verbatim}
-
-\textbf{Example 3:}
-\begin{verbatim}
-Input: arr = [5, 10, 15], k = 5
-Output: true
-Explanation: Each element is divisible by 5:
-             [5], [10], [15]
-\end{verbatim}
-
-\textbf{Constraints:}
-\begin{itemize}
-    \item $1 \leq$ arr.length $\leq 10^5$
-    \item $-10^9 \leq$ arr[i] $\leq 10^9$
-    \item $1 \leq k \leq 10^3$
-\end{itemize}
-\end{problembox}
-
-\begin{solutionbox}
-\textbf{Solution Approach:}
-
-Key insight: If total sum is not divisible by k, impossible. Otherwise, use prefix sum modulo tracking:
-\begin{itemize}
-    \item Calculate prefix sums modulo k
-    \item A valid partition exists if we can split where each segment has sum $\equiv 0 \pmod{k}$
-    \item Use hash map to track seen remainders
-    \item Time: $O(N)$ where N = array length
-    \item Space: $O(K)$ for remainder tracking
-\end{itemize}
-
-\textbf{Python Solution:}
-\begin{verbatim}
-def can_partition_divisible(arr, k):
-    # First check: total sum must be divisible by k
-    total = sum(arr)
-    if total % k != 0:
-        return False
-
-    # Try to greedily partition
-    current_sum = 0
-    for num in arr:
-        current_sum += num
-        if current_sum % k == 0:
-            current_sum = 0  # Start new partition
-
-    # If we end with current_sum == 0, valid partition exists
-    return current_sum == 0
-
-# Alternative: Count remainders
-def can_partition_divisible_v2(arr, k):
-    if sum(arr) % k != 0:
-        return False
-
-    # Count prefix sum remainders
-    prefix_sum = 0
-    remainder_count = {0: 1}
-
-    for num in arr:
-        prefix_sum = (prefix_sum + num) % k
-        # Handle negative modulo
-        if prefix_sum < 0:
-            prefix_sum += k
-
-        if prefix_sum == 0:
-            # Can partition here
-            remainder_count = {0: 1}
-        else:
-            remainder_count[prefix_sum] = \
-                remainder_count.get(prefix_sum, 0) + 1
-
-    return True  # If we got here, partition exists
-
-# Tests
-print(can_partition_divisible([3,1,2,6,4,2], 3))  # True
-print(can_partition_divisible([1,2,3], 5))        # False
-print(can_partition_divisible([5,10,15], 5))      # True
-\end{verbatim}
-\end{solutionbox}
-
-\begin{testbox}
-\textbf{Edge Cases \& Testing:}
-\begin{itemize}
-    \item Single element divisible by k: \texttt{[6], k=3} $\rightarrow$ \texttt{true}
-    \item Single element not divisible: \texttt{[5], k=3} $\rightarrow$ \texttt{false}
-    \item All elements divisible: each forms own partition
-    \item Negative numbers: handle modulo correctly (\texttt{(-5) \% 3 = 1} in Python)
-    \item Zero in array: \texttt{[0, k]} always works
-    \item Large k: k > sum(arr)
-    \item Total sum not divisible: early return false
-\end{itemize}
-
-\textbf{Test Cases:}
-\begin{verbatim}
-def test_array_divisibility():
-    assert can_partition_divisible([3,1,2,6,4,2], 3) == True
-    assert can_partition_divisible([1,2,3], 5) == False
-    assert can_partition_divisible([5,10,15], 5) == True
-    assert can_partition_divisible([1], 1) == True
-    assert can_partition_divisible([2], 3) == False
-    assert can_partition_divisible([-3,3], 3) == True
-    assert can_partition_divisible([0,0,0], 5) == True
-
-test_array_divisibility()
-\end{verbatim}
-
-\textbf{Interview Tips:}
-\begin{itemize}
-    \item Clarify if empty partitions are allowed
-    \item Ask about negative number handling
-    \item Discuss greedy vs DP approaches
-    \item Mention total sum check optimization
-    \item For Faire: Test with negative numbers and zeros
-\end{itemize}
-\end{testbox}
-
-\textit{Source: CodeSignal OA (2024)}
-
-\subsubsection{Digit Frequency Counter}
-
-\begin{problembox}
-\textbf{Problem Statement:}
-
-Given two integers \texttt{L} and \texttt{R} representing a range $[L, R]$, count the frequency of each digit (0-9) that appears in all numbers within this range (inclusive).
-
-Return an array of length 10 where \texttt{result[i]} represents the count of digit \texttt{i}.
-
-\textbf{Example 1:}
-\begin{verbatim}
-Input: L = 10, R = 12
-Output: [1, 3, 1, 0, 0, 0, 0, 0, 0, 0]
-
-Explanation:
-Numbers: 10, 11, 12
-10: digits 1, 0
-11: digits 1, 1
-12: digits 1, 2
-
-Digit frequencies:
-0: 1 time  (from 10)
-1: 3 times (from 10, 11, 11, 12)
-2: 1 time  (from 12)
-\end{verbatim}
-
-\textbf{Example 2:}
-\begin{verbatim}
-Input: L = 1, R = 13
-Output: [1, 6, 1, 1, 0, 0, 0, 0, 0, 0]
-
-Numbers: 1,2,3,4,5,6,7,8,9,10,11,12,13
-0: 1 (from 10)
-1: 6 (from 1, 10, 11, 11, 12, 13)
-2: 1 (from 2, 12)
-3: 1 (from 3, 13)
-...
-\end{verbatim}
-
-\textbf{Constraints:}
-\begin{itemize}
-    \item $0 \leq L \leq R \leq 10^9$
-\end{itemize}
-\end{problembox}
-
-\begin{solutionbox}
-\textbf{Solution Approach:}
-
-\textit{Method 1: Brute Force (Small ranges)}
-\begin{itemize}
-    \item Iterate through each number in [L, R]
-    \item Convert to string and count each digit
-    \item Time: $O((R - L) \times \log R)$
-    \item Space: $O(1)$
-    \item Works well for small ranges
-\end{itemize}
-
-\textit{Method 2: Digit DP (Large ranges)}
-\begin{itemize}
-    \item Use digit dynamic programming
-    \item count(R) - count(L-1) where count(n) = digits from 0 to n
-    \item Time: $O(\log R)$
-    \item More complex but handles large ranges
-\end{itemize}
-
-\textbf{Python Solution:}
-\begin{verbatim}
-def count_digit_frequency(L, R):
-    # Brute force approach for reasonable ranges
-    freq = [0] * 10
-
-    for num in range(L, R + 1):
-        # Count digits in current number
-        for digit_char in str(num):
-            digit = int(digit_char)
-            freq[digit] += 1
-
-    return freq
-
-# Optimized for large ranges using helper function
-def count_digits_upto(n):
-    """Count digit frequencies from 0 to n"""
-    if n < 0:
-        return [0] * 10
-
-    freq = [0] * 10
-    for num in range(n + 1):
-        for digit_char in str(num):
-            freq[int(digit_char)] += 1
-    return freq
-
-def count_digit_frequency_optimized(L, R):
-    # Count from 0 to R
-    freq_R = count_digits_upto(R)
-    # Count from 0 to L-1
-    freq_L = count_digits_upto(L - 1)
-
-    # Subtract to get range [L, R]
-    result = [freq_R[i] - freq_L[i] for i in range(10)]
-    return result
-
-# Tests
-print(count_digit_frequency(10, 12))
-# [1, 3, 1, 0, 0, 0, 0, 0, 0, 0]
-
-print(count_digit_frequency(1, 13))
-# [1, 6, 1, 1, 0, 0, 0, 0, 0, 0] (approx)
-
-print(count_digit_frequency(0, 10))
-# Should count 0,1,2,...,10
-\end{verbatim}
-\end{solutionbox}
-
-\begin{testbox}
-\textbf{Edge Cases \& Testing:}
-\begin{itemize}
-    \item Single number: L = R = 5 $\rightarrow$ only digit 5 appears once
-    \item Range with 0: L = 0, R = 5
-    \item Leading zeros: don't count (10 has digits 1 and 0, not 0, 1, 0)
-    \item Large numbers: $10^9$ range
-    \item Consecutive numbers: [99, 101] crosses 100
-    \item All same digit: [111, 111] $\rightarrow$ three 1's
-\end{itemize}
-
-\textbf{Test Cases:}
-\begin{verbatim}
-def test_digit_frequency():
-    # Test 1: Example from problem
-    assert count_digit_frequency(10, 12) == \
-        [1, 3, 1, 0, 0, 0, 0, 0, 0, 0]
-
-    # Test 2: Single number
-    assert count_digit_frequency(5, 5) == \
-        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
-
-    # Test 3: Include zero
-    assert count_digit_frequency(0, 1)[0] == 1
-    assert count_digit_frequency(0, 1)[1] == 1
-
-    # Test 4: Range crossing hundreds
-    result = count_digit_frequency(99, 101)
-    assert result[0] == 2  # From 100, 100
-    assert result[1] == 4  # From 99, 100, 100, 101
-    assert result[9] == 2  # From 99, 99
-
-test_digit_frequency()
-\end{verbatim}
-
-\textbf{Interview Tips:}
-\begin{itemize}
-    \item Clarify if leading zeros count (they don't for numbers)
-    \item Discuss time complexity for different range sizes
-    \item Mention digit DP for very large ranges
-    \item Ask about memory constraints
-    \item For Faire: Test boundary cases like 0, 999, 1000
-\end{itemize}
-\end{testbox}
-
-\textit{Source: CodeSignal OA (2024)}
 
 \subsubsection{Ads Assortment Problem}
 
@@ -2603,284 +1793,6 @@ test_ads_assortment()
     \item \textbf{Feedback:} Very difficult for job-hopping while employed; low error tolerance
     \item \textbf{Source:} Senior Data Engineer interview (2025)
 \end{itemize}
-
-\section{Frontend/Full Stack Specific}
-
-\subsection{Object Manipulation (Frontend Intern)}
-
-\begin{problembox}
-\textbf{Problem Statement:}
-
-You are building a product catalog system for an e-commerce platform. Implement a \texttt{ProductCatalog} class that stores products and supports various filtering operations.
-
-Each product has the following attributes:
-\begin{itemize}
-    \item \texttt{id}: unique identifier (string)
-    \item \texttt{name}: product name (string)
-    \item \texttt{price}: product price (float)
-    \item \texttt{category}: product category (string)
-    \item \texttt{attributes}: dictionary of additional attributes (e.g., \{"size": "M", "color": "blue"\})
-    \item \texttt{in\_stock}: whether product is in stock (boolean)
-\end{itemize}
-
-Implement the following methods:
-
-\begin{enumerate}
-    \item \texttt{add\_product(product)}: Add a product to the catalog
-    \item \texttt{get\_product(product\_id)}: Retrieve a product by ID
-    \item \texttt{filter\_by\_category(category)}: Return all products in a category
-    \item \texttt{filter\_by\_price\_range(min\_price, max\_price)}: Return products in price range
-    \item \texttt{filter\_by\_attributes(attr\_dict)}: Return products matching all given attributes
-    \item \texttt{search\_by\_name(query)}: Return products with name containing query (case-insensitive)
-    \item \texttt{get\_available\_products()}: Return all in-stock products
-\end{enumerate}
-
-\textbf{Example:}
-\begin{verbatim}
-catalog = ProductCatalog()
-
-catalog.add_product({
-    'id': 'p1', 'name': 'Blue T-Shirt', 'price': 19.99,
-    'category': 'clothing', 'attributes': {'size': 'M', 'color': 'blue'},
-    'in_stock': True
-})
-
-catalog.add_product({
-    'id': 'p2', 'name': 'Red T-Shirt', 'price': 24.99,
-    'category': 'clothing', 'attributes': {'size': 'L', 'color': 'red'},
-    'in_stock': False
-})
-
-# Filter by category
-catalog.filter_by_category('clothing')  # Returns [p1, p2]
-
-# Filter by attributes
-catalog.filter_by_attributes({'color': 'blue'})  # Returns [p1]
-
-# Get available products
-catalog.get_available_products()  # Returns [p1]
-\end{verbatim}
-
-\textbf{Constraints:}
-\begin{itemize}
-    \item $1 \leq$ number of products $\leq 10^4$
-    \item Product IDs are unique
-    \item $0 \leq$ price $\leq 10^6$
-    \item Attribute keys and values are non-empty strings
-\end{itemize}
-\end{problembox}
-
-\begin{solutionbox}
-\textbf{Approach:}
-
-Use a dictionary to store products by ID for O(1) lookup. For filtering operations, iterate through products and check conditions. Can optimize with indexes for common queries.
-
-\textbf{Time Complexity:}
-\begin{itemize}
-    \item add\_product: $O(1)$
-    \item get\_product: $O(1)$
-    \item filter operations: $O(N)$ where N = number of products
-\end{itemize}
-
-\textbf{Space Complexity:} $O(N)$ for storing N products
-
-\textbf{Python Solution:}
-\begin{verbatim}
-class ProductCatalog:
-    def __init__(self):
-        self.products = {}  # id -> product mapping
-
-    def add_product(self, product):
-        """Add a product to the catalog"""
-        if 'id' not in product:
-            raise ValueError("Product must have an id")
-
-        product_id = product['id']
-        self.products[product_id] = product
-
-    def get_product(self, product_id):
-        """Get product by ID"""
-        return self.products.get(product_id, None)
-
-    def filter_by_category(self, category):
-        """Return all products in a category"""
-        result = []
-        for product in self.products.values():
-            if product.get('category') == category:
-                result.append(product)
-        return result
-
-    def filter_by_price_range(self, min_price, max_price):
-        """Return products within price range [min_price, max_price]"""
-        result = []
-        for product in self.products.values():
-            price = product.get('price', 0)
-            if min_price <= price <= max_price:
-                result.append(product)
-        return result
-
-    def filter_by_attributes(self, attr_dict):
-        """Return products matching all given attributes"""
-        result = []
-        for product in self.products.values():
-            product_attrs = product.get('attributes', {})
-
-            # Check if all attributes match
-            match = True
-            for key, value in attr_dict.items():
-                if product_attrs.get(key) != value:
-                    match = False
-                    break
-
-            if match:
-                result.append(product)
-
-        return result
-
-    def search_by_name(self, query):
-        """Return products with name containing query (case-insensitive)"""
-        result = []
-        query_lower = query.lower()
-
-        for product in self.products.values():
-            name = product.get('name', '').lower()
-            if query_lower in name:
-                result.append(product)
-
-        return result
-
-    def get_available_products(self):
-        """Return all in-stock products"""
-        result = []
-        for product in self.products.values():
-            if product.get('in_stock', False):
-                result.append(product)
-        return result
-
-    def remove_product(self, product_id):
-        """Remove a product from catalog"""
-        if product_id in self.products:
-            del self.products[product_id]
-            return True
-        return False
-
-    def update_stock(self, product_id, in_stock):
-        """Update stock status"""
-        if product_id in self.products:
-            self.products[product_id]['in_stock'] = in_stock
-            return True
-        return False
-
-
-# Optimized version with indexes
-class OptimizedProductCatalog:
-    def __init__(self):
-        self.products = {}
-        self.category_index = {}  # category -> [product_ids]
-        self.stock_index = {'in_stock': set(), 'out_of_stock': set()}
-
-    def add_product(self, product):
-        product_id = product['id']
-        self.products[product_id] = product
-
-        # Update category index
-        category = product.get('category')
-        if category:
-            if category not in self.category_index:
-                self.category_index[category] = set()
-            self.category_index[category].add(product_id)
-
-        # Update stock index
-        if product.get('in_stock', False):
-            self.stock_index['in_stock'].add(product_id)
-        else:
-            self.stock_index['out_of_stock'].add(product_id)
-
-    def filter_by_category(self, category):
-        """O(K) where K is products in category"""
-        product_ids = self.category_index.get(category, set())
-        return [self.products[pid] for pid in product_ids]
-
-    def get_available_products(self):
-        """O(K) where K is in-stock products"""
-        return [self.products[pid] for pid in self.stock_index['in_stock']]
-\end{verbatim}
-\end{solutionbox}
-
-\begin{testbox}
-\textbf{Edge Cases \& Testing:}
-\begin{itemize}
-    \item Empty catalog: all filters return empty list
-    \item Product with missing attributes: handle gracefully
-    \item Duplicate product IDs: overwrite or reject
-    \item Case sensitivity in search: ensure case-insensitive
-    \item Price = 0 or negative: validate input
-    \item Empty search query: return all or none
-    \item Attribute value is None or empty string
-    \item Multiple filters combined (AND vs OR logic)
-\end{itemize}
-
-\textbf{Test Cases:}
-\begin{verbatim}
-def test_product_catalog():
-    catalog = ProductCatalog()
-
-    # Test 1: Add and retrieve
-    p1 = {'id': 'p1', 'name': 'Shirt', 'price': 20,
-          'category': 'clothing', 'in_stock': True,
-          'attributes': {'size': 'M', 'color': 'blue'}}
-    catalog.add_product(p1)
-    assert catalog.get_product('p1') == p1
-
-    # Test 2: Filter by category
-    p2 = {'id': 'p2', 'name': 'Pants', 'price': 30,
-          'category': 'clothing', 'in_stock': True,
-          'attributes': {}}
-    catalog.add_product(p2)
-    assert len(catalog.filter_by_category('clothing')) == 2
-
-    # Test 3: Price range filter
-    results = catalog.filter_by_price_range(15, 25)
-    assert len(results) == 1
-    assert results[0]['id'] == 'p1'
-
-    # Test 4: Attribute filter
-    results = catalog.filter_by_attributes({'color': 'blue'})
-    assert len(results) == 1
-    assert results[0]['id'] == 'p1'
-
-    # Test 5: Search by name
-    results = catalog.search_by_name('shirt')
-    assert len(results) == 1
-
-    # Test 6: Available products
-    p3 = {'id': 'p3', 'name': 'Hat', 'price': 15,
-          'category': 'accessories', 'in_stock': False,
-          'attributes': {}}
-    catalog.add_product(p3)
-    results = catalog.get_available_products()
-    assert len(results) == 2  # p1 and p2
-
-    # Test 7: Empty results
-    assert catalog.filter_by_category('shoes') == []
-    assert catalog.filter_by_attributes({'size': 'XL'}) == []
-
-    print("All tests passed!")
-
-test_product_catalog()
-\end{verbatim}
-
-\textbf{Interview Tips:}
-\begin{itemize}
-    \item Ask about performance requirements (optimize with indexes?)
-    \item Clarify attribute matching logic (AND vs OR)
-    \item Discuss trade-offs: simple iteration vs indexed lookups
-    \item Consider using list comprehensions for cleaner code
-    \item Validate input data (missing fields, invalid types)
-\end{itemize}
-\end{testbox}
-
-\textit{Position: Frontend Intern | Duration: 1 hour | Source: Intern interview (2023)}
 
 \section{Behavioral Interview Questions}
 

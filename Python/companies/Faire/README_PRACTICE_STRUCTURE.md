@@ -35,21 +35,20 @@ cp 01_group_anagrams_solution.py 01_group_anagrams_solution.py.backup
 # Edit fresh...
 ```
 
-## All 14 Problems
+## All Problems (Verified from 1point3acres)
 
-1. 01_group_anagrams - Hash map grouping
-2. 02_html_format_validation - Stack-based tag matching
-3. 03_haiku_finder - Syllable counting (5-7-5)
-4. 04_funnel_problem - Conversion funnel analysis
-5. 05_number_to_word_conversion - Number to English words
-6. 06_course_schedule_min_time - Topological sort
-7. 07_max_consecutive_ones - Simple iteration
-8. 08_date_format_function - Date parsing/validation
-9. 09_maze_with_portals - BFS with teleportation
-10. 10_string_parsing_problem - Log parsing with regex
-11. 11_array_divisibility_check - Modular arithmetic
-12. 12_digit_frequency_counter - Frequency counting
-13. 13_ads_assortment_problem - 0/1 Knapsack DP
-14. 14_object_manipulation - ProductCatalog class
+### Top Priority (Asked 3+ times):
+1. **01_group_anagrams** - Hash map grouping (LC 49)
+2. **02_html_format_validation** - Stack-based tag matching with `{{ #tag }}` format
+3. **03_haiku_finder** - Find 5-7-5 syllable pattern in sentence (O(n) prefix sum)
+4. **04_funnel_problem** - User conversion funnel analysis
+5. **05_number_to_word_conversion** - Convert numbers 1-1000 to English words
+6. **13_ads_assortment_problem** - Weekly ad limits per user/brand
+
+### Medium Priority (Asked 1-2 times):
+7. **06_course_schedule_min_time** - Topological sort + time calculation
+8. **09_maze_with_portals** - BFS with teleportation
+
+**Total: 8 verified problems**
 
 Happy practicing! 🚀

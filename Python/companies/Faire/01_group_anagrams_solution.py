@@ -21,7 +21,10 @@ def group_anagrams(strs: List[str]) -> List[List[str]]:
     anagrams = defaultdict(list)
 
     for s in strs:
-        key = ''.join(sorted(s))
-        anagrams[key].append(s)
+        if s == "":
+            anagrams[s].append(s)
+        else:
+            key = ''.join(sorted(s))
+            anagrams[key].append(s)
 
     return list(anagrams.values())

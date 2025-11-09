@@ -1,0 +1,607 @@
+[Faire]senior data engineer 全套挂经
+
+地里匿名用户SAQR2
+8 天前
+
+Favorite
+
+2025(7-9月) DataEng 硕士 全职@faire - 网上海投 - 视频面试 | 🙁 Negative 😣 Hard | Fail | 在职跳槽
+
+8月投递, 8月末得到recruiter reach out
+
+总共电面coding 1轮 + VO 3轮 (coding + BQ + pipeline design)
+
+
+
+电面: 1小时3题, 面试的时候不敢分心, 所以有些不太记得. 9月初面.
+
+一道类似LC Longest Substring Without Repeating Characters 的slide window 题目
+第二道忘了
+第三道是design类型, 要求实现relational database中的transaction操作, 类似postgres中begin transaction, commit, rollback
+
+第三题没有来得及做完, 把主体数据结构写好后讲了思路.
+
+VO: 过了几天后说proceed 到VO, 我因为中间有好几个面试, 推迟到10月初.
+
+pipeline design:
+```
+e-commerce
+stream as input, containing events like search, add-to-cart, purchase
+now add a new action "like"
+then try to implement analytical pipeline for aggregate
+- require real-time (1/5/15/30 min and 1 hour) and batch (weekly/monthly/yearly, up to 5 year)
+```
+
+bq: 比较基本的BQ, 有问到做过的最主要项目, collaboration cross-functional team.
+
+coding: 这回踩坑的地方
+
+题目其实跟地里面经一样, https://www.1point3acres.com/bbs/thread-883469-1-1.html, 我则是按照LC 伍玖幺 去准备. 不过我时间不够, LC 这题挺多corner cases, 我来不及把所有corner case跑通.
+
+面试的时候, 我用python的正则表达式和stack, 把给出的test case解出来. 但面试官作为followup, 给我提出一个 {{ 的情况. 估计这就是挂我的一个地方, 我2天前做LC时没过这个case, 没有主动把这个test case提出来, 但是让面试官被作为follow up提到. 但我在还剩10分钟的时候把这个case也cover了.
+
+VO过两天后说没过, feedback只说coding没过, 给的不足地方在缺乏
+"deeper proficiency in data structure–based problem solving and more consistent implementation under time constraints"
+"final coding solutions and approach to testing and optimization fell short of the level of technical depth we expect for this position"
+
+有点无语这评价, 不过确实也符合地里对这家公司的过往面试经验, 非常注重test case. 只是感觉data engineer的coding没必要弄那么高的bar.
+
+
+
+感受是在职跳槽真的很难, 现在面试容错率很低. 如果好几个VO一起来, 真的准备不过来, 时间不够. 代码基本写出来也不保证能过.
+
+大米+1
+
+
+
+Question 1
+Practice this problem
+EN
+AI Insights
+Sliding Window
+Array
+
+Given an integer array nums and an integer k, find all the subarrays of length k with the maximum sum. Aim to achieve the lowest possible time complexity.
+
+Input:
+
+An integer array nums.
+An integer k representing the length of the subarray.
+Output:
+
+An integer representing the maximum sum.
+Example:
+
+Input: nums = [1, 4, 2, 10, 23, 3, 1, 0, 20], k = 4 Output: 39 Explanation: The subarray [4, 2, 10, 23] has the maximum sum.
+
+Constraints:
+
+1 ≤ nums.length ≤ 10^5
+1 ≤ nums[i] ≤ 10^4
+1 ≤ k ≤ nums.length
+Practice this problem in the mock coding interview editor
+
+Hint
+
+Solution
+
+Test Cases
+Is this summary helpful to you?
+👍 Helpful
+👎 Not Helpful
+Question 2
+EN
+AI Insights
+System Design
+Database
+
+Design a system to simulate transaction operations in a relational database, which needs to implement the following functions:
+
+begin transaction: Start a new transaction.
+commit: Commit the current transaction.
+rollback: Rollback the current transaction.
+Specific requirements:
+
+Support nested transactions, meaning when ending a transaction, ensure its parent transaction remains valid.
+All changes made within a transaction should be invisible in external database reads unless the transaction is committed.
+Provide a detailed design of this system, including data structures and methods.
+
+
+Hint
+
+Solution
+
+
+
+faire挂面
+
+地里匿名用户4SBTW
+3 个月前
+4
+
+Favorite
+
+2025(7-9月) 码农类General 硕士 全职@Faire - 内推 - 技术电面 | 🙁 Negative 😣 Hard | Fail | 在职跳槽
+
+第一轮技术电面，题目是地里的老题，然而地里也没有详情，我也没做好充分准备。我详细总结一下：
+given a sentence "Internationalization a Simple flower Petals shine Vibrant don’t Pure Stares into Void. Return home”, sentence包含大小写和符号
+
+and given a syllable dictionary:
+syllable_dict = {“internationalization”:8, “a”: 1, “simple”: 2, “flower”: 2, “petals”: 2, “shine”: 1, “vibrant”: 2, “don’t”: 1, “pure”: 1, “stares”: 2, “into”: 2, “void”: 1, “return”: 2, “home”: 1}
+
+return the first Haiku poem like [“a Simple flower”, “Petals shine Vibrant don’t Pure”, “Stares into Void.”]
+我用的暴力法先找出所有包含17个音节的连续句子，然后对每个可选句子分割成3部分判断5-7-5。测试运行通过了，然后面试结果挂了。当时想着应该可以用前缀和解决的，但是面试时没时间优化了。回来用双子座复盘
+import string
+
+def find_haiku(sentence: str, syllable_dict: dict) -> list[str] | None:
+
+    """
+
+    使用前缀和与哈希表，以 O(N) 时间复杂度寻找第一个俳句。
+
+    Args:
+
+        sentence: 输入句子。
+
+        syllable_dict: 音节字典。
+
+Returns:
+
+        一个包含三行俳句的列表，如果找不到则返回 None。
+
+    """
+
+    words = sentence.split()
+
+# --- 步骤 1: O(N) 预计算 ---
+
+    # 计算每个单词的音节列表
+
+    syllables = [
+
+        syllable_dict.get(word.lower().strip(string.punctuation), 0)
+
+        for word in words
+
+    ]
+
+# 计算音节的前缀和数组
+
+    # prefix_sums[k] 表示 words[0:k] 的音节总和
+
+    prefix_sums = [0] * (len(words) + 1)
+
+    for i in range(len(words)):
+
+        prefix_sums[i+1] = prefix_sums[i] + syllables[i]
+
+# 创建一个从 "前缀和值" 到 "单词索引" 的哈希映射，用于O(1)查找
+
+    # 注意：一个和值可能对应多个索引，我们只存第一个出现的，因为要找第一个俳句
+
+    sum_to_index_map = {s: i for i, s in reversed(list(enumerate(prefix_sums)))}
+
+# --- 步骤 2: O(N) 线性扫描查找 ---
+
+    # 遍历每个可能成为俳句起点的位置 i
+
+    for i in range(len(prefix_sums)):
+
+        start_sum = prefix_sums[i]
+
+# 寻找目标和值
+
+        target_sum1 = start_sum + 5
+
+        target_sum2 = start_sum + 12  # 5 + 7
+
+        target_sum3 = start_sum + 17  # 5 + 7 + 5
+
+# 利用哈希表进行 O(1) 查找
+
+        end_index1 = sum_to_index_map.get(target_sum1)
+
+        end_index2 = sum_to_index_map.get(target_sum2)
+
+        end_index3 = sum_to_index_map.get(target_sum3)
+
+# 检查三个目标是否存在，并且索引是否正确递增
+
+        # (例如，第一行结尾的索引必须小于第二行结尾的索引)
+
+        if (end_index1 is not None and
+
+            end_index2 is not None and
+
+            end_index3 is not None and
+
+            i < end_index1 <= end_index2 <= end_index3):
+
+# 找到了！重组俳句并返回
+
+            line1 = " ".join(words[i : end_index1])
+
+            line2 = " ".join(words[end_index1 : end_index2])
+
+            line3 = " ".join(words[end_index2 : end_index3])
+
+            return [line1, line2, line3]
+
+# 遍历结束仍未找到
+
+    return None
+
+# --- 输入数据 ---
+
+sentence_input = "Internationalization a Simple flower Petals shine Vibrant don’t Pure Stares into Void. Return home"
+
+syllable_dict_input = {
+
+    "internationalization": 8, "a": 1, "simple": 2, "flower": 2,
+
+    "petals": 2, "shine": 1, "vibrant": 2, "don’t": 1, "pure": 1,
+
+    "stares": 2, "into": 2, "void": 1, "return": 2, "home": 1
+
+}
+
+# --- 执行并打印结果 ---
+
+haiku_poem = find_haiku(sentence_input, syllable_dict_input)
+
+大米+1
+
+
+
+
+
+Question 1
+Practice this problem
+EN
+AI Insights
+String
+Hash Table
+Prefix Sum
+
+Given a sentence such as "Internationalization a Simple flower Petals shine Vibrant don’t Pure Stares into Void. Return home", which includes mixed cases and punctuation. Along with a syllable dictionary: {“internationalization”:8, “a”: 1, “simple”: 2, “flower”: 2, “petals”: 2, “shine”: 1, “vibrant”: 2, “don’t”: 1, “pure”: 1, “stares”: 2, “into”: 2, “void”: 1, “return”: 2, “home”: 1}. Return the first Haiku poem found in the sentence that fits the 5-7-5 syllable pattern. The result should consist of three lines, each with 5, 7, and 5 syllables respectively, totaling 17 syllables. If no such sequence is found, return None. For example, the given input should return [“a Simple flower”, “Petals shine Vibrant don’t Pure”, “Stares into Void.”].
+
+Practice this problem in the mock coding interview editor
+
+Hint
+
+Solution
+
+Test Cases
+
+
+Faire 挂经
+
+sicklich
+5 个月前
+3
+
+Favorite
+
+2025(4-6月) 码农类General 硕士 全职@faire - 网上海投 - 视频面试 | 🙁 Negative 🙂 Easy | Fail | 其他
+
+老题 漏斗
+面试官很注重testcase, 还上了junit, 并且一直追问还有什么edge case
+我最后问他我什么case没覆盖到他也说不上来，难绷..
+
+大米+1
+
+
+
+Question 1
+Practice this problem
+EN
+AI Insights
+Algorithm
+Sorting
+Array
+
+Given a list of integers sorted in ascending order, design an algorithm to divide these integers into several funnels, where the integers in each funnel decrease multiplicatively. The number of elements in each funnel is the same. Write a function to implement this algorithm and return the list of funnels. The minimum in each funnel is multiplicative with the maximum in the next funnel. Provide full test cases with data amount guaranteed between 1 and 10^5.
+
+Faire 面经
+
+地里匿名用户ON20F
+1 年前
+2
+
+Favorite
+
+2024(10-12月) 码农类General 硕士 全职@Faire - 网上海投 - 视频面试 | 😃 Positive 😐 Average | Other | 在职跳槽
+
+因为地理数据不多，所以贡献一点dp
+
+System Design round
+design like a post functionality
+设计给post点赞的功能，更多的是在沟通，你怎么思考这个问题的，有什么方案，然后进行trade-off
+不用画很多的图
+
+coding
+地理老题 - funnel
+
+
+Faire 安卓
+
+地里匿名用户5OSWN
+1 年前
+
+Favorite
+
+2024(7-9月) MobileEng 博士 全职@faire - 网上海投 - 2 3 | 😐 Neutral 😐 Average | Fail | 在职跳槽
+
+最近面了他们家的安卓platform staff， 挂在了技术深度上，准备了个staff结果要senior的感觉。 作为platform team lead职位，一点release方面的问题都没问，一点drive project 方向也不关注也是醉了。感觉他们家staff最多也就是大厂的senior。记着5年前申请他们的senior职位，hr很吊的说他们要和faang抢人，结果mobile组都是从巴西搬运的。
+
+1. split sms message with suffix 地理能找到
+2. system design， 显示 saved 股票，要求超级简单，没有登陆，就2个界面，search 和显示股票价格。我把基础的设计和扩展方向都说了，没有任何follow up问题，结果这轮说的android相关的技术细节不够，估计说的android名词不够把。。。真没想到挂在这个上。面试前发现没有安卓相关经验的一轮我还奇怪，看来是放在这里了lol。
+3. mobile experience，看了他们的eng blog 上讲的项目，找了一个相关的在大厂干过的项目，重点介绍了怎么做到化繁为简的在不影响metric情况下在startup加入新framework，反馈是技术深度不够。结合之前看他们工作的eng blog上说要引领业界新跨平台架构的方向，估计我的大厂6级经验应该不够资格把lol。然而他们的应用只有50k 下载，也没有任何开源的项目。
+4. bq
+
+Faire full stack ng 面经
+
+地里匿名用户FZPE6
+3 年前
+
+Favorite
+
+2022(1-3月) 码农类General 硕士 全职@faire - 网上海投 - 1 3 5 | 😃 Positive 🙂 Easy | Pass | 应届毕业生
+
+Faire 面经面试过程感觉很好，hr响应很快，有feedback，一般一轮结束当天或隔天会联系
+
+一轮phone screen
+hr 聊项目和经历，why faire
+当场发oa
+
+OA CodeSignal
+四道题70分钟，两道ez，两道medium
+第三道是思路比较简单代码量比较大的那种，第四道是代码量一般考思路的
+第四道比重最大，建议做完1，2先做4
+四道做出三道就可以过，做出来的速度也很重要，做的慢会减分
+隔天通知，约VO时间
+
+VO 三轮
+一轮bq30min，bq没有大厂的难，不太会追着问project的细节
+两轮coding 一轮60min，喜欢考代码量大但思路简单的题，要用framework写test，要run
+第一轮考了haiku
+第二轮考了html validator
+其他帖子有详细的题目描述
+第二天给了答复，mixed feedback，要加面。。。
+估计是一个给了strong hire，一个给了negative
+
+VO 加面
+Eng team lead 大佬给我面。。。
+题不难，类似于简化版的soduku validator
+人也很nice，但问的问题总有种挖小坑看你聪不聪明的感觉。。。
+当天hr打电话给feedback positive
+
+Faire加拿大公司昂塞
+
+地里匿名用户XSHIO
+4 年前
+3
+
+Favorite
+
+2022(4-6月) FrontEndEng 本科 全职@Faire - 网上海投 - 2 3 5 7 | 😐 Neutral 😐 Average | Other | 应届毕业生
+
+第一轮
+给个range of num里面的num转word然后求单词总长度，数字不大于一千
+比如一转成one，二转two，会给个转换的map
+
+第二轮
+地里有人提了，我照抄一下。
+Given a string, find the first Haiku substring. A Haiku is a pattern of 3 substrings with 5,7,5 syllables. 问题会提供一个syllables count map，所有的key都是小写。给的string会有标点符号和大小写，所以在map lookup的时候要记得砍掉每个单词最后的句号或逗号，然后变成小写。
+
+Faire 面筋
+
+微信用户_0b7b21b
+4 年前
+12
+
+Favorite
+
+2022(4-6月) 码农类General 硕士 全职@Faire - 内推 - Onsite | 😃 Positive 😐 Average | Pass | 在职跳槽
+
+一轮滇缅，两轮昂赛，全是蠡口，面的senior level居然不问bq不问sd，我还挺吃惊的滇缅是 而要领 的变体，不光有dependency还给你每个课程完成需要的时间，问你最短多久能完成
+昂赛一 打印杨辉三角，要打出来是等腰三角形
+昂赛二 二期三 不过up to 1001， 让你求所有的这些word的string 长度之和
+都不是特别难，但是代码量都算大的，要仔细，对test和代码质量的要求很高。
+
+Faire full stack new grad 面筋
+
+finalstraw
+4 年前
+11
+
+Favorite
+
+2022(1-3月) 码农类General 硕士 全职@Faire - 网上海投 - Onsite | 😃 Positive 😐 Average | Pass | 应届毕业生
+
+加拿大小商品批发网站
+两轮1hr coding，一轮bq
+
+第一轮 anagram， 要求最优解
+
+第二轮 判断一个string是否为合法的类似html格式 比如："{{div}} {{p}} String{{/p}}{{/div}}" return true。 edge case超级多
+
+test case要写的很精细
+
+[Faire] phone screen + onsite 面经, 新人求米谢谢
+
+地里匿名用户0ED8K
+4 年前
+3
+
+Favorite
+
+2022(4-6月) 码农类General 本科 全职@Faire - 猎头 - 2 3 5 7 | 😃 Positive 🤓 Easiest | Other | 在职跳槽
+
+2022 四月通过猎头申请的faire toronto office.
+
+phone screen：
+Given an assortment of ads that were already sent with ad names (string), the target customer (string), and the day number (int), return a list of customers that should not receive future advertisements for a given week. A customer should not receive receive an ad if 1. they have received it in the same week 2. they have already received 3 ads in the same week.
+
+onsite:
+两轮coding, 半小时behavior， 没有design。
+
+coding1:
+Given a string, find the first Haiku substring. A Haiku is a pattern of 3 substrings with 5,7,5 syllables. 问题会提供一个syllables count map，所有的key都是小写。给的string会有标点符号和大小写，所以在map lookup的时候要记得砍掉每个单词最后的句号或逗号，然后变成小写。
+
+coding2:
+Given a string, return true/false if it's a valid tagged element. The tags use {{ and }} as brackets, and leading # indicate a open tag, leading / indicate a closing tag. Examples:
+Return true: {{ #abc }} {{ #cba }} hello world {{ /cba }} {{ /abc }}
+Return true （单 { 视为正常input）: {{ #abc }} {{ #cba }} hello { world {{ /cba }} {{ /abc }}
+Return false: {{ #abc }} hello world {{ /abc
+Return false: {{ #abc }} {{ #cba }} hello world {{ /cba }}
+Return false: {{ #abc }} {{ #cba }} hello world {{ /abc }} {{ /cba }}
+
+behavior:
+Why faire? Describe a time when you have made a complicate decision. Describe a time when you demonstrated leadership.
+
+[面试经验] Faire面筋
+
+地里匿名用户W8KGS
+4 年前
+4
+
+Favorite
+
+2022(1-3月) 码农类General 本科 全职@Faire - 网上海投 - Onsite | 😃 Positive 😐 Average | Pass | 在职跳槽
+
+求米！
+VO 一共三轮，一小时algo/data structure + 半小时BQ + 一小时algo/data structure
+第一题是
+
+每个receipient 每周只能从同一个brand收取一封广告，每周最多收三份广告。给a list of 已经存在的所有广告，和a list of 未来的广告。对于每个新广告，return 被block的user。
+
+第二题是
+
+给无限个bike rental booking，包括了start time，end time和rental count。需要找出所有booking里某一时刻最多需要多少辆自行车，以及需要最多自行车的时间段（可以是多个时间段）
+
+大米+1
+
+
+Faire面筋
+
+地里匿名用户47EUI
+4 年前
+4
+
+Favorite
+
+2022(1-3月) 码农类General 硕士 全职@Faire - 内推 - Onsite | 😃 Positive 😐 Average | Pass | 在职跳槽
+
+电面是anagram
+昂赛两轮都是算法，不问系统设计
+第一轮是
+
+print pascal trianagle, 要打出来是等腰三角形漂亮的那种，就是每一行要打若干空格，位数也要对应
+第二轮是 num to word
+
+
+题都不难，但是代码量比一般算法题要大一些，主要考察代码的可读性，结构，还有很重视test，要考虑各方面还要写pytest。整体体验不错。
+
+
+最新Faire OA
+
+w474wang
+4 年前
+1
+
+Favorite
+
+2022(1-3月) 码农类General 硕士 全职@Faire - 网上海投 - 技术电面 | 😐 Neutral 😐 Average | Other | 在职跳槽
+
+Code signal上四道题， 70分钟前两题都很简单，一道是给一个array，check第i个item是不是能被(i+1)整除；第二道是求一个int array中0-9出现次数最多的那个数。
+第三题我觉得挺难的，是 https://leetcode.com/discuss/interview-question/1482150/rotatedrectsum-codesignal-quora-two-sigma-oa，
+第四题是自己写一个新的HashMap, 要求实现insert, get, addToAllKey, addToAllValue几个操作，这个看起来是要求每个操作都是O(1)才能通过。
+
+求大米啊啊啊啊！！！
+
+Faire OA
+
+地里匿名用户UY8XJ
+4 年前
+3
+
+Favorite
+
+2022(1-3月) 码农类General 硕士 全职@Faire - 猎头 - 在线笔试 | 😐 Neutral 😐 Average | Other | 在职跳槽
+
+Faire地里很少见到 来发个新鲜OACodeSignal 上面 1h10m 4道题, 说是满分850，750+就给过， 1->4题权重逐渐升高 - 目测只要做出3题就能过
+
+1.送分题 一个数组求连续三个数（组成一个tuple）里面正好有两个一样的， 求满足条件tuple个数
+
+2.送分题+1 手机9键对应字母，有的键坏了，input是digits[] (好的键)& words[] (list of words)，output boolean[] 能不能敲出每个word
+3.这道地里提过就是一个2D matrix迷宫 不同符号代表box/obstacle, 先一直往右推，推不动了再一直往下推，求最后matrix
+4. rate limiter 具体有点记不清了，大概就是给一个maxRequests和一个window和一个request[]存的是每个request进来的timestamp，看每个request是能否accept
+
+Faire 面经
+
+ly012120
+4 年前
+21
+
+Favorite
+
+2021(1-3月) 码农类General 硕士 全职@Faire - 猎头 - Onsite | 😃 Positive 😐 Average | Fail | 在职跳槽
+
+是一家Canada的startup. 模式和shopify据说有点像。正在不断扩张一共两轮coding
+1. 给一串string，要求找出连续的三个subsrting, 第一个substring含有5个syllabus, 第二个7个，第三个5个。每个单词的syllabus会给个字典告诉你。注意首先要小写话每个单词。最后时间复杂度是O(n) 的
+2. 给一个Log，比如 [user1, action1] 再给一个funnel的数组。每个funnel有一个initial action, 和一连串的其他action e.x. [funnel1, action1, action2, action3]
+然后计算每个funnel里每个action总共被执行了几次。每个user必须从一个funnel的第一个action开始。
+然后挂了 说没写testcase.
+第一题的时间复杂度也写错了（我写了O(n^2) 但实际上是O(n) 因为最多有17个syllabus
+
+faire 面经
+
+地里匿名用户ZLLMW
+4 年前
+5
+
+Favorite
+
+2021(4-6月) 码农类General 本科 全职@FAire - 网上海投 - Onsite | 😐 Neutral 😣 Hard | Other | 应届毕业生
+
+前两道题送分的，第三道题是给你一个类似迷宫， input里面有行数，列数，然后有挡板比如1，1是挡板不能过，然后1，1，3，2是指你要是到了1，1可以直接跳到3，2，优先往右走不能往右走就往下走，不能往左或者往上走，然后问你从左上能不能到右下。
+第四道题好难啊。。。是
+Given an array of Strings, your task is to find the number of pairs which one is a suffix of other string
+
+https://leetcode.com/discuss/interview-question/1301919/Robinhood-or-OA-or-Suffix-pairs
+上面这个链接是这道题的，但是下面这个链接这道题一模一样的信息。
+https://www.chegg.com/homework-help/questions-and-answers/given-array-strings-task-find-number-pairs-one-string-suffix-string-specifically-given-si--q85674837
+
+Faire 加拿大面经
+
+地里匿名用户MGTJP
+4 年前
+10
+
+Favorite
+
+2021(10-12月) 码农类General 本科 全职@Faire - 猎头 - Onsite | 😐 Neutral 😐 Average | Other | 在职跳槽
+
+新鲜面经，两题
+1. 给一系列user event,
+
+user1, timestamp, stepID
+user2, timestamp, stepID
+user1, timestamp, stepID
+...
+
+给一个step定义文件
+
+uniqueId Row Id, stepId, stepId, stepId
+uniqueId Row Id, stepId, stepId, stepId
+uniqueId Row Id, stepId, stepId, stepId
+
+根据event log，返回
+uniqueId Row Id, stepId （User count）, stepId （User count）, stepId （User count）
+
+一个stepId 可以出现在好多个row里面，每一个step都有order，比如说，user1 先处理了step3就是不行的，得按照1，2，3的顺序，最后count每个row，每个step来过的user数量。
+
+2.类似于 利口，in memory file system， 核心是Trie
+
+
