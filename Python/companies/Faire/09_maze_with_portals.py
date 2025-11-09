@@ -29,26 +29,30 @@ Constraints:
     - 1 <= rows, cols <= 100
     - Exactly one 'S' and one 'E'
     - 0 or more portals
-    - Return -1 if no path exists
+    - Return -1 if no path exists - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 09_maze_with_portals_solution.py
+- Run this file to test: python 09_maze_with_portals.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List
-from collections import deque
-
-
-def shortest_path_with_portals(maze: List[List[str]]) -> int:
-    """
-    Find shortest path in maze with portals using BFS.
-
-    Args:
-        maze: 2D grid with S, E, P, ., #
-
-    Returns:
-        Shortest path length, or -1 if no path
-    """
-    # TODO: Implement BFS with portal teleportation
-    return -1  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "09_maze_with_portals_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    shortest_path_with_portals = solution_module.shortest_path_with_portals
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 09_maze_with_portals_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for maze with portals."""
@@ -60,7 +64,8 @@ def run_tests():
         ['#', 'P', '.', 'P']
     ]
     result1 = shortest_path_with_portals(maze1)
-    print(f"Test 1: Shortest path = {result1}")
+    # S -> down -> down -> portal to (2,3) -> up -> E = 3 steps
+    assert result1 == 3, f"Test 1 failed: expected 3, got {result1}"
     print("✓ Test 1 passed: Maze with portals")
 
     # Test Case 2: Direct path (no portals)
@@ -70,7 +75,7 @@ def run_tests():
         ['.', '.', 'E']
     ]
     result2 = shortest_path_with_portals(maze2)
-    print(f"Test 2: Shortest path = {result2} (expected 4)")
+    assert result2 == 4, f"Test 2 failed: expected 4, got {result2}"
     print("✓ Test 2 passed: Direct path")
 
     # Test Case 3: No path (blocked)
@@ -94,6 +99,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -101,6 +107,7 @@ def run_custom_tests():
     # Add your custom test cases here
 
     print("No custom tests defined yet.")
+
 
 
 if __name__ == "__main__":

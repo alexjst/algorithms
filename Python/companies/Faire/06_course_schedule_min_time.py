@@ -28,30 +28,30 @@ Constraints:
     - 0 <= prerequisites.length <= 5000
     - prerequisites[i] = [a, b] means course b must be taken before course a
     - No cycles in prerequisites
-    - All courses can be completed
+    - All courses can be completed - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 06_course_schedule_min_time_solution.py
+- Run this file to test: python 06_course_schedule_min_time.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List
-from collections import defaultdict, deque
-
-
-def min_time_to_complete_courses(num_courses: int,
-                                  prerequisites: List[List[int]],
-                                  durations: List[int]) -> int:
-    """
-    Find minimum time to complete all courses.
-
-    Args:
-        num_courses: Total number of courses (0 to num_courses-1)
-        prerequisites: List of [course, prerequisite] pairs
-        durations: durations[i] is time for course i
-
-    Returns:
-        Minimum time to complete all courses
-    """
-    # TODO: Implement using topological sort + critical path
-    return 0  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "06_course_schedule_min_time_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    min_time_to_complete_courses = solution_module.min_time_to_complete_courses
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 06_course_schedule_min_time_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for course scheduling."""
@@ -63,7 +63,7 @@ def run_tests():
     result1 = min_time_to_complete_courses(courses1, prereqs1, durations1)
     # Course 0: 1, Course 1: 1+2=3, Course 2: 1+3=4, Course 3: 4+4=8
     # Minimum time is 8
-    print(f"Test 1: Minimum time = {result1}")
+    assert result1 == 8, f"Test 1 failed: expected 8, got {result1}"
     print("✓ Test 1 passed: Basic parallel courses")
 
     # Test Case 2: Sequential courses
@@ -72,7 +72,7 @@ def run_tests():
     durations2 = [1, 2, 3]
     result2 = min_time_to_complete_courses(courses2, prereqs2, durations2)
     # 0 -> 1 -> 2: total = 1 + 2 + 3 = 6
-    print(f"Test 2: Minimum time = {result2} (expected 6)")
+    assert result2 == 6, f"Test 2 failed: expected 6, got {result2}"
     print("✓ Test 2 passed: Sequential courses")
 
     # Test Case 3: No prerequisites
@@ -89,6 +89,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -96,6 +97,7 @@ def run_custom_tests():
     # Add your custom test cases here
 
     print("No custom tests defined yet.")
+
 
 
 if __name__ == "__main__":

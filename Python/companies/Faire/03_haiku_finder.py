@@ -24,39 +24,31 @@ Example 2:
 Constraints:
     - Input is a list of exactly 3 strings
     - Each string contains only lowercase letters and spaces
-    - Use simple vowel-based syllable counting
+    - Use simple vowel-based syllable counting - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 03_haiku_finder_solution.py
+- Run this file to test: python 03_haiku_finder.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List
-
-
-def count_syllables(word: str) -> int:
-    """
-    Count syllables in a word using vowel-based counting.
-
-    Args:
-        word: Single word (lowercase, no spaces)
-
-    Returns:
-        Number of syllables
-    """
-    # TODO: Implement syllable counting
-    return 0  # Placeholder - replace with your solution
-
-
-def is_haiku(lines: List[str]) -> bool:
-    """
-    Check if three lines form a valid haiku (5-7-5 syllables).
-
-    Args:
-        lines: List of exactly 3 strings
-
-    Returns:
-        True if valid haiku, False otherwise
-    """
-    # TODO: Implement your solution here
-    return False  # Placeholder - replace with your solution
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "03_haiku_finder_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    count_syllables = solution_module.count_syllables
+    is_haiku = solution_module.is_haiku
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 03_haiku_finder_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for haiku validation."""
@@ -93,6 +85,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -105,6 +98,7 @@ def run_custom_tests():
         print(f"  '{word}': {count} syllables")
 
     print("\nNo custom haiku tests defined yet.")
+
 
 
 if __name__ == "__main__":

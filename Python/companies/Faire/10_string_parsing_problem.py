@@ -23,41 +23,31 @@ Constraints:
     - Timestamp format: YYYY-MM-DD HH:MM:SS
     - Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
     - Metadata is optional (may not have | section)
-    - Key-value pairs separated by spaces
+    - Key-value pairs separated by spaces - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 10_string_parsing_problem_solution.py
+- Run this file to test: python 10_string_parsing_problem.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import Dict, Optional
-import re
-
-
-def parse_log_entry(log: str) -> Optional[Dict]:
-    """
-    Parse a log entry into structured format.
-
-    Args:
-        log: Log string to parse
-
-    Returns:
-        Dictionary with timestamp, level, message, metadata
-        Returns None if invalid format
-    """
-    # TODO: Implement log parsing with regex
-    return None  # Placeholder
-
-
-def parse_logs(log_string: str) -> list:
-    """
-    Parse multiple log entries (separated by newlines).
-
-    Args:
-        log_string: Multi-line log string
-
-    Returns:
-        List of parsed log dictionaries
-    """
-    # TODO: Implement multi-line parsing
-    return []  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "10_string_parsing_problem_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    parse_log_entry = solution_module.parse_log_entry
+    parse_logs = solution_module.parse_logs
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 10_string_parsing_problem_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for log parsing."""
@@ -95,6 +85,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -102,6 +93,7 @@ def run_custom_tests():
     # Add your custom test cases here
 
     print("No custom tests defined yet.")
+
 
 
 if __name__ == "__main__":

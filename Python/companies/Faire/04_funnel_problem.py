@@ -28,57 +28,30 @@ Constraints:
     - 1 <= events <= 10^5
     - Events: (user_id, stage, timestamp)
     - Users counted once per stage
-    - Stages in order: Browse, View, Cart, Checkout, Purchase
+    - Stages in order: Browse, View, Cart, Checkout, Purchase - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 04_funnel_problem_solution.py
+- Run this file to test: python 04_funnel_problem.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List, Tuple, Dict
-from collections import defaultdict
-
-
-class FunnelAnalyzer:
-    def __init__(self, events: List[Tuple[str, str, int]]):
-        """
-        Initialize funnel analyzer with events.
-
-        Args:
-            events: List of (user_id, stage, timestamp) tuples
-        """
-        self.events = events
-        self.stages = ['Browse', 'View', 'Cart', 'Checkout', 'Purchase']
-
-        # TODO: Initialize data structures
-        pass
-
-    def calculate_conversion_rates(self) -> Dict[str, float]:
-        """
-        Calculate conversion rate for each stage transition.
-
-        Returns:
-            Dictionary mapping transitions to conversion rates (%)
-        """
-        # TODO: Implement conversion rate calculation
-        return {}  # Placeholder
-
-    def find_dropoff_stage(self) -> Tuple[str, float]:
-        """
-        Find the stage with highest drop-off rate.
-
-        Returns:
-            Tuple of (transition, dropoff_rate)
-        """
-        # TODO: Implement drop-off detection
-        return ("", 0.0)  # Placeholder
-
-    def get_funnel_metrics(self) -> Dict[str, Dict]:
-        """
-        Get comprehensive metrics for each stage.
-
-        Returns:
-            Dictionary with stage metrics
-        """
-        # TODO: Implement funnel metrics
-        return {}  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "04_funnel_problem_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    FunnelAnalyzer = solution_module.FunnelAnalyzer
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 04_funnel_problem_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for FunnelAnalyzer."""
@@ -90,7 +63,8 @@ def run_tests():
     ]
     analyzer1 = FunnelAnalyzer(events1)
     metrics1 = analyzer1.get_funnel_metrics()
-    # Should have 2 users at Browse, 1 at View
+    # Should be able to create analyzer
+    assert isinstance(metrics1, dict), "Test 1 failed: metrics should be a dict"
     print("✓ Test 1 passed: Basic funnel created")
 
     # Test Case 2: Complete journey
@@ -102,6 +76,8 @@ def run_tests():
         ('u1', 'Purchase', 5)
     ]
     analyzer2 = FunnelAnalyzer(events2)
+    metrics2 = analyzer2.get_funnel_metrics()
+    assert isinstance(metrics2, dict), "Test 2 failed: metrics should be a dict"
     print("✓ Test 2 passed: Complete user journey")
 
     # Test Case 3: Drop-off detection
@@ -113,11 +89,14 @@ def run_tests():
     ]
     analyzer3 = FunnelAnalyzer(events3)
     dropoff_stage, rate = analyzer3.find_dropoff_stage()
+    # Should find View->Cart as biggest drop-off (3 users to 1 user = 66.7% drop)
+    assert dropoff_stage != "", f"Test 3 failed: should identify drop-off stage, got empty string"
     print("✓ Test 3 passed: Drop-off detection")
 
     print("\n" + "="*50)
     print("All basic tests passed! ✓")
     print("="*50)
+
 
 
 def run_custom_tests():
@@ -127,6 +106,7 @@ def run_custom_tests():
     # Add your custom test cases here
 
     print("No custom tests defined yet.")
+
 
 
 if __name__ == "__main__":

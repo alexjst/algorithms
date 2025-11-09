@@ -19,25 +19,30 @@ Example 3:
 
 Constraints:
     - 1 <= nums.length <= 10^5
-    - nums[i] is either 0 or 1
+    - nums[i] is either 0 or 1 - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 07_max_consecutive_ones_solution.py
+- Run this file to test: python 07_max_consecutive_ones.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List
-
-
-def find_max_consecutive_ones(nums: List[int]) -> int:
-    """
-    Find maximum number of consecutive 1's in binary array.
-
-    Args:
-        nums: Binary array containing 0s and 1s
-
-    Returns:
-        Maximum count of consecutive 1's
-    """
-    # TODO: Implement your solution here
-    return 0  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "07_max_consecutive_ones_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    find_max_consecutive_ones = solution_module.find_max_consecutive_ones
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 07_max_consecutive_ones_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for max consecutive ones."""
@@ -77,6 +82,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -84,6 +90,7 @@ def run_custom_tests():
     # Add your custom test cases here
 
     print("No custom tests defined yet.")
+
 
 
 if __name__ == "__main__":

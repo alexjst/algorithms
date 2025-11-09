@@ -23,27 +23,30 @@ Constraints:
     - 1 <= arr.length <= 10^5
     - 1 <= arr[i] <= 10^9
     - 1 <= k <= 10^5
-    - Use modular arithmetic
+    - Use modular arithmetic - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 11_array_divisibility_check_solution.py
+- Run this file to test: python 11_array_divisibility_check.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List
-from collections import Counter
-
-
-def can_arrange_pairs(arr: List[int], k: int) -> bool:
-    """
-    Check if array can be arranged into pairs with sum divisible by k.
-
-    Args:
-        arr: Array of integers
-        k: Divisor
-
-    Returns:
-        True if valid pairing exists, False otherwise
-    """
-    # TODO: Implement using remainder frequency counting
-    return False  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "11_array_divisibility_check_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    can_arrange_pairs = solution_module.can_arrange_pairs
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 11_array_divisibility_check_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for array divisibility."""
@@ -88,6 +91,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -102,6 +106,7 @@ def run_custom_tests():
     print(f"  Remainders: {dict(remainders)}")
 
     print("\nNo custom pairing tests defined yet.")
+
 
 
 if __name__ == "__main__":

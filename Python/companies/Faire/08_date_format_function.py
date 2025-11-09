@@ -21,41 +21,31 @@ Example 2:
 Constraints:
     - Validate dates (check for invalid dates like Feb 30, Apr 31)
     - Handle leap years correctly
-    - Year range: 1900-2100
+    - Year range: 1900-2100 - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 08_date_format_function_solution.py
+- Run this file to test: python 08_date_format_function.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import Optional
-
-
-def is_leap_year(year: int) -> bool:
-    """
-    Check if a year is a leap year.
-
-    Args:
-        year: Year to check
-
-    Returns:
-        True if leap year, False otherwise
-    """
-    # TODO: Implement leap year check
-    return False  # Placeholder
-
-
-def convert_date_format(date: str, from_format: str, to_format: str) -> Optional[str]:
-    """
-    Convert date from one format to another with validation.
-
-    Args:
-        date: Date string to convert
-        from_format: Source format
-        to_format: Target format
-
-    Returns:
-        Converted date string, or None if invalid
-    """
-    # TODO: Implement date conversion with validation
-    return None  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "08_date_format_function_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    is_leap_year = solution_module.is_leap_year
+    convert_date_format = solution_module.convert_date_format
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 08_date_format_function_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for date format conversion."""
@@ -90,6 +80,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -102,6 +93,7 @@ def run_custom_tests():
         print(f"  {year}: {'Leap' if is_leap else 'Not leap'}")
 
     print("\nNo custom date conversion tests defined yet.")
+
 
 
 if __name__ == "__main__":

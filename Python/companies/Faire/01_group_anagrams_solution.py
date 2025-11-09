@@ -6,7 +6,7 @@ TODO: Implement the group_anagrams function below.
 """
 
 from typing import List
-
+from collections import defaultdict
 
 def group_anagrams(strs: List[str]) -> List[List[str]]:
     """
@@ -18,5 +18,10 @@ def group_anagrams(strs: List[str]) -> List[List[str]]:
     Returns:
         List of lists, where each inner list contains anagrams
     """
-    # TODO: Implement your solution here
-    return []  # Placeholder - replace with your solution
+    anagrams = defaultdict(list)
+
+    for s in strs:
+        key = ''.join(sorted(s))
+        anagrams[key].append(s)
+
+    return list(anagrams.values())

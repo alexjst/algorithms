@@ -25,37 +25,31 @@ Example 2:
 Constraints:
     - 1 <= start <= end <= 10000
     - Count characters excluding spaces
-    - Handle numbers like 23 -> "twenty three"
+    - Handle numbers like 23 -> "twenty three" - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 05_number_to_word_conversion_solution.py
+- Run this file to test: python 05_number_to_word_conversion.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-def number_to_words(num: int) -> str:
-    """
-    Convert a number to its English word representation.
-
-    Args:
-        num: Number to convert (1 to 10000)
-
-    Returns:
-        English word representation (with spaces)
-    """
-    # TODO: Implement number to words conversion
-    return ""  # Placeholder
-
-
-def total_word_length(start: int, end: int) -> int:
-    """
-    Calculate total character length of all numbers in range [start, end].
-
-    Args:
-        start: Starting number
-        end: Ending number
-
-    Returns:
-        Total character count (excluding spaces)
-    """
-    # TODO: Implement your solution here
-    return 0  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "05_number_to_word_conversion_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    number_to_words = solution_module.number_to_words
+    total_word_length = solution_module.total_word_length
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 05_number_to_word_conversion_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for number to word conversion."""
@@ -87,6 +81,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -99,6 +94,7 @@ def run_custom_tests():
         print(f"  {num} -> '{word}'")
 
     print("\nNo custom range tests defined yet.")
+
 
 
 if __name__ == "__main__":

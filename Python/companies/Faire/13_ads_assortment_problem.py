@@ -30,41 +30,31 @@ Constraints:
     - 1 <= len(ads) <= 1000
     - 1 <= budget <= 10000
     - Each ad has 'value' and 'cost'
-    - Can select each ad at most once (0/1 knapsack)
+    - Can select each ad at most once (0/1 knapsack) - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 13_ads_assortment_problem_solution.py
+- Run this file to test: python 13_ads_assortment_problem.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List, Dict
-
-
-def max_ad_value(ads: List[Dict[str, int]], budget: int) -> int:
-    """
-    Find maximum ad value within budget using 0/1 Knapsack DP.
-
-    Args:
-        ads: List of ad dictionaries with 'value' and 'cost'
-        budget: Maximum budget
-
-    Returns:
-        Maximum achievable value
-    """
-    # TODO: Implement 0/1 Knapsack DP solution
-    return 0  # Placeholder
-
-
-def max_ad_value_optimized(ads: List[Dict[str, int]], budget: int) -> int:
-    """
-    Space-optimized version using 1D DP array.
-
-    Args:
-        ads: List of ad dictionaries
-        budget: Maximum budget
-
-    Returns:
-        Maximum achievable value
-    """
-    # TODO: Implement space-optimized version
-    return 0  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "13_ads_assortment_problem_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    max_ad_value = solution_module.max_ad_value
+    max_ad_value_optimized = solution_module.max_ad_value_optimized
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 13_ads_assortment_problem_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for ads assortment problem."""
@@ -118,6 +108,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -136,6 +127,7 @@ def run_custom_tests():
     print(f"  Optimized: {result_optimized}")
 
     print("\nNo custom tests defined yet.")
+
 
 
 if __name__ == "__main__":

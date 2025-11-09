@@ -21,27 +21,30 @@ Example 2:
 Constraints:
     - 0 <= start <= end <= 10^9
     - Return dictionary with all digits 0-9
-    - Count each digit occurrence across all numbers
+    - Count each digit occurrence across all numbers - TEST SCAFFOLDING (DO NOT EDIT)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 12_digit_frequency_counter_solution.py
+- Run this file to test: python 12_digit_frequency_counter.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import Dict
-from collections import Counter
-
-
-def count_digit_frequency(start: int, end: int) -> Dict[int, int]:
-    """
-    Count frequency of each digit in range [start, end].
-
-    Args:
-        start: Starting number (inclusive)
-        end: Ending number (inclusive)
-
-    Returns:
-        Dictionary mapping digit (0-9) to frequency
-    """
-    # TODO: Implement digit counting
-    return {i: 0 for i in range(10)}  # Placeholder
-
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "12_digit_frequency_counter_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    count_digit_frequency = solution_module.count_digit_frequency
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print(f"   Make sure 12_digit_frequency_counter_solution.py exists.")
+    exit(1)
 
 def run_tests():
     """Run test cases for digit frequency counter."""
@@ -79,6 +82,7 @@ def run_tests():
     print("="*50)
 
 
+
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
@@ -91,6 +95,7 @@ def run_custom_tests():
             print(f"  Digit {digit}: {result[digit]} times")
 
     print("\nNo custom tests defined yet.")
+
 
 
 if __name__ == "__main__":
