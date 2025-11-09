@@ -3,6 +3,36 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable,skins}
+
+% Define custom box styles
+\newtcolorbox{problembox}{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    title={\textbf{PROBLEM}},
+    fonttitle=\bfseries,
+    breakable,
+    enhanced
+}
+
+\newtcolorbox{solutionbox}{
+    colback=green!5!white,
+    colframe=green!50!black,
+    title={\textbf{SOLUTION}},
+    fonttitle=\bfseries,
+    breakable,
+    enhanced
+}
+
+\newtcolorbox{testbox}{
+    colback=yellow!5!white,
+    colframe=orange!75!black,
+    title={\textbf{TEST CASES \& EDGE CASES}},
+    fonttitle=\bfseries,
+    breakable,
+    enhanced
+}
 
 \title{\textbf{Faire Interview Questions\\Backend Software Engineer}}
 \author{Compiled from 1point3acres.com}
@@ -100,6 +130,7 @@ The information represents publicly available interview experiences and may not 
 
 \subsubsection{Group Anagrams}
 
+\begin{problembox}
 \textbf{Problem Statement:}
 
 Given an array of strings \texttt{strs}, group the anagrams together. You can return the answer in any order.
@@ -130,6 +161,7 @@ Output: [["a"]]
     \item $0 \leq$ strs[i].length $\leq 100$
     \item strs[i] consists of lowercase English letters
 \end{itemize}
+\end{problembox}
 
 \textbf{Solution Approach:}
 
@@ -149,7 +181,7 @@ Output: [["a"]]
     \item Space: $O(N \cdot K)$
 \end{itemize}
 
-\textbf{Python Solution:}
+\begin{solutionbox}
 \begin{verbatim}
 from collections import defaultdict
 
@@ -176,8 +208,10 @@ def groupAnagrams_v2(strs):
 
     return list(anagrams.values())
 \end{verbatim}
+\end{solutionbox}
 
-\textbf{Edge Cases \& Testing:}
+\begin{testbox}
+\textbf{Edge Cases:}
 \begin{itemize}
     \item Empty string: \texttt{[""] $\rightarrow$ [[""]]}
     \item Single character: \texttt{["a"] $\rightarrow$ [["a"]]}
@@ -209,6 +243,7 @@ assert len(result) == 3
 result = groupAnagrams(["abc", "bca", "cab"])
 assert len(result) == 1 and len(result[0]) == 3
 \end{verbatim}
+\end{testbox}
 
 \textbf{Interview Tips:}
 \begin{itemize}
@@ -222,6 +257,7 @@ assert len(result) == 1 and len(result[0]) == 3
 
 \subsubsection{HTML Format Validation}
 
+\begin{problembox}
 \textbf{Problem Statement:}
 
 Given a string representing HTML-like tags with custom delimiters, determine if the tag structure is valid.
@@ -267,6 +303,7 @@ Input: "{{div}} Hello"
 Output: false
 Explanation: Missing closing tag
 \end{verbatim}
+\end{problembox}
 
 \textbf{Solution Approach:}
 
@@ -280,7 +317,7 @@ Use a stack to track opening tags:
     \item Space: $O(T)$ where T = number of tags
 \end{itemize}
 
-\textbf{Python Solution:}
+\begin{solutionbox}
 \begin{verbatim}
 def isValidHTML(s):
     stack = []
@@ -323,8 +360,10 @@ print(isValidHTML("{{div}} Hello"))
 print(isValidHTML("{{div}} {{/p}}"))
 # False (closing without opening)
 \end{verbatim}
+\end{solutionbox}
 
-\textbf{Edge Cases \& Testing:}
+\begin{testbox}
+\textbf{Edge Cases:}
 \begin{itemize}
     \item Empty string: \texttt{""} $\rightarrow$ \texttt{true}
     \item No tags, only content: \texttt{"Hello World"} $\rightarrow$ \texttt{true}
@@ -359,6 +398,7 @@ def test_html_validation():
 
 test_html_validation()
 \end{verbatim}
+\end{testbox}
 
 \textbf{Interview Tips:}
 \begin{itemize}
@@ -373,6 +413,7 @@ test_html_validation()
 
 \subsubsection{Haiku Finder (5-7-5 Syllables)}
 
+\begin{problembox}
 \textbf{Problem Statement:}
 
 Given a list of words where each word has an associated syllable count, find all possible haiku formations. A haiku consists of three consecutive parts:
@@ -438,6 +479,7 @@ Line 1: words[0:5] = 5 syllables
 Line 2: words[5:12] = 7 syllables
 Line 3: words[12:17] = 5 syllables
 \end{verbatim}
+\end{problembox}
 
 \textbf{Solution Approach:}
 
@@ -455,7 +497,7 @@ Use prefix sums for efficient range queries:
     \item Space: $O(N)$ for prefix sum array
 \end{itemize}
 
-\textbf{Python Solution:}
+\begin{solutionbox}
 \begin{verbatim}
 def find_haikus(words, syllables):
     n = len(words)
@@ -526,8 +568,10 @@ def find_haikus_optimized(words, syllables):
 
     return haikus
 \end{verbatim}
+\end{solutionbox}
 
-\textbf{Edge Cases \& Testing:}
+\begin{testbox}
+\textbf{Edge Cases:}
 \begin{itemize}
     \item Empty input: \texttt{words = []} $\rightarrow$ \texttt{[]}
     \item Insufficient syllables: total < 17 $\rightarrow$ \texttt{[]}
@@ -565,6 +609,7 @@ def test_haiku_finder():
 
 test_haiku_finder()
 \end{verbatim}
+\end{testbox}
 
 \textbf{Interview Tips:}
 \begin{itemize}
@@ -578,16 +623,343 @@ test_haiku_finder()
 \textit{Source: Backend/Full Stack Phone Screen (2024-2025)}
 
 \subsubsection{Funnel Problem}
+
+\begin{problembox}
+\textbf{Problem Statement:}
+
+You are analyzing a conversion funnel for an e-commerce platform. Users go through the following stages in order:
+
+\begin{enumerate}
+    \item \textbf{Browse}: User browses product listings
+    \item \textbf{View}: User views product details
+    \item \textbf{Cart}: User adds product to cart
+    \item \textbf{Checkout}: User initiates checkout
+    \item \textbf{Purchase}: User completes purchase
+\end{enumerate}
+
+Given a list of user events where each event is a tuple \texttt{(user\_id, stage, timestamp)}, implement the following:
+
+\begin{enumerate}
+    \item \texttt{calculate\_conversion\_rates()}: Return conversion rate for each stage transition
+    \item \texttt{find\_dropoff\_stage()}: Return the stage with highest drop-off rate
+    \item \texttt{get\_funnel\_metrics()}: Return dictionary with:
+    \begin{itemize}
+        \item Total users at each stage
+        \item Conversion rate from previous stage
+        \item Overall conversion rate (Browse to Purchase)
+    \end{itemize}
+    \item \texttt{get\_user\_journey(user\_id)}: Return ordered list of stages user visited
+\end{enumerate}
+
+\textbf{Rules:}
 \begin{itemize}
-    \item \textbf{Description:} Funnel-shaped problem (specific details not publicly available)
-    \item \textbf{Key Point:} Interviewer heavily focused on test cases and edge cases
-    \item \textbf{Note:} Candidate mentioned using JUnit for testing
-    \item \textbf{Feedback:} Even after comprehensive testing, interviewer kept asking for more edge cases
-    \item \textbf{Source:} Coding interview (2024-2025)
+    \item Users must progress through stages in order (can skip stages)
+    \item A user can only be counted once per stage
+    \item Conversion rate = (users in next stage) / (users in current stage)
+    \item Drop-off rate = 1 - conversion rate
 \end{itemize}
+
+\textbf{Example:}
+\begin{verbatim}
+events = [
+    ('u1', 'Browse', 100),
+    ('u1', 'View', 105),
+    ('u1', 'Cart', 110),
+    ('u1', 'Purchase', 120),
+    ('u2', 'Browse', 100),
+    ('u2', 'View', 105),
+    ('u3', 'Browse', 101),
+    ('u3', 'View', 106),
+    ('u3', 'Cart', 111),
+]
+
+Funnel:
+Browse: 3 users (u1, u2, u3)
+View: 3 users (100% conversion from Browse)
+Cart: 2 users (66.7% conversion from View)
+Checkout: 0 users (0% conversion from Cart)
+Purchase: 1 user (N/A conversion - no one at Checkout)
+
+Drop-off rates:
+Browse -> View: 0%
+View -> Cart: 33.3%
+Cart -> Checkout: 100%  (highest drop-off)
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item $1 \leq$ number of events $\leq 10^5$
+    \item $1 \leq$ number of unique users $\leq 10^4$
+    \item Timestamps are in ascending order per user
+    \item Stage names are from the predefined list
+\end{itemize}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Approach:}
+
+Use sets to track unique users at each stage. Build a mapping of user journeys to handle edge cases like skipped stages or repeated events.
+
+\textbf{Time Complexity:} $O(N)$ where N = number of events
+
+\textbf{Space Complexity:} $O(U \times S)$ where U = users, S = stages
+
+\textbf{Python Solution:}
+\begin{verbatim}
+from collections import defaultdict
+
+class FunnelAnalyzer:
+    def __init__(self, events):
+        """
+        events: list of tuples (user_id, stage, timestamp)
+        """
+        self.events = sorted(events, key=lambda x: (x[0], x[2]))
+        self.stages = ['Browse', 'View', 'Cart', 'Checkout', 'Purchase']
+        self.stage_order = {stage: i for i, stage in enumerate(self.stages)}
+
+        # Build user journeys and stage sets
+        self.user_journeys = defaultdict(list)
+        self.stage_users = {stage: set() for stage in self.stages}
+
+        self._process_events()
+
+    def _process_events(self):
+        """Process events and build user journeys"""
+        for user_id, stage, timestamp in self.events:
+            if stage not in self.stage_order:
+                continue  # Invalid stage
+
+            # Add to user journey
+            self.user_journeys[user_id].append((stage, timestamp))
+
+            # Add user to stage (only count once per stage)
+            self.stage_users[stage].add(user_id)
+
+    def calculate_conversion_rates(self):
+        """Return conversion rate for each stage transition"""
+        conversion_rates = {}
+
+        for i in range(len(self.stages) - 1):
+            current_stage = self.stages[i]
+            next_stage = self.stages[i + 1]
+
+            current_count = len(self.stage_users[current_stage])
+            next_count = len(self.stage_users[next_stage])
+
+            if current_count == 0:
+                conversion_rates[f"{current_stage} -> {next_stage}"] = 0.0
+            else:
+                rate = (next_count / current_count) * 100
+                conversion_rates[f"{current_stage} -> {next_stage}"] = round(rate, 2)
+
+        return conversion_rates
+
+    def find_dropoff_stage(self):
+        """Return the stage with highest drop-off rate"""
+        conversion_rates = self.calculate_conversion_rates()
+
+        max_dropoff = 0
+        dropoff_stage = None
+
+        for transition, rate in conversion_rates.items():
+            dropoff_rate = 100 - rate
+            if dropoff_rate > max_dropoff:
+                max_dropoff = dropoff_rate
+                dropoff_stage = transition
+
+        return dropoff_stage, max_dropoff
+
+    def get_funnel_metrics(self):
+        """Return comprehensive funnel metrics"""
+        metrics = {}
+
+        for i, stage in enumerate(self.stages):
+            stage_count = len(self.stage_users[stage])
+
+            metric = {
+                'total_users': stage_count,
+                'conversion_from_previous': None,
+                'overall_conversion': None
+            }
+
+            # Conversion from previous stage
+            if i > 0:
+                prev_stage = self.stages[i - 1]
+                prev_count = len(self.stage_users[prev_stage])
+                if prev_count > 0:
+                    metric['conversion_from_previous'] = round(
+                        (stage_count / prev_count) * 100, 2
+                    )
+
+            # Overall conversion (from Browse)
+            browse_count = len(self.stage_users['Browse'])
+            if browse_count > 0:
+                metric['overall_conversion'] = round(
+                    (stage_count / browse_count) * 100, 2
+                )
+
+            metrics[stage] = metric
+
+        return metrics
+
+    def get_user_journey(self, user_id):
+        """Return ordered list of stages user visited"""
+        if user_id not in self.user_journeys:
+            return []
+
+        # Return unique stages in order
+        seen = set()
+        journey = []
+        for stage, _ in self.user_journeys[user_id]:
+            if stage not in seen:
+                journey.append(stage)
+                seen.add(stage)
+
+        return journey
+
+    def validate_user_journey(self, user_id):
+        """Check if user followed correct order"""
+        journey = self.get_user_journey(user_id)
+
+        for i in range(len(journey) - 1):
+            current_idx = self.stage_order[journey[i]]
+            next_idx = self.stage_order[journey[i + 1]]
+
+            # Next stage should come after current stage
+            if next_idx <= current_idx:
+                return False, f"Invalid order: {journey[i]} -> {journey[i+1]}"
+
+        return True, "Valid journey"
+
+
+# Example usage
+events = [
+    ('u1', 'Browse', 100),
+    ('u1', 'View', 105),
+    ('u1', 'Cart', 110),
+    ('u1', 'Purchase', 120),
+    ('u2', 'Browse', 100),
+    ('u2', 'View', 105),
+    ('u3', 'Browse', 101),
+    ('u3', 'View', 106),
+    ('u3', 'Cart', 111),
+]
+
+analyzer = FunnelAnalyzer(events)
+
+print("Conversion Rates:")
+print(analyzer.calculate_conversion_rates())
+
+print("\nHighest Drop-off:")
+print(analyzer.find_dropoff_stage())
+
+print("\nFunnel Metrics:")
+for stage, metrics in analyzer.get_funnel_metrics().items():
+    print(f"{stage}: {metrics}")
+
+print("\nUser Journey (u1):")
+print(analyzer.get_user_journey('u1'))
+\end{verbatim}
+\end{solutionbox}
+
+\begin{testbox}
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Empty events list: all metrics return 0
+    \item Single user, single event: 100\% drop-off after first stage
+    \item User skips stages: e.g., Browse -> Purchase (validate journey)
+    \item User repeats same stage: count only once
+    \item User goes backwards: Browse -> View -> Browse (invalid order)
+    \item All users complete funnel: 100\% conversion at each stage
+    \item No users reach final stage: Purchase conversion = 0
+    \item Duplicate timestamps: handle tie-breaking
+    \item Invalid stage names: filter out or raise error
+    \item Division by zero: when no users at a stage
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_funnel_analyzer():
+    # Test 1: Basic funnel
+    events = [
+        ('u1', 'Browse', 1), ('u1', 'View', 2),
+        ('u2', 'Browse', 1)
+    ]
+    analyzer = FunnelAnalyzer(events)
+    metrics = analyzer.get_funnel_metrics()
+    assert metrics['Browse']['total_users'] == 2
+    assert metrics['View']['total_users'] == 1
+    assert metrics['View']['conversion_from_previous'] == 50.0
+
+    # Test 2: Complete journey
+    events = [
+        ('u1', 'Browse', 1), ('u1', 'View', 2),
+        ('u1', 'Cart', 3), ('u1', 'Checkout', 4),
+        ('u1', 'Purchase', 5)
+    ]
+    analyzer = FunnelAnalyzer(events)
+    journey = analyzer.get_user_journey('u1')
+    assert len(journey) == 5
+    assert journey[-1] == 'Purchase'
+
+    # Test 3: Drop-off detection
+    events = [
+        ('u1', 'Browse', 1), ('u1', 'View', 2),
+        ('u2', 'Browse', 1), ('u2', 'View', 2),
+        ('u3', 'Browse', 1), ('u3', 'View', 2),
+        ('u1', 'Cart', 3)  # Only u1 proceeds
+    ]
+    analyzer = FunnelAnalyzer(events)
+    dropoff_stage, rate = analyzer.find_dropoff_stage()
+    assert 'View -> Cart' in dropoff_stage
+    assert rate > 60  # ~66.7% drop-off
+
+    # Test 4: Duplicate events (same stage)
+    events = [
+        ('u1', 'Browse', 1),
+        ('u1', 'Browse', 2),  # Duplicate
+        ('u1', 'View', 3)
+    ]
+    analyzer = FunnelAnalyzer(events)
+    assert len(analyzer.stage_users['Browse']) == 1
+
+    # Test 5: Empty events
+    analyzer = FunnelAnalyzer([])
+    metrics = analyzer.get_funnel_metrics()
+    assert all(m['total_users'] == 0 for m in metrics.values())
+
+    # Test 6: Skipped stages
+    events = [
+        ('u1', 'Browse', 1),
+        ('u1', 'Purchase', 5)  # Skips View, Cart, Checkout
+    ]
+    analyzer = FunnelAnalyzer(events)
+    journey = analyzer.get_user_journey('u1')
+    assert journey == ['Browse', 'Purchase']
+
+    print("All funnel tests passed!")
+
+test_funnel_analyzer()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify whether users can skip stages
+    \item Ask about handling duplicate events for same stage
+    \item Discuss how to handle out-of-order events
+    \item Consider time windows for conversion (e.g., must complete within 24h)
+    \item For Faire: \textbf{Focus heavily on edge cases and testing}
+    \item Use proper testing framework (JUnit, pytest) if allowed
+    \item Validate input data (null checks, invalid stages)
+    \item Consider performance with large datasets
+\end{itemize}
+\end{testbox}
+
+\textit{Note: Interviewer heavily focused on test cases and edge cases. Even after comprehensive testing, be prepared for more edge case questions. Source: Coding interview (2024-2025)}
 
 \subsubsection{Number to Word Conversion}
 
+\begin{problembox}
 \textbf{Problem Statement:}
 
 Given two integers \texttt{start} and \texttt{end}, convert all numbers in the range $[start, end]$ (inclusive) to their English word representations and calculate the total length of all characters (excluding spaces).
@@ -632,7 +1004,9 @@ Or if counting spaces:
     \item $1 \leq start \leq end \leq 1000$
     \item Count only letters, not spaces
 \end{itemize}
+\end{problembox}
 
+\begin{solutionbox}
 \textbf{Solution Approach:}
 
 Build number-to-word converter:
@@ -693,7 +1067,9 @@ print(total_word_length(10, 12)) # 15
 print(total_word_length(1, 5))   # one+two+three+four+five
                                  # 3+3+5+4+4 = 19
 \end{verbatim}
+\end{solutionbox}
 
+\begin{testbox}
 \textbf{Edge Cases \& Testing:}
 \begin{itemize}
     \item Single number: start = end = 1 $\rightarrow$ 3
@@ -730,6 +1106,7 @@ test_number_words()
     \item Mention potential optimization for repeated ranges
     \item For Faire: Test edge cases like 1000, teens, exact hundreds
 \end{itemize}
+\end{testbox}
 
 \textit{Source: Backend/Full Stack - Canadian Office (2022)}
 
@@ -737,6 +1114,7 @@ test_number_words()
 
 \subsubsection{Course Schedule with Minimum Time}
 
+\begin{problembox}
 \textbf{Problem Statement:}
 
 You are given:
@@ -798,7 +1176,9 @@ Total: 5 days
 
 Output: 5
 \end{verbatim}
+\end{problembox}
 
+\begin{solutionbox}
 \textbf{Solution Approach:}
 
 Topological Sort + Critical Path Method (CPM):
@@ -880,7 +1260,9 @@ print(minimum_time_courses(
     4, [[1, 0], [2, 0], [3, 1], [3, 2]], [1, 2, 3, 1]
 ))  # Output: 5
 \end{verbatim}
+\end{solutionbox}
 
+\begin{testbox}
 \textbf{Edge Cases \& Testing:}
 \begin{itemize}
     \item No prerequisites: \texttt{max(time)} (all parallel)
@@ -932,35 +1314,319 @@ test_course_schedule_time()
     \item Explain why we take max of prerequisite finish times
     \item For Faire: Test cycle detection and edge cases
 \end{itemize}
+\end{testbox}
 
 \textit{Source: Senior SWE Interview (2022)}
 
 \subsection{LeetCode-style Problems}
 
 \subsubsection{Max Consecutive Ones}
+
+\begin{problembox}
+\textbf{Problem Statement:}
+
+Given a binary array \texttt{nums}, return the maximum number of consecutive 1's in the array.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: nums = [1,1,0,1,1,1]
+Output: 3
+Explanation: The first two digits or the last three digits
+             are consecutive 1s. The maximum is 3.
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: nums = [1,0,1,1,0,1]
+Output: 2
+Explanation: Maximum consecutive 1s is 2.
+\end{verbatim}
+
+\textbf{Example 3:}
+\begin{verbatim}
+Input: nums = [0,0,0]
+Output: 0
+Explanation: No 1s in the array.
+\end{verbatim}
+
+\textbf{Constraints:}
 \begin{itemize}
-    \item \textbf{Problem:} LeetCode 485 - Max Consecutive Ones
-    \item \textbf{Duration:} 45 minutes
-    \item \textbf{Source:} Coding interview (2024-2025)
+    \item $1 \leq$ nums.length $\leq 10^5$
+    \item nums[i] is either 0 or 1
 \end{itemize}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Solution Approach:}
+
+Single pass with counter:
+\begin{itemize}
+    \item Track current consecutive 1s count
+    \item Track maximum seen so far
+    \item Reset counter when encountering 0
+    \item Time: $O(N)$ where N = array length
+    \item Space: $O(1)$
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+def findMaxConsecutiveOnes(nums):
+    max_count = 0
+    current_count = 0
+
+    for num in nums:
+        if num == 1:
+            current_count += 1
+            max_count = max(max_count, current_count)
+        else:
+            current_count = 0
+
+    return max_count
+
+# Alternative: More concise
+def findMaxConsecutiveOnes_v2(nums):
+    # Convert to string and split on '0'
+    return max(len(s) for s in ''.join(map(str, nums)).split('0'))
+
+# Tests
+print(findMaxConsecutiveOnes([1,1,0,1,1,1]))  # 3
+print(findMaxConsecutiveOnes([1,0,1,1,0,1]))  # 2
+print(findMaxConsecutiveOnes([0,0,0]))        # 0
+print(findMaxConsecutiveOnes([1]))            # 1
+\end{verbatim}
+\end{solutionbox}
+
+\begin{testbox}
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item All 1s: [1,1,1,1] $\rightarrow$ 4
+    \item All 0s: [0,0,0] $\rightarrow$ 0
+    \item Single element: [1] $\rightarrow$ 1, [0] $\rightarrow$ 0
+    \item Alternating: [1,0,1,0] $\rightarrow$ 1
+    \item Leading/trailing zeros: [0,1,1,0] $\rightarrow$ 2
+    \item Multiple sequences: [1,1,0,0,1,1,1,0,1] $\rightarrow$ 3
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_max_consecutive_ones():
+    assert findMaxConsecutiveOnes([1,1,0,1,1,1]) == 3
+    assert findMaxConsecutiveOnes([1,0,1,1,0,1]) == 2
+    assert findMaxConsecutiveOnes([0,0,0]) == 0
+    assert findMaxConsecutiveOnes([1,1,1,1]) == 4
+    assert findMaxConsecutiveOnes([1]) == 1
+    assert findMaxConsecutiveOnes([0]) == 0
+    assert findMaxConsecutiveOnes([1,0,1,0,1]) == 1
+
+test_max_consecutive_ones()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Discuss streaming/online algorithm variant
+    \item Mention follow-up: max consecutive 1s with one flip allowed
+    \item Consider space-optimized approaches
+    \item For Faire: Test boundary cases
+\end{itemize}
+\end{testbox}
+
+\textit{Source: Coding interview (2024-2025), LeetCode 485}
 
 \subsection{Additional Coding Problems}
 
 \subsubsection{Date Format Function}
+
+\begin{problembox}
+\textbf{Problem Statement:}
+
+Implement a function to convert dates between different formats. Given a date string and its format, convert it to a target format.
+
+Support the following formats:
 \begin{itemize}
-    \item \textbf{Description:} Implement a function to parse and format dates
-    \item \textbf{Details:}
-    \begin{itemize}
-        \item Convert dates between different formats (e.g., "MM/DD/YYYY" $\leftrightarrow$ "YYYY-MM-DD")
-        \item Handle edge cases: invalid dates, leap years, different delimiters
-        \item Validate date inputs
-    \end{itemize}
-    \item \textbf{Position:} Frontend/Full Stack
-    \item \textbf{Source:} Frontend interview (2024)
+    \item "MM/DD/YYYY" (e.g., "03/15/2024")
+    \item "YYYY-MM-DD" (e.g., "2024-03-15")
+    \item "DD.MM.YYYY" (e.g., "15.03.2024")
+    \item "Month DD, YYYY" (e.g., "March 15, 2024")
 \end{itemize}
+
+Return \texttt{None} or raise an error if the input date is invalid.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: date = "03/15/2024", from_format = "MM/DD/YYYY",
+       to_format = "YYYY-MM-DD"
+Output: "2024-03-15"
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: date = "2024-02-29", from_format = "YYYY-MM-DD",
+       to_format = "MM/DD/YYYY"
+Output: "02/29/2024"
+Explanation: 2024 is a leap year, Feb 29 is valid.
+\end{verbatim}
+
+\textbf{Example 3:}
+\begin{verbatim}
+Input: date = "2023-02-29", from_format = "YYYY-MM-DD",
+       to_format = "MM/DD/YYYY"
+Output: None
+Explanation: 2023 is not a leap year, Feb 29 is invalid.
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item Year range: 1000-9999
+    \item Validate month (1-12) and day based on month/year
+    \item Handle leap years correctly
+\end{itemize}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Solution Approach:}
+
+Date validation and conversion:
+\begin{itemize}
+    \item Parse input format to extract day, month, year
+    \item Validate the date (check month range, day range, leap year)
+    \item Format according to target format
+    \item Time: $O(1)$ - constant time for parsing and formatting
+    \item Space: $O(1)$
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+from datetime import datetime
+
+def is_leap_year(year):
+    """Check if year is a leap year"""
+    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+
+def is_valid_date(day, month, year):
+    """Validate if date is valid"""
+    if month < 1 or month > 12:
+        return False
+    if year < 1000 or year > 9999:
+        return False
+
+    days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    if is_leap_year(year):
+        days_in_month[1] = 29
+
+    if day < 1 or day > days_in_month[month - 1]:
+        return False
+
+    return True
+
+def convert_date_format(date, from_format, to_format):
+    """Convert date from one format to another"""
+    month_names = {
+        'January': 1, 'February': 2, 'March': 3, 'April': 4,
+        'May': 5, 'June': 6, 'July': 7, 'August': 8,
+        'September': 9, 'October': 10, 'November': 11, 'December': 12
+    }
+    month_names_rev = {v: k for k, v in month_names.items()}
+
+    # Parse based on from_format
+    try:
+        if from_format == "MM/DD/YYYY":
+            parts = date.split('/')
+            month, day, year = int(parts[0]), int(parts[1]), int(parts[2])
+        elif from_format == "YYYY-MM-DD":
+            parts = date.split('-')
+            year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
+        elif from_format == "DD.MM.YYYY":
+            parts = date.split('.')
+            day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
+        elif from_format == "Month DD, YYYY":
+            parts = date.replace(',', '').split()
+            month = month_names[parts[0]]
+            day, year = int(parts[1]), int(parts[2])
+        else:
+            return None
+    except:
+        return None
+
+    # Validate
+    if not is_valid_date(day, month, year):
+        return None
+
+    # Format to target
+    if to_format == "MM/DD/YYYY":
+        return f"{month:02d}/{day:02d}/{year}"
+    elif to_format == "YYYY-MM-DD":
+        return f"{year}-{month:02d}-{day:02d}"
+    elif to_format == "DD.MM.YYYY":
+        return f"{day:02d}.{month:02d}.{year}"
+    elif to_format == "Month DD, YYYY":
+        return f"{month_names_rev[month]} {day:02d}, {year}"
+    else:
+        return None
+
+# Tests
+print(convert_date_format("03/15/2024", "MM/DD/YYYY", "YYYY-MM-DD"))
+# "2024-03-15"
+
+print(convert_date_format("2024-02-29", "YYYY-MM-DD", "MM/DD/YYYY"))
+# "02/29/2024"
+
+print(convert_date_format("2023-02-29", "YYYY-MM-DD", "MM/DD/YYYY"))
+# None (invalid)
+\end{verbatim}
+\end{solutionbox}
+
+\begin{testbox}
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Leap year: Feb 29, 2024 (valid) vs Feb 29, 2023 (invalid)
+    \item Century leap year: Feb 29, 2000 (valid) vs Feb 29, 1900 (invalid)
+    \item Invalid month: 13/01/2024 $\rightarrow$ None
+    \item Invalid day: 02/31/2024 $\rightarrow$ None
+    \item Month boundaries: 30 vs 31 day months
+    \item Different delimiters: handle /, -, .
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_date_conversion():
+    # Valid conversions
+    assert convert_date_format("03/15/2024", "MM/DD/YYYY",
+                                "YYYY-MM-DD") == "2024-03-15"
+    assert convert_date_format("2024-02-29", "YYYY-MM-DD",
+                                "MM/DD/YYYY") == "02/29/2024"
+
+    # Invalid dates
+    assert convert_date_format("2023-02-29", "YYYY-MM-DD",
+                                "MM/DD/YYYY") is None
+    assert convert_date_format("13/01/2024", "MM/DD/YYYY",
+                                "YYYY-MM-DD") is None
+    assert convert_date_format("02/31/2024", "MM/DD/YYYY",
+                                "YYYY-MM-DD") is None
+
+    # Leap year edge cases
+    assert convert_date_format("2000-02-29", "YYYY-MM-DD",
+                                "MM/DD/YYYY") == "02/29/2000"
+    assert convert_date_format("1900-02-29", "YYYY-MM-DD",
+                                "MM/DD/YYYY") is None
+
+test_date_conversion()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Discuss using datetime library vs manual validation
+    \item Clarify supported formats upfront
+    \item Ask about timezone handling
+    \item Mention error handling strategies
+    \item For Faire: Test leap year and boundary cases thoroughly
+\end{itemize}
+\end{testbox}
+
+\textit{Source: Frontend/Full Stack interview (2024)}
 
 \subsubsection{Maze with Portals}
 
+\begin{problembox}
 \textbf{Problem Statement:}
 
 You are given a 2D grid maze where:
@@ -1006,7 +1672,9 @@ maze = [
 ]
 Output: -1 (impossible, wall blocks path)
 \end{verbatim}
+\end{problembox}
 
+\begin{solutionbox}
 \textbf{Solution Approach:}
 
 Use BFS (Breadth-First Search) with portal handling:
@@ -1088,7 +1756,9 @@ maze1 = [
 portals1 = {(1, 2): (3, 1)}
 print(shortest_path_with_portals(maze1, portals1))
 \end{verbatim}
+\end{solutionbox}
 
+\begin{testbox}
 \textbf{Edge Cases \& Testing:}
 \begin{itemize}
     \item Empty maze: return -1
@@ -1138,16 +1808,228 @@ test_maze_portals()
     \item Mention BFS is optimal for shortest path
     \item For Faire: Test portal edge cases thoroughly
 \end{itemize}
+\end{testbox}
 
 \textit{Source: Backend Engineer Phone Screen (2024)}
 
 \subsubsection{String Parsing Problem}
+
+\begin{problembox}
+\textbf{Problem Statement:}
+
+Parse a log file string containing structured data and extract specific information. Each log entry has the format:
+
+\texttt{[TIMESTAMP] LEVEL: message | key1=value1 key2=value2}
+
+Given a log string with multiple entries (separated by newlines), return a list of dictionaries where each dictionary contains:
 \begin{itemize}
-    \item \textbf{Description:} Parse a string with specific format rules and extract information
-    \item \textbf{Details:} Limited information available; involves pattern matching and string manipulation
-    \item \textbf{Position:} Backend Engineer
-    \item \textbf{Source:} Coding round (2024)
+    \item \texttt{timestamp}: The timestamp string
+    \item \texttt{level}: The log level (INFO, ERROR, WARNING, DEBUG)
+    \item \texttt{message}: The message text
+    \item \texttt{metadata}: Dictionary of key-value pairs
 \end{itemize}
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input:
+"[2024-01-15 10:30:00] INFO: User login | user_id=123 ip=192.168.1.1
+[2024-01-15 10:31:00] ERROR: Failed query | query_id=456 error_code=500"
+
+Output: [
+  {
+    'timestamp': '2024-01-15 10:30:00',
+    'level': 'INFO',
+    'message': 'User login',
+    'metadata': {'user_id': '123', 'ip': '192.168.1.1'}
+  },
+  {
+    'timestamp': '2024-01-15 10:31:00',
+    'level': 'ERROR',
+    'message': 'Failed query',
+    'metadata': {'query_id': '456', 'error_code': '500'}
+  }
+]
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item 1 $\leq$ number of log entries $\leq 1000$
+    \item Metadata may have 0 or more key-value pairs
+    \item Keys and values do not contain spaces or special characters
+\end{itemize}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Solution Approach:}
+
+String parsing with regex or manual parsing:
+\begin{itemize}
+    \item Split input by newlines to get individual log entries
+    \item For each entry, extract components using string operations or regex
+    \item Parse metadata by splitting on spaces and equals signs
+    \item Time: $O(N \times M)$ where N = entries, M = avg entry length
+    \item Space: $O(N \times M)$ for storing parsed results
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+import re
+
+def parse_logs(log_string):
+    """Parse log entries from string"""
+    if not log_string.strip():
+        return []
+
+    entries = []
+    lines = log_string.strip().split('\n')
+
+    for line in lines:
+        if not line.strip():
+            continue
+
+        # Extract timestamp
+        timestamp_match = re.search(r'\[(.*?)\]', line)
+        if not timestamp_match:
+            continue
+        timestamp = timestamp_match.group(1)
+
+        # Extract level
+        level_match = re.search(r'\]\s+(\w+):', line)
+        if not level_match:
+            continue
+        level = level_match.group(1)
+
+        # Extract message and metadata
+        parts = line.split(':', 1)
+        if len(parts) < 2:
+            continue
+
+        remaining = parts[1].strip()
+        if '|' in remaining:
+            message, metadata_str = remaining.split('|', 1)
+            message = message.strip()
+            metadata = {}
+
+            # Parse metadata
+            metadata_pairs = metadata_str.strip().split()
+            for pair in metadata_pairs:
+                if '=' in pair:
+                    key, value = pair.split('=', 1)
+                    metadata[key] = value
+        else:
+            message = remaining.strip()
+            metadata = {}
+
+        entries.append({
+            'timestamp': timestamp,
+            'level': level,
+            'message': message,
+            'metadata': metadata
+        })
+
+    return entries
+
+# Alternative: Manual parsing without regex
+def parse_logs_manual(log_string):
+    """Parse without regex"""
+    entries = []
+    for line in log_string.strip().split('\n'):
+        if not line.strip():
+            continue
+
+        # Find timestamp
+        start = line.find('[')
+        end = line.find(']')
+        if start == -1 or end == -1:
+            continue
+        timestamp = line[start+1:end]
+
+        # Find level
+        colon_idx = line.find(':', end)
+        if colon_idx == -1:
+            continue
+        level = line[end+1:colon_idx].strip()
+
+        # Find message and metadata
+        remaining = line[colon_idx+1:].strip()
+        if '|' in remaining:
+            message, meta_str = remaining.split('|', 1)
+            metadata = {}
+            for pair in meta_str.strip().split():
+                if '=' in pair:
+                    k, v = pair.split('=', 1)
+                    metadata[k] = v
+        else:
+            message = remaining
+            metadata = {}
+
+        entries.append({
+            'timestamp': timestamp,
+            'level': level,
+            'message': message.strip(),
+            'metadata': metadata
+        })
+
+    return entries
+
+# Test
+log = """[2024-01-15 10:30:00] INFO: User login | user_id=123 ip=192.168.1.1
+[2024-01-15 10:31:00] ERROR: Failed query | query_id=456"""
+
+result = parse_logs(log)
+print(result[0]['timestamp'])  # '2024-01-15 10:30:00'
+print(result[0]['metadata']['user_id'])  # '123'
+\end{verbatim}
+\end{solutionbox}
+
+\begin{testbox}
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Empty string: return []
+    \item Entry without metadata: only timestamp, level, message
+    \item Multiple metadata fields: parse all key-value pairs
+    \item Malformed entries: skip or handle gracefully
+    \item Special characters in message: preserve them
+    \item Empty metadata after pipe: handle empty dict
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_log_parsing():
+    # Test 1: Standard parsing
+    log1 = "[2024-01-15 10:30:00] INFO: Test | key=value"
+    result = parse_logs(log1)
+    assert result[0]['level'] == 'INFO'
+    assert result[0]['metadata']['key'] == 'value'
+
+    # Test 2: No metadata
+    log2 = "[2024-01-15 10:30:00] ERROR: Test message"
+    result = parse_logs(log2)
+    assert result[0]['message'] == 'Test message'
+    assert result[0]['metadata'] == {}
+
+    # Test 3: Multiple metadata
+    log3 = "[2024-01-15 10:30:00] DEBUG: Test | a=1 b=2 c=3"
+    result = parse_logs(log3)
+    assert len(result[0]['metadata']) == 3
+
+    # Test 4: Empty input
+    assert parse_logs("") == []
+
+test_log_parsing()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Discuss regex vs manual parsing trade-offs
+    \item Ask about error handling for malformed entries
+    \item Clarify if metadata keys/values can have special chars
+    \item Mention performance for large log files
+    \item For Faire: Test edge cases thoroughly
+\end{itemize}
+\end{testbox}
+
+\textit{Source: Backend Engineer coding round (2024)}
 
 \section{Online Assessment (OA) - CodeSignal}
 
@@ -1171,6 +2053,7 @@ test_maze_portals()
 
 \subsubsection{Array Divisibility Check}
 
+\begin{problembox}
 \textbf{Problem Statement:}
 
 Given an array of integers \texttt{arr} and an integer \texttt{k}, determine if you can partition the array into contiguous subarrays such that the sum of each subarray is divisible by \texttt{k}.
@@ -1207,7 +2090,9 @@ Explanation: Each element is divisible by 5:
     \item $-10^9 \leq$ arr[i] $\leq 10^9$
     \item $1 \leq k \leq 10^3$
 \end{itemize}
+\end{problembox}
 
+\begin{solutionbox}
 \textbf{Solution Approach:}
 
 Key insight: If total sum is not divisible by k, impossible. Otherwise, use prefix sum modulo tracking:
@@ -1266,7 +2151,9 @@ print(can_partition_divisible([3,1,2,6,4,2], 3))  # True
 print(can_partition_divisible([1,2,3], 5))        # False
 print(can_partition_divisible([5,10,15], 5))      # True
 \end{verbatim}
+\end{solutionbox}
 
+\begin{testbox}
 \textbf{Edge Cases \& Testing:}
 \begin{itemize}
     \item Single element divisible by k: \texttt{[6], k=3} $\rightarrow$ \texttt{true}
@@ -1300,11 +2187,13 @@ test_array_divisibility()
     \item Mention total sum check optimization
     \item For Faire: Test with negative numbers and zeros
 \end{itemize}
+\end{testbox}
 
 \textit{Source: CodeSignal OA (2024)}
 
 \subsubsection{Digit Frequency Counter}
 
+\begin{problembox}
 \textbf{Problem Statement:}
 
 Given two integers \texttt{L} and \texttt{R} representing a range $[L, R]$, count the frequency of each digit (0-9) that appears in all numbers within this range (inclusive).
@@ -1345,7 +2234,9 @@ Numbers: 1,2,3,4,5,6,7,8,9,10,11,12,13
 \begin{itemize}
     \item $0 \leq L \leq R \leq 10^9$
 \end{itemize}
+\end{problembox}
 
+\begin{solutionbox}
 \textbf{Solution Approach:}
 
 \textit{Method 1: Brute Force (Small ranges)}
@@ -1411,7 +2302,9 @@ print(count_digit_frequency(1, 13))
 print(count_digit_frequency(0, 10))
 # Should count 0,1,2,...,10
 \end{verbatim}
+\end{solutionbox}
 
+\begin{testbox}
 \textbf{Edge Cases \& Testing:}
 \begin{itemize}
     \item Single number: L = R = 5 $\rightarrow$ only digit 5 appears once
@@ -1454,21 +2347,215 @@ test_digit_frequency()
     \item Ask about memory constraints
     \item For Faire: Test boundary cases like 0, 999, 1000
 \end{itemize}
+\end{testbox}
 
 \textit{Source: CodeSignal OA (2024)}
 
 \subsubsection{Ads Assortment Problem}
+
+\begin{problembox}
+\textbf{Problem Statement:}
+
+You are given \texttt{n} advertisements, where each ad has a \texttt{value} (revenue generated) and a \texttt{cost} (budget required). You have a total budget of \texttt{B}.
+
+Select a subset of ads to maximize total value while staying within budget.
+
+Additionally, some ads may have \textbf{category constraints}: You can only select at most \texttt{k} ads from each category.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input:
+ads = [
+  {'value': 60, 'cost': 10, 'category': 'tech'},
+  {'value': 100, 'cost': 20, 'category': 'fashion'},
+  {'value': 120, 'cost': 30, 'category': 'tech'}
+]
+budget = 50
+category_limit = 2  # Max 2 ads per category
+
+Output: 220
+Explanation: Select ads 2 and 3 (fashion + tech)
+             Cost: 20 + 30 = 50, Value: 100 + 120 = 220
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input:
+ads = [
+  {'value': 60, 'cost': 10},
+  {'value': 100, 'cost': 20},
+  {'value': 120, 'cost': 30}
+]
+budget = 35
+
+Output: 160
+Explanation: Select ads 1 and 2.
+             Cost: 10 + 20 = 30, Value: 60 + 100 = 160
+\end{verbatim}
+
+\textbf{Constraints:}
 \begin{itemize}
-    \item \textbf{Description:} Optimize selection of advertisements to maximize value given constraints
-    \item \textbf{Details:}
-    \begin{itemize}
-        \item Multiple ads with associated values and constraints
-        \item Budget/capacity limitations
-        \item Need to maximize total value
-    \end{itemize}
-    \item \textbf{Similar to:} Knapsack-variant or greedy selection problem
-    \item \textbf{Source:} CodeSignal OA (2024)
+    \item $1 \leq n \leq 100$
+    \item $1 \leq$ cost[i], value[i] $\leq 1000$
+    \item $1 \leq B \leq 10000$
 \end{itemize}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Solution Approach:}
+
+\textit{Method 1: Dynamic Programming (0/1 Knapsack)}
+\begin{itemize}
+    \item Classic 0/1 knapsack problem
+    \item dp[i][j] = max value using first i ads with budget j
+    \item Time: $O(N \times B)$
+    \item Space: $O(N \times B)$, optimizable to $O(B)$
+\end{itemize}
+
+\textit{Method 2: Greedy (with category constraints)}
+\begin{itemize}
+    \item Sort ads by value/cost ratio (efficiency)
+    \item Greedily select highest efficiency ads
+    \item Track category counts
+    \item Time: $O(N \log N)$
+    \item Note: May not give optimal solution, but good approximation
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+def max_ad_value_knapsack(ads, budget):
+    """0/1 Knapsack DP solution"""
+    n = len(ads)
+    # dp[i][b] = max value using first i ads with budget b
+    dp = [[0] * (budget + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        cost = ads[i-1]['cost']
+        value = ads[i-1]['value']
+
+        for b in range(budget + 1):
+            # Don't take current ad
+            dp[i][b] = dp[i-1][b]
+
+            # Take current ad if possible
+            if b >= cost:
+                dp[i][b] = max(dp[i][b], dp[i-1][b-cost] + value)
+
+    return dp[n][budget]
+
+# Space-optimized version
+def max_ad_value_optimized(ads, budget):
+    """Space-optimized O(B) space"""
+    dp = [0] * (budget + 1)
+
+    for ad in ads:
+        cost = ad['cost']
+        value = ad['value']
+
+        # Traverse backwards to avoid using same item twice
+        for b in range(budget, cost - 1, -1):
+            dp[b] = max(dp[b], dp[b - cost] + value)
+
+    return dp[budget]
+
+# With category constraints
+def max_ad_value_with_categories(ads, budget, category_limit):
+    """DP with category constraints"""
+    from collections import defaultdict
+
+    # Group ads by category
+    categories = defaultdict(list)
+    for i, ad in enumerate(ads):
+        cat = ad.get('category', 'default')
+        categories[cat].append(i)
+
+    # Generate valid ad combinations respecting category limits
+    # For simplicity, use greedy approach
+    ads_sorted = sorted(enumerate(ads),
+                       key=lambda x: x[1]['value'] / x[1]['cost'],
+                       reverse=True)
+
+    category_count = defaultdict(int)
+    selected = []
+    total_cost = 0
+    total_value = 0
+
+    for idx, ad in ads_sorted:
+        cat = ad.get('category', 'default')
+        if (category_count[cat] < category_limit and
+            total_cost + ad['cost'] <= budget):
+            selected.append(idx)
+            category_count[cat] += 1
+            total_cost += ad['cost']
+            total_value += ad['value']
+
+    return total_value
+
+# Tests
+ads1 = [
+    {'value': 60, 'cost': 10},
+    {'value': 100, 'cost': 20},
+    {'value': 120, 'cost': 30}
+]
+print(max_ad_value_knapsack(ads1, 35))  # 160
+
+ads2 = [
+    {'value': 60, 'cost': 10, 'category': 'tech'},
+    {'value': 100, 'cost': 20, 'category': 'fashion'},
+    {'value': 120, 'cost': 30, 'category': 'tech'}
+]
+print(max_ad_value_with_categories(ads2, 50, 2))  # 220
+\end{verbatim}
+\end{solutionbox}
+
+\begin{testbox}
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Budget = 0: return 0
+    \item Single ad within budget: return its value
+    \item Single ad exceeds budget: return 0
+    \item All ads exceed budget: return 0
+    \item Category limit = 0: cannot select any ads
+    \item Multiple ads same efficiency: test tie-breaking
+    \item Exact budget match: select ads that sum to exactly B
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_ads_assortment():
+    # Test 1: Basic knapsack
+    ads = [{'value': 60, 'cost': 10}, {'value': 100, 'cost': 20}]
+    assert max_ad_value_knapsack(ads, 25) == 100
+
+    # Test 2: All ads fit
+    ads = [{'value': 10, 'cost': 5}, {'value': 20, 'cost': 10}]
+    assert max_ad_value_knapsack(ads, 15) == 30
+
+    # Test 3: No ads fit
+    ads = [{'value': 100, 'cost': 50}]
+    assert max_ad_value_knapsack(ads, 40) == 0
+
+    # Test 4: Empty ads
+    assert max_ad_value_knapsack([], 100) == 0
+
+    # Test 5: Zero budget
+    ads = [{'value': 100, 'cost': 10}]
+    assert max_ad_value_knapsack(ads, 0) == 0
+
+test_ads_assortment()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Recognize as 0/1 knapsack variant
+    \item Discuss trade-offs: DP vs greedy
+    \item Ask about fractional ads (0/1 vs fractional knapsack)
+    \item Clarify category constraint details
+    \item For Faire: Test boundary conditions
+\end{itemize}
+\end{testbox}
+
+\textit{Source: CodeSignal OA (2024)}
 
 \subsubsection{General OA Topics}
 \begin{itemize}
@@ -1520,18 +2607,280 @@ test_digit_frequency()
 \section{Frontend/Full Stack Specific}
 
 \subsection{Object Manipulation (Frontend Intern)}
+
+\begin{problembox}
+\textbf{Problem Statement:}
+
+You are building a product catalog system for an e-commerce platform. Implement a \texttt{ProductCatalog} class that stores products and supports various filtering operations.
+
+Each product has the following attributes:
 \begin{itemize}
-    \item \textbf{Description:} Write operations on product objects using Python or JavaScript
-    \item \textbf{Details:}
-    \begin{itemize}
-        \item Objects represent products with attributes (size, color, etc.)
-        \item Operations: search/filter products by attributes
-    \end{itemize}
-    \item \textbf{Duration:} 1 hour
-    \item \textbf{Position:} Frontend Intern
-    \item \textbf{Location:} Canada
-    \item \textbf{Source:} Intern interview (2023)
+    \item \texttt{id}: unique identifier (string)
+    \item \texttt{name}: product name (string)
+    \item \texttt{price}: product price (float)
+    \item \texttt{category}: product category (string)
+    \item \texttt{attributes}: dictionary of additional attributes (e.g., \{"size": "M", "color": "blue"\})
+    \item \texttt{in\_stock}: whether product is in stock (boolean)
 \end{itemize}
+
+Implement the following methods:
+
+\begin{enumerate}
+    \item \texttt{add\_product(product)}: Add a product to the catalog
+    \item \texttt{get\_product(product\_id)}: Retrieve a product by ID
+    \item \texttt{filter\_by\_category(category)}: Return all products in a category
+    \item \texttt{filter\_by\_price\_range(min\_price, max\_price)}: Return products in price range
+    \item \texttt{filter\_by\_attributes(attr\_dict)}: Return products matching all given attributes
+    \item \texttt{search\_by\_name(query)}: Return products with name containing query (case-insensitive)
+    \item \texttt{get\_available\_products()}: Return all in-stock products
+\end{enumerate}
+
+\textbf{Example:}
+\begin{verbatim}
+catalog = ProductCatalog()
+
+catalog.add_product({
+    'id': 'p1', 'name': 'Blue T-Shirt', 'price': 19.99,
+    'category': 'clothing', 'attributes': {'size': 'M', 'color': 'blue'},
+    'in_stock': True
+})
+
+catalog.add_product({
+    'id': 'p2', 'name': 'Red T-Shirt', 'price': 24.99,
+    'category': 'clothing', 'attributes': {'size': 'L', 'color': 'red'},
+    'in_stock': False
+})
+
+# Filter by category
+catalog.filter_by_category('clothing')  # Returns [p1, p2]
+
+# Filter by attributes
+catalog.filter_by_attributes({'color': 'blue'})  # Returns [p1]
+
+# Get available products
+catalog.get_available_products()  # Returns [p1]
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item $1 \leq$ number of products $\leq 10^4$
+    \item Product IDs are unique
+    \item $0 \leq$ price $\leq 10^6$
+    \item Attribute keys and values are non-empty strings
+\end{itemize}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Approach:}
+
+Use a dictionary to store products by ID for O(1) lookup. For filtering operations, iterate through products and check conditions. Can optimize with indexes for common queries.
+
+\textbf{Time Complexity:}
+\begin{itemize}
+    \item add\_product: $O(1)$
+    \item get\_product: $O(1)$
+    \item filter operations: $O(N)$ where N = number of products
+\end{itemize}
+
+\textbf{Space Complexity:} $O(N)$ for storing N products
+
+\textbf{Python Solution:}
+\begin{verbatim}
+class ProductCatalog:
+    def __init__(self):
+        self.products = {}  # id -> product mapping
+
+    def add_product(self, product):
+        """Add a product to the catalog"""
+        if 'id' not in product:
+            raise ValueError("Product must have an id")
+
+        product_id = product['id']
+        self.products[product_id] = product
+
+    def get_product(self, product_id):
+        """Get product by ID"""
+        return self.products.get(product_id, None)
+
+    def filter_by_category(self, category):
+        """Return all products in a category"""
+        result = []
+        for product in self.products.values():
+            if product.get('category') == category:
+                result.append(product)
+        return result
+
+    def filter_by_price_range(self, min_price, max_price):
+        """Return products within price range [min_price, max_price]"""
+        result = []
+        for product in self.products.values():
+            price = product.get('price', 0)
+            if min_price <= price <= max_price:
+                result.append(product)
+        return result
+
+    def filter_by_attributes(self, attr_dict):
+        """Return products matching all given attributes"""
+        result = []
+        for product in self.products.values():
+            product_attrs = product.get('attributes', {})
+
+            # Check if all attributes match
+            match = True
+            for key, value in attr_dict.items():
+                if product_attrs.get(key) != value:
+                    match = False
+                    break
+
+            if match:
+                result.append(product)
+
+        return result
+
+    def search_by_name(self, query):
+        """Return products with name containing query (case-insensitive)"""
+        result = []
+        query_lower = query.lower()
+
+        for product in self.products.values():
+            name = product.get('name', '').lower()
+            if query_lower in name:
+                result.append(product)
+
+        return result
+
+    def get_available_products(self):
+        """Return all in-stock products"""
+        result = []
+        for product in self.products.values():
+            if product.get('in_stock', False):
+                result.append(product)
+        return result
+
+    def remove_product(self, product_id):
+        """Remove a product from catalog"""
+        if product_id in self.products:
+            del self.products[product_id]
+            return True
+        return False
+
+    def update_stock(self, product_id, in_stock):
+        """Update stock status"""
+        if product_id in self.products:
+            self.products[product_id]['in_stock'] = in_stock
+            return True
+        return False
+
+
+# Optimized version with indexes
+class OptimizedProductCatalog:
+    def __init__(self):
+        self.products = {}
+        self.category_index = {}  # category -> [product_ids]
+        self.stock_index = {'in_stock': set(), 'out_of_stock': set()}
+
+    def add_product(self, product):
+        product_id = product['id']
+        self.products[product_id] = product
+
+        # Update category index
+        category = product.get('category')
+        if category:
+            if category not in self.category_index:
+                self.category_index[category] = set()
+            self.category_index[category].add(product_id)
+
+        # Update stock index
+        if product.get('in_stock', False):
+            self.stock_index['in_stock'].add(product_id)
+        else:
+            self.stock_index['out_of_stock'].add(product_id)
+
+    def filter_by_category(self, category):
+        """O(K) where K is products in category"""
+        product_ids = self.category_index.get(category, set())
+        return [self.products[pid] for pid in product_ids]
+
+    def get_available_products(self):
+        """O(K) where K is in-stock products"""
+        return [self.products[pid] for pid in self.stock_index['in_stock']]
+\end{verbatim}
+\end{solutionbox}
+
+\begin{testbox}
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Empty catalog: all filters return empty list
+    \item Product with missing attributes: handle gracefully
+    \item Duplicate product IDs: overwrite or reject
+    \item Case sensitivity in search: ensure case-insensitive
+    \item Price = 0 or negative: validate input
+    \item Empty search query: return all or none
+    \item Attribute value is None or empty string
+    \item Multiple filters combined (AND vs OR logic)
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_product_catalog():
+    catalog = ProductCatalog()
+
+    # Test 1: Add and retrieve
+    p1 = {'id': 'p1', 'name': 'Shirt', 'price': 20,
+          'category': 'clothing', 'in_stock': True,
+          'attributes': {'size': 'M', 'color': 'blue'}}
+    catalog.add_product(p1)
+    assert catalog.get_product('p1') == p1
+
+    # Test 2: Filter by category
+    p2 = {'id': 'p2', 'name': 'Pants', 'price': 30,
+          'category': 'clothing', 'in_stock': True,
+          'attributes': {}}
+    catalog.add_product(p2)
+    assert len(catalog.filter_by_category('clothing')) == 2
+
+    # Test 3: Price range filter
+    results = catalog.filter_by_price_range(15, 25)
+    assert len(results) == 1
+    assert results[0]['id'] == 'p1'
+
+    # Test 4: Attribute filter
+    results = catalog.filter_by_attributes({'color': 'blue'})
+    assert len(results) == 1
+    assert results[0]['id'] == 'p1'
+
+    # Test 5: Search by name
+    results = catalog.search_by_name('shirt')
+    assert len(results) == 1
+
+    # Test 6: Available products
+    p3 = {'id': 'p3', 'name': 'Hat', 'price': 15,
+          'category': 'accessories', 'in_stock': False,
+          'attributes': {}}
+    catalog.add_product(p3)
+    results = catalog.get_available_products()
+    assert len(results) == 2  # p1 and p2
+
+    # Test 7: Empty results
+    assert catalog.filter_by_category('shoes') == []
+    assert catalog.filter_by_attributes({'size': 'XL'}) == []
+
+    print("All tests passed!")
+
+test_product_catalog()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Ask about performance requirements (optimize with indexes?)
+    \item Clarify attribute matching logic (AND vs OR)
+    \item Discuss trade-offs: simple iteration vs indexed lookups
+    \item Consider using list comprehensions for cleaner code
+    \item Validate input data (missing fields, invalid types)
+\end{itemize}
+\end{testbox}
+
+\textit{Position: Frontend Intern | Duration: 1 hour | Source: Intern interview (2023)}
 
 \section{Behavioral Interview Questions}
 
