@@ -34,14 +34,14 @@ try:
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "solution_module",
-        "01_group_anagrams_solution.py"
+        "04_group_anagrams_solution.py"
     )
     solution_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(solution_module)
     group_anagrams = solution_module.group_anagrams
 except Exception as e:
     print(f"❌ Error importing solution: {e}")
-    print(f"   Make sure 01_group_anagrams_solution.py exists.")
+    print(f"   Make sure 04_group_anagrams_solution.py exists.")
     exit(1)
 
 

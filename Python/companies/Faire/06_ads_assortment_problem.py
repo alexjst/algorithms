@@ -45,7 +45,7 @@ try:
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "solution_module",
-        "13_ads_assortment_problem_solution.py"
+        "06_ads_assortment_problem_solution.py"
     )
     solution_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(solution_module)
@@ -53,7 +53,7 @@ try:
     max_ad_value_optimized = solution_module.max_ad_value_optimized
 except Exception as e:
     print(f"❌ Error importing solution: {e}")
-    print(f"   Make sure 13_ads_assortment_problem_solution.py exists.")
+    print(f"   Make sure 06_ads_assortment_problem_solution.py exists.")
     exit(1)
 
 def run_tests():

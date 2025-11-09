@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 2: Tag Validator (Custom {{ }} Syntax)
+Problem 1: Tag Validator (Custom {{ }} Syntax)
 
 🚨 ACTUAL FAIRE INTERVIEW PROBLEM - ASKED 5+ TIMES (2022-2025)
 
@@ -66,14 +66,14 @@ try:
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "solution_module",
-        "02_html_format_validation_solution.py"
+        "01_html_format_validation_solution.py"
     )
     solution_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(solution_module)
     is_valid_tags = solution_module.is_valid_tags
 except Exception as e:
     print(f"❌ Error importing solution: {e}")
-    print("   Make sure 02_html_format_validation_solution.py exists.")
+    print("   Make sure 01_html_format_validation_solution.py exists.")
     exit(1)
 
 

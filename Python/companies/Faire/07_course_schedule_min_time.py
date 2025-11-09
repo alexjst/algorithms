@@ -43,14 +43,14 @@ try:
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "solution_module",
-        "06_course_schedule_min_time_solution.py"
+        "07_course_schedule_min_time_solution.py"
     )
     solution_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(solution_module)
     min_time_to_complete_courses = solution_module.min_time_to_complete_courses
 except Exception as e:
     print(f"❌ Error importing solution: {e}")
-    print(f"   Make sure 06_course_schedule_min_time_solution.py exists.")
+    print(f"   Make sure 07_course_schedule_min_time_solution.py exists.")
     exit(1)
 
 def run_tests():

@@ -128,133 +128,6 @@ The information represents publicly available interview experiences and may not 
 
 \subsection{String and Array Problems}
 
-\subsubsection{Group Anagrams}
-
-\begin{problembox}
-\textbf{Problem Statement:}
-
-Given an array of strings \texttt{strs}, group the anagrams together. You can return the answer in any order.
-
-An anagram is a word or phrase formed by rearranging the letters of a different word or phrase, using all the original letters exactly once.
-
-\textbf{Example 1:}
-\begin{verbatim}
-Input: strs = ["eat","tea","tan","ate","nat","bat"]
-Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
-\end{verbatim}
-
-\textbf{Example 2:}
-\begin{verbatim}
-Input: strs = [""]
-Output: [[""]]
-\end{verbatim}
-
-\textbf{Example 3:}
-\begin{verbatim}
-Input: strs = ["a"]
-Output: [["a"]]
-\end{verbatim}
-
-\textbf{Constraints:}
-\begin{itemize}
-    \item $1 \leq$ strs.length $\leq 10^4$
-    \item $0 \leq$ strs[i].length $\leq 100$
-    \item strs[i] consists of lowercase English letters
-\end{itemize}
-\end{problembox}
-
-\textbf{Solution Approach:}
-
-\textit{Method 1: Sorting (Optimal)}
-\begin{itemize}
-    \item For each string, sort its characters to create a key
-    \item Use a hash map where key = sorted string, value = list of original strings
-    \item All anagrams will have the same sorted key
-    \item Time: $O(N \cdot K \log K)$ where N = number of strings, K = max length
-    \item Space: $O(N \cdot K)$
-\end{itemize}
-
-\textit{Method 2: Character Count (Alternative)}
-\begin{itemize}
-    \item Use character frequency as key (e.g., "a1b2c1" for "abc", "bac")
-    \item Time: $O(N \cdot K)$ - better than sorting
-    \item Space: $O(N \cdot K)$
-\end{itemize}
-
-\begin{solutionbox}
-\begin{verbatim}
-from collections import defaultdict
-
-def groupAnagrams(strs):
-    anagrams = defaultdict(list)
-
-    for s in strs:
-        # Use sorted string as key
-        key = ''.join(sorted(s))
-        anagrams[key].append(s)
-
-    return list(anagrams.values())
-
-# Alternative: Character count method
-def groupAnagrams_v2(strs):
-    anagrams = defaultdict(list)
-
-    for s in strs:
-        # Use character frequency tuple as key
-        count = [0] * 26
-        for c in s:
-            count[ord(c) - ord('a')] += 1
-        anagrams[tuple(count)].append(s)
-
-    return list(anagrams.values())
-\end{verbatim}
-\end{solutionbox}
-
-\begin{testbox}
-\textbf{Edge Cases:}
-\begin{itemize}
-    \item Empty string: \texttt{[""] $\rightarrow$ [[""]]}
-    \item Single character: \texttt{["a"] $\rightarrow$ [["a"]]}
-    \item All anagrams: \texttt{["abc", "bca", "cab"] $\rightarrow$ [["abc", "bca", "cab"]]}
-    \item No anagrams: \texttt{["a", "b", "c"] $\rightarrow$ [["a"], ["b"], ["c"]]}
-    \item Duplicate strings: \texttt{["a", "a"] $\rightarrow$ [["a", "a"]]}
-    \item Mixed lengths: \texttt{["a", "ab", "ba"] $\rightarrow$ [["a"], ["ab", "ba"]]}
-    \item Case sensitivity: Problem specifies lowercase only
-\end{itemize}
-
-\textbf{Test Cases:}
-\begin{verbatim}
-# Test 1: Standard case
-assert sorted([sorted(g) for g in groupAnagrams(
-    ["eat","tea","tan","ate","nat","bat"])]
-) == sorted([["bat"], ["nat","tan"], ["ate","eat","tea"]])
-
-# Test 2: Empty strings
-assert groupAnagrams([""]) == [[""]]
-
-# Test 3: Single element
-assert groupAnagrams(["a"]) == [["a"]]
-
-# Test 4: No anagrams
-result = groupAnagrams(["abc", "def", "ghi"])
-assert len(result) == 3
-
-# Test 5: All anagrams
-result = groupAnagrams(["abc", "bca", "cab"])
-assert len(result) == 1 and len(result[0]) == 3
-\end{verbatim}
-\end{testbox}
-
-\textbf{Interview Tips:}
-\begin{itemize}
-    \item Clarify if input can have empty strings or duplicates
-    \item Discuss both sorting and character count approaches
-    \item Mention trade-offs: sorting is simpler, char count is faster
-    \item For Faire: Emphasize thorough testing and edge cases
-\end{itemize}
-
-\textit{Source: Full Stack New Grad (2023-2025)}
-
 \subsubsection{HTML Format Validation (Tag Validator)}
 
 \begin{problembox}
@@ -990,6 +863,133 @@ test_funnel_analyzer()
 
 \textit{Note: Interviewer heavily focused on test cases and edge cases. Even after comprehensive testing, be prepared for more edge case questions. Source: Coding interview (2024-2025)}
 
+\subsubsection{Group Anagrams}
+
+\begin{problembox}
+\textbf{Problem Statement:}
+
+Given an array of strings \texttt{strs}, group the anagrams together. You can return the answer in any order.
+
+An anagram is a word or phrase formed by rearranging the letters of a different word or phrase, using all the original letters exactly once.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: strs = ["eat","tea","tan","ate","nat","bat"]
+Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: strs = [""]
+Output: [[""]]
+\end{verbatim}
+
+\textbf{Example 3:}
+\begin{verbatim}
+Input: strs = ["a"]
+Output: [["a"]]
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item $1 \leq$ strs.length $\leq 10^4$
+    \item $0 \leq$ strs[i].length $\leq 100$
+    \item strs[i] consists of lowercase English letters
+\end{itemize}
+\end{problembox}
+
+\textbf{Solution Approach:}
+
+\textit{Method 1: Sorting (Optimal)}
+\begin{itemize}
+    \item For each string, sort its characters to create a key
+    \item Use a hash map where key = sorted string, value = list of original strings
+    \item All anagrams will have the same sorted key
+    \item Time: $O(N \cdot K \log K)$ where N = number of strings, K = max length
+    \item Space: $O(N \cdot K)$
+\end{itemize}
+
+\textit{Method 2: Character Count (Alternative)}
+\begin{itemize}
+    \item Use character frequency as key (e.g., "a1b2c1" for "abc", "bac")
+    \item Time: $O(N \cdot K)$ - better than sorting
+    \item Space: $O(N \cdot K)$
+\end{itemize}
+
+\begin{solutionbox}
+\begin{verbatim}
+from collections import defaultdict
+
+def groupAnagrams(strs):
+    anagrams = defaultdict(list)
+
+    for s in strs:
+        # Use sorted string as key
+        key = ''.join(sorted(s))
+        anagrams[key].append(s)
+
+    return list(anagrams.values())
+
+# Alternative: Character count method
+def groupAnagrams_v2(strs):
+    anagrams = defaultdict(list)
+
+    for s in strs:
+        # Use character frequency tuple as key
+        count = [0] * 26
+        for c in s:
+            count[ord(c) - ord('a')] += 1
+        anagrams[tuple(count)].append(s)
+
+    return list(anagrams.values())
+\end{verbatim}
+\end{solutionbox}
+
+\begin{testbox}
+\textbf{Edge Cases:}
+\begin{itemize}
+    \item Empty string: \texttt{[""] $\rightarrow$ [[""]]}
+    \item Single character: \texttt{["a"] $\rightarrow$ [["a"]]}
+    \item All anagrams: \texttt{["abc", "bca", "cab"] $\rightarrow$ [["abc", "bca", "cab"]]}
+    \item No anagrams: \texttt{["a", "b", "c"] $\rightarrow$ [["a"], ["b"], ["c"]]}
+    \item Duplicate strings: \texttt{["a", "a"] $\rightarrow$ [["a", "a"]]}
+    \item Mixed lengths: \texttt{["a", "ab", "ba"] $\rightarrow$ [["a"], ["ab", "ba"]]}
+    \item Case sensitivity: Problem specifies lowercase only
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+# Test 1: Standard case
+assert sorted([sorted(g) for g in groupAnagrams(
+    ["eat","tea","tan","ate","nat","bat"])]
+) == sorted([["bat"], ["nat","tan"], ["ate","eat","tea"]])
+
+# Test 2: Empty strings
+assert groupAnagrams([""]) == [[""]]
+
+# Test 3: Single element
+assert groupAnagrams(["a"]) == [["a"]]
+
+# Test 4: No anagrams
+result = groupAnagrams(["abc", "def", "ghi"])
+assert len(result) == 3
+
+# Test 5: All anagrams
+result = groupAnagrams(["abc", "bca", "cab"])
+assert len(result) == 1 and len(result[0]) == 3
+\end{verbatim}
+\end{testbox}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify if input can have empty strings or duplicates
+    \item Discuss both sorting and character count approaches
+    \item Mention trade-offs: sorting is simpler, char count is faster
+    \item For Faire: Emphasize thorough testing and edge cases
+\end{itemize}
+
+\textit{Source: Full Stack New Grad (2023-2025)}
+
 \subsubsection{Number to Word Conversion}
 
 \begin{problembox}
@@ -1144,6 +1144,212 @@ test_number_words()
 \textit{Source: Backend/Full Stack - Canadian Office (2022)}
 
 \subsection{Graph and Path Problems}
+
+\subsubsection{Ads Assortment Problem}
+
+\begin{problembox}
+\textbf{Problem Statement:}
+
+You are given \texttt{n} advertisements, where each ad has a \texttt{value} (revenue generated) and a \texttt{cost} (budget required). You have a total budget of \texttt{B}.
+
+Select a subset of ads to maximize total value while staying within budget.
+
+Additionally, some ads may have \textbf{category constraints}: You can only select at most \texttt{k} ads from each category.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input:
+ads = [
+  {'value': 60, 'cost': 10, 'category': 'tech'},
+  {'value': 100, 'cost': 20, 'category': 'fashion'},
+  {'value': 120, 'cost': 30, 'category': 'tech'}
+]
+budget = 50
+category_limit = 2  # Max 2 ads per category
+
+Output: 220
+Explanation: Select ads 2 and 3 (fashion + tech)
+             Cost: 20 + 30 = 50, Value: 100 + 120 = 220
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input:
+ads = [
+  {'value': 60, 'cost': 10},
+  {'value': 100, 'cost': 20},
+  {'value': 120, 'cost': 30}
+]
+budget = 35
+
+Output: 160
+Explanation: Select ads 1 and 2.
+             Cost: 10 + 20 = 30, Value: 60 + 100 = 160
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item $1 \leq n \leq 100$
+    \item $1 \leq$ cost[i], value[i] $\leq 1000$
+    \item $1 \leq B \leq 10000$
+\end{itemize}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Solution Approach:}
+
+\textit{Method 1: Dynamic Programming (0/1 Knapsack)}
+\begin{itemize}
+    \item Classic 0/1 knapsack problem
+    \item dp[i][j] = max value using first i ads with budget j
+    \item Time: $O(N \times B)$
+    \item Space: $O(N \times B)$, optimizable to $O(B)$
+\end{itemize}
+
+\textit{Method 2: Greedy (with category constraints)}
+\begin{itemize}
+    \item Sort ads by value/cost ratio (efficiency)
+    \item Greedily select highest efficiency ads
+    \item Track category counts
+    \item Time: $O(N \log N)$
+    \item Note: May not give optimal solution, but good approximation
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+def max_ad_value_knapsack(ads, budget):
+    """0/1 Knapsack DP solution"""
+    n = len(ads)
+    # dp[i][b] = max value using first i ads with budget b
+    dp = [[0] * (budget + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        cost = ads[i-1]['cost']
+        value = ads[i-1]['value']
+
+        for b in range(budget + 1):
+            # Don't take current ad
+            dp[i][b] = dp[i-1][b]
+
+            # Take current ad if possible
+            if b >= cost:
+                dp[i][b] = max(dp[i][b], dp[i-1][b-cost] + value)
+
+    return dp[n][budget]
+
+# Space-optimized version
+def max_ad_value_optimized(ads, budget):
+    """Space-optimized O(B) space"""
+    dp = [0] * (budget + 1)
+
+    for ad in ads:
+        cost = ad['cost']
+        value = ad['value']
+
+        # Traverse backwards to avoid using same item twice
+        for b in range(budget, cost - 1, -1):
+            dp[b] = max(dp[b], dp[b - cost] + value)
+
+    return dp[budget]
+
+# With category constraints
+def max_ad_value_with_categories(ads, budget, category_limit):
+    """DP with category constraints"""
+    from collections import defaultdict
+
+    # Group ads by category
+    categories = defaultdict(list)
+    for i, ad in enumerate(ads):
+        cat = ad.get('category', 'default')
+        categories[cat].append(i)
+
+    # Generate valid ad combinations respecting category limits
+    # For simplicity, use greedy approach
+    ads_sorted = sorted(enumerate(ads),
+                       key=lambda x: x[1]['value'] / x[1]['cost'],
+                       reverse=True)
+
+    category_count = defaultdict(int)
+    selected = []
+    total_cost = 0
+    total_value = 0
+
+    for idx, ad in ads_sorted:
+        cat = ad.get('category', 'default')
+        if (category_count[cat] < category_limit and
+            total_cost + ad['cost'] <= budget):
+            selected.append(idx)
+            category_count[cat] += 1
+            total_cost += ad['cost']
+            total_value += ad['value']
+
+    return total_value
+
+# Tests
+ads1 = [
+    {'value': 60, 'cost': 10},
+    {'value': 100, 'cost': 20},
+    {'value': 120, 'cost': 30}
+]
+print(max_ad_value_knapsack(ads1, 35))  # 160
+
+ads2 = [
+    {'value': 60, 'cost': 10, 'category': 'tech'},
+    {'value': 100, 'cost': 20, 'category': 'fashion'},
+    {'value': 120, 'cost': 30, 'category': 'tech'}
+]
+print(max_ad_value_with_categories(ads2, 50, 2))  # 220
+\end{verbatim}
+\end{solutionbox}
+
+\begin{testbox}
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Budget = 0: return 0
+    \item Single ad within budget: return its value
+    \item Single ad exceeds budget: return 0
+    \item All ads exceed budget: return 0
+    \item Category limit = 0: cannot select any ads
+    \item Multiple ads same efficiency: test tie-breaking
+    \item Exact budget match: select ads that sum to exactly B
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_ads_assortment():
+    # Test 1: Basic knapsack
+    ads = [{'value': 60, 'cost': 10}, {'value': 100, 'cost': 20}]
+    assert max_ad_value_knapsack(ads, 25) == 100
+
+    # Test 2: All ads fit
+    ads = [{'value': 10, 'cost': 5}, {'value': 20, 'cost': 10}]
+    assert max_ad_value_knapsack(ads, 15) == 30
+
+    # Test 3: No ads fit
+    ads = [{'value': 100, 'cost': 50}]
+    assert max_ad_value_knapsack(ads, 40) == 0
+
+    # Test 4: Empty ads
+    assert max_ad_value_knapsack([], 100) == 0
+
+    # Test 5: Zero budget
+    ads = [{'value': 100, 'cost': 10}]
+    assert max_ad_value_knapsack(ads, 0) == 0
+
+test_ads_assortment()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Recognize as 0/1 knapsack variant
+    \item Discuss trade-offs: DP vs greedy
+    \item Ask about fractional ads (0/1 vs fractional knapsack)
+    \item Clarify category constraint details
+    \item For Faire: Test boundary conditions
+\end{itemize}
+\end{testbox}
+
+\textit{Source: CodeSignal OA (2024)}
 
 \subsubsection{Course Schedule with Minimum Time}
 
@@ -1540,212 +1746,6 @@ test_maze_portals()
 \end{testbox}
 
 \textit{Source: Backend Engineer Phone Screen (2024)}
-
-\subsubsection{Ads Assortment Problem}
-
-\begin{problembox}
-\textbf{Problem Statement:}
-
-You are given \texttt{n} advertisements, where each ad has a \texttt{value} (revenue generated) and a \texttt{cost} (budget required). You have a total budget of \texttt{B}.
-
-Select a subset of ads to maximize total value while staying within budget.
-
-Additionally, some ads may have \textbf{category constraints}: You can only select at most \texttt{k} ads from each category.
-
-\textbf{Example 1:}
-\begin{verbatim}
-Input:
-ads = [
-  {'value': 60, 'cost': 10, 'category': 'tech'},
-  {'value': 100, 'cost': 20, 'category': 'fashion'},
-  {'value': 120, 'cost': 30, 'category': 'tech'}
-]
-budget = 50
-category_limit = 2  # Max 2 ads per category
-
-Output: 220
-Explanation: Select ads 2 and 3 (fashion + tech)
-             Cost: 20 + 30 = 50, Value: 100 + 120 = 220
-\end{verbatim}
-
-\textbf{Example 2:}
-\begin{verbatim}
-Input:
-ads = [
-  {'value': 60, 'cost': 10},
-  {'value': 100, 'cost': 20},
-  {'value': 120, 'cost': 30}
-]
-budget = 35
-
-Output: 160
-Explanation: Select ads 1 and 2.
-             Cost: 10 + 20 = 30, Value: 60 + 100 = 160
-\end{verbatim}
-
-\textbf{Constraints:}
-\begin{itemize}
-    \item $1 \leq n \leq 100$
-    \item $1 \leq$ cost[i], value[i] $\leq 1000$
-    \item $1 \leq B \leq 10000$
-\end{itemize}
-\end{problembox}
-
-\begin{solutionbox}
-\textbf{Solution Approach:}
-
-\textit{Method 1: Dynamic Programming (0/1 Knapsack)}
-\begin{itemize}
-    \item Classic 0/1 knapsack problem
-    \item dp[i][j] = max value using first i ads with budget j
-    \item Time: $O(N \times B)$
-    \item Space: $O(N \times B)$, optimizable to $O(B)$
-\end{itemize}
-
-\textit{Method 2: Greedy (with category constraints)}
-\begin{itemize}
-    \item Sort ads by value/cost ratio (efficiency)
-    \item Greedily select highest efficiency ads
-    \item Track category counts
-    \item Time: $O(N \log N)$
-    \item Note: May not give optimal solution, but good approximation
-\end{itemize}
-
-\textbf{Python Solution:}
-\begin{verbatim}
-def max_ad_value_knapsack(ads, budget):
-    """0/1 Knapsack DP solution"""
-    n = len(ads)
-    # dp[i][b] = max value using first i ads with budget b
-    dp = [[0] * (budget + 1) for _ in range(n + 1)]
-
-    for i in range(1, n + 1):
-        cost = ads[i-1]['cost']
-        value = ads[i-1]['value']
-
-        for b in range(budget + 1):
-            # Don't take current ad
-            dp[i][b] = dp[i-1][b]
-
-            # Take current ad if possible
-            if b >= cost:
-                dp[i][b] = max(dp[i][b], dp[i-1][b-cost] + value)
-
-    return dp[n][budget]
-
-# Space-optimized version
-def max_ad_value_optimized(ads, budget):
-    """Space-optimized O(B) space"""
-    dp = [0] * (budget + 1)
-
-    for ad in ads:
-        cost = ad['cost']
-        value = ad['value']
-
-        # Traverse backwards to avoid using same item twice
-        for b in range(budget, cost - 1, -1):
-            dp[b] = max(dp[b], dp[b - cost] + value)
-
-    return dp[budget]
-
-# With category constraints
-def max_ad_value_with_categories(ads, budget, category_limit):
-    """DP with category constraints"""
-    from collections import defaultdict
-
-    # Group ads by category
-    categories = defaultdict(list)
-    for i, ad in enumerate(ads):
-        cat = ad.get('category', 'default')
-        categories[cat].append(i)
-
-    # Generate valid ad combinations respecting category limits
-    # For simplicity, use greedy approach
-    ads_sorted = sorted(enumerate(ads),
-                       key=lambda x: x[1]['value'] / x[1]['cost'],
-                       reverse=True)
-
-    category_count = defaultdict(int)
-    selected = []
-    total_cost = 0
-    total_value = 0
-
-    for idx, ad in ads_sorted:
-        cat = ad.get('category', 'default')
-        if (category_count[cat] < category_limit and
-            total_cost + ad['cost'] <= budget):
-            selected.append(idx)
-            category_count[cat] += 1
-            total_cost += ad['cost']
-            total_value += ad['value']
-
-    return total_value
-
-# Tests
-ads1 = [
-    {'value': 60, 'cost': 10},
-    {'value': 100, 'cost': 20},
-    {'value': 120, 'cost': 30}
-]
-print(max_ad_value_knapsack(ads1, 35))  # 160
-
-ads2 = [
-    {'value': 60, 'cost': 10, 'category': 'tech'},
-    {'value': 100, 'cost': 20, 'category': 'fashion'},
-    {'value': 120, 'cost': 30, 'category': 'tech'}
-]
-print(max_ad_value_with_categories(ads2, 50, 2))  # 220
-\end{verbatim}
-\end{solutionbox}
-
-\begin{testbox}
-\textbf{Edge Cases \& Testing:}
-\begin{itemize}
-    \item Budget = 0: return 0
-    \item Single ad within budget: return its value
-    \item Single ad exceeds budget: return 0
-    \item All ads exceed budget: return 0
-    \item Category limit = 0: cannot select any ads
-    \item Multiple ads same efficiency: test tie-breaking
-    \item Exact budget match: select ads that sum to exactly B
-\end{itemize}
-
-\textbf{Test Cases:}
-\begin{verbatim}
-def test_ads_assortment():
-    # Test 1: Basic knapsack
-    ads = [{'value': 60, 'cost': 10}, {'value': 100, 'cost': 20}]
-    assert max_ad_value_knapsack(ads, 25) == 100
-
-    # Test 2: All ads fit
-    ads = [{'value': 10, 'cost': 5}, {'value': 20, 'cost': 10}]
-    assert max_ad_value_knapsack(ads, 15) == 30
-
-    # Test 3: No ads fit
-    ads = [{'value': 100, 'cost': 50}]
-    assert max_ad_value_knapsack(ads, 40) == 0
-
-    # Test 4: Empty ads
-    assert max_ad_value_knapsack([], 100) == 0
-
-    # Test 5: Zero budget
-    ads = [{'value': 100, 'cost': 10}]
-    assert max_ad_value_knapsack(ads, 0) == 0
-
-test_ads_assortment()
-\end{verbatim}
-
-\textbf{Interview Tips:}
-\begin{itemize}
-    \item Recognize as 0/1 knapsack variant
-    \item Discuss trade-offs: DP vs greedy
-    \item Ask about fractional ads (0/1 vs fractional knapsack)
-    \item Clarify category constraint details
-    \item For Faire: Test boundary conditions
-\end{itemize}
-\end{testbox}
-
-\textit{Source: CodeSignal OA (2024)}
 
 \subsubsection{General OA Topics}
 \begin{itemize}

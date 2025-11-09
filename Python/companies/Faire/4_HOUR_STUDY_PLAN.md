@@ -6,18 +6,49 @@
 
 ---
 
-## ⏰ Hour 1: Haiku Finder (MOST IMPORTANT - Asked 5+ times)
+## ⏰ Hour 1: HTML/Tag Validator (MOST IMPORTANT - Asked 5+ times)
+
+**Goal:** Implement stack-based validation with correct `{{ }}` syntax
+
+### Tasks:
+- [ ] **0:00-0:15** Read `EXPLAIN_TOP_PROBLEMS.md` - HTML Validator section
+- [ ] **0:15-0:50** Implement solution in `01_html_format_validation_solution.py`
+  - Use stack to track opening tags
+  - Look for `{{` and `}}` (not single `{`)
+  - Check for `#` (opening) or `/` (closing) prefix
+  - Single braces = normal text (ignore them!)
+  - Validate LIFO order
+- [ ] **0:50-1:00** Run tests and debug edge cases
+  - Incomplete tags (missing `}}`)
+  - Single braces as text
+  - Wrong closing order
+  - Only opening or only closing tags
+
+### Key Takeaways:
+```python
+# The pattern you MUST know:
+1. Scan for "{{" (not "<")
+2. Find matching "}}"
+3. Extract: s[i+2:j].strip()
+4. If starts with "#": stack.append(tag_name)
+5. If starts with "/": check stack[-1] == tag_name
+6. Single "{" or "}" → skip (normal text!)
+```
+
+---
+
+## ⏰ Hour 2: Haiku Finder (MOST IMPORTANT - Asked 5+ times)
 
 **Goal:** Understand and implement the O(n) prefix sum solution
 
 ### Tasks:
-- [ ] **0:00-0:15** Read `EXPLAIN_TOP_PROBLEMS.md` - Haiku section
-- [ ] **0:15-0:45** Implement solution in `03_haiku_finder_solution.py`
+- [ ] **1:00-1:15** Read `EXPLAIN_TOP_PROBLEMS.md` - Haiku section
+- [ ] **1:15-1:50** Implement solution in `02_haiku_finder_solution.py`
   - Build prefix sum array
   - Create hash map for O(1) lookup
   - Handle punctuation (strip before lookup, preserve in output)
   - Handle case (lowercase for lookup, preserve original)
-- [ ] **0:45-1:00** Run tests and debug edge cases
+- [ ] **1:50-2:00** Run tests and debug edge cases
   - Empty string
   - No valid haiku found
   - Words missing from dictionary
@@ -35,50 +66,7 @@
 
 ---
 
-## ⏰ Hour 2: HTML/Tag Validator (MOST IMPORTANT - Asked 5+ times)
-
-**Goal:** Implement stack-based validation with correct `{{ }}` syntax
-
-### Tasks:
-- [ ] **1:00-1:15** Read `EXPLAIN_TOP_PROBLEMS.md` - HTML Validator section
-- [ ] **1:15-1:30** Understand the difference from your current version:
-  - **OLD:** `<tag>` and `</tag>`
-  - **NEW:** `{{ #tag }}` and `{{ /tag }}`
-  - **Critical:** Single `{` is normal text!
-- [ ] **1:30-1:50** Implement solution in `02_html_format_validation_solution.py`
-  - Look for `{{` (not just `<`)
-  - Find matching `}}`
-  - Extract tag between `{{ }}`
-  - If starts with `#`: push to stack
-  - If starts with `/`: check match and pop
-  - Single `{` or `}`: ignore (normal text)
-- [ ] **1:50-2:00** Run tests and memorize edge cases
-  - Incomplete tags: `{{ #abc` (no closing `}}`)
-  - Single braces: `{ text }` (valid!)
-  - Wrong order: Must follow LIFO
-  - Missing closing tags
-
-### Key Takeaways:
-```python
-# The pattern you MUST know:
-1. Scan for "{{" (not "<")
-2. Find matching "}}"
-3. Extract: s[i+2:j].strip()
-4. If starts with "#": stack.append(tag_name)
-5. If starts with "/": check stack[-1] == tag_name
-6. Single "{" or "}" → skip (normal text!)
-```
-
-**Practice saying out loud:** "When interviewer asks 'what other edge cases?'"
-- "Incomplete tags without closing }}"
-- "Single braces treated as text"
-- "Nested tags with same name"
-- "Only opening tags or only closing tags"
-- "Wrong closing order - must be LIFO"
-
----
-
-## ⏰ Hour 3: Anagrams + Funnel (Round out top problems)
+## ⏰ Hour 3: Funnel + Anagrams (Round out top problems)
 
 **Goal:** Quick review of remaining high-priority problems
 

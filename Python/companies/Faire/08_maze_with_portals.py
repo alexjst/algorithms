@@ -44,14 +44,14 @@ try:
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "solution_module",
-        "09_maze_with_portals_solution.py"
+        "08_maze_with_portals_solution.py"
     )
     solution_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(solution_module)
     shortest_path_with_portals = solution_module.shortest_path_with_portals
 except Exception as e:
     print(f"❌ Error importing solution: {e}")
-    print(f"   Make sure 09_maze_with_portals_solution.py exists.")
+    print(f"   Make sure 08_maze_with_portals_solution.py exists.")
     exit(1)
 
 def run_tests():

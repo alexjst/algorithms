@@ -62,14 +62,14 @@ try:
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "solution_module",
-        "03_haiku_finder_solution.py"
+        "02_haiku_finder_solution.py"
     )
     solution_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(solution_module)
     find_haiku = solution_module.find_haiku
 except Exception as e:
     print(f"❌ Error importing solution: {e}")
-    print(f"   Make sure 03_haiku_finder_solution.py exists.")
+    print(f"   Make sure 02_haiku_finder_solution.py exists.")
     exit(1)
 
 def run_tests():
