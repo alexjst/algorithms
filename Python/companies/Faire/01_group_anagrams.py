@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 1: Group Anagrams
+Problem 1: Group Anagrams - TEST SCAFFOLDING (DO NOT EDIT)
 
 Given an array of strings, group anagrams together.
 
@@ -20,23 +20,33 @@ Constraints:
     - 1 <= strs.length <= 10^4
     - 0 <= strs[i].length <= 100
     - strs[i] consists of lowercase English letters
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 01_group_anagrams_solution.py
+- Run this file to test: python 01_group_anagrams.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List
-
-
-def group_anagrams(strs: List[str]) -> List[List[str]]:
-    """
-    Group anagrams together from a list of strings.
-
-    Args:
-        strs: List of strings to group
-
-    Returns:
-        List of lists, where each inner list contains anagrams
-    """
-    # TODO: Implement your solution here
-    return []  # Placeholder - replace with your solution
+# Import the solution
+try:
+    from solution_01_group_anagrams import group_anagrams
+except ImportError:
+    print("⚠️  Could not import solution. Make sure 01_group_anagrams_solution.py exists.")
+    print("   Trying alternative import...")
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "solution_module",
+            "01_group_anagrams_solution.py"
+        )
+        solution_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(solution_module)
+        group_anagrams = solution_module.group_anagrams
+    except Exception as e:
+        print(f"❌ Error importing solution: {e}")
+        exit(1)
 
 
 def run_tests():

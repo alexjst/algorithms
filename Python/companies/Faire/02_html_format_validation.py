@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 2: HTML Format Validation
+Problem 2: HTML Format Validation - TEST SCAFFOLDING (DO NOT EDIT)
 
 Validate if an HTML string has properly matched and nested tags.
 
@@ -27,23 +27,29 @@ Constraints:
     - 1 <= html.length <= 10^4
     - Valid tag names contain only lowercase letters
     - No attributes in tags (simplified version)
+
+================================================================================
+INSTRUCTIONS:
+- Implement your solution in: 02_html_format_validation_solution.py
+- Run this file to test: python 02_html_format_validation.py
+- To reset and practice again: just delete/reset the solution file
+================================================================================
 """
 
-from typing import List
-
-
-def is_valid_html(html: str) -> bool:
-    """
-    Validate if HTML string has properly matched and nested tags.
-
-    Args:
-        html: HTML string to validate
-
-    Returns:
-        True if valid, False otherwise
-    """
-    # TODO: Implement your solution here
-    return False  # Placeholder - replace with your solution
+# Import the solution
+try:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "solution_module",
+        "02_html_format_validation_solution.py"
+    )
+    solution_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(solution_module)
+    is_valid_html = solution_module.is_valid_html
+except Exception as e:
+    print(f"❌ Error importing solution: {e}")
+    print("   Make sure 02_html_format_validation_solution.py exists.")
+    exit(1)
 
 
 def run_tests():
@@ -87,9 +93,6 @@ def run_tests():
 def run_custom_tests():
     """Add your own custom test cases here."""
     print("\nRunning custom tests...")
-
-    # Add your custom test cases here
-
     print("No custom tests defined yet.")
 
 
