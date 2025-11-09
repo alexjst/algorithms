@@ -267,3 +267,6 @@ paket-files/
 
 # Latex
 .texpadtmp/
+
+# MCP
+.playwright-mcp/

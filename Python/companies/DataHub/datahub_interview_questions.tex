@@ -1,0 +1,1132 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+
+% Python code styling
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Python
+}
+
+\lstdefinestyle{javastyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Java
+}
+
+\lstset{style=pythonstyle}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{DataHub Interview Prep}
+\lhead{Backend Engineer}
+\rfoot{Page \thepage}
+
+\title{\textbf{DataHub (Acryl Data) Backend Engineer\\Interview Preparation Guide}}
+\author{Comprehensive Solutions \& Strategies}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{About DataHub}
+
+DataHub is the leading open-source metadata platform that helps organizations discover, understand, and trust their data. Founded by LinkedIn engineers and now commercialized by Acryl Data (founded 2020, \~{}50 employees), DataHub provides a comprehensive solution for data cataloging, lineage tracking, and data governance.
+
+\subsection{Interview Process}
+
+Based on typical data infrastructure companies:
+
+\begin{enumerate}
+    \item \textbf{Recruiter Screen} - Background and interest (30 min)
+    \item \textbf{Technical Phone Screen} - LeetCode medium + data structures (45-60 min)
+    \item \textbf{Take-Home Assignment} - Metadata API or pipeline (2-4 hours)
+    \item \textbf{Onsite Interviews} (4-5 hours):
+    \begin{itemize}
+        \item System Design - Metadata catalog design
+        \item Coding - Graphs, trees, search algorithms
+        \item Technical Deep Dive - Past projects
+        \item Cultural Fit - Team collaboration
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Tech Stack}
+
+DataHub's architecture:
+\begin{itemize}
+    \item \textbf{Backend}: Java (Spring Boot), Python
+    \item \textbf{Storage}: MySQL/PostgreSQL, Elasticsearch
+    \item \textbf{Graph}: Neo4j for lineage
+    \item \textbf{Streaming}: Apache Kafka
+    \item \textbf{Frontend}: React, TypeScript
+    \item \textbf{Infrastructure}: Kubernetes, Docker
+\end{itemize}
+
+\subsection{Key Skills to Demonstrate}
+
+\begin{itemize}
+    \item Strong graph algorithm knowledge (critical!)
+    \item Distributed systems and scalability
+    \item Data engineering fundamentals
+    \item Search and indexing expertise
+    \item System design thinking
+\end{itemize}
+
+\newpage
+
+\section{Problem 1: Metadata Lineage Graph}
+
+\subsection{Problem Statement}
+
+DataHub tracks data lineage to understand dependencies between datasets. Implement a system to find all downstream dependencies of a given dataset and detect circular dependencies.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Build a directed graph of dataset dependencies
+    \item Find all datasets that depend on a given dataset (downstream)
+    \item Detect circular dependencies
+    \item Return dependencies in traversal order
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}
+lineage = MetadataLineage()
+lineage.add_dependency("table_c", "table_a")  # c depends on a
+lineage.add_dependency("table_c", "table_b")  # c depends on b
+lineage.add_dependency("table_d", "table_c")  # d depends on c
+
+lineage.get_downstream("table_a")  # Returns ["table_c", "table_d"]
+lineage.has_circular_dependency()  # Returns False
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}
+from typing import List, Dict, Set
+from collections import defaultdict, deque
+
+class MetadataLineage:
+    def __init__(self):
+        self.graph = defaultdict(list)  # source -> [targets that depend on it]
+        self.all_nodes = set()
+
+    def add_dependency(self, target: str, source: str) -> None:
+        self.graph[source].append(target)
+        self.all_nodes.add(source)
+        self.all_nodes.add(target)
+
+    def get_downstream(self, dataset: str) -> List[str]:
+        visited = set()
+        queue = deque([dataset])
+
+        while queue:
+            node = queue.popleft()
+            if node in visited:
+                continue
+            visited.add(node)
+
+            for neighbor in self.graph[node]:
+                if neighbor not in visited:
+                    queue.append(neighbor)
+
+        visited.discard(dataset)  # Don't include the source dataset
+        return list(visited)
+
+    def has_circular_dependency(self) -> bool:
+        visited = set()
+        rec_stack = set()
+
+        def dfs(node):
+            visited.add(node)
+            rec_stack.add(node)
+
+            for neighbor in self.graph[node]:
+                if neighbor not in visited:
+                    if dfs(neighbor):
+                        return True
+                elif neighbor in rec_stack:
+                    return True
+
+            rec_stack.remove(node)
+            return False
+
+        for node in self.all_nodes:
+            if node not in visited:
+                if dfs(node):
+                    return True
+
+        return False
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(V + E) for both operations where V is vertices (datasets), E is edges (dependencies)
+    \item \textbf{Space Complexity}: O(V + E) for graph storage plus O(V) for traversal
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item BFS efficiently finds all reachable nodes (downstream dependencies)
+    \item DFS with recursion stack detects cycles
+    \item Directed graph naturally models data lineage (A produces B)
+    \item Production systems need to handle millions of nodes and edges
+\end{enumerate}
+
+\subsection{Production Enhancements}
+
+\begin{itemize}
+    \item \textbf{Graph Database}: Use Neo4j for efficient graph queries at scale
+    \item \textbf{Caching}: Cache frequently accessed lineage paths
+    \item \textbf{Incremental Updates}: Only recompute affected subgraphs
+    \item \textbf{Column-Level Lineage}: Track individual column dependencies
+    \item \textbf{Visualization}: Generate visual lineage graphs for users
+\end{itemize}
+
+\newpage
+
+\section{Problem 2: Metadata Search Index}
+
+\subsection{Problem Statement}
+
+DataHub needs efficient search across dataset metadata. Implement a search index that supports prefix matching and ranks results by relevance.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Index datasets with name, description, and tags
+    \item Support prefix search (e.g., "user" matches "user\_events")
+    \item Rank results by relevance (exact match $>$ prefix match)
+    \item Return top K results
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}
+index = MetadataSearchIndex()
+index.add_dataset("user_events", "User activity events", ["analytics"])
+index.add_dataset("user_profile", "User profile data", ["users"])
+index.add_dataset("product_sales", "Sales transactions", ["sales"])
+
+index.search("user", k=2)  # Returns ["user_events", "user_profile"]
+index.search("sal", k=1)   # Returns ["product_sales"]
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}
+from typing import List, Dict
+
+class MetadataSearchIndex:
+    def __init__(self):
+        self.datasets = {}  # name -> {description, tags}
+
+    def add_dataset(self, name: str, description: str, tags: List[str]) -> None:
+        self.datasets[name] = {
+            "description": description,
+            "tags": tags
+        }
+
+    def search(self, query: str, k: int) -> List[str]:
+        query_lower = query.lower()
+        scores = []
+
+        for name, metadata in self.datasets.items():
+            score = 0
+            name_lower = name.lower()
+
+            # Exact name match - highest score
+            if name_lower == query_lower:
+                score += 100
+
+            # Name starts with query - high score
+            elif name_lower.startswith(query_lower):
+                score += 50
+
+            # Query in name - medium score
+            elif query_lower in name_lower:
+                score += 25
+
+            # Check tags
+            for tag in metadata["tags"]:
+                tag_lower = tag.lower()
+                if tag_lower == query_lower:
+                    score += 30
+                elif query_lower in tag_lower:
+                    score += 10
+
+            # Check description
+            desc_lower = metadata["description"].lower()
+            if query_lower in desc_lower:
+                score += 5
+
+            if score > 0:
+                scores.append((score, name))
+
+        # Sort by score descending, then alphabetically
+        scores.sort(key=lambda x: (-x[0], x[1]))
+
+        # Return top k results
+        return [name for score, name in scores[:k]]
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(N × M) where N is datasets, M is avg metadata length; O(N log N) for sorting
+    \item \textbf{Space Complexity}: O(N × M) for storing all metadata
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item Simple relevance scoring works for small datasets
+    \item Exact matches should rank higher than partial matches
+    \item Production systems use Elasticsearch or similar
+    \item Consider TF-IDF or BM25 for better ranking
+\end{enumerate}
+
+\subsection{Production Enhancements}
+
+\begin{itemize}
+    \item \textbf{Elasticsearch}: Full-text search with analyzers and tokenizers
+    \item \textbf{Fuzzy Matching}: Handle typos with edit distance
+    \item \textbf{Popularity Boost}: Factor in usage statistics
+    \item \textbf{Personalization}: Rank based on user's team or domain
+    \item \textbf{Faceted Search}: Filter by type, owner, freshness
+\end{itemize}
+
+\newpage
+
+\section{Problem 3: Schema Evolution Tracking}
+
+\subsection{Problem Statement}
+
+DataHub tracks schema changes over time to ensure compatibility. Implement a system to detect changes and check compatibility between schema versions.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Store schema versions with metadata
+    \item Detect schema changes (added/removed/modified fields)
+    \item Check backward compatibility (new schema reads old data)
+    \item Check forward compatibility (old schema reads new data)
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}
+tracker = SchemaEvolution()
+
+schema_v1 = {"user_id": "int", "name": "string", "email": "string"}
+schema_v2 = {"user_id": "int", "name": "string", "email": "string",
+             "created_at": "timestamp"}
+
+tracker.add_schema("users", schema_v1, version=1)
+tracker.add_schema("users", schema_v2, version=2)
+
+changes = tracker.get_changes("users", version_from=1, version_to=2)
+# Returns: {"added": ["created_at"], "removed": [], "modified": []}
+
+tracker.is_backward_compatible("users", 2, 1)  # Returns True
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}
+from typing import Dict, List
+
+class SchemaEvolution:
+    def __init__(self):
+        self.schemas = {}  # (table_name, version) -> schema dict
+
+    def add_schema(self, table_name: str, schema: Dict[str, str], version: int) -> None:
+        self.schemas[(table_name, version)] = schema.copy()
+
+    def get_changes(self, table_name: str, version_from: int, version_to: int) -> Dict[str, List[str]]:
+        schema_old = self.schemas.get((table_name, version_from), {})
+        schema_new = self.schemas.get((table_name, version_to), {})
+
+        added = []
+        removed = []
+        modified = []
+
+        # Find added and modified fields
+        for field, new_type in schema_new.items():
+            if field not in schema_old:
+                added.append(field)
+            elif schema_old[field] != new_type:
+                modified.append(field)
+
+        # Find removed fields
+        for field in schema_old:
+            if field not in schema_new:
+                removed.append(field)
+
+        return {
+            "added": added,
+            "removed": removed,
+            "modified": modified
+        }
+
+    def is_backward_compatible(self, table_name: str, new_version: int, old_version: int) -> bool:
+        changes = self.get_changes(table_name, old_version, new_version)
+
+        # Backward compatible if:
+        # 1. No fields removed (new schema has all old fields)
+        # 2. No field types changed
+        if changes["removed"] or changes["modified"]:
+            return False
+
+        return True
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(n) where n is number of fields in schemas
+    \item \textbf{Space Complexity}: O(v × n) where v is versions, n is fields per version
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item Backward compatibility: new code reads old data (adding optional fields OK)
+    \item Forward compatibility: old code reads new data (more restrictive)
+    \item Schema evolution is critical for zero-downtime deployments
+    \item Track not just schema but also statistics and sample values
+\end{enumerate}
+
+\subsection{Schema Registry Integration}
+
+In production DataHub:
+\begin{itemize}
+    \item \textbf{Avro/Protobuf}: Integration with schema registries
+    \item \textbf{Compatibility Modes}: BACKWARD, FORWARD, FULL, NONE
+    \item \textbf{Version History}: Complete audit trail of all changes
+    \item \textbf{Impact Analysis}: Show which pipelines affected by schema change
+    \item \textbf{Alerts}: Notify owners of breaking changes
+\end{itemize}
+
+\newpage
+
+\section{Problem 4: Data Quality Monitoring}
+
+\subsection{Problem Statement}
+
+DataHub monitors data quality metrics to detect anomalies. Implement a system that tracks metrics over time and detects significant deviations using statistical methods.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Track metrics over time (row count, null percentage, distinct values)
+    \item Calculate rolling statistics (mean, standard deviation)
+    \item Detect anomalies using Z-score (values beyond threshold)
+    \item Return alerts for anomalous metrics
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}
+monitor = DataQualityMonitor(window_size=5, threshold=2.0)
+
+# Normal metrics
+monitor.add_metric("table1", "row_count", 1000)
+monitor.add_metric("table1", "row_count", 1050)
+monitor.add_metric("table1", "row_count", 980)
+monitor.add_metric("table1", "row_count", 1020)
+monitor.add_metric("table1", "row_count", 1010)
+
+# Anomalous metric
+result = monitor.add_metric("table1", "row_count", 5000)
+# Returns: {"is_anomaly": True, "z_score": 3.5, ...}
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}
+from typing import Dict
+from collections import deque
+import statistics
+
+class DataQualityMonitor:
+    def __init__(self, window_size: int, threshold: float):
+        self.window_size = window_size
+        self.threshold = threshold
+        self.metrics = {}  # (table, metric_name) -> deque of values
+
+    def add_metric(self, table_name: str, metric_name: str, value: float) -> Dict:
+        key = (table_name, metric_name)
+
+        if key not in self.metrics:
+            self.metrics[key] = deque(maxlen=self.window_size)
+
+        history = self.metrics[key]
+
+        # Calculate stats before adding new value
+        is_anomaly = False
+        z_score = 0.0
+        mean = 0.0
+        std_dev = 0.0
+
+        if len(history) >= 2:
+            mean = statistics.mean(history)
+            std_dev = statistics.stdev(history)
+
+            if std_dev > 0:
+                z_score = abs((value - mean) / std_dev)
+                is_anomaly = z_score > self.threshold
+
+        # Add current value to history
+        history.append(value)
+
+        return {
+            "is_anomaly": is_anomaly,
+            "z_score": z_score,
+            "mean": mean,
+            "std_dev": std_dev
+        }
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(w) where w is window size (for statistics calculation)
+    \item \textbf{Space Complexity}: O(t × m × w) where t is tables, m is metrics, w is window size
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item Z-score detects outliers based on historical pattern
+    \item Rolling window adapts to changing baselines
+    \item Threshold of 2.0-3.0 balances sensitivity vs false positives
+    \item Production systems use more sophisticated methods (ML-based)
+\end{enumerate}
+
+\subsection{Production Enhancements}
+
+\begin{itemize}
+    \item \textbf{Multiple Algorithms}: Combine Z-score, IQR, ARIMA, ML models
+    \item \textbf{Seasonality}: Account for daily/weekly patterns
+    \item \textbf{Multi-metric Correlation}: Detect related anomalies
+    \item \textbf{Alert Routing}: Notify data owners via Slack/email
+    \item \textbf{Historical Analysis}: Store all anomalies for pattern analysis
+\end{itemize}
+
+\newpage
+
+\section{IMPORTANT: Java Concurrency Problems}
+
+\subsection{Why Java for DataHub?}
+
+\textbf{DataHub explicitly tests multithreading and concurrency in their first interview round.}
+
+Key reasons to use Java (not Python) for concurrency:
+
+\begin{itemize}
+    \item \textbf{DataHub's backend is Java} (Spring Boot)
+    \item Java has robust concurrency primitives
+    \item Python's GIL limits true parallelism
+    \item Interview will expect Java concurrency knowledge
+\end{itemize}
+
+Problems 5-7 are in Java and focus specifically on concurrency patterns used in DataHub's production systems.
+
+\newpage
+
+\section{Problem 5: Thread-Safe Metadata Cache}
+
+\subsection{Problem Statement}
+
+DataHub's metadata service needs a thread-safe cache for frequently accessed metadata. Implement a thread-safe LRU cache that handles concurrent reads and writes.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Thread-safe get() and put() operations
+    \item LRU eviction policy when capacity is reached
+    \item Support concurrent reads (multiple threads simultaneously)
+    \item Writes must be exclusive (only one writer at a time)
+    \item No data corruption under concurrent access
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}[style=javastyle]
+MetadataCache cache = new MetadataCache(2);
+
+// Thread 1
+cache.put("dataset1", "metadata1");
+
+// Thread 2 (concurrent)
+cache.put("dataset2", "metadata2");
+
+// Thread 3 (concurrent read)
+String m = cache.get("dataset1");
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}[style=javastyle]
+import java.util.*;
+import java.util.concurrent.locks.*;
+
+class MetadataCache {
+    private final int capacity;
+    private final LinkedHashMap<String, String> cache;
+    private final ReadWriteLock lock;
+    private final Lock readLock;
+    private final Lock writeLock;
+
+    public MetadataCache(int capacity) {
+        this.capacity = capacity;
+        this.cache = new LinkedHashMap<String, String>(capacity, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                return size() > MetadataCache.this.capacity;
+            }
+        };
+        this.lock = new ReentrantReadWriteLock();
+        this.readLock = lock.readLock();
+        this.writeLock = lock.writeLock();
+    }
+
+    public String get(String key) {
+        readLock.lock();
+        try {
+            return cache.get(key);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    public void put(String key, String value) {
+        writeLock.lock();
+        try {
+            cache.put(key, value);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public int size() {
+        readLock.lock();
+        try {
+            return cache.size();
+        } finally {
+            readLock.unlock();
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(1) for both get and put operations
+    \item \textbf{Space Complexity}: O(capacity)
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item \textbf{ReadWriteLock}: Allows multiple concurrent readers, but exclusive writer
+    \item \textbf{LinkedHashMap}: Maintains insertion/access order for LRU
+    \item \textbf{accessOrder=true}: Moves accessed entries to end (LRU behavior)
+    \item \textbf{removeEldestEntry}: Automatic eviction when capacity exceeded
+    \item \textbf{Always unlock in finally}: Ensures lock is released even on exception
+\end{enumerate}
+
+\subsection{Follow-up Questions}
+
+\begin{enumerate}
+    \item Why use ReadWriteLock instead of synchronized?
+    \item What if we needed distributed caching across multiple servers?
+    \item How would you handle cache invalidation?
+    \item What are the trade-offs between LRU, LFU, and FIFO?
+\end{enumerate}
+
+\newpage
+
+\section{Problem 6: Producer-Consumer Metadata Ingestion}
+
+\subsection{Problem Statement}
+
+DataHub ingests metadata from multiple sources concurrently. Implement a producer-consumer pattern where producers add metadata events to a queue and consumers process them.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Thread-safe queue for metadata events
+    \item Multiple producers add events concurrently
+    \item Multiple consumers process events concurrently
+    \item Graceful shutdown (process all pending events)
+    \item No events lost or processed twice
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}[style=javastyle]
+MetadataIngestionPipeline pipeline = new MetadataIngestionPipeline(10);
+
+// Start 3 consumer threads
+pipeline.startConsumers(3);
+
+// Producers add events
+pipeline.addEvent(new MetadataEvent("dataset1", "SCHEMA_CHANGE"));
+pipeline.addEvent(new MetadataEvent("dataset2", "LINEAGE_UPDATE"));
+
+// Shutdown and wait for completion
+pipeline.shutdown();
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}[style=javastyle]
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+
+class MetadataIngestionPipeline {
+    private final BlockingQueue<MetadataEvent> queue;
+    private ExecutorService executorService;
+    private final AtomicInteger processedCount;
+    private volatile boolean isShutdown;
+    private static final MetadataEvent POISON_PILL =
+        new MetadataEvent("POISON", "PILL");
+
+    public MetadataIngestionPipeline(int queueSize) {
+        this.queue = new ArrayBlockingQueue<>(queueSize);
+        this.processedCount = new AtomicInteger(0);
+        this.isShutdown = false;
+    }
+
+    public void startConsumers(int numConsumers) {
+        executorService = Executors.newFixedThreadPool(numConsumers);
+
+        for (int i = 0; i < numConsumers; i++) {
+            executorService.submit(() -> {
+                try {
+                    while (true) {
+                        MetadataEvent event = queue.take();
+                        if (event == POISON_PILL) {
+                            break;
+                        }
+                        // Process event
+                        Thread.sleep(10); // Simulate processing
+                        processedCount.incrementAndGet();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+        }
+    }
+
+    public boolean addEvent(MetadataEvent event) throws InterruptedException {
+        if (isShutdown) {
+            return false;
+        }
+        queue.put(event);  // Blocks if queue is full
+        return true;
+    }
+
+    public void shutdown() throws InterruptedException {
+        isShutdown = true;
+
+        // Add poison pills for each consumer
+        int consumers = ((ThreadPoolExecutor) executorService).getActiveCount();
+        for (int i = 0; i < consumers; i++) {
+            queue.put(POISON_PILL);
+        }
+
+        executorService.shutdown();
+        executorService.awaitTermination(10, TimeUnit.SECONDS);
+    }
+
+    public int getProcessedCount() {
+        return processedCount.get();
+    }
+}
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(1) for add/poll operations
+    \item \textbf{Space Complexity}: O(queue\_size)
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item \textbf{BlockingQueue}: Thread-safe, handles blocking automatically
+    \item \textbf{Poison Pill}: Sentinel value to signal consumer shutdown
+    \item \textbf{AtomicInteger}: Lock-free counter for thread safety
+    \item \textbf{ExecutorService}: Manages thread lifecycle
+    \item \textbf{Graceful Shutdown}: Process pending events before stopping
+\end{enumerate}
+
+\subsection{Production Considerations}
+
+\begin{itemize}
+    \item \textbf{Backpressure}: ArrayBlockingQueue naturally provides backpressure
+    \item \textbf{Error Handling}: Wrap event processing in try-catch
+    \item \textbf{Monitoring}: Track queue depth, processing rate, error rate
+    \item \textbf{Distributed}: Use Kafka for distributed producer-consumer
+\end{itemize}
+
+\newpage
+
+\section{Problem 7: Concurrent Batch Processor}
+
+\subsection{Problem Statement}
+
+DataHub needs to process large batches of metadata updates efficiently. Implement a concurrent batch processor using thread pools.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Use ExecutorService with thread pool
+    \item Process batches concurrently
+    \item Collect results from all threads safely
+    \item Handle exceptions without crashing
+    \item Proper shutdown and cleanup
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}[style=javastyle]
+BatchProcessor processor = new BatchProcessor(4);
+
+List<String> datasets = Arrays.asList("ds1", "ds2", ..., "ds100");
+List<String> results = processor.processBatch(datasets);
+
+processor.shutdown();
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}[style=javastyle]
+import java.util.*;
+import java.util.concurrent.*;
+
+class BatchProcessor {
+    private final ExecutorService executorService;
+
+    public BatchProcessor(int threadPoolSize) {
+        this.executorService = Executors.newFixedThreadPool(threadPoolSize);
+    }
+
+    public List<String> processBatch(List<String> datasets)
+            throws InterruptedException, ExecutionException {
+        List<Future<String>> futures = new ArrayList<>();
+
+        // Submit all tasks
+        for (String dataset : datasets) {
+            Future<String> future = executorService.submit(() -> {
+                return processDataset(dataset);
+            });
+            futures.add(future);
+        }
+
+        // Collect results
+        List<String> results = new ArrayList<>();
+        for (Future<String> future : futures) {
+            results.add(future.get());  // Blocking
+        }
+
+        return results;
+    }
+
+    public ProcessResult processBatchWithFailures(List<String> datasets)
+            throws InterruptedException {
+        List<Future<String>> futures = new ArrayList<>();
+
+        for (String dataset : datasets) {
+            futures.add(executorService.submit(() -> processDataset(dataset)));
+        }
+
+        List<String> successes = new ArrayList<>();
+        int failures = 0;
+
+        for (Future<String> future : futures) {
+            try {
+                successes.add(future.get());
+            } catch (ExecutionException e) {
+                failures++;
+            }
+        }
+
+        return new ProcessResult(successes, failures);
+    }
+
+    public void shutdown() throws InterruptedException {
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
+    }
+
+    private String processDataset(String dataset) throws Exception {
+        Thread.sleep(10);  // Simulate work
+        if (dataset.contains("fail")) {
+            throw new Exception("Failed: " + dataset);
+        }
+        return "processed_" + dataset;
+    }
+}
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(n/p) where n is items, p is threads (parallelization)
+    \item \textbf{Space Complexity}: O(n) for results
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item \textbf{Future}: Represents async computation result
+    \item \textbf{ExecutorService}: Reuses threads, avoids overhead
+    \item \textbf{Thread Pool Sizing}: CPU-bound = cores + 1; I/O-bound = cores × 2
+    \item \textbf{Exception Handling}: ExecutionException wraps task exceptions
+    \item \textbf{Shutdown}: Always call shutdown() and awaitTermination()
+\end{enumerate}
+
+\subsection{Optimizations}
+
+\begin{itemize}
+    \item \textbf{CompletionService}: Process results as they complete (not in order)
+    \item \textbf{ForkJoinPool}: For recursive divide-and-conquer tasks
+    \item \textbf{Timeout}: Use future.get(timeout, unit) to avoid hanging
+    \item \textbf{Batch Size}: Tune for optimal throughput vs latency
+\end{itemize}
+
+\newpage
+
+\section{Java Concurrency Quick Reference}
+
+\subsection{Essential Concurrency Primitives}
+
+\begin{itemize}
+    \item \textbf{synchronized}: Basic mutual exclusion (method or block level)
+    \item \textbf{ReentrantLock}: Explicit lock with tryLock, fairness options
+    \item \textbf{ReadWriteLock}: Many readers OR one writer (cache scenarios)
+    \item \textbf{Semaphore}: Limit concurrent access to N threads
+    \item \textbf{CountDownLatch}: Wait for N events (one-time barrier)
+    \item \textbf{CyclicBarrier}: Synchronize N threads repeatedly
+    \item \textbf{Atomic Classes}: Lock-free thread-safe variables
+\end{itemize}
+
+\subsection{Thread-Safe Collections}
+
+\begin{itemize}
+    \item \textbf{ConcurrentHashMap}: Thread-safe map with fine-grained locking
+    \item \textbf{CopyOnWriteArrayList}: Thread-safe list (read-heavy workloads)
+    \item \textbf{BlockingQueue}: Producer-consumer pattern
+    \item \textbf{ConcurrentLinkedQueue}: Non-blocking concurrent queue
+\end{itemize}
+
+\subsection{Common Pitfalls}
+
+\begin{enumerate}
+    \item \textbf{Forgetting unlock}: Always use try-finally with explicit locks
+    \item \textbf{Deadlock}: Acquire locks in consistent order
+    \item \textbf{Race Conditions}: Use atomic operations or synchronization
+    \item \textbf{Ignoring InterruptedException}: Restore interrupt flag
+    \item \textbf{Shared Mutable State}: Minimize or use immutable objects
+\end{enumerate}
+
+\newpage
+
+\section{System Design Topics}
+
+\subsection{Metadata Catalog Architecture}
+
+Key components of a metadata platform:
+
+\begin{enumerate}
+    \item \textbf{Metadata Store}: Primary database for all metadata
+    \item \textbf{Search Index}: Elasticsearch for fast discovery
+    \item \textbf{Graph Database}: Neo4j for lineage queries
+    \item \textbf{Ingestion}: Kafka for real-time metadata events
+    \item \textbf{API Layer}: RESTful and GraphQL APIs
+    \item \textbf{UI}: React frontend for data discovery
+\end{enumerate}
+
+\subsection{Scalability Considerations}
+
+Critical for enterprise deployments:
+
+\begin{itemize}
+    \item \textbf{Sharding}: Partition metadata by domain or data source
+    \item \textbf{Caching}: Redis for frequently accessed metadata
+    \item \textbf{Read Replicas}: Scale read queries independently
+    \item \textbf{Async Processing}: Background jobs for lineage computation
+    \item \textbf{Rate Limiting}: Protect from ingestion spikes
+\end{itemize}
+
+\subsection{Data Lineage at Scale}
+
+Challenges and solutions:
+
+\begin{itemize}
+    \item \textbf{Graph Size}: Billions of nodes, trillions of edges
+    \item \textbf{Query Performance}: Sub-second lineage traversal
+    \item \textbf{Real-time Updates}: Incremental lineage computation
+    \item \textbf{Multi-hop Queries}: Efficient path finding algorithms
+    \item \textbf{Visualization}: Render large graphs without overwhelming UI
+\end{itemize}
+
+\newpage
+
+\section{DataHub-Specific Knowledge}
+
+\subsection{Core Entities}
+
+DataHub models these entities:
+\begin{itemize}
+    \item \textbf{Datasets}: Tables, files, topics
+    \item \textbf{Charts}: BI visualizations
+    \item \textbf{Dashboards}: Collections of charts
+    \item \textbf{Data Jobs}: Pipelines, workflows
+    \item \textbf{ML Models}: Machine learning models
+    \item \textbf{Containers}: Databases, schemas
+\end{itemize}
+
+\subsection{Metadata Aspects}
+
+Each entity has multiple aspects:
+\begin{itemize}
+    \item \textbf{Schema}: Column names, types, descriptions
+    \item \textbf{Ownership}: Individuals and teams
+    \item \textbf{Tags}: Free-form labels
+    \item \textbf{Glossary Terms}: Business vocabulary
+    \item \textbf{Lineage}: Upstream and downstream dependencies
+    \item \textbf{Usage Stats}: Query frequency, users
+    \item \textbf{Properties}: Custom key-value pairs
+\end{itemize}
+
+\subsection{Ingestion Framework}
+
+DataHub supports 100+ data sources:
+\begin{itemize}
+    \item \textbf{Databases}: MySQL, PostgreSQL, Oracle, SQL Server
+    \item \textbf{Warehouses}: Snowflake, BigQuery, Redshift
+    \item \textbf{BI Tools}: Looker, Tableau, PowerBI
+    \item \textbf{Orchestration}: Airflow, Dagster
+    \item \textbf{Streaming}: Kafka, Pulsar
+\end{itemize}
+
+\newpage
+
+\section{Behavioral Interview Prep}
+
+\subsection{DataHub/Acryl Data Values}
+
+\begin{itemize}
+    \item \textbf{Data Democratization}: Make data accessible to all
+    \item \textbf{Open Source First}: Community-driven development
+    \item \textbf{Engineering Excellence}: Scalable, reliable systems
+    \item \textbf{Customer Success}: Solve real data discovery problems
+\end{itemize}
+
+\subsection{Common Questions}
+
+\begin{enumerate}
+    \item Why are you interested in data infrastructure?
+    \item Tell me about a time you built a scalable distributed system
+    \item How do you approach system design with conflicting requirements?
+    \item Describe your experience with graph algorithms
+    \item What's your approach to contributing to open-source projects?
+\end{enumerate}
+
+\subsection{Questions to Ask}
+
+\begin{itemize}
+    \item What are the biggest technical challenges in scaling DataHub?
+    \item How do you balance open-source community vs commercial features?
+    \item What's the roadmap for column-level lineage?
+    \item How does the team handle on-call and production incidents?
+    \item What opportunities exist for technical leadership growth?
+\end{itemize}
+
+\newpage
+
+\section{Additional Resources}
+
+\subsection{Technical Learning}
+
+\begin{itemize}
+    \item \textbf{DataHub GitHub}: Study the codebase and architecture docs
+    \item \textbf{Algorithms}: Focus on graph algorithms (BFS, DFS, topological sort)
+    \item \textbf{System Design}: "Designing Data-Intensive Applications"
+    \item \textbf{Data Engineering}: "Fundamentals of Data Engineering"
+    \item \textbf{Similar Projects}: Apache Atlas, Amundsen, LinkedIn WhereHows
+\end{itemize}
+
+\subsection{Practice Platforms}
+
+\begin{itemize}
+    \item \textbf{LeetCode}: Graph problems (medium/hard), trees, search
+    \item \textbf{System Design}: Grokking courses, YouTube channels
+    \item \textbf{Open Source}: Contribute to DataHub to understand deeply
+\end{itemize}
+
+\subsection{Data Infrastructure Blogs}
+
+\begin{itemize}
+    \item DataHub Blog (blog.datahubproject.io)
+    \item Acryl Data Engineering Blog
+    \item LinkedIn Engineering Blog
+    \item Netflix Tech Blog (data infrastructure posts)
+\end{itemize}
+
+\section{Final Tips}
+
+\begin{enumerate}
+    \item \textbf{Study DataHub}: Clone the repo, run locally, understand architecture
+    \item \textbf{Graph Mastery}: DataHub is heavily graph-based - know your graph algorithms!
+    \item \textbf{Scalability Mindset}: Think about millions of datasets from day one
+    \item \textbf{Open Source}: Show familiarity with open-source contribution process
+    \item \textbf{Data Passion}: Demonstrate genuine interest in solving data discovery problems
+    \item \textbf{Ask Questions}: Show curiosity about technical decisions and trade-offs
+\end{enumerate}
+
+\vspace{1cm}
+\noindent\textbf{Good luck with your DataHub/Acryl Data interview!}
+
+\end{document}

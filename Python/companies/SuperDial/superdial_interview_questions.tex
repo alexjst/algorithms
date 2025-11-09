@@ -1,0 +1,604 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+
+% Python code styling
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Python
+}
+
+\lstset{style=pythonstyle}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{SuperDial Interview Prep}
+\lhead{Backend Engineer}
+\rfoot{Page \thepage}
+
+\title{\textbf{SuperDial Backend Engineer\\Interview Preparation Guide}}
+\author{Comprehensive Solutions \& Strategies}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{About SuperDial}
+
+SuperDial is a voice AI platform revolutionizing healthcare communication. Founded in 2021, they automate patient interactions, appointment scheduling, and administrative tasks using advanced voice AI technology. As a fast-growing startup with approximately 15 employees, they're focused on HIPAA-compliant voice automation for medical practices.
+
+\subsection{Interview Process}
+
+Based on similar healthcare AI startups:
+
+\begin{enumerate}
+    \item \textbf{Recruiter Screen} - Culture fit, passion for healthcare (30 min)
+    \item \textbf{Technical Interview} - LeetCode medium + system design (60 min)
+    \item \textbf{Take-Home Assignment} - Voice API or healthcare data processor (2-3 hours)
+    \item \textbf{Team Interview} - Technical deep dive (60 min)
+    \item \textbf{Founder Interview} - Vision alignment (30 min)
+\end{enumerate}
+
+\subsection{Tech Stack}
+
+SuperDial likely uses:
+\begin{itemize}
+    \item \textbf{Backend}: Python/Node.js, RESTful APIs
+    \item \textbf{Voice AI}: Speech-to-text, NLP, conversational AI
+    \item \textbf{Healthcare}: HIPAA compliance, secure PHI handling
+    \item \textbf{Real-time}: WebSockets, streaming data
+    \item \textbf{Cloud}: AWS/GCP for scalable infrastructure
+\end{itemize}
+
+\subsection{Key Skills to Demonstrate}
+
+\begin{itemize}
+    \item Strong fundamentals in data structures and algorithms
+    \item System design for real-time, high-reliability systems
+    \item Understanding of healthcare data sensitivity (HIPAA, PHI)
+    \item API design and microservices architecture
+    \item Passion for healthcare and AI/ML systems
+\end{itemize}
+
+\newpage
+
+\section{Problem 1: Priority Rate Limiter}
+
+\subsection{Problem Statement}
+
+SuperDial handles healthcare voice calls that require prioritization based on urgency. Implement a rate limiter that processes API requests with priority levels while enforcing rate limits.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Limit to \texttt{max\_requests} per \texttt{time\_window} seconds
+    \item Higher priority requests (lower number = higher priority) should be processed first when possible
+    \item Return \texttt{True} if request allowed, \texttt{False} if rate limited
+    \item Clean up old requests outside the time window
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}
+limiter = PriorityRateLimiter(max_requests=3, time_window=1.0)
+limiter.allow_request(priority=1)  # True (urgent)
+limiter.allow_request(priority=2)  # True
+limiter.allow_request(priority=2)  # True
+limiter.allow_request(priority=3)  # False (rate limit reached)
+
+# After 1 second
+limiter.allow_request(priority=1)  # True (window reset)
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}
+import time
+from collections import deque
+
+class PriorityRateLimiter:
+    def __init__(self, max_requests: int, time_window: float):
+        self.max_requests = max_requests
+        self.time_window = time_window
+        self.requests = deque()  # (timestamp, priority)
+
+    def allow_request(self, priority: int) -> bool:
+        current_time = time.time()
+
+        # Remove requests outside the time window
+        while self.requests and current_time - self.requests[0][0] >= self.time_window:
+            self.requests.popleft()
+
+        # Check if we can accept the request
+        if len(self.requests) < self.max_requests:
+            self.requests.append((current_time, priority))
+            return True
+
+        return False
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(n) where n is the number of requests in the window (amortized O(1) for cleanup)
+    \item \textbf{Space Complexity}: O(max\_requests)
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item Use a deque for efficient removal of old requests from the front
+    \item Store timestamps with requests to track the time window
+    \item For healthcare systems, priority is critical but rate limiting applies to all requests
+    \item In production, consider distributed rate limiting with Redis
+\end{enumerate}
+
+\subsection{Follow-up Questions}
+
+\begin{enumerate}
+    \item How would you implement this in a distributed system with multiple servers?
+    \item How would you handle time synchronization across servers?
+    \item What if we wanted to give priority requests a separate, higher rate limit?
+\end{enumerate}
+
+\newpage
+
+\section{Problem 2: Streaming Buffer Management}
+
+\subsection{Problem Statement}
+
+SuperDial processes real-time voice transcription data in chunks. Implement a circular buffer that efficiently manages streaming data with fixed capacity.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Fixed-size buffer with efficient write/read operations
+    \item Support for writing chunks of data
+    \item Support for reading all available data
+    \item Handle buffer overflow (old data overwritten)
+    \item Track number of bytes available
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}
+buffer = StreamingBuffer(capacity=10)
+buffer.write("Hello")      # Returns 5 (bytes written)
+buffer.write(" World")     # Returns 6
+buffer.read()              # Returns "Hello Worl" (last 10 bytes)
+buffer.available()         # Returns 10
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}
+class StreamingBuffer:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.buffer = ""
+
+    def write(self, data: str) -> int:
+        # Add new data to buffer
+        self.buffer += data
+
+        # Keep only the last 'capacity' bytes (circular behavior)
+        if len(self.buffer) > self.capacity:
+            self.buffer = self.buffer[-self.capacity:]
+
+        return len(data)
+
+    def read(self) -> str:
+        return self.buffer
+
+    def available(self) -> int:
+        return len(self.buffer)
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(n) for write where n is data size; O(1) for read and available
+    \item \textbf{Space Complexity}: O(capacity)
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item Simple string-based approach works for small buffers
+    \item For production voice streaming, use byte arrays or ring buffers
+    \item Circular buffers prevent memory growth while maintaining recent data
+    \item Real-time systems need low-latency buffer operations
+\end{enumerate}
+
+\subsection{Optimizations}
+
+\begin{itemize}
+    \item Use \texttt{bytearray} for better performance with binary data
+    \item Implement true circular indexing to avoid string slicing
+    \item Add watermark notifications (buffer 80\% full)
+    \item Consider thread-safe operations for concurrent access
+\end{itemize}
+
+\newpage
+
+\section{Problem 3: Patient Data Deduplication}
+
+\subsection{Problem Statement}
+
+SuperDial's healthcare platform needs to detect duplicate patient records. Implement a system to identify potential duplicates using fuzzy matching on names and exact matching on identifiers.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Detect duplicates based on similar names (Levenshtein distance)
+    \item Exact match on phone numbers or patient IDs
+    \item Return groups of potential duplicates
+    \item Handle edge cases (missing data, empty fields)
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}
+patients = [
+    {"id": "P1", "name": "John Smith", "phone": "555-1234"},
+    {"id": "P2", "name": "Jon Smith", "phone": "555-1234"},
+    {"id": "P3", "name": "Jane Doe", "phone": "555-5678"},
+]
+
+detector = PatientDeduplicator()
+duplicates = detector.find_duplicates(patients)
+# Returns: [[0, 1]] (indices 0 and 1 are duplicates)
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}
+from typing import List, Dict
+
+class PatientDeduplicator:
+    def __init__(self, name_threshold: int = 3):
+        self.name_threshold = name_threshold
+
+    def find_duplicates(self, patients: List[Dict[str, str]]) -> List[List[int]]:
+        n = len(patients)
+        parent = list(range(n))  # Union-Find
+
+        def find(x):
+            if parent[x] != x:
+                parent[x] = find(parent[x])
+            return parent[x]
+
+        def union(x, y):
+            px, py = find(x), find(y)
+            if px != py:
+                parent[px] = py
+
+        # Compare all pairs
+        for i in range(n):
+            for j in range(i + 1, n):
+                if self.is_duplicate(patients[i], patients[j]):
+                    union(i, j)
+
+        # Group duplicates
+        groups = {}
+        for i in range(n):
+            root = find(i)
+            if root not in groups:
+                groups[root] = []
+            groups[root].append(i)
+
+        # Return groups with more than 1 patient
+        return [group for group in groups.values() if len(group) > 1]
+
+    def is_duplicate(self, p1: Dict[str, str], p2: Dict[str, str]) -> bool:
+        # Same ID
+        if p1.get("id") == p2.get("id") and p1.get("id"):
+            return True
+
+        # Same phone number
+        if p1.get("phone") == p2.get("phone") and p1.get("phone"):
+            return True
+
+        # Similar names
+        name1 = p1.get("name", "")
+        name2 = p2.get("name", "")
+        if name1 and name2:
+            distance = self.levenshtein_distance(name1.lower(), name2.lower())
+            if distance <= self.name_threshold:
+                return True
+
+        return False
+
+    def levenshtein_distance(self, s1: str, s2: str) -> int:
+        m, n = len(s1), len(s2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+        for i in range(m + 1):
+            dp[i][0] = i
+        for j in range(n + 1):
+            dp[0][j] = j
+
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s1[i-1] == s2[j-1]:
+                    dp[i][j] = dp[i-1][j-1]
+                else:
+                    dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+
+        return dp[m][n]
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(n² × L²) where n is number of patients, L is average name length
+    \item \textbf{Space Complexity}: O(n + L²) for Union-Find and DP table
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item Union-Find efficiently groups duplicates
+    \item Levenshtein distance catches typos and minor variations
+    \item Multiple matching criteria (ID, phone, name) increase accuracy
+    \item Healthcare data requires careful handling of missing/null values
+    \item HIPAA compliance: de-identify before testing/development
+\end{enumerate}
+
+\subsection{Healthcare Considerations}
+
+\begin{itemize}
+    \item \textbf{PHI Protection}: Patient data must be encrypted and access-controlled
+    \item \textbf{Audit Logging}: Track all access to patient records
+    \item \textbf{Data Quality}: Healthcare data often has inconsistencies
+    \item \textbf{False Positives}: Manual review process for suggested duplicates
+\end{itemize}
+
+\newpage
+
+\section{Problem 4: Call Routing System}
+
+\subsection{Problem Statement}
+
+SuperDial needs to route incoming voice calls to available AI agents. Implement a load balancer that distributes calls efficiently across agents while considering capacity and specialization.
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Route calls to least loaded available agent
+    \item Support agent specialization (e.g., "cardiology", "general")
+    \item Track active calls per agent
+    \item Handle agent availability (online/offline)
+    \item Return None if no agents available
+\end{itemize}
+
+\textbf{Example:}
+\begin{lstlisting}
+router = CallRouter()
+router.add_agent("agent1", capacity=5, specialization="cardiology")
+router.add_agent("agent2", capacity=3, specialization="general")
+
+router.route_call("call1", specialty="cardiology")  # Returns "agent1"
+router.route_call("call2", specialty="general")     # Returns "agent2"
+router.end_call("call1")                             # Frees "agent1"
+\end{lstlisting}
+
+\subsection{Solution}
+
+\begin{lstlisting}
+from typing import Optional, Dict, Set
+
+class CallRouter:
+    def __init__(self):
+        self.agents = {}  # agent_id -> {capacity, specialization, online, calls}
+        self.call_to_agent = {}  # call_id -> agent_id
+
+    def add_agent(self, agent_id: str, capacity: int, specialization: str) -> None:
+        self.agents[agent_id] = {
+            "capacity": capacity,
+            "specialization": specialization,
+            "online": True,
+            "calls": set()
+        }
+
+    def route_call(self, call_id: str, specialty: str) -> Optional[str]:
+        best_agent = None
+        min_load = float('inf')
+
+        # Find least loaded agent with matching specialty
+        for agent_id, agent in self.agents.items():
+            if not agent["online"]:
+                continue
+            if agent["specialization"] != specialty:
+                continue
+            if len(agent["calls"]) >= agent["capacity"]:
+                continue
+
+            current_load = len(agent["calls"])
+            if current_load < min_load:
+                min_load = current_load
+                best_agent = agent_id
+
+        if best_agent:
+            self.agents[best_agent]["calls"].add(call_id)
+            self.call_to_agent[call_id] = best_agent
+            return best_agent
+
+        return None
+
+    def end_call(self, call_id: str) -> None:
+        if call_id in self.call_to_agent:
+            agent_id = self.call_to_agent[call_id]
+            self.agents[agent_id]["calls"].discard(call_id)
+            del self.call_to_agent[call_id]
+
+    def set_agent_status(self, agent_id: str, online: bool) -> None:
+        if agent_id in self.agents:
+            self.agents[agent_id]["online"] = online
+\end{lstlisting}
+
+\subsection{Complexity Analysis}
+
+\begin{itemize}
+    \item \textbf{Time Complexity}: O(n) for routing where n is number of agents; O(1) for end call and status change
+    \item \textbf{Space Complexity}: O(a + c) where a is agents, c is active calls
+\end{itemize}
+
+\subsection{Key Insights}
+
+\begin{enumerate}
+    \item Load balancing prevents agent overload
+    \item Specialization matching ensures proper expertise for calls
+    \item Tracking active calls enables accurate capacity management
+    \item Agent status management handles maintenance/breaks
+\end{enumerate}
+
+\subsection{Production Enhancements}
+
+\begin{itemize}
+    \item \textbf{Priority Queue}: Use heap for O(log n) best agent selection
+    \item \textbf{Metrics}: Track call duration, success rate per agent
+    \item \textbf{Failover}: Route to "general" if specialty not available
+    \item \textbf{Sticky Routing}: Route follow-up calls to same agent
+    \item \textbf{Geographic}: Route based on agent location/timezone
+\end{itemize}
+
+\newpage
+
+\section{System Design Topics}
+
+\subsection{Voice AI Architecture}
+
+Key components of a voice AI system:
+
+\begin{enumerate}
+    \item \textbf{Speech-to-Text (STT)}: Convert audio to text
+    \item \textbf{Natural Language Understanding (NLU)}: Extract intent and entities
+    \item \textbf{Dialog Management}: Manage conversation flow
+    \item \textbf{Text-to-Speech (TTS)}: Generate voice responses
+    \item \textbf{Backend API}: Business logic and data access
+\end{enumerate}
+
+\subsection{HIPAA Compliance Requirements}
+
+Critical for healthcare applications:
+
+\begin{itemize}
+    \item \textbf{Encryption}: At-rest and in-transit (TLS 1.2+)
+    \item \textbf{Access Control}: Role-based access, MFA
+    \item \textbf{Audit Logging}: Track all PHI access
+    \item \textbf{Data Retention}: Secure deletion after retention period
+    \item \textbf{Business Associate Agreements}: With all third-party services
+\end{itemize}
+
+\subsection{Real-time System Design}
+
+Considerations for voice calls:
+
+\begin{itemize}
+    \item \textbf{Low Latency}: <300ms for natural conversation
+    \item \textbf{High Availability}: 99.99\% uptime for healthcare
+    \item \textbf{Scalability}: Handle thousands of concurrent calls
+    \item \textbf{Error Handling}: Graceful degradation, fallback to human
+    \item \textbf{Monitoring}: Real-time alerts for system health
+\end{itemize}
+
+\newpage
+
+\section{Behavioral Interview Prep}
+
+\subsection{SuperDial Values}
+
+\begin{itemize}
+    \item \textbf{Mission-Driven}: Passionate about improving healthcare
+    \item \textbf{Startup Mentality}: Comfortable with ambiguity, rapid iteration
+    \item \textbf{Technical Excellence}: High-quality code despite fast pace
+    \item \textbf{Patient-Centric}: Always considering patient impact
+\end{itemize}
+
+\subsection{Common Questions}
+
+\begin{enumerate}
+    \item Why are you interested in healthcare technology?
+    \item Tell me about a time you built something with limited resources
+    \item How do you handle competing priorities?
+    \item Describe your experience with AI/ML systems
+    \item What's your approach to ensuring code quality under pressure?
+\end{enumerate}
+
+\subsection{Questions to Ask}
+
+\begin{itemize}
+    \item What are the biggest technical challenges you're facing?
+    \item How do you balance speed and quality in development?
+    \item What's your approach to HIPAA compliance and security?
+    \item How does the voice AI system handle edge cases and errors?
+    \item What's the team structure and growth plans?
+\end{itemize}
+
+\newpage
+
+\section{Additional Resources}
+
+\subsection{Technical Learning}
+
+\begin{itemize}
+    \item \textbf{Algorithms}: "Cracking the Coding Interview" - LeetCode medium problems
+    \item \textbf{System Design}: "Designing Data-Intensive Applications" by Martin Kleppmann
+    \item \textbf{Voice AI}: Google Cloud Speech-to-Text, AWS Transcribe documentation
+    \item \textbf{Healthcare}: HIPAA compliance guides, HL7/FHIR standards
+\end{itemize}
+
+\subsection{Practice Platforms}
+
+\begin{itemize}
+    \item \textbf{LeetCode}: Focus on medium difficulty, strings, queues, graphs
+    \item \textbf{System Design}: Grokking the System Design Interview
+    \item \textbf{Mock Interviews}: Pramp, Interviewing.io
+\end{itemize}
+
+\subsection{Healthcare Tech Blogs}
+
+\begin{itemize}
+    \item Healthcare IT News
+    \item HIMSS Healthcare Blog
+    \item Health Tech Insider
+\end{itemize}
+
+\section{Final Tips}
+
+\begin{enumerate}
+    \item \textbf{Healthcare Passion}: Show genuine interest in improving patient care
+    \item \textbf{System Thinking}: Discuss trade-offs, not just solutions
+    \item \textbf{Startup Fit}: Demonstrate adaptability and ownership mentality
+    \item \textbf{Ask Questions}: Show curiosity about their technology and mission
+    \item \textbf{Follow Up}: Send thank-you notes, reiterate interest
+\end{enumerate}
+
+\vspace{1cm}
+\noindent\textbf{Good luck with your SuperDial interview!}
+
+\end{document}

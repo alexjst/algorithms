@@ -1,0 +1,1063 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+% Define custom colors
+\definecolor{problemblue}{RGB}{41, 128, 185}
+\definecolor{solutiongreen}{RGB}{39, 174, 96}
+\definecolor{testpurple}{RGB}{142, 68, 173}
+
+% Define colored boxes
+\newtcolorbox{problembox}{
+    colback=problemblue!5,
+    colframe=problemblue,
+    title=Problem,
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{solutionbox}{
+    colback=solutiongreen!5,
+    colframe=solutiongreen,
+    title=Solution,
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{testbox}{
+    colback=testpurple!5,
+    colframe=testpurple,
+    title=Test Cases,
+    fonttitle=\bfseries
+}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+\title{\textbf{ClickUp Backend Engineer\\Interview Questions}}
+\author{Comprehensive Preparation Guide}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+This document contains 14 backend engineering problems commonly asked in ClickUp interviews, based on real candidate experiences and ClickUp's technical stack.
+
+\textbf{ClickUp Tech Stack:}
+\begin{itemize}
+    \item Node.js / TypeScript / Express
+    \item Transitioning from Monolith to Microservices
+    \item Docker \& Amazon EKS (Kubernetes)
+    \item Focus on API design and scalability
+\end{itemize}
+
+\textbf{Interview Process:}
+\begin{enumerate}
+    \item Technical Recruiter Screen
+    \item Take-Home Assignment (1hr Node.js API)
+    \item Technical Interview (LeetCode Medium + Discussion)
+    \item System Design Round
+    \item Cultural Fit Interview
+\end{enumerate}
+
+\newpage
+
+\section{Problem 1: Two Sum (Array Pairs)}
+
+\begin{problembox}
+\textbf{Difficulty:} Easy/Medium \\
+\textbf{Topics:} Hash Map, Arrays \\
+\textbf{Asked at ClickUp:} Yes (confirmed)
+
+\vspace{10pt}
+Given an array of integers \texttt{nums} and an integer \texttt{target}, return indices of the two numbers that add up to \texttt{target}. You may not use the same element twice.
+
+\vspace{10pt}
+\textbf{Constraints:}
+\begin{itemize}
+    \item $2 \leq$ nums.length $\leq 10^4$
+    \item $-10^9 \leq$ nums[i] $\leq 10^9$
+    \item Exactly one solution exists
+    \item Cannot use same index twice
+\end{itemize}
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: nums = [2, 7, 11, 15], target = 9
+Output: [0, 1]
+Explanation: nums[0] + nums[1] = 2 + 7 = 9
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: nums = [3, 2, 4], target = 6
+Output: [1, 2]
+\end{verbatim}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Approach: Hash Map (Optimal)}
+
+The key insight is to use a hash map to store numbers we've seen and check if the complement exists.
+
+\textbf{Algorithm:}
+\begin{enumerate}
+    \item Create empty hash map
+    \item For each number at index i:
+    \begin{itemize}
+        \item Calculate complement = target - nums[i]
+        \item If complement exists in hash map, return [map[complement], i]
+        \item Otherwise, store nums[i] $\rightarrow$ i in map
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Time Complexity:} O(n) \\
+\textbf{Space Complexity:} O(n)
+
+\begin{lstlisting}
+def two_sum(nums: List[int], target: int) -> List[int]:
+    """
+    Find indices of two numbers that sum to target.
+
+    Args:
+        nums: Array of integers
+        target: Target sum
+
+    Returns:
+        List of two indices [i, j] where nums[i] + nums[j] = target
+    """
+    seen = {}  # Maps number -> index
+
+    for i, num in enumerate(nums):
+        complement = target - num
+
+        if complement in seen:
+            return [seen[complement], i]
+
+        seen[num] = i
+
+    return []  # No solution found
+\end{lstlisting}
+\end{solutionbox}
+
+\begin{testbox}
+\begin{lstlisting}
+def test_two_sum():
+    # Test 1: Basic case
+    assert two_sum([2, 7, 11, 15], 9) == [0, 1]
+
+    # Test 2: Numbers not in order
+    assert two_sum([3, 2, 4], 6) == [1, 2]
+
+    # Test 3: Negative numbers
+    assert two_sum([-1, -2, -3, -4, -5], -8) == [2, 4]
+
+    # Test 4: Same number appears twice
+    assert two_sum([3, 3], 6) == [0, 1]
+
+    # Test 5: Larger array
+    assert two_sum([1, 5, 3, 7, 9, 2], 10) == [1, 3]
+
+    print("All test cases passed!")
+
+if __name__ == "__main__":
+    test_two_sum()
+\end{lstlisting}
+\end{testbox}
+
+\newpage
+
+\section{Problem 2: Combination Sum}
+
+\begin{problembox}
+\textbf{Difficulty:} Medium \\
+\textbf{Topics:} Backtracking, Recursion \\
+\textbf{Asked at ClickUp:} Yes (confirmed variation)
+
+\vspace{10pt}
+Given an array of distinct integers \texttt{candidates} and a target integer \texttt{target}, return all unique combinations where the chosen numbers sum to \texttt{target}. Numbers can be used unlimited times.
+
+\vspace{10pt}
+\textbf{Constraints:}
+\begin{itemize}
+    \item $1 \leq$ candidates.length $\leq 30$
+    \item All elements in candidates are distinct
+    \item $1 \leq$ candidates[i] $\leq 200$
+    \item $1 \leq$ target $\leq 500$
+\end{itemize}
+
+\textbf{Example:}
+\begin{verbatim}
+Input: candidates = [2, 3, 6, 7], target = 7
+Output: [[2, 2, 3], [7]]
+Explanation:
+2 + 2 + 3 = 7
+7 = 7
+\end{verbatim}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Approach: Backtracking}
+
+Use recursion to explore all possible combinations, pruning when sum exceeds target.
+
+\begin{lstlisting}
+def combination_sum(candidates: List[int], target: int) -> List[List[int]]:
+    """
+    Find all unique combinations that sum to target.
+
+    Args:
+        candidates: Array of distinct integers
+        target: Target sum
+
+    Returns:
+        List of all valid combinations
+    """
+    result = []
+
+    def backtrack(start: int, current: List[int], current_sum: int):
+        # Base cases
+        if current_sum == target:
+            result.append(current[:])  # Found valid combination
+            return
+
+        if current_sum > target:
+            return  # Exceeded target, prune
+
+        # Try each candidate starting from 'start' index
+        for i in range(start, len(candidates)):
+            current.append(candidates[i])
+            # Can reuse same element, so pass i (not i+1)
+            backtrack(i, current, current_sum + candidates[i])
+            current.pop()  # Backtrack
+
+    backtrack(0, [], 0)
+    return result
+\end{lstlisting}
+
+\textbf{Time Complexity:} O($k \cdot 2^t$) where k is average combination length, t is target \\
+\textbf{Space Complexity:} O(target) for recursion depth
+\end{solutionbox}
+
+\begin{testbox}
+\begin{lstlisting}
+def test_combination_sum():
+    # Test 1: Basic case
+    result1 = combination_sum([2, 3, 6, 7], 7)
+    assert sorted(result1) == sorted([[2, 2, 3], [7]])
+
+    # Test 2: Multiple solutions
+    result2 = combination_sum([2, 3, 5], 8)
+    assert len(result2) == 3  # [2,2,2,2], [2,3,3], [3,5]
+
+    # Test 3: No solution
+    result3 = combination_sum([2, 4], 7)
+    assert result3 == []
+
+    print("All test cases passed!")
+\end{lstlisting}
+\end{testbox}
+
+\newpage
+
+\section{Problem 3: Task Dependency Resolution}
+
+\begin{problembox}
+\textbf{Difficulty:} Medium \\
+\textbf{Topics:} Graphs, Topological Sort, DFS \\
+\textbf{ClickUp Context:} Task hierarchies and dependencies
+
+\vspace{10pt}
+Given a list of tasks and their dependencies, determine if all tasks can be completed and return a valid execution order. Return empty list if there's a circular dependency.
+
+\vspace{10pt}
+\textbf{Input Format:}
+\begin{itemize}
+    \item \texttt{num\_tasks}: Number of tasks (labeled 0 to n-1)
+    \item \texttt{dependencies}: List of [task, prerequisite] pairs
+\end{itemize}
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: num_tasks = 4, dependencies = [[1,0], [2,0], [3,1], [3,2]]
+Output: [0, 1, 2, 3] or [0, 2, 1, 3]
+Explanation:
+Task 0 has no prerequisites
+Tasks 1 and 2 depend on task 0
+Task 3 depends on tasks 1 and 2
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: num_tasks = 2, dependencies = [[1,0], [0,1]]
+Output: []
+Explanation: Circular dependency exists
+\end{verbatim}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Approach: Topological Sort using DFS}
+
+Use DFS with cycle detection to find valid task execution order.
+
+\begin{lstlisting}
+from collections import defaultdict
+from typing import List
+
+def find_task_order(num_tasks: int, dependencies: List[List[int]]) -> List[int]:
+    """
+    Find valid task execution order or detect circular dependencies.
+
+    Args:
+        num_tasks: Total number of tasks
+        dependencies: List of [task, prerequisite] pairs
+
+    Returns:
+        Valid execution order, or empty list if circular dependency exists
+    """
+    # Build adjacency list
+    graph = defaultdict(list)
+    for task, prereq in dependencies:
+        graph[prereq].append(task)
+
+    # States: 0 = unvisited, 1 = visiting, 2 = visited
+    state = [0] * num_tasks
+    result = []
+
+    def has_cycle(task: int) -> bool:
+        """DFS to detect cycles."""
+        if state[task] == 1:  # Currently visiting - cycle detected
+            return True
+        if state[task] == 2:  # Already processed
+            return False
+
+        state[task] = 1  # Mark as visiting
+
+        # Visit all dependent tasks
+        for dependent in graph[task]:
+            if has_cycle(dependent):
+                return True
+
+        state[task] = 2  # Mark as visited
+        result.append(task)  # Add to result in reverse order
+        return False
+
+    # Check all tasks
+    for task in range(num_tasks):
+        if has_cycle(task):
+            return []  # Circular dependency found
+
+    return result[::-1]  # Reverse to get correct order
+\end{lstlisting}
+
+\textbf{Time Complexity:} O(V + E) where V = tasks, E = dependencies \\
+\textbf{Space Complexity:} O(V + E)
+\end{solutionbox}
+
+\begin{testbox}
+\begin{lstlisting}
+def test_task_order():
+    # Test 1: Valid dependency chain
+    result1 = find_task_order(4, [[1,0], [2,0], [3,1], [3,2]])
+    assert result1 in [[0,1,2,3], [0,2,1,3]]
+
+    # Test 2: Circular dependency
+    result2 = find_task_order(2, [[1,0], [0,1]])
+    assert result2 == []
+
+    # Test 3: No dependencies
+    result3 = find_task_order(3, [])
+    assert len(result3) == 3
+
+    # Test 4: Linear chain
+    result4 = find_task_order(3, [[1,0], [2,1]])
+    assert result4 == [0, 1, 2]
+
+    print("All test cases passed!")
+\end{lstlisting}
+\end{testbox}
+
+\newpage
+
+\section{Problem 4: API Rate Limiter}
+
+\begin{problembox}
+\textbf{Difficulty:} Medium \\
+\textbf{Topics:} System Design, Sliding Window \\
+\textbf{ClickUp Context:} API design and scalability
+
+\vspace{10pt}
+Design a rate limiter that restricts the number of API requests a user can make within a time window.
+
+\vspace{10pt}
+\textbf{Requirements:}
+\begin{itemize}
+    \item Support sliding window rate limiting
+    \item \texttt{is\_allowed(user\_id, timestamp)}: Check if request is allowed
+    \item Track requests per user
+    \item Configure max requests per time window
+\end{itemize}
+
+\textbf{Example:}
+\begin{verbatim}
+limiter = RateLimiter(max_requests=3, window_seconds=60)
+limiter.is_allowed("user1", 0)   # True  (1/3)
+limiter.is_allowed("user1", 10)  # True  (2/3)
+limiter.is_allowed("user1", 20)  # True  (3/3)
+limiter.is_allowed("user1", 30)  # False (limit reached)
+limiter.is_allowed("user1", 65)  # True  (first request expired)
+\end{verbatim}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Approach: Sliding Window with Deque}
+
+Maintain a queue of timestamps for each user and remove expired entries.
+
+\begin{lstlisting}
+from collections import defaultdict, deque
+from typing import Dict
+
+class RateLimiter:
+    """
+    Rate limiter using sliding window algorithm.
+    """
+
+    def __init__(self, max_requests: int, window_seconds: int):
+        """
+        Initialize rate limiter.
+
+        Args:
+            max_requests: Maximum requests allowed in window
+            window_seconds: Time window in seconds
+        """
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        # Map user_id -> deque of timestamps
+        self.requests: Dict[str, deque] = defaultdict(deque)
+
+    def is_allowed(self, user_id: str, timestamp: int) -> bool:
+        """
+        Check if request is allowed for user at given timestamp.
+
+        Args:
+            user_id: User identifier
+            timestamp: Current timestamp in seconds
+
+        Returns:
+            True if request is allowed, False otherwise
+        """
+        user_requests = self.requests[user_id]
+
+        # Remove expired requests (outside sliding window)
+        window_start = timestamp - self.window_seconds
+        while user_requests and user_requests[0] <= window_start:
+            user_requests.popleft()
+
+        # Check if under limit
+        if len(user_requests) < self.max_requests:
+            user_requests.append(timestamp)
+            return True
+
+        return False
+
+    def get_request_count(self, user_id: str, timestamp: int) -> int:
+        """Get current request count in window."""
+        user_requests = self.requests[user_id]
+        window_start = timestamp - self.window_seconds
+
+        # Remove expired
+        while user_requests and user_requests[0] <= window_start:
+            user_requests.popleft()
+
+        return len(user_requests)
+\end{lstlisting}
+
+\textbf{Time Complexity:} O(n) worst case for removing expired entries \\
+\textbf{Space Complexity:} O(u $\cdot$ r) where u = users, r = requests per window
+\end{solutionbox}
+
+\begin{testbox}
+\begin{lstlisting}
+def test_rate_limiter():
+    # Test 1: Basic rate limiting
+    limiter = RateLimiter(max_requests=3, window_seconds=60)
+    assert limiter.is_allowed("user1", 0) == True
+    assert limiter.is_allowed("user1", 10) == True
+    assert limiter.is_allowed("user1", 20) == True
+    assert limiter.is_allowed("user1", 30) == False
+
+    # Test 2: Sliding window expiration
+    assert limiter.is_allowed("user1", 65) == True  # First request expired
+
+    # Test 3: Multiple users
+    limiter2 = RateLimiter(max_requests=2, window_seconds=10)
+    assert limiter2.is_allowed("user1", 0) == True
+    assert limiter2.is_allowed("user2", 0) == True
+    assert limiter2.is_allowed("user1", 5) == True
+    assert limiter2.is_allowed("user1", 7) == False
+    assert limiter2.is_allowed("user2", 7) == True
+
+    # Test 4: Request count
+    assert limiter2.get_request_count("user1", 7) == 2
+
+    print("All test cases passed!")
+\end{lstlisting}
+\end{testbox}
+
+\newpage
+
+\section{Problem 5: Event Stream Processor}
+
+\begin{problembox}
+\textbf{Difficulty:} Medium \\
+\textbf{Topics:} Async, Streams, Data Processing \\
+\textbf{ClickUp Context:} Real-time event processing
+
+\vspace{10pt}
+Implement an event stream processor that handles incoming events, applies transformations, and maintains windowed aggregations.
+
+\vspace{10pt}
+\textbf{Requirements:}
+\begin{itemize}
+    \item Process events with \texttt{event\_id}, \texttt{event\_type}, \texttt{timestamp}, \texttt{data}
+    \item Filter events by type
+    \item Transform event data
+    \item Calculate windowed aggregates (count, sum, avg)
+    \item Handle out-of-order events
+\end{itemize}
+
+\textbf{Example:}
+\begin{verbatim}
+Events:
+{"id": 1, "type": "click", "timestamp": 100, "value": 10}
+{"id": 2, "type": "view", "timestamp": 101, "value": 5}
+{"id": 3, "type": "click", "timestamp": 102, "value": 15}
+
+Window (100-110):
+  clicks: count=2, sum=25, avg=12.5
+  views: count=1, sum=5, avg=5.0
+\end{verbatim}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Approach: Buffered Stream with Sliding Windows}
+
+\begin{lstlisting}
+from collections import defaultdict, deque
+from typing import Dict, List, Callable, Any
+
+class Event:
+    """Represents a single event."""
+    def __init__(self, event_id: int, event_type: str,
+                 timestamp: int, data: Dict[str, Any]):
+        self.event_id = event_id
+        self.event_type = event_type
+        self.timestamp = timestamp
+        self.data = data
+
+class EventStreamProcessor:
+    """
+    Process streaming events with windowed aggregations.
+    """
+
+    def __init__(self, window_size: int = 60):
+        """
+        Initialize processor.
+
+        Args:
+            window_size: Window size in seconds
+        """
+        self.window_size = window_size
+        # Store events by type
+        self.events: Dict[str, deque] = defaultdict(deque)
+        # Filters and transformers
+        self.filters: List[Callable] = []
+        self.transformers: List[Callable] = []
+
+    def add_filter(self, filter_func: Callable[[Event], bool]):
+        """Add event filter."""
+        self.filters.append(filter_func)
+
+    def add_transformer(self, transform_func: Callable[[Event], Event]):
+        """Add event transformer."""
+        self.transformers.append(transform_func)
+
+    def process_event(self, event: Event) -> bool:
+        """
+        Process a single event.
+
+        Args:
+            event: Event to process
+
+        Returns:
+            True if event was accepted, False if filtered out
+        """
+        # Apply filters
+        for filter_func in self.filters:
+            if not filter_func(event):
+                return False
+
+        # Apply transformations
+        for transform_func in self.transformers:
+            event = transform_func(event)
+
+        # Store event
+        self.events[event.event_type].append(event)
+        return True
+
+    def get_window_stats(self, event_type: str,
+                         current_time: int) -> Dict[str, float]:
+        """
+        Calculate statistics for events in current window.
+
+        Args:
+            event_type: Type of events to analyze
+            current_time: Current timestamp
+
+        Returns:
+            Dictionary with count, sum, avg, min, max
+        """
+        window_start = current_time - self.window_size
+        events_queue = self.events[event_type]
+
+        # Remove expired events
+        while events_queue and events_queue[0].timestamp < window_start:
+            events_queue.popleft()
+
+        if not events_queue:
+            return {"count": 0, "sum": 0, "avg": 0, "min": 0, "max": 0}
+
+        # Calculate statistics
+        values = [e.data.get("value", 0) for e in events_queue]
+        return {
+            "count": len(values),
+            "sum": sum(values),
+            "avg": sum(values) / len(values),
+            "min": min(values),
+            "max": max(values)
+        }
+
+    def get_event_count(self, event_type: str, current_time: int) -> int:
+        """Get count of events in current window."""
+        stats = self.get_window_stats(event_type, current_time)
+        return stats["count"]
+\end{lstlisting}
+
+\textbf{Time Complexity:} O(w) per query where w = events in window \\
+\textbf{Space Complexity:} O(n) where n = total events stored
+\end{solutionbox}
+
+\begin{testbox}
+\begin{lstlisting}
+def test_event_stream_processor():
+    # Test 1: Basic event processing
+    processor = EventStreamProcessor(window_size=60)
+
+    e1 = Event(1, "click", 100, {"value": 10})
+    e2 = Event(2, "view", 101, {"value": 5})
+    e3 = Event(3, "click", 102, {"value": 15})
+
+    assert processor.process_event(e1) == True
+    assert processor.process_event(e2) == True
+    assert processor.process_event(e3) == True
+
+    # Test 2: Window statistics
+    stats = processor.get_window_stats("click", 110)
+    assert stats["count"] == 2
+    assert stats["sum"] == 25
+    assert stats["avg"] == 12.5
+
+    # Test 3: Event filtering
+    processor2 = EventStreamProcessor(window_size=60)
+    processor2.add_filter(lambda e: e.data.get("value", 0) > 5)
+
+    assert processor2.process_event(Event(1, "test", 100, {"value": 3})) == False
+    assert processor2.process_event(Event(2, "test", 100, {"value": 10})) == True
+
+    # Test 4: Event expiration
+    stats = processor.get_window_stats("click", 200)
+    assert stats["count"] == 0  # All events expired
+
+    print("All test cases passed!")
+\end{lstlisting}
+\end{testbox}
+
+\newpage
+
+\section{Problem 6: Task Hierarchy Builder}
+
+\begin{problembox}
+\textbf{Difficulty:} Medium \\
+\textbf{Topics:} Trees, Recursion, Data Structures \\
+\textbf{ClickUp Context:} Task/subtask hierarchy system
+
+\vspace{10pt}
+Build a task hierarchy system that supports nested tasks (ClickUp's core feature).
+
+\vspace{10pt}
+\textbf{Requirements:}
+\begin{itemize}
+    \item Create tasks and subtasks (unlimited nesting)
+    \item Find all subtasks under a task (recursive)
+    \item Calculate total estimated time for task + all subtasks
+    \item Find task path from root to specific task
+    \item Get tasks at specific depth level
+\end{itemize}
+
+\textbf{Example:}
+\begin{verbatim}
+Task Hierarchy:
+Project Alpha (8h)
+├── Design Phase (3h)
+│   ├── Wireframes (1h)
+│   └── Mockups (2h)
+└── Development (5h)
+    ├── Backend API (3h)
+    └── Frontend (2h)
+\end{verbatim}
+\end{problembox}
+
+\begin{solutionbox}
+\textbf{Approach: Tree with Recursive Operations}
+
+\begin{lstlisting}
+from typing import List, Optional, Dict
+from dataclasses import dataclass, field
+
+@dataclass
+class Task:
+    """Represents a task in the hierarchy."""
+    task_id: str
+    name: str
+    estimated_hours: float
+    parent_id: Optional[str] = None
+    subtasks: List['Task'] = field(default_factory=list)
+    metadata: Dict = field(default_factory=dict)
+
+class TaskHierarchy:
+    """
+    Manages hierarchical task structure.
+    """
+
+    def __init__(self):
+        self.tasks: Dict[str, Task] = {}
+        self.root_tasks: List[Task] = []
+
+    def add_task(self, task_id: str, name: str,
+                 estimated_hours: float,
+                 parent_id: Optional[str] = None) -> Task:
+        """
+        Add a task to the hierarchy.
+
+        Args:
+            task_id: Unique task identifier
+            name: Task name
+            estimated_hours: Estimated completion time
+            parent_id: Parent task ID (None for root tasks)
+
+        Returns:
+            Created Task object
+        """
+        task = Task(task_id, name, estimated_hours, parent_id)
+        self.tasks[task_id] = task
+
+        if parent_id:
+            if parent_id not in self.tasks:
+                raise ValueError(f"Parent task {parent_id} not found")
+            parent = self.tasks[parent_id]
+            parent.subtasks.append(task)
+        else:
+            self.root_tasks.append(task)
+
+        return task
+
+    def get_all_subtasks(self, task_id: str) -> List[Task]:
+        """
+        Get all subtasks recursively.
+
+        Args:
+            task_id: Task ID to search from
+
+        Returns:
+            List of all descendant tasks
+        """
+        if task_id not in self.tasks:
+            return []
+
+        task = self.tasks[task_id]
+        result = []
+
+        def collect_subtasks(t: Task):
+            for subtask in t.subtasks:
+                result.append(subtask)
+                collect_subtasks(subtask)
+
+        collect_subtasks(task)
+        return result
+
+    def calculate_total_time(self, task_id: str) -> float:
+        """
+        Calculate total estimated time including all subtasks.
+
+        Args:
+            task_id: Root task ID
+
+        Returns:
+            Total estimated hours
+        """
+        if task_id not in self.tasks:
+            return 0.0
+
+        task = self.tasks[task_id]
+        total = task.estimated_hours
+
+        for subtask in task.subtasks:
+            total += self.calculate_total_time(subtask.task_id)
+
+        return total
+
+    def find_task_path(self, task_id: str) -> List[str]:
+        """
+        Find path from root to task.
+
+        Args:
+            task_id: Target task ID
+
+        Returns:
+            List of task IDs from root to target
+        """
+        if task_id not in self.tasks:
+            return []
+
+        path = []
+        current_id = task_id
+
+        while current_id:
+            path.append(current_id)
+            current = self.tasks[current_id]
+            current_id = current.parent_id
+
+        return path[::-1]  # Reverse to get root-to-leaf order
+
+    def get_tasks_at_depth(self, depth: int) -> List[Task]:
+        """
+        Get all tasks at specific depth level.
+
+        Args:
+            depth: Depth level (0 = root tasks)
+
+        Returns:
+            List of tasks at specified depth
+        """
+        result = []
+
+        def traverse(task: Task, current_depth: int):
+            if current_depth == depth:
+                result.append(task)
+            else:
+                for subtask in task.subtasks:
+                    traverse(subtask, current_depth + 1)
+
+        for root in self.root_tasks:
+            traverse(root, 0)
+
+        return result
+
+    def print_hierarchy(self, task: Optional[Task] = None,
+                       indent: str = "") -> str:
+        """Print task hierarchy as tree."""
+        lines = []
+
+        tasks_to_print = [task] if task else self.root_tasks
+
+        for t in tasks_to_print:
+            lines.append(f"{indent}{t.name} ({t.estimated_hours}h)")
+            for i, subtask in enumerate(t.subtasks):
+                is_last = i == len(t.subtasks) - 1
+                connector = "└── " if is_last else "├── "
+                extension = "    " if is_last else "│   "
+                lines.append(f"{indent}{connector}{subtask.name} ({subtask.estimated_hours}h)")
+
+                # Recursively print subtasks
+                sub_lines = self.print_hierarchy(subtask, indent + extension)
+                if sub_lines:
+                    lines.append(sub_lines)
+
+        return "\n".join(lines)
+\end{lstlisting}
+
+\textbf{Time Complexity:}
+\begin{itemize}
+    \item Add task: O(1)
+    \item Get all subtasks: O(n) where n = total subtasks
+    \item Calculate total time: O(n)
+    \item Find path: O(d) where d = depth
+\end{itemize}
+
+\textbf{Space Complexity:} O(n) for storing all tasks
+\end{solutionbox}
+
+\begin{testbox}
+\begin{lstlisting}
+def test_task_hierarchy():
+    # Test 1: Build hierarchy
+    hierarchy = TaskHierarchy()
+
+    hierarchy.add_task("proj", "Project Alpha", 8.0)
+    hierarchy.add_task("design", "Design Phase", 3.0, "proj")
+    hierarchy.add_task("wire", "Wireframes", 1.0, "design")
+    hierarchy.add_task("mock", "Mockups", 2.0, "design")
+    hierarchy.add_task("dev", "Development", 5.0, "proj")
+    hierarchy.add_task("backend", "Backend API", 3.0, "dev")
+    hierarchy.add_task("frontend", "Frontend", 2.0, "dev")
+
+    # Test 2: Get all subtasks
+    subtasks = hierarchy.get_all_subtasks("proj")
+    assert len(subtasks) == 6  # All tasks except root
+
+    # Test 3: Calculate total time
+    total = hierarchy.calculate_total_time("proj")
+    assert total == 16.0  # 8 + 3 + 1 + 2 + 5 + 3 + 2
+
+    # Test 4: Find task path
+    path = hierarchy.find_task_path("wire")
+    assert path == ["proj", "design", "wire"]
+
+    # Test 5: Get tasks at depth
+    depth_0 = hierarchy.get_tasks_at_depth(0)
+    assert len(depth_0) == 1  # Just "proj"
+
+    depth_1 = hierarchy.get_tasks_at_depth(1)
+    assert len(depth_1) == 2  # "design" and "dev"
+
+    depth_2 = hierarchy.get_tasks_at_depth(2)
+    assert len(depth_2) == 4  # All leaf tasks
+
+    print("All test cases passed!")
+\end{lstlisting}
+\end{testbox}
+
+\newpage
+
+\section{Summary and Additional Tips}
+
+\subsection{Key Topics for ClickUp Interviews}
+
+\begin{enumerate}
+    \item \textbf{Data Structures \& Algorithms}
+    \begin{itemize}
+        \item Hash maps and sets (Two Sum variations)
+        \item Backtracking (Combination problems)
+        \item Graph algorithms (Task dependencies, topological sort)
+        \item Trees (Task hierarchies)
+    \end{itemize}
+
+    \item \textbf{Backend System Design}
+    \begin{itemize}
+        \item API design patterns
+        \item Rate limiting strategies
+        \item Caching mechanisms
+        \item Microservices architecture
+    \end{itemize}
+
+    \item \textbf{Node.js / JavaScript Concepts}
+    \begin{itemize}
+        \item Event loop and async patterns
+        \item Promises and async/await
+        \item Stream processing
+        \item Error handling
+    \end{itemize}
+
+    \item \textbf{Database \& Data Processing}
+    \begin{itemize}
+        \item Query optimization
+        \item Data aggregation
+        \item Real-time data processing
+        \item Data integrity and validation
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Interview Preparation Strategy}
+
+\begin{enumerate}
+    \item \textbf{Master the Fundamentals}
+    \begin{itemize}
+        \item Practice LeetCode medium problems daily
+        \item Focus on hash maps, graphs, and trees
+        \item Understand time/space complexity analysis
+    \end{itemize}
+
+    \item \textbf{Study ClickUp's Tech Stack}
+    \begin{itemize}
+        \item Review Node.js best practices
+        \item Understand Express middleware patterns
+        \item Study Docker and Kubernetes basics
+        \item Learn about microservices architecture
+    \end{itemize}
+
+    \item \textbf{Practice System Design}
+    \begin{itemize}
+        \item Design scalable API systems
+        \item Plan database schemas
+        \item Consider caching and rate limiting
+        \item Think about real-world ClickUp features
+    \end{itemize}
+
+    \item \textbf{Prepare for Take-Home Assignment}
+    \begin{itemize}
+        \item Build a simple Express API beforehand
+        \item Practice writing testable, modular code
+        \item Review testing frameworks (Jest, Mocha)
+        \item Focus on code organization and documentation
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Common Interview Questions}
+
+\textbf{Technical Discussion Topics:}
+\begin{itemize}
+    \item Explain the JavaScript event loop
+    \item How does async/await work under the hood?
+    \item Describe your experience with microservices
+    \item How would you handle database migrations?
+    \item Explain caching strategies you've used
+    \item How do you ensure API security?
+\end{itemize}
+
+\textbf{Behavioral Questions:}
+\begin{itemize}
+    \item Describe a challenging bug you fixed
+    \item How do you handle tight deadlines?
+    \item Tell me about a time you disagreed with a technical decision
+    \item How do you stay current with technology?
+    \item Describe your ideal development workflow
+\end{itemize}
+
+\subsection{Resources}
+
+\begin{itemize}
+    \item \textbf{LeetCode:} Focus on medium difficulty, especially graphs and backtracking
+    \item \textbf{Node.js Docs:} Deep dive into async patterns and streams
+    \item \textbf{System Design:} "Designing Data-Intensive Applications" by Martin Kleppmann
+    \item \textbf{ClickUp Blog:} Read about their engineering challenges and solutions
+\end{itemize}
+
+\end{document}
