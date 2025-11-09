@@ -1,38 +1,52 @@
 #!/usr/bin/env python3
 """
-Solution for Problem 13: Ads Assortment Problem (0/1 Knapsack)
+Solution for Problem 6: Ads Assortment Problem
+
+Asked 3+ times at Faire
+
+Problem: Maximize ad value while respecting weekly limits per brand and per user.
+
+Constraints:
+- Each brand can show max N ads per week
+- Each user can see max M ads per week
+- Maximize total ad value
 
 TODO: Implement the functions below.
 """
 
-from typing import List, Dict
+from typing import List, Tuple
 
 
-def max_ad_value(ads: List[Dict[str, int]], budget: int) -> int:
+def max_ad_value(ads: List[Tuple[str, str, int]], brand_limit: int, user_limit: int) -> int:
     """
-    Find maximum ad value within budget using 0/1 Knapsack DP.
+    Calculate maximum ad value respecting brand and user limits.
 
     Args:
-        ads: List of ad dictionaries with 'value' and 'cost'
-        budget: Maximum budget
+        ads: List of (user_id, brand_id, value) tuples
+             Example: [('u1', 'Nike', 100), ('u1', 'Adidas', 90), ('u2', 'Nike', 80)]
+        brand_limit: Max ads per brand per week
+        user_limit: Max ads per user per week
 
     Returns:
-        Maximum achievable value
+        Maximum total ad value
+
+    Examples:
+        >>> ads = [('u1', 'Nike', 100), ('u1', 'Adidas', 90), ('u2', 'Nike', 80)]
+        >>> max_ad_value(ads, brand_limit=1, user_limit=1)
+        # Should return optimal selection respecting limits
     """
-    # TODO: Implement 0/1 Knapsack DP solution
-    return 0  # Placeholder
+    # TODO: Implement ad selection algorithm
+    # Hint: Greedy approach - sort by value descending
+    # Track counts per brand and per user
+    pass
 
 
-def max_ad_value_optimized(ads: List[Dict[str, int]], budget: int) -> int:
+def max_ad_value_optimized(ads: List[Tuple[str, str, int]], brand_limit: int, user_limit: int) -> int:
     """
-    Space-optimized version using 1D DP array.
+    Optimized version using more efficient data structures.
 
-    Args:
-        ads: List of ad dictionaries
-        budget: Maximum budget
-
-    Returns:
-        Maximum achievable value
+    Same interface as max_ad_value but potentially faster.
     """
-    # TODO: Implement space-optimized version
-    return 0  # Placeholder
+    # TODO: Implement optimized version
+    # Hint: Use dictionaries to track brand/user counts
+    pass

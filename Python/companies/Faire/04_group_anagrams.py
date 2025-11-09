@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 1: Group Anagrams - TEST SCAFFOLDING (DO NOT EDIT)
+Problem 4: Group Anagrams - TEST SCAFFOLDING (DO NOT EDIT)
 
 Given an array of strings, group anagrams together.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 4: Funnel Problem
+Problem 3: Funnel Problem
 
 Analyze conversion funnel for e-commerce platform. Users go through stages:
 Browse -> View -> Cart -> Checkout -> Purchase

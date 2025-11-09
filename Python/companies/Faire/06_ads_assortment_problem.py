@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 13: Ads Assortment Problem (0/1 Knapsack)
+Problem 6: Ads Assortment Problem (0/1 Knapsack)
 
 Given a budget and ads with costs and values, select ads to maximize value.
 This is a 0/1 Knapsack problem variant.

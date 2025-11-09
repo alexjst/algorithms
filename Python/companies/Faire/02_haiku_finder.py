@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 3: Haiku Finder (Find First Haiku in Sentence)
+Problem 2: Haiku Finder (Find First Haiku in Sentence)
 
 Given a sentence (single string with mixed case and punctuation) and a syllable
 dictionary, find the FIRST haiku in the sentence. A haiku consists of 3 consecutive
