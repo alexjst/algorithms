@@ -36,7 +36,7 @@ rm 01_lru_cache_solution.py
 
 ## 📝 Problems List
 
-### Core Coding Problems (Problems 1-5)
+### Core Coding Problems (Problems 1-8)
 
 Based on actual OpenAI interview questions from multiple sources (2024-2025):
 
@@ -45,6 +45,9 @@ Based on actual OpenAI interview questions from multiple sources (2024-2025):
 3. **Versioned KV Store** - Thread-safe key-value store with version history
 4. **Rate Limiter** - Implement Fixed Window, Sliding Window, and Token Bucket algorithms
 5. **Text Editor with Undo/Redo** - Command pattern with unlimited undo/redo support
+6. **Toy Language Type System** - Parser for custom language with primitives, generics, and tuples
+7. **Memory Allocator** - Simulate malloc/free with efficient memory management
+8. **KV Store with Persistence** - Key-value store with shutdown/restore and crash recovery
 
 ### System Design Problems
 

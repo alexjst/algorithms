@@ -42,3 +42,6 @@ Thumbs.db
 # Backup files
 *.bak
 *.backup
+
+# Misc
+__pycache__

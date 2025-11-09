@@ -134,9 +134,86 @@ store.get("a", 1)    # "1"
 
 ---
 
+### 6. Toy Language Type System ⭐⭐⭐⭐
+
+**Frequency**: Appears in ~20% of interviews
+
+**Question**: Design a type system for a custom toy language supporting:
+- **Primitives**: int, char, float
+- **Generics**: T1, T2, T3, ... (uppercase alpha + numbers)
+- **Tuples**: Can contain primitives, generics, or nested tuples
+
+**Task**: Process a list of types and reduce/filter them
+
+**Example**:
+```python
+Input:  ["int", "char", "int", "int"]
+Output: ["int", "char"]  # Remove duplicates
+
+Input:  ["(int, char)", "(int, char)", "T1"]
+Output: ["(int, char)", "T1"]
+
+Input:  ["((int, T1), (char, float))", "T2"]
+Output: ["((int, T1), (char, float))", "T2"]
+```
+
+**Source**: 一亩三分地 (thread #1120322, #1145128)
+
+**Difficulty**: Medium (requires parsing and type validation)
+
+---
+
+### 7. Memory Allocator (malloc/free) ⭐⭐⭐⭐
+
+**Frequency**: Appears in ~15% of interviews
+
+**Question**: Implement a memory allocator simulating malloc() and free():
+- `allocate(size)` - Allocate contiguous memory block
+- `free(ptr)` - Free previously allocated block
+- Handle fragmentation and memory reuse
+
+**Optimization Goals**:
+- Naive: O(n) allocate, O(n) free
+- Better: O(n) allocate, O(1) free
+- Best: O(log n) allocate, O(log n) free
+
+**Approaches**:
+- First Fit: Find first block large enough
+- Best Fit: Find smallest block that fits
+- Buddy System: Power-of-2 allocation
+- Free List with balanced tree
+
+**Source**: 一亩三分地 (thread #1137962)
+
+**Difficulty**: Medium-Hard (requires efficient data structures)
+
+---
+
+### 8. KV Store with Persistence ⭐⭐⭐
+
+**Frequency**: Appears in ~15% of interviews
+
+**Question**: Implement a key-value store with persistence:
+- `put(key, value)` - Store key-value pair
+- `get(key)` - Retrieve value
+- `shutdown()` - Persist all data to disk
+- `restore()` - Restore data from disk after restart
+
+**Advanced Features** (may be asked as follow-ups):
+- Write-Ahead Log (WAL) for crash recovery
+- Periodic auto-save
+- Transaction support (commit/rollback)
+- Compaction to reduce file size
+
+**Source**: 一亩三分地 (thread #1140479)
+
+**Difficulty**: Medium (file I/O and data serialization)
+
+---
+
 ## 🧠 ML-Specific Coding Questions
 
-### 6. Transformer Model Debugging ⭐⭐⭐⭐⭐
+### 9. Transformer Model Debugging ⭐⭐⭐⭐⭐
 
 **Frequency**: Appears in ~70% of ML Engineer interviews
 
@@ -169,7 +246,7 @@ class TransformerBlock:
 
 ---
 
-### 7. Excel Sheet Simulator ⭐⭐⭐
+### 10. Excel Sheet Simulator ⭐⭐⭐
 
 **Frequency**: Appears in ~15% of interviews
 
