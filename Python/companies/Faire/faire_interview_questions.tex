@@ -1,0 +1,1610 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\title{\textbf{Faire Interview Questions\\Backend Software Engineer}}
+\author{Compiled from 1point3acres.com}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Overview}
+This document contains interview questions for Backend Software Engineer positions at Faire, compiled from multiple sources:
+\begin{itemize}
+    \item 1point3acres.com - Interview experiences from 2022-2025
+    \item Prepfully.com - Behavioral interview questions
+    \item Web search results - CodeSignal OA format and general interview structure
+\end{itemize}
+
+The information represents publicly available interview experiences and may not reflect current or complete interview content. Questions span multiple positions: Backend Engineer, Full Stack Engineer, Data Engineer, and Frontend Engineer/Intern roles.
+
+\section*{Interview Process}
+
+\subsection*{Complete Interview Timeline}
+\begin{enumerate}
+    \item \textbf{Application \& Recruiter Screening}
+    \begin{itemize}
+        \item Initial phone call with recruiter (15-20 minutes)
+        \item Discussion of background, role expectations, compensation range
+        \item Response time: Usually 1-3 days
+    \end{itemize}
+
+    \item \textbf{Online Assessment (OA)}
+    \begin{itemize}
+        \item CodeSignal assessment (4 questions, 70 minutes)
+        \item Passing score: 750+/850
+        \item Must be completed within 3-5 days of invitation
+    \end{itemize}
+
+    \item \textbf{Technical Phone Screen}
+    \begin{itemize}
+        \item Duration: 45-60 minutes
+        \item 1-2 coding questions (medium difficulty)
+        \item Live coding in shared editor (CoderPad or similar)
+        \item Focus on problem-solving, code quality, edge cases
+    \end{itemize}
+
+    \item \textbf{Virtual Onsite (3-4 rounds, 2.5-3 hours total)}
+    \begin{itemize}
+        \item \textbf{Round 1:} Coding (45-60 min)
+        \begin{itemize}
+            \item Medium to Hard difficulty
+            \item Strong emphasis on test cases and edge cases
+            \item May include debugging existing code
+        \end{itemize}
+
+        \item \textbf{Round 2:} Coding (45-60 min)
+        \begin{itemize}
+            \item Similar format to Round 1
+            \item Different problem domain
+        \end{itemize}
+
+        \item \textbf{Round 3:} Behavioral/Cultural Fit (30-45 min)
+        \begin{itemize}
+            \item STAR method questions
+            \item Team collaboration scenarios
+            \item Why Faire? Career goals
+        \end{itemize}
+
+        \item \textbf{Round 4 (Senior/Staff):} System Design or Pipeline Design (45-60 min)
+        \begin{itemize}
+            \item Backend: System design (e.g., design a like functionality)
+            \item Data Engineering: Pipeline design
+            \item Focus on scalability, trade-offs, communication
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{Final Decision}
+    \begin{itemize}
+        \item Response time: Same day to 3 days
+        \item Offer includes: Base salary, equity, benefits discussion
+    \end{itemize}
+\end{enumerate}
+
+\subsection*{Key Process Notes}
+\begin{itemize}
+    \item \textcolor{red}{\textbf{Low Error Tolerance:}} According to recent feedback (2024-2025), even mostly working code may not guarantee passing
+    \item \textbf{Fast Process:} Usually hear back same day or next day after each round
+    \item \textbf{Responsive HR:} Recruiters provide feedback and are generally helpful
+    \item \textbf{Interview Difficulty:} Rated as "Hard" by most candidates
+    \item \textbf{Test Case Emphasis:} Interviewers heavily focus on edge cases and testing
+\end{itemize}
+
+\section{Coding Questions}
+
+\subsection{String and Array Problems}
+
+\subsubsection{Group Anagrams}
+
+\textbf{Problem Statement:}
+
+Given an array of strings \texttt{strs}, group the anagrams together. You can return the answer in any order.
+
+An anagram is a word or phrase formed by rearranging the letters of a different word or phrase, using all the original letters exactly once.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: strs = ["eat","tea","tan","ate","nat","bat"]
+Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: strs = [""]
+Output: [[""]]
+\end{verbatim}
+
+\textbf{Example 3:}
+\begin{verbatim}
+Input: strs = ["a"]
+Output: [["a"]]
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item $1 \leq$ strs.length $\leq 10^4$
+    \item $0 \leq$ strs[i].length $\leq 100$
+    \item strs[i] consists of lowercase English letters
+\end{itemize}
+
+\textbf{Solution Approach:}
+
+\textit{Method 1: Sorting (Optimal)}
+\begin{itemize}
+    \item For each string, sort its characters to create a key
+    \item Use a hash map where key = sorted string, value = list of original strings
+    \item All anagrams will have the same sorted key
+    \item Time: $O(N \cdot K \log K)$ where N = number of strings, K = max length
+    \item Space: $O(N \cdot K)$
+\end{itemize}
+
+\textit{Method 2: Character Count (Alternative)}
+\begin{itemize}
+    \item Use character frequency as key (e.g., "a1b2c1" for "abc", "bac")
+    \item Time: $O(N \cdot K)$ - better than sorting
+    \item Space: $O(N \cdot K)$
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+from collections import defaultdict
+
+def groupAnagrams(strs):
+    anagrams = defaultdict(list)
+
+    for s in strs:
+        # Use sorted string as key
+        key = ''.join(sorted(s))
+        anagrams[key].append(s)
+
+    return list(anagrams.values())
+
+# Alternative: Character count method
+def groupAnagrams_v2(strs):
+    anagrams = defaultdict(list)
+
+    for s in strs:
+        # Use character frequency tuple as key
+        count = [0] * 26
+        for c in s:
+            count[ord(c) - ord('a')] += 1
+        anagrams[tuple(count)].append(s)
+
+    return list(anagrams.values())
+\end{verbatim}
+
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Empty string: \texttt{[""] $\rightarrow$ [[""]]}
+    \item Single character: \texttt{["a"] $\rightarrow$ [["a"]]}
+    \item All anagrams: \texttt{["abc", "bca", "cab"] $\rightarrow$ [["abc", "bca", "cab"]]}
+    \item No anagrams: \texttt{["a", "b", "c"] $\rightarrow$ [["a"], ["b"], ["c"]]}
+    \item Duplicate strings: \texttt{["a", "a"] $\rightarrow$ [["a", "a"]]}
+    \item Mixed lengths: \texttt{["a", "ab", "ba"] $\rightarrow$ [["a"], ["ab", "ba"]]}
+    \item Case sensitivity: Problem specifies lowercase only
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+# Test 1: Standard case
+assert sorted([sorted(g) for g in groupAnagrams(
+    ["eat","tea","tan","ate","nat","bat"])]
+) == sorted([["bat"], ["nat","tan"], ["ate","eat","tea"]])
+
+# Test 2: Empty strings
+assert groupAnagrams([""]) == [[""]]
+
+# Test 3: Single element
+assert groupAnagrams(["a"]) == [["a"]]
+
+# Test 4: No anagrams
+result = groupAnagrams(["abc", "def", "ghi"])
+assert len(result) == 3
+
+# Test 5: All anagrams
+result = groupAnagrams(["abc", "bca", "cab"])
+assert len(result) == 1 and len(result[0]) == 3
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify if input can have empty strings or duplicates
+    \item Discuss both sorting and character count approaches
+    \item Mention trade-offs: sorting is simpler, char count is faster
+    \item For Faire: Emphasize thorough testing and edge cases
+\end{itemize}
+
+\textit{Source: Full Stack New Grad (2023-2025)}
+
+\subsubsection{HTML Format Validation}
+
+\textbf{Problem Statement:}
+
+Given a string representing HTML-like tags with custom delimiters, determine if the tag structure is valid.
+
+Tags are represented as:
+\begin{itemize}
+    \item Opening tag: \texttt{\{\{tagName\}\}}
+    \item Closing tag: \texttt{\{\{/tagName\}\}}
+    \item Content: Any text between tags
+\end{itemize}
+
+A valid structure must satisfy:
+\begin{itemize}
+    \item Every opening tag has a matching closing tag
+    \item Tags are properly nested (no overlapping)
+    \item Closing tags match the most recent unclosed opening tag
+\end{itemize}
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: "{{div}} {{p}} Hello {{/p}} {{/div}}"
+Output: true
+Explanation: Tags are properly nested
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: "{{div}} {{p}} Hello {{/div}} {{/p}}"
+Output: false
+Explanation: Tags overlap incorrectly
+\end{verbatim}
+
+\textbf{Example 3:}
+\begin{verbatim}
+Input: "{{div}} Hello {{/div}} {{p}} World {{/p}}"
+Output: true
+Explanation: Two separate valid tag pairs
+\end{verbatim}
+
+\textbf{Example 4:}
+\begin{verbatim}
+Input: "{{div}} Hello"
+Output: false
+Explanation: Missing closing tag
+\end{verbatim}
+
+\textbf{Solution Approach:}
+
+Use a stack to track opening tags:
+\begin{itemize}
+    \item Parse the string to identify tags
+    \item When encountering opening tag: push tag name to stack
+    \item When encountering closing tag: pop stack and verify match
+    \item Final stack must be empty
+    \item Time: $O(N)$ where N = length of string
+    \item Space: $O(T)$ where T = number of tags
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+def isValidHTML(s):
+    stack = []
+    i = 0
+
+    while i < len(s):
+        # Look for tag start
+        if i < len(s) - 1 and s[i:i+2] == '{{':
+            # Find tag end
+            j = s.find('}}', i + 2)
+            if j == -1:
+                return False  # Malformed tag
+
+            tag = s[i+2:j]
+
+            if tag.startswith('/'):
+                # Closing tag
+                tag_name = tag[1:]
+                if not stack or stack[-1] != tag_name:
+                    return False
+                stack.pop()
+            else:
+                # Opening tag
+                stack.append(tag)
+
+            i = j + 2
+        else:
+            # Regular content, skip
+            i += 1
+
+    return len(stack) == 0
+
+# Test cases
+print(isValidHTML("{{div}} {{p}} Hello {{/p}} {{/div}}"))
+# True
+print(isValidHTML("{{div}} {{p}} Hello {{/div}} {{/p}}"))
+# False
+print(isValidHTML("{{div}} Hello"))
+# False
+print(isValidHTML("{{div}} {{/p}}"))
+# False (closing without opening)
+\end{verbatim}
+
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Empty string: \texttt{""} $\rightarrow$ \texttt{true}
+    \item No tags, only content: \texttt{"Hello World"} $\rightarrow$ \texttt{true}
+    \item Unmatched opening: \texttt{"\{\{div\}\}"} $\rightarrow$ \texttt{false}
+    \item Unmatched closing: \texttt{"\{\{/div\}\}"} $\rightarrow$ \texttt{false}
+    \item Wrong order: \texttt{"\{\{div\}\} \{\{p\}\} \{\{/div\}\} \{\{/p\}\}"} $\rightarrow$ \texttt{false}
+    \item Nested same tags: \texttt{"\{\{div\}\} \{\{div\}\} \{\{/div\}\} \{\{/div\}\}"} $\rightarrow$ \texttt{true}
+    \item Malformed tags: \texttt{"\{\{div"} $\rightarrow$ \texttt{false}
+    \item Self-closing tags: Clarify requirements
+    \item Case sensitivity: Clarify if \texttt{\{\{Div\}\}} and \texttt{\{\{div\}\}} are different
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_html_validation():
+    # Valid cases
+    assert isValidHTML("") == True
+    assert isValidHTML("Hello World") == True
+    assert isValidHTML("{{div}} {{/div}}") == True
+    assert isValidHTML("{{div}} {{p}} {{/p}} {{/div}}") == True
+
+    # Invalid cases
+    assert isValidHTML("{{div}}") == False
+    assert isValidHTML("{{/div}}") == False
+    assert isValidHTML("{{div}} {{p}} {{/div}} {{/p}}") == False
+    assert isValidHTML("{{div}} {{p}}") == False
+
+    # Edge cases
+    assert isValidHTML("{{div}} {{div}} {{/div}} {{/div}}") == True
+    assert isValidHTML("{{a}} {{b}} {{c}} {{/c}} {{/b}} {{/a}}")
+           == True
+
+test_html_validation()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify tag naming rules (alphanumeric? special chars?)
+    \item Ask about self-closing tags (e.g., \texttt{<img />})
+    \item Discuss handling of attributes if applicable
+    \item Mention similarity to valid parentheses problem
+    \item For Faire: Test thoroughly with malformed input
+\end{itemize}
+
+\textit{Source: Full Stack New Grad (2023-2025)}
+
+\subsubsection{Haiku Finder (5-7-5 Syllables)}
+
+\textbf{Problem Statement:}
+
+Given a list of words where each word has an associated syllable count, find all possible haiku formations. A haiku consists of three consecutive parts:
+\begin{itemize}
+    \item First line: exactly 5 syllables
+    \item Second line: exactly 7 syllables
+    \item Third line: exactly 5 syllables
+\end{itemize}
+
+The three parts must be formed from consecutive words in the input list (no gaps allowed).
+
+\textbf{Input Format:}
+\begin{verbatim}
+words = ["hello", "world", "foo", "bar", "baz", "test", "data"]
+syllables = [2, 1, 1, 1, 1, 1, 2]
+\end{verbatim}
+
+\textbf{Output Format:}
+Return all valid haiku formations as tuples of (start\_idx, mid\_idx, end\_idx) where:
+\begin{itemize}
+    \item words[start\_idx:mid\_idx] has 5 syllables
+    \item words[mid\_idx:end\_idx] has 7 syllables
+    \item words[end\_idx:end\_idx+k] has 5 syllables (where k determined by counting)
+\end{itemize}
+
+Or return the actual word groups for each line.
+
+\textbf{Example 1:}
+\begin{verbatim}
+words = ["birds", "fly", "south", "in", "the", "winter", "cold"]
+syllables = [1, 1, 1, 1, 1, 2, 1]
+
+Output:
+[
+  [["birds", "fly", "south", "in"],     # 1+1+1+1 = 4? No
+   ["the", "winter"],                    # 1+2 = 3? No
+   ...]
+]
+
+Valid example:
+words = ["spring", "rain", "falls", "gently", "on",
+         "the", "garden", "flowers", "bloom"]
+syllables = [1, 1, 1, 2, 1, 1, 2, 2, 1]
+
+One valid haiku:
+Line 1: ["spring", "rain", "falls", "gently"]  # 1+1+1+2 = 5
+Line 2: ["on", "the", "garden", "flowers"]     # 1+1+2+2 = 6? No
+
+Let me use a clearer example:
+words = ["I", "love", "to", "code", "all", "day",
+         "long", "writing", "Python"]
+syllables = [1, 1, 1, 1, 1, 1, 1, 2, 2]
+
+Valid haiku:
+Line 1: ["I", "love", "to", "code", "all"]     # 1+1+1+1+1 = 5
+Line 2: ["day", "long", "writing", "Python"]   # 1+1+2+2 = 6? No
+
+Simpler:
+words = ["a", "b", "c", "d", "e", "f", "g", "h", "i"]
+syllables = [1, 1, 1, 1, 1, 1, 1, 1, 1, ...]
+
+Line 1: words[0:5] = 5 syllables
+Line 2: words[5:12] = 7 syllables
+Line 3: words[12:17] = 5 syllables
+\end{verbatim}
+
+\textbf{Solution Approach:}
+
+Use prefix sums for efficient range queries:
+\begin{itemize}
+    \item Compute prefix sum array: prefix[i] = sum of syllables[0:i]
+    \item For each starting position i:
+    \begin{itemize}
+        \item Use binary search or two pointers to find j where prefix[j] - prefix[i] = 5
+        \item Then find k where prefix[k] - prefix[j] = 7
+        \item Then find m where prefix[m] - prefix[k] = 5
+        \item If all three are found, record haiku
+    \end{itemize}
+    \item Time: $O(N^2)$ with two pointers, or $O(N \log N)$ with binary search per position
+    \item Space: $O(N)$ for prefix sum array
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+def find_haikus(words, syllables):
+    n = len(words)
+    if n == 0:
+        return []
+
+    # Build prefix sum
+    prefix = [0]
+    for syl in syllables:
+        prefix.append(prefix[-1] + syl)
+
+    haikus = []
+
+    # Try all starting positions
+    for i in range(n):
+        # Find end of line 1 (5 syllables)
+        for j in range(i + 1, n + 1):
+            if prefix[j] - prefix[i] == 5:
+                # Find end of line 2 (7 syllables)
+                for k in range(j + 1, n + 1):
+                    if prefix[k] - prefix[j] == 7:
+                        # Find end of line 3 (5 syllables)
+                        for m in range(k + 1, n + 1):
+                            if prefix[m] - prefix[k] == 5:
+                                haiku = [
+                                    words[i:j],
+                                    words[j:k],
+                                    words[k:m]
+                                ]
+                                haikus.append(haiku)
+                        break  # Only first valid line 3
+                break  # Only first valid line 2
+        # Note: Can remove breaks to find ALL combos
+
+    return haikus
+
+# Optimized version with binary search
+from bisect import bisect_left
+
+def find_haikus_optimized(words, syllables):
+    n = len(words)
+    prefix = [0]
+    for syl in syllables:
+        prefix.append(prefix[-1] + syl)
+
+    haikus = []
+
+    for i in range(n):
+        # Find j: prefix[j] = prefix[i] + 5
+        target1 = prefix[i] + 5
+        j = bisect_left(prefix, target1, i + 1)
+        if j >= len(prefix) or prefix[j] != target1:
+            continue
+
+        # Find k: prefix[k] = prefix[j] + 7
+        target2 = prefix[j] + 7
+        k = bisect_left(prefix, target2, j + 1)
+        if k >= len(prefix) or prefix[k] != target2:
+            continue
+
+        # Find m: prefix[m] = prefix[k] + 5
+        target3 = prefix[k] + 5
+        m = bisect_left(prefix, target3, k + 1)
+        if m >= len(prefix) or prefix[m] != target3:
+            continue
+
+        haikus.append([words[i:j], words[j:k], words[k:m]])
+
+    return haikus
+\end{verbatim}
+
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Empty input: \texttt{words = []} $\rightarrow$ \texttt{[]}
+    \item Insufficient syllables: total < 17 $\rightarrow$ \texttt{[]}
+    \item Exact one haiku: all words form perfect 5-7-5
+    \item Multiple valid haikus: overlapping or non-overlapping
+    \item Single word with many syllables: e.g., "beautiful" (3 syllables)
+    \item Impossible to form 5-7-5: e.g., all words have 2 syllables (can't sum to 5 or 7)
+    \item Very long word list: performance considerations
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_haiku_finder():
+    # Test 1: Simple case with 1-syllable words
+    words1 = ["a"]*5 + ["b"]*7 + ["c"]*5
+    syls1 = [1]*17
+    result1 = find_haikus(words1, syls1)
+    assert len(result1) >= 1
+
+    # Test 2: No valid haiku
+    words2 = ["hello", "world"]
+    syls2 = [2, 1]  # Only 3 syllables total
+    result2 = find_haikus(words2, syls2)
+    assert result2 == []
+
+    # Test 3: Multiple word lengths
+    words3 = ["I", "love", "coding", "every", "single",
+              "day", "it", "makes", "me", "happy"]
+    syls3 = [1, 1, 2, 2, 2, 1, 1, 1, 1, 2]
+    result3 = find_haikus(words3, syls3)
+    # Check if valid haikus found
+
+    # Test 4: Empty input
+    assert find_haikus([], []) == []
+
+test_haiku_finder()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify if overlapping haikus are allowed
+    \item Ask if we need ALL haikus or just first/any one
+    \item Discuss prefix sum optimization
+    \item Mention binary search for faster lookups
+    \item For Faire: Thoroughly test edge cases (empty, impossible, etc.)
+\end{itemize}
+
+\textit{Source: Backend/Full Stack Phone Screen (2024-2025)}
+
+\subsubsection{Funnel Problem}
+\begin{itemize}
+    \item \textbf{Description:} Funnel-shaped problem (specific details not publicly available)
+    \item \textbf{Key Point:} Interviewer heavily focused on test cases and edge cases
+    \item \textbf{Note:} Candidate mentioned using JUnit for testing
+    \item \textbf{Feedback:} Even after comprehensive testing, interviewer kept asking for more edge cases
+    \item \textbf{Source:} Coding interview (2024-2025)
+\end{itemize}
+
+\subsubsection{Number to Word Conversion}
+
+\textbf{Problem Statement:}
+
+Given two integers \texttt{start} and \texttt{end}, convert all numbers in the range $[start, end]$ (inclusive) to their English word representations and calculate the total length of all characters (excluding spaces).
+
+For example: 1 = "one", 2 = "two", ..., 23 = "twenty three"
+
+Return the total length of all word representations.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: start = 1, end = 3
+Output: 11
+
+Explanation:
+1 -> "one" (3 chars)
+2 -> "two" (3 chars)
+3 -> "three" (5 chars)
+Total: 3 + 3 + 5 = 11
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: start = 10, end = 12
+Output: 22
+
+Explanation:
+10 -> "ten" (3 chars)
+11 -> "eleven" (6 chars)
+12 -> "twelve" (6 chars)
+Total: 3 + 6 + 6 = 15 (NOT 22, recalculating...)
+Actually: 3 + 6 + 6 = 15
+
+Or if counting spaces:
+10 -> "ten" (3)
+11 -> "eleven" (6)
+12 -> "twelve" (6)
+= 15 without spaces
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item $1 \leq start \leq end \leq 1000$
+    \item Count only letters, not spaces
+\end{itemize}
+
+\textbf{Solution Approach:}
+
+Build number-to-word converter:
+\begin{itemize}
+    \item Create maps for 1-19, tens (20, 30,...), and hundreds
+    \item For each number, convert to words recursively
+    \item Sum up character counts
+    \item Time: $O(N)$ where N = end - start + 1
+    \item Space: $O(1)$ for conversion maps
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+def number_to_words(num):
+    """Convert number (1-1000) to English words"""
+    if num == 0:
+        return "zero"
+
+    ones = ["", "one", "two", "three", "four", "five",
+            "six", "seven", "eight", "nine"]
+    teens = ["ten", "eleven", "twelve", "thirteen",
+             "fourteen", "fifteen", "sixteen",
+             "seventeen", "eighteen", "nineteen"]
+    tens = ["", "", "twenty", "thirty", "forty", "fifty",
+            "sixty", "seventy", "eighty", "ninety"]
+
+    def helper(n):
+        if n == 0:
+            return ""
+        elif n < 10:
+            return ones[n]
+        elif n < 20:
+            return teens[n - 10]
+        elif n < 100:
+            return tens[n // 10] + \
+                   (" " + ones[n % 10] if n % 10 != 0 else "")
+        else:
+            return ones[n // 100] + " hundred" + \
+                   (" " + helper(n % 100) if n % 100 != 0
+                    else "")
+
+    if num == 1000:
+        return "one thousand"
+    return helper(num)
+
+def total_word_length(start, end):
+    total = 0
+    for num in range(start, end + 1):
+        words = number_to_words(num)
+        # Remove spaces and count length
+        length = len(words.replace(" ", ""))
+        total += length
+    return total
+
+# Tests
+print(total_word_length(1, 3))   # 11
+print(total_word_length(10, 12)) # 15
+print(total_word_length(1, 5))   # one+two+three+four+five
+                                 # 3+3+5+4+4 = 19
+\end{verbatim}
+
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Single number: start = end = 1 $\rightarrow$ 3
+    \item Teens (11-19): special handling
+    \item Exact tens (20, 30, ...): no "and"
+    \item Hundreds: 100 = "one hundred" (10 chars)
+    \item 1000: "one thousand" (special case)
+    \item Crossing boundaries: [19, 21] includes "nineteen", "twenty", "twenty one"
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_number_words():
+    # Test individual conversions
+    assert number_to_words(1) == "one"
+    assert number_to_words(11) == "eleven"
+    assert number_to_words(20) == "twenty"
+    assert number_to_words(100) == "one hundred"
+    assert number_to_words(1000) == "one thousand"
+
+    # Test total length
+    assert total_word_length(1, 1) == 3  # "one"
+    assert total_word_length(1, 3) == 11 # 3+3+5
+    assert total_word_length(10, 10) == 3 # "ten"
+
+test_number_words()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify if spaces count toward length
+    \item Ask about range limits (problem says $\leq 1000$)
+    \item Discuss British vs American English ("and" placement)
+    \item Mention potential optimization for repeated ranges
+    \item For Faire: Test edge cases like 1000, teens, exact hundreds
+\end{itemize}
+
+\textit{Source: Backend/Full Stack - Canadian Office (2022)}
+
+\subsection{Graph and Path Problems}
+
+\subsubsection{Course Schedule with Minimum Time}
+
+\textbf{Problem Statement:}
+
+You are given:
+\begin{itemize}
+    \item \texttt{n} courses labeled from 0 to n-1
+    \item \texttt{prerequisites}: array where \texttt{prerequisites[i] = [a, b]} means course \texttt{b} must be completed before course \texttt{a}
+    \item \texttt{time}: array where \texttt{time[i]} is the duration (in days/weeks) to complete course \texttt{i}
+\end{itemize}
+
+Find the minimum time required to complete all courses. You can take multiple courses simultaneously if their prerequisites are met.
+
+\textbf{Example 1:}
+\begin{verbatim}
+n = 3
+prerequisites = [[1, 0], [2, 0]]
+time = [1, 2, 3]
+
+Course 0: 1 day, no prerequisites
+Course 1: 2 days, requires course 0
+Course 2: 3 days, requires course 0
+
+Timeline:
+Day 0-1: Complete course 0 (1 day)
+Day 1-3: Complete courses 1 and 2 in parallel (max 3 days)
+
+Total: 1 + 3 = 4 days
+
+Output: 4
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+n = 4
+prerequisites = [[1, 0], [2, 1], [3, 2]]
+time = [1, 1, 1, 1]
+
+Linear dependency: 0 -> 1 -> 2 -> 3
+Must complete sequentially: 1+1+1+1 = 4 days
+
+Output: 4
+\end{verbatim}
+
+\textbf{Example 3:}
+\begin{verbatim}
+n = 4
+prerequisites = [[1, 0], [2, 0], [3, 1], [3, 2]]
+time = [1, 2, 3, 1]
+
+Course 0: 1 day
+Courses 1, 2: after 0 (2, 3 days) - parallel
+Course 3: after both 1 and 2 (1 day)
+
+Timeline:
+Day 0-1: Course 0
+Day 1-4: Courses 1 (done day 3) and 2 (done day 4) parallel
+Day 4-5: Course 3
+
+Total: 5 days
+
+Output: 5
+\end{verbatim}
+
+\textbf{Solution Approach:}
+
+Topological Sort + Critical Path Method (CPM):
+\begin{itemize}
+    \item Build graph from prerequisites
+    \item Check for cycles (if cycle exists, return -1)
+    \item Use topological sort with earliest start time tracking:
+    \begin{itemize}
+        \item \texttt{earliest[i]} = earliest time course \texttt{i} can start
+        \item For each course: \texttt{earliest[i] = max(earliest[prereq] + time[prereq]) for all prereqs}
+    \end{itemize}
+    \item Answer = \texttt{max(earliest[i] + time[i]) for all i}
+    \item Time: $O(V + E)$ where V = courses, E = prerequisites
+    \item Space: $O(V + E)$
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+from collections import defaultdict, deque
+
+def minimum_time_courses(n, prerequisites, time):
+    # Build graph and in-degree
+    graph = defaultdict(list)
+    in_degree = [0] * n
+
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    # Initialize earliest start times
+    earliest = [0] * n
+
+    # Topological sort using Kahn's algorithm
+    queue = deque()
+    for i in range(n):
+        if in_degree[i] == 0:
+            queue.append(i)
+
+    completed = 0
+
+    while queue:
+        course = queue.popleft()
+        completed += 1
+
+        # Process neighbors
+        for next_course in graph[course]:
+            # Update earliest start time for next_course
+            earliest[next_course] = max(
+                earliest[next_course],
+                earliest[course] + time[course]
+            )
+
+            in_degree[next_course] -= 1
+            if in_degree[next_course] == 0:
+                queue.append(next_course)
+
+    # Check for cycle
+    if completed != n:
+        return -1  # Impossible due to cycle
+
+    # Calculate total time (max finish time)
+    max_time = 0
+    for i in range(n):
+        finish_time = earliest[i] + time[i]
+        max_time = max(max_time, finish_time)
+
+    return max_time
+
+# Tests
+print(minimum_time_courses(
+    3, [[1, 0], [2, 0]], [1, 2, 3]
+))  # Output: 4
+
+print(minimum_time_courses(
+    4, [[1, 0], [2, 1], [3, 2]], [1, 1, 1, 1]
+))  # Output: 4
+
+print(minimum_time_courses(
+    4, [[1, 0], [2, 0], [3, 1], [3, 2]], [1, 2, 3, 1]
+))  # Output: 5
+\end{verbatim}
+
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item No prerequisites: \texttt{max(time)} (all parallel)
+    \item Linear chain: \texttt{sum(time)} (all sequential)
+    \item Cycle in prerequisites: return -1
+    \item Single course: \texttt{time[0]}
+    \item Zero time courses: valid, acts as dependency marker
+    \item Disconnected components: multiple independent course chains
+    \item Course with multiple prerequisites: must wait for ALL
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_course_schedule_time():
+    # Test 1: Parallel courses
+    assert minimum_time_courses(
+        3, [[1, 0], [2, 0]], [1, 2, 3]
+    ) == 4
+
+    # Test 2: Linear sequence
+    assert minimum_time_courses(
+        3, [[1, 0], [2, 1]], [1, 2, 3]
+    ) == 6
+
+    # Test 3: No prerequisites (all parallel)
+    assert minimum_time_courses(
+        3, [], [1, 2, 3]
+    ) == 3
+
+    # Test 4: Cycle detection
+    assert minimum_time_courses(
+        2, [[0, 1], [1, 0]], [1, 1]
+    ) == -1
+
+    # Test 5: Diamond dependency
+    assert minimum_time_courses(
+        4, [[1, 0], [2, 0], [3, 1], [3, 2]],
+        [1, 2, 3, 1]
+    ) == 5
+
+test_course_schedule_time()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Recognize this as Critical Path Method (CPM) problem
+    \item Discuss difference from standard Course Schedule
+    \item Mention that parallel execution is key
+    \item Explain why we take max of prerequisite finish times
+    \item For Faire: Test cycle detection and edge cases
+\end{itemize}
+
+\textit{Source: Senior SWE Interview (2022)}
+
+\subsection{LeetCode-style Problems}
+
+\subsubsection{Max Consecutive Ones}
+\begin{itemize}
+    \item \textbf{Problem:} LeetCode 485 - Max Consecutive Ones
+    \item \textbf{Duration:} 45 minutes
+    \item \textbf{Source:} Coding interview (2024-2025)
+\end{itemize}
+
+\subsection{Additional Coding Problems}
+
+\subsubsection{Date Format Function}
+\begin{itemize}
+    \item \textbf{Description:} Implement a function to parse and format dates
+    \item \textbf{Details:}
+    \begin{itemize}
+        \item Convert dates between different formats (e.g., "MM/DD/YYYY" $\leftrightarrow$ "YYYY-MM-DD")
+        \item Handle edge cases: invalid dates, leap years, different delimiters
+        \item Validate date inputs
+    \end{itemize}
+    \item \textbf{Position:} Frontend/Full Stack
+    \item \textbf{Source:} Frontend interview (2024)
+\end{itemize}
+
+\subsubsection{Maze with Portals}
+
+\textbf{Problem Statement:}
+
+You are given a 2D grid maze where:
+\begin{itemize}
+    \item \texttt{0} = walkable cell
+    \item \texttt{1} = wall (cannot pass)
+    \item \texttt{S} = start position
+    \item \texttt{E} = end position
+    \item \texttt{P} = portal (teleporter)
+\end{itemize}
+
+Additionally, you have a dictionary mapping portal positions to their destinations. When you step on a portal, you are instantly teleported to its destination.
+
+Find the shortest path from S to E. Return the minimum number of steps, or -1 if impossible.
+
+\textbf{Movement:} You can move up, down, left, right (4 directions). Each move counts as 1 step. Portal teleportation does NOT count as an extra step.
+
+\textbf{Example 1:}
+\begin{verbatim}
+maze = [
+  ['S', '0', '1', '0'],
+  ['0', '1', 'P', '0'],
+  ['0', '0', '0', '1'],
+  ['1', '0', 'E', '0']
+]
+
+portals = {(1, 2): (3, 1)}  # Portal at (1,2) goes to (3,1)
+
+Shortest path:
+S(0,0) -> (1,0) -> (2,0) -> (2,1) -> (2,2) -> Portal(1,2)
+       -> Teleport to (3,1) -> E(3,2)
+
+Without portal: 6 steps
+With portal: 4 steps (reach portal) + 1 step (to E) = 5 steps
+
+Output: 5
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+maze = [
+  ['S', '1', 'E']
+]
+Output: -1 (impossible, wall blocks path)
+\end{verbatim}
+
+\textbf{Solution Approach:}
+
+Use BFS (Breadth-First Search) with portal handling:
+\begin{itemize}
+    \item Standard BFS tracks (row, col, distance)
+    \item When visiting a cell:
+    \begin{itemize}
+        \item If it's a portal, add BOTH normal neighbors AND portal destination to queue
+        \item Portal destination inherits same distance (instant teleport)
+    \end{itemize}
+    \item Use visited set to avoid cycles
+    \item Time: $O(R \times C)$ where R = rows, C = columns
+    \item Space: $O(R \times C)$ for queue and visited set
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+from collections import deque
+
+def shortest_path_with_portals(maze, portals):
+    if not maze or not maze[0]:
+        return -1
+
+    rows, cols = len(maze), len(maze[0])
+
+    # Find start and end
+    start, end = None, None
+    for r in range(rows):
+        for c in range(cols):
+            if maze[r][c] == 'S':
+                start = (r, c)
+            elif maze[r][c] == 'E':
+                end = (r, c)
+
+    if not start or not end:
+        return -1
+
+    # BFS
+    queue = deque([(start[0], start[1], 0)])  # (row, col, dist)
+    visited = {start}
+    directions = [(0,1), (1,0), (0,-1), (-1,0)]
+
+    while queue:
+        r, c, dist = queue.popleft()
+
+        # Check if reached end
+        if (r, c) == end:
+            return dist
+
+        # Check if current cell is a portal
+        if (r, c) in portals:
+            pr, pc = portals[(r, c)]
+            if (pr, pc) not in visited and \
+               0 <= pr < rows and 0 <= pc < cols and \
+               maze[pr][pc] != '1':
+                visited.add((pr, pc))
+                queue.append((pr, pc, dist))
+
+        # Explore normal neighbors
+        for dr, dc in directions:
+            nr, nc = r + dr, c + dc
+
+            if (0 <= nr < rows and 0 <= nc < cols and
+                (nr, nc) not in visited and
+                maze[nr][nc] != '1'):
+
+                visited.add((nr, nc))
+                queue.append((nr, nc, dist + 1))
+
+    return -1  # No path found
+
+# Test
+maze1 = [
+    ['S', '0', '1', '0'],
+    ['0', '1', 'P', '0'],
+    ['0', '0', '0', '1'],
+    ['1', '0', 'E', '0']
+]
+portals1 = {(1, 2): (3, 1)}
+print(shortest_path_with_portals(maze1, portals1))
+\end{verbatim}
+
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Empty maze: return -1
+    \item No start or end: return -1
+    \item Start = End: return 0
+    \item No path exists (walls block): return -1
+    \item Portal leads to wall: ignore portal
+    \item Portal leads out of bounds: ignore portal
+    \item Multiple portals: test chaining portals
+    \item Portal at start position: can immediately teleport
+    \item Portal at end position: doesn't affect result
+    \item Bidirectional portals: clarify if portals work both ways
+    \item Portal cycles: A $\rightarrow$ B, B $\rightarrow$ A (visited set handles this)
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_maze_portals():
+    # Test 1: With portal shortcut
+    maze1 = [['S', '0', 'P'], ['1', '1', '0'], ['E', '0', '0']]
+    portals1 = {(0, 2): (2, 0)}
+    assert shortest_path_with_portals(maze1, portals1) == 2
+
+    # Test 2: No path
+    maze2 = [['S', '1', 'E']]
+    portals2 = {}
+    assert shortest_path_with_portals(maze2, portals2) == -1
+
+    # Test 3: Direct path better than portal
+    maze3 = [['S', '0', 'E']]
+    portals3 = {(0, 1): (0, 0)}  # Portal doesn't help
+    assert shortest_path_with_portals(maze3, portals3) == 2
+
+    # Test 4: Start = End
+    maze4 = [['S']]
+    portals4 = {}
+    # Modify to handle S=E: return 0 if (r,c) == end initially
+
+test_maze_portals()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify if portals are one-way or bidirectional
+    \item Ask if portal teleportation counts as a step
+    \item Discuss handling of portal cycles/loops
+    \item Mention BFS is optimal for shortest path
+    \item For Faire: Test portal edge cases thoroughly
+\end{itemize}
+
+\textit{Source: Backend Engineer Phone Screen (2024)}
+
+\subsubsection{String Parsing Problem}
+\begin{itemize}
+    \item \textbf{Description:} Parse a string with specific format rules and extract information
+    \item \textbf{Details:} Limited information available; involves pattern matching and string manipulation
+    \item \textbf{Position:} Backend Engineer
+    \item \textbf{Source:} Coding round (2024)
+\end{itemize}
+
+\section{Online Assessment (OA) - CodeSignal}
+
+\subsection{OA Format and Structure}
+\begin{itemize}
+    \item \textbf{Platform:} CodeSignal
+    \item \textbf{Number of Questions:} 4 coding questions
+    \item \textbf{Time Limit:} 70 minutes total
+    \item \textbf{Scoring:}
+    \begin{itemize}
+        \item Maximum score: 850 points
+        \item Passing threshold: 750+ points
+        \item Each question has multiple test cases
+        \item Partial credit given for passing some test cases
+    \end{itemize}
+    \item \textbf{Difficulty:} Mix of Easy to Medium-Hard LeetCode-style problems
+    \item \textbf{Note:} High passing bar - need to solve most questions completely or nearly completely
+\end{itemize}
+
+\subsection{OA Question Examples}
+
+\subsubsection{Array Divisibility Check}
+
+\textbf{Problem Statement:}
+
+Given an array of integers \texttt{arr} and an integer \texttt{k}, determine if you can partition the array into contiguous subarrays such that the sum of each subarray is divisible by \texttt{k}.
+
+Return \texttt{true} if such a partition exists, \texttt{false} otherwise.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: arr = [3, 1, 2, 6, 4, 2], k = 3
+Output: true
+Explanation: [3] (sum=3, 3%3=0), [1,2] (sum=3, 3%3=0),
+             [6] (sum=6, 6%3=0), [4,2] (sum=6, 6%3=0)
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: arr = [1, 2, 3], k = 5
+Output: false
+Explanation: Total sum = 6, cannot partition into sums
+             divisible by 5
+\end{verbatim}
+
+\textbf{Example 3:}
+\begin{verbatim}
+Input: arr = [5, 10, 15], k = 5
+Output: true
+Explanation: Each element is divisible by 5:
+             [5], [10], [15]
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item $1 \leq$ arr.length $\leq 10^5$
+    \item $-10^9 \leq$ arr[i] $\leq 10^9$
+    \item $1 \leq k \leq 10^3$
+\end{itemize}
+
+\textbf{Solution Approach:}
+
+Key insight: If total sum is not divisible by k, impossible. Otherwise, use prefix sum modulo tracking:
+\begin{itemize}
+    \item Calculate prefix sums modulo k
+    \item A valid partition exists if we can split where each segment has sum $\equiv 0 \pmod{k}$
+    \item Use hash map to track seen remainders
+    \item Time: $O(N)$ where N = array length
+    \item Space: $O(K)$ for remainder tracking
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+def can_partition_divisible(arr, k):
+    # First check: total sum must be divisible by k
+    total = sum(arr)
+    if total % k != 0:
+        return False
+
+    # Try to greedily partition
+    current_sum = 0
+    for num in arr:
+        current_sum += num
+        if current_sum % k == 0:
+            current_sum = 0  # Start new partition
+
+    # If we end with current_sum == 0, valid partition exists
+    return current_sum == 0
+
+# Alternative: Count remainders
+def can_partition_divisible_v2(arr, k):
+    if sum(arr) % k != 0:
+        return False
+
+    # Count prefix sum remainders
+    prefix_sum = 0
+    remainder_count = {0: 1}
+
+    for num in arr:
+        prefix_sum = (prefix_sum + num) % k
+        # Handle negative modulo
+        if prefix_sum < 0:
+            prefix_sum += k
+
+        if prefix_sum == 0:
+            # Can partition here
+            remainder_count = {0: 1}
+        else:
+            remainder_count[prefix_sum] = \
+                remainder_count.get(prefix_sum, 0) + 1
+
+    return True  # If we got here, partition exists
+
+# Tests
+print(can_partition_divisible([3,1,2,6,4,2], 3))  # True
+print(can_partition_divisible([1,2,3], 5))        # False
+print(can_partition_divisible([5,10,15], 5))      # True
+\end{verbatim}
+
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Single element divisible by k: \texttt{[6], k=3} $\rightarrow$ \texttt{true}
+    \item Single element not divisible: \texttt{[5], k=3} $\rightarrow$ \texttt{false}
+    \item All elements divisible: each forms own partition
+    \item Negative numbers: handle modulo correctly (\texttt{(-5) \% 3 = 1} in Python)
+    \item Zero in array: \texttt{[0, k]} always works
+    \item Large k: k > sum(arr)
+    \item Total sum not divisible: early return false
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_array_divisibility():
+    assert can_partition_divisible([3,1,2,6,4,2], 3) == True
+    assert can_partition_divisible([1,2,3], 5) == False
+    assert can_partition_divisible([5,10,15], 5) == True
+    assert can_partition_divisible([1], 1) == True
+    assert can_partition_divisible([2], 3) == False
+    assert can_partition_divisible([-3,3], 3) == True
+    assert can_partition_divisible([0,0,0], 5) == True
+
+test_array_divisibility()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify if empty partitions are allowed
+    \item Ask about negative number handling
+    \item Discuss greedy vs DP approaches
+    \item Mention total sum check optimization
+    \item For Faire: Test with negative numbers and zeros
+\end{itemize}
+
+\textit{Source: CodeSignal OA (2024)}
+
+\subsubsection{Digit Frequency Counter}
+
+\textbf{Problem Statement:}
+
+Given two integers \texttt{L} and \texttt{R} representing a range $[L, R]$, count the frequency of each digit (0-9) that appears in all numbers within this range (inclusive).
+
+Return an array of length 10 where \texttt{result[i]} represents the count of digit \texttt{i}.
+
+\textbf{Example 1:}
+\begin{verbatim}
+Input: L = 10, R = 12
+Output: [1, 3, 1, 0, 0, 0, 0, 0, 0, 0]
+
+Explanation:
+Numbers: 10, 11, 12
+10: digits 1, 0
+11: digits 1, 1
+12: digits 1, 2
+
+Digit frequencies:
+0: 1 time  (from 10)
+1: 3 times (from 10, 11, 11, 12)
+2: 1 time  (from 12)
+\end{verbatim}
+
+\textbf{Example 2:}
+\begin{verbatim}
+Input: L = 1, R = 13
+Output: [1, 6, 1, 1, 0, 0, 0, 0, 0, 0]
+
+Numbers: 1,2,3,4,5,6,7,8,9,10,11,12,13
+0: 1 (from 10)
+1: 6 (from 1, 10, 11, 11, 12, 13)
+2: 1 (from 2, 12)
+3: 1 (from 3, 13)
+...
+\end{verbatim}
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item $0 \leq L \leq R \leq 10^9$
+\end{itemize}
+
+\textbf{Solution Approach:}
+
+\textit{Method 1: Brute Force (Small ranges)}
+\begin{itemize}
+    \item Iterate through each number in [L, R]
+    \item Convert to string and count each digit
+    \item Time: $O((R - L) \times \log R)$
+    \item Space: $O(1)$
+    \item Works well for small ranges
+\end{itemize}
+
+\textit{Method 2: Digit DP (Large ranges)}
+\begin{itemize}
+    \item Use digit dynamic programming
+    \item count(R) - count(L-1) where count(n) = digits from 0 to n
+    \item Time: $O(\log R)$
+    \item More complex but handles large ranges
+\end{itemize}
+
+\textbf{Python Solution:}
+\begin{verbatim}
+def count_digit_frequency(L, R):
+    # Brute force approach for reasonable ranges
+    freq = [0] * 10
+
+    for num in range(L, R + 1):
+        # Count digits in current number
+        for digit_char in str(num):
+            digit = int(digit_char)
+            freq[digit] += 1
+
+    return freq
+
+# Optimized for large ranges using helper function
+def count_digits_upto(n):
+    """Count digit frequencies from 0 to n"""
+    if n < 0:
+        return [0] * 10
+
+    freq = [0] * 10
+    for num in range(n + 1):
+        for digit_char in str(num):
+            freq[int(digit_char)] += 1
+    return freq
+
+def count_digit_frequency_optimized(L, R):
+    # Count from 0 to R
+    freq_R = count_digits_upto(R)
+    # Count from 0 to L-1
+    freq_L = count_digits_upto(L - 1)
+
+    # Subtract to get range [L, R]
+    result = [freq_R[i] - freq_L[i] for i in range(10)]
+    return result
+
+# Tests
+print(count_digit_frequency(10, 12))
+# [1, 3, 1, 0, 0, 0, 0, 0, 0, 0]
+
+print(count_digit_frequency(1, 13))
+# [1, 6, 1, 1, 0, 0, 0, 0, 0, 0] (approx)
+
+print(count_digit_frequency(0, 10))
+# Should count 0,1,2,...,10
+\end{verbatim}
+
+\textbf{Edge Cases \& Testing:}
+\begin{itemize}
+    \item Single number: L = R = 5 $\rightarrow$ only digit 5 appears once
+    \item Range with 0: L = 0, R = 5
+    \item Leading zeros: don't count (10 has digits 1 and 0, not 0, 1, 0)
+    \item Large numbers: $10^9$ range
+    \item Consecutive numbers: [99, 101] crosses 100
+    \item All same digit: [111, 111] $\rightarrow$ three 1's
+\end{itemize}
+
+\textbf{Test Cases:}
+\begin{verbatim}
+def test_digit_frequency():
+    # Test 1: Example from problem
+    assert count_digit_frequency(10, 12) == \
+        [1, 3, 1, 0, 0, 0, 0, 0, 0, 0]
+
+    # Test 2: Single number
+    assert count_digit_frequency(5, 5) == \
+        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+
+    # Test 3: Include zero
+    assert count_digit_frequency(0, 1)[0] == 1
+    assert count_digit_frequency(0, 1)[1] == 1
+
+    # Test 4: Range crossing hundreds
+    result = count_digit_frequency(99, 101)
+    assert result[0] == 2  # From 100, 100
+    assert result[1] == 4  # From 99, 100, 100, 101
+    assert result[9] == 2  # From 99, 99
+
+test_digit_frequency()
+\end{verbatim}
+
+\textbf{Interview Tips:}
+\begin{itemize}
+    \item Clarify if leading zeros count (they don't for numbers)
+    \item Discuss time complexity for different range sizes
+    \item Mention digit DP for very large ranges
+    \item Ask about memory constraints
+    \item For Faire: Test boundary cases like 0, 999, 1000
+\end{itemize}
+
+\textit{Source: CodeSignal OA (2024)}
+
+\subsubsection{Ads Assortment Problem}
+\begin{itemize}
+    \item \textbf{Description:} Optimize selection of advertisements to maximize value given constraints
+    \item \textbf{Details:}
+    \begin{itemize}
+        \item Multiple ads with associated values and constraints
+        \item Budget/capacity limitations
+        \item Need to maximize total value
+    \end{itemize}
+    \item \textbf{Similar to:} Knapsack-variant or greedy selection problem
+    \item \textbf{Source:} CodeSignal OA (2024)
+\end{itemize}
+
+\subsubsection{General OA Topics}
+\begin{itemize}
+    \item Array manipulation and subarrays
+    \item String processing and pattern matching
+    \item Hash maps and frequency counting
+    \item Greedy algorithms
+    \item Dynamic programming (basic)
+    \item Math and number theory (modular arithmetic)
+\end{itemize}
+
+\section{System Design Questions}
+
+\subsection{Design a Post "Like" Functionality}
+\begin{itemize}
+    \item \textbf{Description:} Design a system for liking posts (similar to social media)
+    \item \textbf{Focus:} Communication and thought process
+    \item \textbf{Key aspects to consider:}
+    \begin{itemize}
+        \item How to think about the problem
+        \item Different solution approaches
+        \item Scalability considerations
+    \end{itemize}
+    \item \textbf{Note:} More emphasis on communication than specific implementation
+    \item \textbf{Position:} Backend Engineer
+    \item \textbf{Source:} System Design round (2024-2025)
+\end{itemize}
+
+\section{Data Engineering Questions}
+
+\subsection{Senior Data Engineer Interview}
+\begin{itemize}
+    \item \textbf{Interview Structure:}
+    \begin{itemize}
+        \item 1 round phone screen: Coding
+        \item 3 rounds virtual onsite:
+        \begin{enumerate}
+            \item Coding
+            \item Behavioral Questions (BQ)
+            \item Pipeline Design
+        \end{enumerate}
+    \end{itemize}
+    \item \textbf{Timeline:} August application, late August recruiter reach out
+    \item \textbf{Result:} Rejection
+    \item \textbf{Feedback:} Very difficult for job-hopping while employed; low error tolerance
+    \item \textbf{Source:} Senior Data Engineer interview (2025)
+\end{itemize}
+
+\section{Frontend/Full Stack Specific}
+
+\subsection{Object Manipulation (Frontend Intern)}
+\begin{itemize}
+    \item \textbf{Description:} Write operations on product objects using Python or JavaScript
+    \item \textbf{Details:}
+    \begin{itemize}
+        \item Objects represent products with attributes (size, color, etc.)
+        \item Operations: search/filter products by attributes
+    \end{itemize}
+    \item \textbf{Duration:} 1 hour
+    \item \textbf{Position:} Frontend Intern
+    \item \textbf{Location:} Canada
+    \item \textbf{Source:} Intern interview (2023)
+\end{itemize}
+
+\section{Behavioral Interview Questions}
+
+Common behavioral questions asked at Faire (compiled from Prepfully and 1point3acres):
+
+\begin{enumerate}
+    \item Tell me about yourself and your background
+    \item Why do you want to work at Faire? What interests you about the company?
+    \item Describe a time when you had to work with a difficult team member. How did you handle it?
+    \item Tell me about a challenging technical problem you solved. What was your approach?
+    \item How do you handle disagreements with your manager or team members?
+    \item Describe a project you're most proud of. What was your role?
+    \item Tell me about a time you failed. What did you learn?
+    \item How do you prioritize tasks when you have multiple deadlines?
+    \item Describe a situation where you had to learn a new technology quickly
+    \item Where do you see yourself in 3-5 years?
+\end{enumerate}
+
+\subsection{Tips for Behavioral Rounds}
+\begin{itemize}
+    \item Use STAR method (Situation, Task, Action, Result)
+    \item Prepare stories that demonstrate:
+    \begin{itemize}
+        \item Technical problem-solving
+        \item Teamwork and collaboration
+        \item Leadership and ownership
+        \item Adaptability and learning
+        \item Communication skills
+    \end{itemize}
+    \item Research Faire's business model (wholesale marketplace connecting retailers and brands)
+    \item Be prepared to discuss why you're interested in B2B marketplace space
+    \item Demonstrate understanding of Faire's mission to empower small businesses
+\end{itemize}
+
+\section{Key Interview Tips}
+
+\subsection{Test Cases and Edge Cases}
+\begin{itemize}
+    \item Faire interviewers place \textbf{heavy emphasis} on test cases
+    \item Be prepared to discuss many edge cases
+    \item Consider using testing frameworks (e.g., JUnit) during the interview
+    \item Even comprehensive testing may not be enough - be ready to think of more cases
+\end{itemize}
+
+\subsection{Recent Trends (2024-2025)}
+\begin{itemize}
+    \item \textcolor{red}{Low error tolerance} - even mostly working code may result in rejection
+    \item Difficult for candidates job-hopping while employed due to time constraints
+    \item Senior level may not include BQ or system design in some cases (varies by position)
+\end{itemize}
+
+\section{Additional Notes}
+
+\begin{itemize}
+    \item \textbf{Company:} Faire is a wholesale marketplace (Canadian company with US presence)
+    \item \textbf{Interview Difficulty:} Generally rated as "Hard" by candidates
+    \item \textbf{Response Time:} Fast - usually hear back same day or next day after each round
+    \item \textbf{Process:} HR is responsive and provides feedback
+\end{itemize}
+
+\section*{Disclaimer}
+This information is compiled from multiple public sources including 1point3acres.com, Prepfully.com, and web search results. Actual interview content may vary. Some details on 1point3acres.com were hidden behind paywalls and may not be completely comprehensive. Use this as a reference for preparation, but be prepared for variations in actual interviews.
+
+\vspace{1em}
+\noindent\textbf{Sources:}
+\begin{itemize}
+    \item 1point3acres Faire tag (3 pages): \url{https://www.1point3acres.com/bbs/tag/faire-7100-1.html}
+    \item Prepfully Faire Interviews: \url{https://prepfully.com/interview-guides/faire}
+    \item Various web search results for CodeSignal OA format and interview structure
+\end{itemize}
+
+\vspace{1em}
+\noindent\textit{Data collected: November 2025}\\
+\textit{Document compiled from 10+ interview experiences across multiple sources}
+
+\end{document}
