@@ -1,0 +1,660 @@
+================================================================================
+GALAXY SEARCH RANKING SIGNALS - COMPREHENSIVE CATEGORIZATION
+================================================================================
+Total: 83 Signals
+Source: /Users/ayang/git/github/galaxy/search/serving/gravity/service/src/main/java/com/coupang/search/gravity/product/ranking/signal/
+Date: 2025-01-09
+
+================================================================================
+1. TEXT RELEVANCE SIGNALS (18 signals)
+================================================================================
+Measures how well query terms match document text fields
+
+Signal Name                              | Formula/Implementation                           | Fields Matched                | Key Details
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+DkScoreSignal                            | {!payload field=parent_dir_ufr_term              | Unified field                 | BM25-like with weighted term payloads
+                                         | function=max}query                               | (title+tags+description)      |
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+WeightedTermsSignal                      | sum(unigram_weights, bigram_weights)             | unigramPayload, bigramPayload | Unigram + bigram matching with term weights
+                                         |                                                  |                               | Example: "맥북 프로" matches "맥북_프로" bigram
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+DkScoreV2Signal                          | Enhanced DkScore with feedback                   | Multiple fields               | DkScore + user feedback integration
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+DkScoreV3                                | DkScore v3 iteration                             | Multiple fields               | Further refinement of DkScore
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+DkScoreV4Signal                          | DkScore v4 iteration                             | Multiple fields               | Latest DkScore version
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+DkScoreWithWeight                        | Weighted DkScore variant                         | Multiple fields               | Configurable weight parameters
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+SalientTermSignal                        | sum(max(term_weight_brand,                       | brand, title                  | Boost docs with salient query terms
+                                         | term_weight_title))                              |                               | Weighted by field: title (0.5), category (0.3)
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+SalientTermV2Signal                      | Enhanced salient term v2                         | brand, title, category        | Additional field support
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+TermVectorSignal                         | Term vector similarity                           | Multiple fields               | Vector-based text similarity
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+TextSimilaritySignal                     | General text similarity                          | Multiple fields               | Base text similarity implementation
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+CookDingDkScoreSignal                    | DkScore for cooking domain                       | Domain-specific fields        | Specialized for food queries
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+TranslatedDkScoreSignal                  | DkScore for translated queries                   | Translated text fields        | Cross-language search support
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+TranslatedWeightedTerms                  | Weighted terms for translations                  | Translated fields             | Translation-aware matching
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+SimilarQuerySignal                       | Similar query matching                           | Query expansion fields        | Query synonym/expansion
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+SimilarQueryFbScoreSignal                | Similar query + feedback                         | Query + feedback fields       | Combines query expansion with feedback
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+SimilarQueryCookdingFbScoreSignal        | Cooking query + feedback                         | Cooking-specific fields       | Cooking domain specialization
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+BroadQueryWithGuidedSearchSignal         | Broad query handling                             | Multiple fields               | For ambiguous/broad queries
+-----------------------------------------|--------------------------------------------------|-------------------------------|--------------------------------------------------
+SubstituteWeightedTerms                  | Substitute query matching                        | Substitute term fields        | Query substitution support
+
+Interview Talking Points:
+- Uses BM25-like scoring with term payload fields in Solr
+- Unigram + bigram matching to capture phrase semantics
+- Field-specific weights: title (higher weight) vs description (lower weight)
+- Salient terms boost documents containing important query terms identified by ML
+- Korean NLP via Coumoran tokenizer for proper Korean text segmentation
+
+Code Location:
+- /signal/DkScoreSignal.java
+- /signal/textsimilarity/WeightedTermsSignal.java
+- /signal/textsimilarity/SalientTermSignal.java
+- /signal/dkscore/SimilarQueryFbScoreSignal.java
+- /signal/translation/TranslatedDkScoreSignal.java
+
+================================================================================
+2. DOCUMENT QUALITY SIGNALS (9 signals)
+================================================================================
+Query-independent product quality metrics
+
+Signal Name                | Formula/Implementation                                        | Key Details
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+Rating                     | Transformed rating score                                      | Average product rating (1-5 stars) with sigmoid
+                           |                                                               | transformation
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+RatingAverage              | Average rating value                                          | Raw average rating across reviews
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+RatingCount                | Number of ratings                                             | Review volume as quality signal
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+SalesScore                 | 1 / (1 + e^(-7 * (ln(sales + 0.0001) + 0.7)))               | Decayed sales with recency weighting
+                           |                                                               | Sigmoid function on log(sales)
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+DecayedSaleAmount          | Time-decayed sales                                            | Recent sales weighted higher than old sales
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+DocScore                   | Combined document score                                       | Multiple quality factors combined
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+Price                      | Price-based quality signal                                    | Price range transformation (low/medium/high)
+                           |                                                               | Can indicate premium products
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+CustomerShareSignal        | Customer share metric                                         | Market share/popularity signal
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+Delivery                   | Delivery type quality                                         | Rocket delivery (premium) vs standard
+
+Interview Talking Points:
+- Sales velocity with time decay: recent sales count more
+- Rating transformation: sigmoid function to handle rating distribution skew
+- Price as quality proxy: higher price can indicate premium products
+- Query-independent: computed offline, same for all queries
+
+Code Location:
+- /signal/product/Rating.java
+- /signal/product/SalesScore.java
+- /signal/product/DecayedSaleAmount.java
+- /signal/product/Price.java
+
+================================================================================
+3. QUERY-DOCUMENT MATCHING SIGNALS (25 signals)
+================================================================================
+Structural matching between query intent and document attributes
+
+--------------------------------------------------------------------------------
+3A. Category Matching (7 signals)
+--------------------------------------------------------------------------------
+
+Signal Name                              | Formula/Implementation                           | Key Details
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CategoryWeightSignalV2                   | max(if(refinedCategories=catX,                   | Boosts products in query-matched categories
+                                         | weightX, 1.0))                                   | Uses CategoryWeightTriplet from QR
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CategoryBoosting                         | Category boost from QR                           | Uses Query Rewrite category predictions
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CategoryBoostingRawSignal                | Raw category boosting                            | Direct category match weights
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CategoryBoostingRawSignalDepthAll        | Multi-depth category boost                       | Matches category hierarchy (L1, L2, L3, L4)
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CategoryBoostingSignalWithTun            | Tunable category boost                           | Configurable category weights
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+QrCategorySignal                         | Query rewrite category signal                    | QR-predicted category matches
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+QueryCategoryWeightSignal                | Query-specific category weights                  | Learned query→category associations
+
+Code Location:
+- /signal/category/CategoryWeightSignalV2.java
+- /signal/product/CategoryBoosting.java
+- /signal/QueryCategoryWeightSignal.java
+
+--------------------------------------------------------------------------------
+3B. Brand Matching (17 signals)
+--------------------------------------------------------------------------------
+
+Signal Name                              | Formula/Implementation                           | Key Details
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CqiBrandSignalV11                        | max(if(cqiBrand=brandX,                          | Brand mentioned in query gets 1.05-1.4x boost
+                                         | 1.05-1.4, 1.0))                                  | Uses TAGS_AFTER_MERGING from QR
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CqiBrandSignalV7                         | Earlier brand signal v7                          | Iterative improvements
+CqiBrandSignalV8                         | Earlier brand signal v8                          |
+CqiBrandSignalV9                         | Earlier brand signal v9                          |
+CqiBrandSignalV10                        | Earlier brand signal v10                         |
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CqiBrandMaxBoostSignal                   | Maximum brand boost                              | Strongest brand match
+CqiBrandMaxBoostSignalV1                 | Brand boost v1                                   | Different boost strategies
+CqiBrandMaxBoostSignalV2                 | Brand boost v2                                   |
+CqiBrandMaxBoostSignalV3                 | Brand boost v3                                   |
+CqiBrandMaxBoostSignalV4                 | Brand boost v4                                   |
+CqiBrandMaxBoostSignalV5                 | Brand boost v5                                   |
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CqiBrandWithCatBoostingDynamicSignal     | Brand + category dynamic boost                   | Combined brand & category matching
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CqiBrandWithCqiCatBoostingDynamicSignal  | CQI brand + CQI category                         | CQI (Chinese Query Intent) integration
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CqiDynamicBrandSignal                    | Dynamic CQI brand signal                         | Adaptive brand matching
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+QrBrandSignal                            | Query rewrite brand signal                       | QR-predicted brand matches
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+BrandCategoryWeightSignal                | Brand × category weight                          | Joint brand-category matching
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+CqiBrandCategoryWeightSignal             | CQI brand × category                             | CQI-aware brand-category matching
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+NerSignal                                | Named Entity Recognition signal                  | NER-detected brand entities
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+QConceptBrand                            | Query concept brand                              | Concept-based brand matching
+QConceptCategory                         | Query concept category                           | Concept-based category matching
+QConceptCqiCategory                      | Query concept CQI category                       | CQI concept matching
+QConceptImw                              | Query concept IMW                                | Item-to-Market-Weight concept matching
+
+Interview Talking Points:
+- Hierarchical category matching: matches at different category levels
+  Example: "electronics" → "laptops" → "MacBook"
+- Brand synonyms: "맥북" = "MacBook" = "Apple MacBook"
+- Query tagging: Query Rewrite service tags query tokens as BRAND, CATEGORY, NAME_PRODUCT
+  Example: "삼성 갤럭시" → "삼성:BRAND 갤럭시:NAME_PRODUCT"
+- Dynamic weights: brand boost ranges from 1.05x (weak match) to 1.4x (strong match)
+- Uses HierarchicalCanonicalBrand from Query Rewrite service
+
+Code Location:
+- /signal/product/CqiBrandSignalV11.java
+- /signal/category/QrBrandSignal.java
+- /signal/BrandCategoryWeightSignal.java
+
+================================================================================
+4. ENGAGEMENT SIGNALS - QUERY-INDEPENDENT (3 signals)
+================================================================================
+User engagement on products, independent of query
+
+Signal Name                | Formula/Implementation                           | Key Details
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+Clicks                     | {!payload field=parentClicks function=max}       | Total clicks on product (all queries)
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+SalesScore                 | Decayed sales amount                             | Purchase events with time decay
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+RatingCount                | Number of reviews                                | Review engagement volume
+
+Interview Talking Points:
+- Popularity signals: high clicks/sales indicate popular products
+- Not query-specific: same click count for all queries
+- Time decay: recent engagement weighted higher
+
+Code Location:
+- /signal/feedback/Clicks.java
+
+================================================================================
+5. ENGAGEMENT SIGNALS - QUERY-SPECIFIC (3 signals)
+================================================================================
+User engagement between specific query-product pairs
+
+Signal Name                | Formula/Implementation                                        | Key Details
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+NavboostSignal             | (clicks + norm) / (expectedClicks + norm) × weight           | Query-product CTR similar to Google's NavBoost
+                           |                                                               | Position-normalized engagement
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+TranslatedNavBoost         | NavBoost for translated queries                              | Cross-language engagement
+---------------------------|---------------------------------------------------------------|-------------------------------------------------------
+Clicks (query-specific)    | {!payload field=parentClicks function=max}query              | Clicks for this specific query
+
+Formula Details:
+NavBoost = weight × (clicks + nbnorm) / (expectedClicks + nbnorm)
+where:
+- clicks = actual clicks on product for this query
+- expectedClicks = expected clicks based on position (position bias)
+- nbnorm = normalization constant to smooth low-traffic queries (typically 5-10)
+- weight = configurable multiplier (typically 0.1-1.0)
+
+Formula: nbWeight * (clicks + nbNorm) / (expectedClicks + nbNorm)
+
+Interview Talking Points:
+- Query-product pair engagement: "MacBook Pro" → Product A has high CTR
+- Position-normalized: corrects for position bias using expected clicks
+  Example: Position 1 gets ~30% CTR, Position 10 gets ~2% CTR
+- Similar to Google's NavBoost: uses clicks over expected clicks ratio
+- Cold start handling: normalization constant prevents overfitting to sparse data
+- Multiple versions: COEC_WITH_CLICKS_CAPPED_OFFLINE variant
+
+Code Location:
+- /signal/NavboostSignal.java
+- /signal/feedback/NavBoost.java
+- /signal/translation/TranslatedNavBoost.java
+
+================================================================================
+6. ML PROBABILITY SIGNALS (4 signals)
+================================================================================
+Machine learning predicted user action probabilities
+
+Signal Name                              | Formula/Implementation                           | ML Model          | Key Details
+-----------------------------------------|--------------------------------------------------|-------------------|---------------------------------------------
+MinMaxNormalizedClickProbability         | (clickProb - minClick) /                         | XGBoost/          | Predicted P(click | query, product)
+                                         | (maxClick - minClick) + 1.0                      | TensorFlow        | Min-max scaled to [1.0, 2.0]
+-----------------------------------------|--------------------------------------------------|-------------------|---------------------------------------------
+MinMaxNormalizedPurchaseProbability      | (purchaseProb - minPurchase) /                   | XGBoost/          | Predicted P(purchase | query, product)
+                                         | (maxPurchase - minPurchase) + 1.0                | TensorFlow        |
+-----------------------------------------|--------------------------------------------------|-------------------|---------------------------------------------
+MinMaxNormalizedAddCartProbability       | (addCartProb - minAddCart) /                     | XGBoost/          | Predicted P(addToCart | query, product)
+                                         | (maxAddCart - minAddCart) + 1.0                  | TensorFlow        |
+-----------------------------------------|--------------------------------------------------|-------------------|---------------------------------------------
+MinMaxNormalizedDirectBuyProbability     | (directBuyProb - minDirectBuy) /                 | XGBoost/          | Predicted P(directBuy | query, product)
+                                         | (maxDirectBuy - minDirectBuy) + 1.0              | TensorFlow        | Direct purchase without cart
+
+Interview Talking Points:
+- Trained ML models (XGBoost, TensorFlow) via Proton framework
+- Min-max normalization: scales probabilities to [1.0, 2.0] range for ranking
+- Query-product features: uses text relevance, engagement, quality as ML input features
+- Real-time scoring: models served via Proton, scored at query time
+- Calibration: min/max values computed per-query from Query Rewrite service
+  (via UserBehaviorMinMaxProbability in QueryJoin)
+- Multiple conversion types: click → add to cart → purchase → direct buy
+
+Code Location:
+- /signal/feedback/MinMaxNormalizedClickProbability.java
+- /signal/feedback/MinMaxNormalizedPurchaseProbability.java
+- /signal/feedback/MinMaxNormalizedAddCartProbability.java
+- /signal/feedback/MinMaxNormalizedDirectBuyProbability.java
+
+================================================================================
+7. BUSINESS/MONETIZATION SIGNALS (31 signals)
+================================================================================
+Profitability, promotions, and business logic
+
+--------------------------------------------------------------------------------
+7A. GPPU (Gross Product Profit Unit) Signals (20 signals)
+--------------------------------------------------------------------------------
+
+Signal Name                              | Formula/Implementation                           | Boost Range   | Key Details
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+GppuScorePromotionSignal                 | if(ppp > avgPpp,                                 | 1.0x - 1.5x   | Promotes high-profit products
+                                         | 1.0 + scale × (ppp - avgPpp) / avgPpp,          |               |
+                                         | 1.0)                                             |               |
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+GppuScorePromotionV2Signal               | GPPU promotion v2                                | Variable      | Experimental iterations
+GppuScorePromotionV3Signal               | GPPU promotion v3                                | Variable      |
+GppuScorePromotionV4Signal               | GPPU promotion v4                                | Variable      |
+GppuScorePromotionV5Signal               | GPPU promotion v5                                | Variable      |
+GppuScorePromotionV6Signal               | GPPU promotion v6                                | Variable      |
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+GppuScoreDemotionSignal                  | if(ppp < avgPpp, 0.5-1.0, 1.0)                   | 0.5x - 1.0x   | Demotes low-profit products
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+GppuScoreDemotionV2Signal                | GPPU demotion v2                                 | Variable      | Experimental iterations
+GppuScoreDemotionV3Signal                | GPPU demotion v3                                 | Variable      |
+GppuScoreDemotionV4Signal                | GPPU demotion v4                                 | Variable      |
+GppuScoreDemotionV5Signal                | GPPU demotion v5                                 | Variable      |
+GppuScoreDemotionV6Signal                | GPPU demotion v6                                 | Variable      |
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+GppuEntityBoostSignal                    | Entity-aware GPPU boost                          | 1.0x - 1.5x   | GPPU + entity matching
+GppuEntityBoostSignalV1                  | Entity GPPU v1                                   | Variable      | Entity boost refinements
+GppuEntityBoostSignalV2                  | Entity GPPU v2                                   | Variable      |
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+ImproveGppuExperimentSignal              | GPPU experiment signal                           | Variable      | A/B test variant
+ImproveGppuExperimentSignalC             | GPPU experiment variant C                        | Variable      |
+ImproveGppuExperimentSignalE             | GPPU experiment variant E                        | Variable      |
+ImproveGppuExperimentSignalV2B           | GPPU experiment v2 variant B                     | Variable      |
+ImproveGppuExperimentSignalV3            | GPPU experiment v3                               | Variable      |
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+GppuPromotionTwiddlerSignal              | GPPU promotion twiddler                          | Variable      | Post-processing GPPU boost
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+CategoryAwarePppBoostSignal              | Category-aware PPP boost                         | Variable      | Per-category profit optimization
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+PureProductProfitSigmoidSignal           | Sigmoid profit transform                         | 0.0x - 2.0x   | Non-linear profit transformation
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+AdjustedProfitWeightSignal               | Adjusted profit weight                           | Variable      | Profit with adjustments
+AdjustedProfitWeightComponent            | Profit weight component                          | Variable      | Profit computation component
+
+GPPU Formula Example:
+if (productProfitPerUnit > avgQueryProfitPerUnit) {
+    boost = 1.0 + scale × (ppp - avgPpp) / avgPpp  // Ranges from 1.0 to 1.5
+} else {
+    boost = 1.0  // or apply demotion (0.5 - 1.0)
+}
+
+Code Location:
+- /signal/GppuScorePromotionSignal.java
+- /signal/AbstractGppuScoreSignal.java
+- /signal/product/GppuEntityBoostSignal.java
+
+--------------------------------------------------------------------------------
+7B. Delivery & Promotion Signals (6 signals)
+--------------------------------------------------------------------------------
+
+Signal Name                | Formula/Implementation                           | Key Details
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+DeliveryTypeSignal         | if(deliveryType=ROCKET, 1.1, 1.0)               | 10% boost for Rocket (premium) delivery
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+Delivery                   | General delivery signal                          | Delivery speed/type ranking
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+PromotionSignal            | Promotion/discount boost                         | Boosts discounted products
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+DiscountProductBoost       | Discount-specific boost                          | Emphasizes discounted items
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+NewSelectionSignalV2       | New product selection v2                         | Boosts newly listed products
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+NewSelectionSignalV4       | New product selection v4                         | Enhanced new product boost
+
+Code Location:
+- /signal/DeliveryTypeSignal.java
+- /signal/PromotionSignal.java
+- /signal/DiscountProductBoost.java
+
+--------------------------------------------------------------------------------
+7C. Other Business Signals (5 signals)
+--------------------------------------------------------------------------------
+
+Signal Name                | Formula/Implementation                           | Key Details
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+QueryPriceSingnal          | Query-based price signal                         | Price matching query intent (e.g., "cheap", "저렴한")
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+QueryRatingSignal          | Query-based rating signal                        | Rating matching query intent (e.g., "best", "최고")
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+HighAspBoostSignal         | High aspect ratio boost                          | Boosts specific product attributes
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+FbParamSignal              | Feedback parameter signal                        | Configurable feedback weights
+---------------------------|--------------------------------------------------|-------------------------------------------------------
+SimilarCategory            | Similar category boost                           | Cross-category recommendations
+
+Interview Talking Points:
+- Profit optimization: balances relevance with business profitability (GPPU)
+- Rocket delivery premium: 10% boost for fast delivery products
+- Promotional emphasis: boosts discounted products during sales
+- New product cold-start: temporary boost for newly listed items
+- Query-aware business signals: price/rating expectations from query
+  Example: "cheap phone" should prefer lower-priced phones
+
+Code Location:
+- /signal/QueryPriceSingnal.java
+- /signal/QueryRatingSignal.java
+
+================================================================================
+8. DEMOTION SIGNALS (6 signals)
+================================================================================
+Negative signals to suppress unwanted products
+
+Signal Name                              | Formula/Implementation                           | Penalty       | Key Details
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+OutOfStockDemotionSignal                 | if(isSoldOut=Y, -10000, 0)                       | -10,000       | Effectively removes sold-out products
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+OutOfStockDemotionMultiplicationSignal   | if(isSoldOut=Y, 0.01, 1.0)                       | 0.01x (99%)   | Multiplicative out-of-stock penalty
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+AdultDemotionSignal                      | Adult content demotion                           | Variable      | Suppresses adult content
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+AdultDemotionMultiplicationSignal        | if(isAdult=Y, 0.1, 1.0)                          | 0.1x (90%)    | Multiplicative adult content penalty
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+DbVendorDemotion                         | Database vendor demotion                         | Variable      | Suppresses specific vendors
+-----------------------------------------|--------------------------------------------------|---------------|----------------------------------------
+DbVendorDemotionMultiplicationSignal     | Vendor-based demotion multiplier                 | 0.1x - 1.0x   | Configurable vendor penalties
+
+Interview Talking Points:
+- Hard demotions: -10,000 penalty effectively removes products from results
+- Soft demotions: 0.1x multiplier reduces score by 90%
+- Business logic: out-of-stock products should not appear prominently
+- Content filtering: adult content suppression for general audiences
+- Vendor management: can suppress problematic vendors
+
+Code Location:
+- /signal/OutOfStockDemotionSignal.java
+- /signal/demotion/OutOfStockDemotionMultiplicationSignal.java
+- /signal/demotion/AdultDemotionMultiplicationSignal.java
+- /signal/demotion/DbVendorDemotion.java
+
+================================================================================
+9. QUERY EXPANSION/RELAXATION SIGNALS (6 signals)
+================================================================================
+Handling query reformulations and expansions
+
+Signal Name                              | Formula/Implementation                           | Key Details
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+QueryRewriteSignal                       | Query rewrite boost                              | Boosts QR-suggested terms
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+QueryRelaxingSignal                      | Query relaxation signal                          | Handles overly restrictive queries
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+BroadQueryNeighborsBoostSignal           | Broad query neighbor boost                       | Expands broad/ambiguous queries
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+BroadQueryNeighborBoostSignalBigram      | Bigram broad query boost                         | Bigram-based query expansion
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+BroadSubstituteWeightedTerms             | Broad query substitutes                          | Substitute terms for broad queries
+-----------------------------------------|--------------------------------------------------|-------------------------------------------------------
+DemoteExpandedMatchSignal                | Demote expanded matches                          | Penalizes overly expanded matches
+
+Interview Talking Points:
+- Query expansion: handles sparse queries by adding related terms
+  Example: "phone" → "smartphone cellphone mobile"
+- Query relaxation: removes overly restrictive constraints for zero-result queries
+- Broad query handling: special treatment for ambiguous queries like "옷" (clothes)
+- Expansion penalty: demotes results matched via aggressive expansion
+  (ensures expanded results rank lower than exact matches)
+
+Code Location:
+- /signal/QueryRewriteSignal.java
+- /signal/QueryRelaxingSignal.java
+- /signal/dkscore/broadquery/BroadQueryNeighborsBoostSignal.java
+
+================================================================================
+10. SPECIALIZED/EXPERIMENTAL SIGNALS (2 signals)
+================================================================================
+
+Signal Name                | Key Details
+---------------------------|-------------------------------------------------------
+LongclawSignal             | Experimental category signal
+---------------------------|-------------------------------------------------------
+FtCategorySignal           | Feature-based category signal
+
+Code Location:
+- /signal/category/LongclawSignal.java
+- /signal/category/FtCategorySignal.java
+
+================================================================================
+SIGNAL ARCHITECTURE PATTERNS
+================================================================================
+
+How Signals Work in Galaxy:
+
+1. Signal Interface: All signals implement Signal.base(RankingContext) → String
+2. Solr Function Queries: Returns Solr function query syntax
+   Example: if(exists(query({!v='deliveryChargeType:ROCKET'})), 1.1, 1.0)
+3. Payload Fields: Stores precomputed scores in Lucene payload fields
+   Examples: parentClicks, unigramPayload, bigramPayload, parentCoecWithClicksCapped
+4. Ranking Equation: Signals combined via product() or sum()
+
+Example Ranking Equation:
+--------------------------
+product(
+    DkScore,               // Text relevance: BM25-like weighted terms
+    CategoryWeight,        // Category matching: 1.0-1.4x boost
+    NavBoost,              // Engagement: query-product CTR
+    GppuPromotion,         // Business logic: profit optimization
+    RatingScore,           // Document quality: product rating
+    DeliveryBoost          // Premium delivery: Rocket = 1.1x
+)
+
+Signal Versioning Strategy:
+---------------------------
+- Signals have multiple versions (V1, V2, ..., V11) for A/B testing
+- Newer versions don't always replace old ones - they run in parallel experiments
+- Allows gradual rollout and performance comparison
+- Example: CqiBrandSignalV7, V8, V9, V10, V11 all coexist
+
+Signal Combination Strategies:
+------------------------------
+1. Multiplicative: product(signal1, signal2, ...) - default for most signals
+2. Additive: sum(signal1, signal2, ...) - for weighted terms
+3. Max: max(signal1, signal2, ...) - for category/brand matching
+4. If/Else: if(condition, value_if_true, value_if_false) - for binary features
+
+================================================================================
+INTERVIEW SUMMARY CHEAT SHEET
+================================================================================
+
+Category                    | Count | Key Examples                              | Talking Point
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Text Relevance              | 18    | DkScore, WeightedTerms, SalientTerm       | BM25-like with unigram+bigram, field-specific
+                            |       |                                           | weights, Korean NLP tokenization
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Document Quality            | 9     | Rating, SalesScore, Price                 | Query-independent product quality metrics,
+                            |       |                                           | sigmoid transformations
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Query-Doc Matching          | 25    | CategoryWeight, CqiBrand                  | Structural matching: brand/category from
+                            |       |                                           | query tagging, hierarchical matching
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Engagement (Doc)            | 3     | Clicks, SalesScore                        | Popularity signals, not query-specific
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Engagement (Query-Doc)      | 3     | NavBoost                                  | Query-product CTR, position-normalized,
+                            |       |                                           | similar to Google's NavBoost
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+ML Probabilities            | 4     | ClickProb, PurchaseProb, AddCartProb      | XGBoost/TensorFlow models via Proton framework,
+                            |       |                                           | min-max normalized to [1.0, 2.0]
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Business/Monetization       | 31    | GPPU, Delivery, Promotion                 | Profit optimization (GPPU 1.0-1.5x), delivery
+                            |       |                                           | premium (1.1x), discounts, new product boost
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Demotion                    | 6     | OutOfStock, Adult                         | Hard penalties (-10,000) or soft (0.01x-0.1x)
+                            |       |                                           | for unwanted products
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Query Expansion             | 6     | QueryRewrite, QueryRelaxing               | Handles sparse/broad/ambiguous queries,
+                            |       |                                           | expansion penalty
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+Specialized                 | 2     | Longclaw, FtCategory                      | Experimental features
+----------------------------|-------|-------------------------------------------|--------------------------------------------------
+TOTAL                       | 83    |                                           |
+
+================================================================================
+KEY TECHNICAL INSIGHTS FOR INTERVIEWS
+================================================================================
+
+1. Multi-Signal Learning-to-Rank Architecture:
+   - Galaxy uses 83 specialized signals combined via Solr function queries
+   - Balances text relevance, engagement, business metrics, and ML predictions
+   - Weighted combinations allow fine-tuned control over ranking factors
+
+2. Solr Payload Fields for Efficient Scoring:
+   - Precomputed scores stored in Lucene payload fields
+   - Avoids expensive runtime computations
+   - Examples: parentClicks, unigramPayload, parentCoecWithClicksCapped
+
+3. Korean Language Support:
+   - Coumoran tokenizer for Korean text segmentation
+   - Unigram + bigram matching to capture Korean phrase semantics
+   - Example: "맥북 프로" matches both unigrams ("맥북", "프로") and bigram ("맥북_프로")
+
+4. Query Rewrite Integration:
+   - External Query Rewrite service tags query tokens (BRAND, CATEGORY, NAME_PRODUCT)
+   - Provides category predictions, brand matching, query expansion
+   - Feeds structured information into matching signals
+
+5. A/B Testing Framework:
+   - Multiple signal versions run in parallel experiments
+   - Allows gradual rollout and performance comparison
+   - Example: CqiBrandSignalV7-V11 all available for testing
+
+6. Business Logic Integration:
+   - GPPU signals optimize for profitability (1.0x-1.5x boost for high profit)
+   - Delivery premium (Rocket = 1.1x boost)
+   - Out-of-stock demotion (-10,000 penalty)
+
+7. Position-Normalized Engagement:
+   - NavBoost corrects for position bias using expected clicks
+   - Similar to Google's NavBoost patent
+   - Formula: (clicks + norm) / (expectedClicks + norm)
+
+8. ML Model Integration via Proton:
+   - Real-time ML model serving (XGBoost, TensorFlow)
+   - Predicts click, purchase, add-to-cart, direct-buy probabilities
+   - Min-max normalized per query for ranking
+
+================================================================================
+RELATED FILES AND COMPONENTS
+================================================================================
+
+Signal Framework:
+- Signal.java interface: base(RankingContext) → String
+- RankingContext: provides query, request, QR response, parameters
+- ScoringLevel: PARENT vs CHILD level scoring
+
+Query Rewrite Integration:
+- QueryRewriteResponse proto: contains category, brand, query expansions
+- HierarchicalCanonicalBrand: brand hierarchy for matching
+- CategoryBoostingSignal: category predictions from QR
+
+Proton (ML Framework):
+- JediFeatures proto: ML feature values
+- ModelRequest/ModelResponse: ML model serving
+- Proton server: hosts XGBoost/TensorFlow models
+
+Solr Integration:
+- Function queries: if(), exists(), query(), product(), sum(), max()
+- Payload fields: {!payload field=X function=max}
+- Field types: docvalues, stored, indexed
+
+================================================================================
+EXAMPLE INTERVIEW QUESTIONS & ANSWERS
+================================================================================
+
+Q: How does Galaxy handle text relevance?
+A: Galaxy uses multiple text relevance signals including DkScore (BM25-like with
+   weighted term payloads) and WeightedTermsSignal (unigram + bigram matching).
+   For Korean queries, we use the Coumoran tokenizer to properly segment text.
+   Field-specific weights give higher importance to title matches vs description.
+   We also use SalientTermSignal to boost documents containing ML-identified
+   important query terms.
+
+Q: How do you incorporate user engagement data?
+A: We use two types of engagement signals:
+   1) Query-independent: raw clicks and sales on products (popularity)
+   2) Query-specific: NavBoost signal that measures query-product CTR,
+      position-normalized using expected clicks (similar to Google's NavBoost).
+   Formula: (actual_clicks + norm) / (expected_clicks + norm)
+   This corrects for position bias since position 1 gets ~30% CTR naturally.
+
+Q: How does Galaxy balance relevance with business metrics?
+A: We use GPPU (Gross Product Profit Unit) signals that promote high-profit
+   products with 1.0x-1.5x boost and demote low-profit products with 0.5x-1.0x
+   penalty. We also boost Rocket delivery products by 1.1x and handle
+   promotions/discounts. The key is using multiplicative combination:
+   product(relevance_score, engagement_score, business_score)
+   This ensures we don't show irrelevant but profitable products.
+
+Q: What ML models does Galaxy use?
+A: Galaxy integrates ML via Proton framework which serves XGBoost and TensorFlow
+   models. We predict 4 types of probabilities: click, purchase, add-to-cart,
+   and direct-buy. These are min-max normalized per query to [1.0, 2.0] range
+   and combined with other signals. The models use features from text relevance,
+   engagement, and quality signals as input.
+
+Q: How do you handle brand and category matching?
+A: We use Query Rewrite service to tag query tokens as BRAND, CATEGORY, or
+   NAME_PRODUCT. For brands, CqiBrandSignalV11 boosts products from query-mentioned
+   brands by 1.05x-1.4x depending on match strength. For categories, we use
+   hierarchical matching at multiple levels (L1, L2, L3, L4) and weight matches
+   based on category depth and specificity.
+
+================================================================================
+END OF DOCUMENT
+================================================================================
