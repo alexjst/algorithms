@@ -15,13 +15,14 @@ Example 1:
         courses = 4
         prerequisites = [[1, 0], [2, 0], [3, 1], [3, 2]]
         durations = [1, 2, 3, 4]
-    Output: 7
+    Output: 8
     Explanation:
-        Course 0: time 1 (no prereqs)
-        Course 1: time 2 (after course 0) -> earliest = 1 + 2 = 3
-        Course 2: time 3 (after course 0) -> earliest = 1 + 3 = 4
-        Course 3: time 4 (after courses 1, 2) -> earliest = max(3, 4) + 4 = 8
-        But we can take 0, 1, 2 in parallel, so minimum is 7
+        Course 0: duration 1, no prereqs -> finishes at time 1
+        Course 1: duration 2, after course 0 -> starts at 1, finishes at 3
+        Course 2: duration 3, after course 0 -> starts at 1, finishes at 4
+        (Courses 1 and 2 run IN PARALLEL since they only depend on 0)
+        Course 3: duration 4, after courses 1 AND 2 -> starts at 4, finishes at 8
+        Total minimum time: 8
 
 Constraints:
     - 1 <= courses <= 2000

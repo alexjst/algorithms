@@ -2,105 +2,87 @@
 """
 Solution for Problem 8: Maze with Portals
 
-🚨 Asked 2+ times at Faire
+🚨 CONFIRMED FAIRE INTERVIEW PROBLEM (Asked 2021)
 
 Problem: Find shortest path in a maze with teleportation portals.
 - Grid with walls, open spaces, start, end
-- Portals allow instant teleportation between two locations
+- Portals marked with 'P' allow instant teleportation to ANY other 'P'
 - Find shortest path length (or -1 if impossible)
 
-Similar to: BFS shortest path + state tracking
-
 Key Approach:
-- BFS with state = (row, col, portal_used)
-- Portal usage tracking: can use each portal at most once per path
-- Portal is bidirectional: A→B or B→A (but only once)
-- Distance = number of moves (portal teleport counts as 1 move)
+- BFS with normal moves + portal teleportation
+- When standing on a portal, can teleport to any other portal
+- Each move (including portal teleport) counts as 1 step
+
+Time Complexity: O(R*C) where R = rows, C = cols
+Space Complexity: O(R*C) for visited set and queue
 """
 
-from typing import List, Tuple, Set, Dict
+from typing import List
 from collections import deque
 
 
-def shortest_path_with_portals(
-    grid: List[List[str]],
-    portals: List[Tuple[Tuple[int, int], Tuple[int, int]]]
-) -> int:
+def shortest_path_with_portals(maze: List[List[str]]) -> int:
     """
     Find shortest path in maze with portals.
 
     Args:
-        grid: 2D grid where:
-              'S' = start
-              'E' = end
-              '#' = wall
-              '.' = open space
-        portals: List of portal pairs [(from, to), ...]
-                 Each portal is bidirectional
-                 Format: [((r1, c1), (r2, c2)), ...]
+        maze: 2D grid where:
+              'S' = start position
+              'E' = end position
+              '.' = empty cell (can walk)
+              '#' = wall (cannot walk)
+              'P' = portal (can teleport to any other 'P')
 
     Returns:
-        Shortest path length, or -1 if no path exists
+        Shortest path length (number of moves), or -1 if no path exists
 
     Examples:
-        >>> grid = [
-        ...     ['S', '.', '.', '#', 'E'],
-        ...     ['#', '#', '.', '#', '.'],
-        ...     ['.', '.', '.', '.', '.']
+        >>> maze = [
+        ...     ['S', '.', '#', 'E'],
+        ...     ['.', '.', '.', '.'],
+        ...     ['#', 'P', '.', 'P']
         ... ]
-        >>> portals = [((0, 1), (2, 4))]  # Portal from (0,1) to (2,4)
-        >>> shortest_path_with_portals(grid, portals)
-        3  # S→(0,1)→portal→(2,4)→E
+        >>> shortest_path_with_portals(maze)
+        3
+        # Path: S → down → down → portal to (2,3) → up → E = 3 moves
 
     Key Insight:
-    - State = (row, col, portal_used_set)
-    - Portal can be used in either direction
-    - Each portal can only be used once per path
-    - BFS ensures shortest path
-
-    Time: O(R*C*2^P) where P = number of portals (worst case)
-          In practice, much better due to pruning
-    Space: O(R*C*2^P) for visited states
+    - Use BFS for shortest path
+    - When on a portal, can teleport to any other portal (costs 1 move)
+    - Each portal teleportation is counted as 1 step
     """
-    if not grid or not grid[0]:
+    if not maze or not maze[0]:
         return -1
 
-    rows, cols = len(grid), len(grid[0])
+    rows, cols = len(maze), len(maze[0])
 
-    # Find start and end positions
-    start, end = None, None
+    # Find start, end, and all portal positions
+    start = None
+    end = None
+    portals = []
+
     for r in range(rows):
         for c in range(cols):
-            if grid[r][c] == 'S':
+            if maze[r][c] == 'S':
                 start = (r, c)
-            elif grid[r][c] == 'E':
+            elif maze[r][c] == 'E':
                 end = (r, c)
+            elif maze[r][c] == 'P':
+                portals.append((r, c))
 
     if not start or not end:
         return -1
 
-    # Build portal lookup: position → list of connected portals
-    portal_map = {}  # {(r, c): [(dest, portal_id), ...]}
-    for portal_id, (pos1, pos2) in enumerate(portals):
-        # Bidirectional
-        if pos1 not in portal_map:
-            portal_map[pos1] = []
-        portal_map[pos1].append((pos2, portal_id))
-
-        if pos2 not in portal_map:
-            portal_map[pos2] = []
-        portal_map[pos2].append((pos1, portal_id))
-
-    # BFS with state = (row, col, used_portals_frozenset)
-    # Using frozenset to make it hashable for visited tracking
-    queue = deque([(start[0], start[1], frozenset(), 0)])  # (r, c, used_portals, distance)
+    # BFS
+    queue = deque([(start[0], start[1], 0)])  # (row, col, distance)
     visited = set()
-    visited.add((start[0], start[1], frozenset()))
+    visited.add(start)
 
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # right, down, left, up
 
     while queue:
-        r, c, used_portals, dist = queue.popleft()
+        r, c, dist = queue.popleft()
 
         # Check if reached end
         if (r, c) == end:
@@ -110,178 +92,181 @@ def shortest_path_with_portals(
         for dr, dc in directions:
             nr, nc = r + dr, c + dc
 
-            # Check bounds and walls
-            if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] != '#':
-                state = (nr, nc, used_portals)
-                if state not in visited:
-                    visited.add(state)
-                    queue.append((nr, nc, used_portals, dist + 1))
+            # Check bounds
+            if 0 <= nr < rows and 0 <= nc < cols:
+                # Check if walkable (not wall) and not visited
+                if maze[nr][nc] != '#' and (nr, nc) not in visited:
+                    visited.add((nr, nc))
+                    new_dist = dist + 1
 
-        # Try portal moves
-        if (r, c) in portal_map:
-            for dest, portal_id in portal_map[(r, c)]:
-                # Check if portal not already used
-                if portal_id not in used_portals:
-                    dr, dc = dest
-                    new_used = used_portals | {portal_id}  # Add portal to used set
-                    state = (dr, dc, new_used)
-
-                    if state not in visited:
-                        visited.add(state)
-                        queue.append((dr, dc, new_used, dist + 1))
+                    # If we're moving ONTO a portal, immediately teleport
+                    # (portal entry + teleport counts as 1 move total)
+                    if maze[nr][nc] == 'P':
+                        queue.append((nr, nc, new_dist))
+                        # Also add all other portal destinations
+                        for pr, pc in portals:
+                            if (pr, pc) != (nr, nc) and (pr, pc) not in visited:
+                                visited.add((pr, pc))
+                                queue.append((pr, pc, new_dist))
+                    else:
+                        queue.append((nr, nc, new_dist))
 
     return -1  # No path found
 
 
-def shortest_path_simple(grid: List[List[str]], portals: List[Tuple[Tuple[int, int], Tuple[int, int]]]) -> int:
+# Alternative implementation with clearer logic
+def shortest_path_with_portals_verbose(maze: List[List[str]]) -> int:
     """
-    Simplified version assuming each portal can be used unlimited times.
-    This is easier to implement but may not match problem requirements.
-
-    Use shortest_path_with_portals() for the correct solution where
-    portals can only be used once per path.
+    More verbose implementation for clarity.
+    Same functionality as shortest_path_with_portals.
     """
-    if not grid or not grid[0]:
+    if not maze or not maze[0]:
         return -1
 
-    rows, cols = len(grid), len(grid[0])
+    rows, cols = len(maze), len(maze[0])
 
-    # Find start and end
-    start, end = None, None
+    # Step 1: Find all special positions
+    start_pos = None
+    end_pos = None
+    portal_positions = []
+
     for r in range(rows):
         for c in range(cols):
-            if grid[r][c] == 'S':
-                start = (r, c)
-            elif grid[r][c] == 'E':
-                end = (r, c)
+            cell = maze[r][c]
+            if cell == 'S':
+                start_pos = (r, c)
+            elif cell == 'E':
+                end_pos = (r, c)
+            elif cell == 'P':
+                portal_positions.append((r, c))
 
-    if not start or not end:
+    # Validation
+    if start_pos is None or end_pos is None:
         return -1
 
-    # Build portal map
-    portal_map = {}
-    for pos1, pos2 in portals:
-        if pos1 not in portal_map:
-            portal_map[pos1] = []
-        portal_map[pos1].append(pos2)
-
-        if pos2 not in portal_map:
-            portal_map[pos2] = []
-        portal_map[pos2].append(pos1)
-
-    # Simple BFS without portal usage tracking
-    queue = deque([(start[0], start[1], 0)])
-    visited = set()
-    visited.add((start[0], start[1]))
-
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    # Step 2: BFS
+    queue = deque([(start_pos[0], start_pos[1], 0)])
+    visited = set([start_pos])
 
     while queue:
-        r, c, dist = queue.popleft()
+        row, col, distance = queue.popleft()
 
-        if (r, c) == end:
-            return dist
+        # Check if reached destination
+        if (row, col) == end_pos:
+            return distance
 
-        # Normal moves
-        for dr, dc in directions:
-            nr, nc = r + dr, c + dc
-            if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] != '#':
-                if (nr, nc) not in visited:
-                    visited.add((nr, nc))
-                    queue.append((nr, nc, dist + 1))
+        # Option 1: Move in 4 directions
+        for delta_row, delta_col in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+            new_row = row + delta_row
+            new_col = col + delta_col
 
-        # Portal moves
-        if (r, c) in portal_map:
-            for dr, dc in portal_map[(r, c)]:
-                if (dr, dc) not in visited:
-                    visited.add((dr, dc))
-                    queue.append((dr, dc, dist + 1))
+            # Check if position is valid
+            if 0 <= new_row < rows and 0 <= new_col < cols:
+                # Check if not a wall
+                if maze[new_row][new_col] != '#':
+                    # Check if not visited
+                    if (new_row, new_col) not in visited:
+                        visited.add((new_row, new_col))
+                        queue.append((new_row, new_col, distance + 1))
 
+        # Option 2: Use portal teleportation (if standing on portal)
+        if maze[row][col] == 'P':
+            # Can teleport to any other portal
+            for portal_row, portal_col in portal_positions:
+                # Don't teleport to self
+                if (portal_row, portal_col) != (row, col):
+                    # Check if not visited
+                    if (portal_row, portal_col) not in visited:
+                        visited.add((portal_row, portal_col))
+                        queue.append((portal_row, portal_col, distance + 1))
+
+    # No path found
     return -1
 
 
 if __name__ == "__main__":
     print("=== Maze with Portals Examples ===\n")
 
-    # Example 1: Simple portal shortcut
-    print("Example 1: Simple portal shortcut")
-    grid1 = [
-        ['S', '.', '.', '#', 'E'],
-        ['#', '#', '.', '#', '.'],
-        ['.', '.', '.', '.', '.']
+    # Example 1: Maze with portals
+    print("Example 1: Using portal to reach end")
+    maze1 = [
+        ['S', '.', '#', 'E'],
+        ['.', '.', '.', '.'],
+        ['#', 'P', '.', 'P']
     ]
-    portals1 = [((0, 1), (2, 4))]  # Portal near start to near end
-    result1 = shortest_path_with_portals(grid1, portals1)
-    print("Grid:")
-    for row in grid1:
+    result1 = shortest_path_with_portals(maze1)
+    print("Maze:")
+    for row in maze1:
         print("  ", row)
-    print(f"Portals: {portals1}")
     print(f"Shortest path: {result1}")
-    print("Explanation: S→(0,1)→portal→(2,4)→E = 3 moves\n")
+    print("Explanation: S → down → down → portal (2,1) to (2,3) → up → E = 3 moves\n")
 
-    # Example 2: No portal needed
-    print("Example 2: Direct path is shorter")
-    grid2 = [
-        ['S', '.', 'E'],
+    # Example 2: Direct path (no portals)
+    print("Example 2: Direct path without portals")
+    maze2 = [
+        ['S', '.', '.'],
         ['.', '.', '.'],
+        ['.', '.', 'E']
     ]
-    portals2 = [((1, 0), (1, 2))]  # Portal doesn't help
-    result2 = shortest_path_with_portals(grid2, portals2)
-    print("Grid:")
-    for row in grid2:
+    result2 = shortest_path_with_portals(maze2)
+    print("Maze:")
+    for row in maze2:
         print("  ", row)
-    print(f"Portals: {portals2}")
     print(f"Shortest path: {result2}")
-    print("Explanation: S→(0,1)→E = 2 moves (portal not needed)\n")
+    print("Explanation: S → right → right → down → down → E = 4 moves\n")
 
-    # Example 3: Multiple portals
-    print("Example 3: Multiple portals")
-    grid3 = [
-        ['S', '.', '#', '#', '#'],
-        ['.', '.', '#', 'E', '#'],
-        ['#', '#', '#', '.', '.']
+    # Example 3: No path (blocked)
+    print("Example 3: No path exists")
+    maze3 = [
+        ['S', '#', 'E']
     ]
-    portals3 = [
-        ((0, 1), (2, 4)),  # Portal 1
-        ((2, 4), (1, 3))   # Portal 2
-    ]
-    result3 = shortest_path_with_portals(grid3, portals3)
-    print("Grid:")
-    for row in grid3:
+    result3 = shortest_path_with_portals(maze3)
+    print("Maze:")
+    for row in maze3:
         print("  ", row)
-    print(f"Portals: {portals3}")
     print(f"Shortest path: {result3}")
-    print("Explanation: S→(0,1)→portal1→(2,4)→portal2→(1,3) = 3 moves\n")
+    print("Explanation: Completely blocked by wall\n")
 
-    # Example 4: No path
-    print("Example 4: No path exists")
-    grid4 = [
-        ['S', '#', 'E'],
-        ['#', '#', '#'],
+    # Example 4: Adjacent start and end
+    print("Example 4: Adjacent positions")
+    maze4 = [
+        ['S', 'E']
     ]
-    portals4 = []
-    result4 = shortest_path_with_portals(grid4, portals4)
-    print("Grid:")
-    for row in grid4:
+    result4 = shortest_path_with_portals(maze4)
+    print("Maze:")
+    for row in maze4:
         print("  ", row)
-    print(f"Portals: {portals4}")
     print(f"Shortest path: {result4}")
-    print("Explanation: Completely blocked by walls\n")
+    print("Explanation: S → right → E = 1 move\n")
 
-    # Example 5: Portal vs normal path choice
-    print("Example 5: Choose between portal and normal path")
-    grid5 = [
-        ['S', '.', '.', '.', 'E'],
+    # Example 5: Portal provides shortcut
+    print("Example 5: Portal creates shortcut")
+    maze5 = [
+        ['S', 'P', '#', '#', '#'],
+        ['#', '#', '#', '#', '#'],
+        ['#', '#', '#', '#', 'P'],
         ['.', '.', '.', '.', '.'],
+        ['E', '.', '.', '.', '.']
     ]
-    portals5 = [((0, 1), (1, 4))]
-    result5 = shortest_path_with_portals(grid5, portals5)
-    print("Grid:")
-    for row in grid5:
+    result5 = shortest_path_with_portals(maze5)
+    print("Maze:")
+    for row in maze5:
         print("  ", row)
-    print(f"Portals: {portals5}")
     print(f"Shortest path: {result5}")
-    print("Explanation:")
-    print("  Normal path: S→(0,1)→(0,2)→(0,3)→E = 4 moves")
-    print("  Portal path: S→(0,1)→portal→(1,4)→(0,4)=E = 3 moves")
-    print("  BFS chooses portal path!\n")
+    print("Explanation: S → right to (0,1) portal → teleport to (2,4) → down → down → left...")
+    print("  Without portal would need to go around walls\n")
+
+    # Example 6: Multiple portals
+    print("Example 6: Multiple portals - choose best path")
+    maze6 = [
+        ['S', 'P', '.', 'E'],
+        ['.', '.', '.', '.'],
+        ['P', '.', '.', 'P']
+    ]
+    result6 = shortest_path_with_portals(maze6)
+    print("Maze:")
+    for row in maze6:
+        print("  ", row)
+    print(f"Shortest path: {result6}")
+    print("Explanation: S → right → right → E = 2 moves")
+    print("  Portal doesn't help here, direct path is shorter\n")

@@ -1,0 +1,123 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\setlist[itemize]{noitemsep,topsep=1pt,leftmargin=1.2em}
+\setlist[enumerate]{noitemsep,topsep=1pt,leftmargin=1.2em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\titleformat{\section}{\large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\normalsize\bfseries}{}{0pt}{}
+
+\begin{document}
+\begin{center}
+    {\LARGE \textbf{Search Index vs Hydration vs Feature Store Cheat Sheet}}\\[4pt]
+    {\small Quick reference for designing efficient retrieval, ranking, and serving layers}
+\end{center}
+
+\section*{1. Core Principle}
+\textbf{Put in the index only what you need to find, filter, rank, or render minimally.}\\
+Everything else belongs to hydration or the feature store.
+
+\section*{2. Quick Comparison}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3cm}|p{4.5cm}|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Aspect} & \textbf{Search Index} & \textbf{Hydration (DB/Cache)} & \textbf{Feature Store} \\
+\hline
+\textbf{Purpose} & Fast retrieval, filtering, first-pass ranking & Full data enrichment and display & Online feature access for ML ranking and shared consumers \\
+\hline
+\textbf{Typical Data} &
+\begin{itemize}
+    \item IDs, titles, keywords
+    \item Facets, filters
+    \item Coarse numeric features
+    \item Static ranking features
+    \item Small display info
+\end{itemize} &
+\begin{itemize}
+    \item Full description
+    \item Dynamic fields (price, stock)
+    \item Large JSON or media
+    \item PII or sensitive data
+\end{itemize} &
+\begin{itemize}
+    \item CTR, CVR, engagement
+    \item Short-term aggregates
+    \item Cross-entity signals
+    \item Model features
+\end{itemize} \\
+\hline
+\textbf{Update Frequency} & Low to moderate (hours or daily) & High (seconds to minutes) & High to very high (real-time) \\
+\hline
+\textbf{Size Limit} & Small (compact doc) & Large objects ok & Moderate (feature vectors) \\
+\hline
+\textbf{Latency Need} & Milliseconds (query time) & Only for top-K hydration & Microseconds to ms (online inference) \\
+\hline
+\textbf{Consistency Goal} & Eventually consistent, stale tolerant & Strong source of truth & Fresh, low-latency consistency \\
+\hline
+\textbf{Consumers} & Search retrieval service & API / frontend rendering & ML ranking, recsys, ads \\
+\hline
+\end{tabular}
+
+\section*{3. Field Placement Rule of Thumb}
+
+\begin{itemize}
+    \item \textbf{In Index:} essential for recall, filter, sort, or first ranking.
+    \item \textbf{In Hydration:} large, volatile, or rarely accessed.
+    \item \textbf{In Feature Store:} frequently updated metrics or shared model features.
+\end{itemize}
+
+\textbf{Ask for each field:}
+\begin{enumerate}
+    \item Needed to select or rank? $\rightarrow$ Index
+    \item Updated often? $\rightarrow$ Avoid index
+    \item Large? $\rightarrow$ Hydration
+    \item Shared or real-time? $\rightarrow$ Feature store
+\end{enumerate}
+
+\section*{4. Serving Flow Pattern}
+
+\begin{enumerate}
+    \item \textbf{Candidate Retrieval} (Index)
+    Fetch top-N doc IDs using textual/semantic matching and indexed filters.
+    \item \textbf{Hydration} (DB/Cache)
+    Fetch detailed data for top-N from fast key-value or DB.
+    \item \textbf{Feature Enrichment} (Feature Store)
+    Join real-time model features for top-M.
+    \item \textbf{Final Ranking}
+    Run ML model with combined features and return results.
+\end{enumerate}
+
+\section*{5. Example Split for E-commerce}
+
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{4.5cm}|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Index} & \textbf{Hydration} & \textbf{Feature Store} \\
+\hline
+ID, title, short name, category, brand, price bucket, rating bucket, availability flag, popularity score & Full description, high-res images, reviews, seller details, exact inventory count, last-updated timestamps & CTR/CVR, trending score, user-item interaction features, recent engagement counters \\
+\hline
+\end{tabular}
+
+\section*{6. Notes}
+
+\begin{itemize}
+    \item Keep the index small and stable—optimize for recall and speed.
+    \item Avoid frequent reindexing of volatile data.
+    \item Use a cache or feature store for freshness and reusability.
+    \item Design coarse fields (for example, price\_bucket, in\_stock) to avoid heavy updates.
+    \item Ensure all paths (index, hydration, features) share consistent identifiers.
+\end{itemize}
+
+\begin{center}
+\rule{0.4\textwidth}{0.4pt}\\
+{\small \textit{“Retrieve with index, enrich with data, rank with features.”}}
+\end{center}
+
+\end{document}
+

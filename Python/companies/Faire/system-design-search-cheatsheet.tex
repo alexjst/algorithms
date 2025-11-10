@@ -1,0 +1,477 @@
+\documentclass[8pt]{extarticle}
+\usepackage[margin=0.4in,landscape]{geometry}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{helvet}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{pifont}
+
+\renewcommand{\familydefault}{\sfdefault}
+\setlist[itemize]{noitemsep,topsep=1pt,leftmargin=1em,parsep=0pt}
+\setlist[enumerate]{noitemsep,topsep=1pt,leftmargin=1.2em,parsep=0pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+\setlength{\columnsep}{15pt}
+
+\titleformat{\section}{\normalsize\bfseries}{}{0pt}{}[\vspace{-3pt}]
+\titleformat{\subsection}{\small\bfseries}{}{0pt}{}[\vspace{-2pt}]
+
+\definecolor{headerblue}{RGB}{41,128,185}
+\definecolor{sectiongray}{RGB}{52,73,94}
+
+\newcommand{\checkyes}{\textcolor{green!60!black}{\ding{51}}}
+\newcommand{\checkno}{\textcolor{red!70!black}{\ding{55}}}
+
+\begin{document}
+\begin{center}
+    {\Large \textbf{Principal-Level Search System Design Cheat Sheet}}\\[2pt]
+    {\footnotesize Complete reference for Staff/Principal IC interviews at elite tech companies}
+\end{center}
+
+\begin{multicols}{3}
+\raggedcolumns
+
+\section*{1. Three-Layer Architecture}
+
+\textbf{Core Principle:} \textit{"Retrieve with index, enrich with data, rank with features"}
+
+\vspace{2pt}
+\begin{tabular}{|p{2.2cm}|p{1.5cm}|p{1.3cm}|p{1.8cm}|}
+\hline
+\textbf{Layer} & \textbf{Latency} & \textbf{Update} & \textbf{Purpose} \\
+\hline
+\textbf{Index} & 10-50ms & Hours & Recall, filter \\
+\textbf{Hydration} & 5-20ms & Seconds & Enrich top-K \\
+\textbf{Feature Store} & 1-5ms & Real-time & ML features \\
+\hline
+\end{tabular}
+
+\subsection*{Field Placement Rule}
+\begin{itemize}
+    \item \textbf{Index:} IDs, titles, categories, price\_bucket, availability\_flag
+    \item \textbf{Hydration:} Full descriptions, images, exact inventory, reviews, PII
+    \item \textbf{Feature Store:} CTR, CVR, trending scores, user engagement
+\end{itemize}
+
+\textbf{Decision Tree:}
+\begin{verbatim}
+If (needed for recall/filter) → Index
+Else if (large or PII) → Hydration
+Else if (updated frequently) → Feature Store
+Else → Hydration (lazy load)
+\end{verbatim}
+
+\section*{2. Query Understanding (5-20ms)}
+
+\textbf{Pipeline Stages:}
+\begin{enumerate}
+    \item \textbf{Normalization:} Lowercase, Unicode, special chars
+    \item \textbf{Spell Correction:} Levenshtein, Soundex, neural models
+    \item \textbf{Tokenization:} Language-specific (jieba, MeCab)
+    \item \textbf{Expansion:} Synonyms (WordNet), embeddings
+    \item \textbf{Intent Classification:} Rules (top 20\%) + BERT (tail)
+\end{enumerate}
+
+\textbf{Key Tradeoff:} Precision vs Recall
+\begin{itemize}
+    \item Aggressive expansion → High recall (tail queries)
+    \item Conservative → High precision (head queries)
+\end{itemize}
+
+\section*{3. Retrieval Layer}
+
+\subsection*{Index Design Decisions}
+
+\begin{tabular}{|p{2cm}|p{2.5cm}|p{1.5cm}|}
+\hline
+\textbf{Strategy} & \textbf{When to Use} & \textbf{Scale} \\
+\hline
+Single index & Similar schemas & $<$1M docs \\
+Separate indices & Different update freq & $>$10M docs \\
+Federated & Multi-entity & Any \\
+\hline
+\end{tabular}
+
+\subsection*{Vector vs Keyword Search}
+
+\begin{tabular}{|p{2cm}|p{1.5cm}|p{2cm}|}
+\hline
+\textbf{Metric} & \textbf{ES} & \textbf{Milvus} \\
+\hline
+Latency p99 & 50-200ms & 1-5ms \\
+Recall@100 & 70-80\% & 85-95\% \\
+Use Case & Keyword & Semantic \\
+\hline
+\end{tabular}
+
+\textbf{Hybrid Approach} (LinkedIn, Airbnb):
+\begin{verbatim}
+Candidates = Union(
+  BM25(top-500),
+  ANN(top-500)
+) → Rank top-100
+\end{verbatim}
+
+\subsection*{Inventory Freshness (30s SLA)}
+
+\textbf{Two Approaches:}
+\begin{enumerate}
+    \item \textbf{Live Ingestion:} SQS → ES real-time update
+    \item \textbf{Hydration Layer:} Redis cache (10s TTL) + RDBMS
+\end{enumerate}
+
+\textbf{Hydration Architecture @ 10K QPS:}
+\begin{itemize}
+    \item 500K product lookups/sec (50 items/page)
+    \item Redis Cluster: 3-5 shards, 2-3 replicas each
+    \item Cache hit rate: 92-97\% (hot products)
+    \item CDC: PostgreSQL → Kafka → Redis (5-10s latency)
+\end{itemize}
+
+\textbf{Fallback:} Hydration down → Serve stale from index
+
+\section*{4. Ranking System (40\% Interview Time)}
+
+\subsection*{A. Learning-to-Rank Algorithms}
+
+\begin{tabular}{|p{1.8cm}|p{2cm}|p{2cm}|}
+\hline
+\textbf{Type} & \textbf{Algorithm} & \textbf{Use Case} \\
+\hline
+Pointwise & Linear, NN & Cold start \\
+Pairwise & RankNet & Moderate data \\
+Listwise & \textbf{LambdaMART} & \textbf{Production} \\
+\hline
+\end{tabular}
+
+\textbf{Industry Standard:} LambdaMART (XGBoost)
+\begin{verbatim}
+params = {
+  'objective': 'rank:ndcg',
+  'eval_metric': 'ndcg@10'
+}
+\end{verbatim}
+
+\subsection*{B. Feature Engineering}
+
+\begin{tabular}{|p{2cm}|p{2cm}|p{1.8cm}|}
+\hline
+\textbf{Category} & \textbf{Examples} & \textbf{Source} \\
+\hline
+Query-Doc & BM25, TF-IDF, cosine & Index \\
+Doc Static & Category, price, rating & Index \\
+Doc Dynamic & Inventory, CTR, CVR & Feature Store \\
+User & Location, cohort, history & Feature Store \\
+Context & Time, device, season & Runtime \\
+\hline
+\end{tabular}
+
+\textbf{Critical:} Train with \textit{historical} features (point-in-time), serve with \textit{current} features
+
+\subsection*{C. Multi-Objective Optimization}
+
+\textbf{Problem:} Optimize relevance + revenue + diversity
+
+\textbf{Three Approaches:}
+
+\textbf{1. Guardrail Method \checkyes} (Most common)
+\begin{verbatim}
+Step 1: Rank by relevance (NDCG > 0.75)
+Step 2: Re-rank top-K by revenue
+Step 3: Apply diversity (max 2/brand)
+\end{verbatim}
+Pros: Interpretable, safe | Cons: Suboptimal
+
+\textbf{2. Weighted Sum}
+\begin{verbatim}
+Score = a*Relevance + b*Revenue + c*Diversity
+\end{verbatim}
+Pros: Simple | Cons: Hard to tune
+
+\textbf{3. Multi-Task Learning} (Advanced)
+\begin{verbatim}
+Shared layers → Task heads (rel, CTR, CVR)
+Loss = w1·L_rel + w2·L_CTR + w3·L_CVR
+\end{verbatim}
+Pros: Learns relationships | Cons: Complex
+
+\subsection*{D. Fast-Moving Features}
+
+\textbf{Problem:} Training/serving skew (inventory changes)
+
+\begin{tabular}{|p{1.5cm}|p{1.8cm}|p{2.3cm}|}
+\hline
+\textbf{Method} & \textbf{Pros} & \textbf{Cons} \\
+\hline
+Raw value & Complex patterns & Out-of-dist \\
+Post-filter & Simple & Ignores signal \\
+\textbf{Bucketing \checkyes} & \textbf{Stable} & \textbf{Less granular} \\
+\hline
+\end{tabular}
+
+\textbf{Buckets:} 0, 1-10, 11-100, 100+ (reduces feature space)
+
+\section*{5. Personalization at Scale}
+
+\subsection*{Two-Tier Strategy}
+
+\textbf{Tier 1: Coarse (All users, $<$1ms)}
+\begin{itemize}
+    \item User cohort (new vs returning)
+    \item Location, device, time-of-day
+\end{itemize}
+
+\textbf{Tier 2: Fine (Top 20\%, 1-2ms)}
+\begin{itemize}
+    \item User embedding (50-100 dims) in Redis
+    \item Async update every 5-15 min
+    \item Pre-compute: dot(user\_emb, item\_embs)
+\end{itemize}
+
+\textbf{Serving Flow:}
+\begin{verbatim}
+Query → Retrieve (1000 items)
+      → Redis: user_embedding (1ms)
+      → Batch dot products (2ms)
+      → Merge with base rank (3ms)
+\end{verbatim}
+
+\textbf{Key:} Never compute user embedding at query time!
+
+\section*{6. Multi-Entity Blending}
+
+\textbf{Problem:} Blend products + brands + collections
+
+\subsection*{Two Strategies}
+
+\textbf{A. Widget-Level Ranking \checkyes} (Simpler)
+\begin{verbatim}
+Rank: [Products, Brands, Collections]
+Each shows top-3 items
+\end{verbatim}
+Training: User-widget affinity
+
+\textbf{B. Item-Level Interleaving} (Advanced)
+\begin{verbatim}
+Merge all → Single ranked list
+[Product1, Brand1, Product2, ...]
+\end{verbatim}
+Training: Bootstrap → Collect feedback
+
+\textbf{Cold Start:} Round-robin for 2-4 weeks to collect data
+
+\section*{7. Evaluation Metrics}
+
+\subsection*{Offline Metrics}
+
+\textbf{NDCG@K} (Most common):
+$$\text{NDCG@K} = \frac{\sum_{i=1}^{K} \frac{\text{rel}_i}{\log_2(i+1)}}{\text{IDCG@K}}$$
+Range: [0, 1] | Use: Graded relevance
+
+\textbf{MRR} (Navigational):
+$$\text{MRR} = \frac{1}{|Q|} \sum_{q=1}^{|Q|} \frac{1}{\text{rank}_q}$$
+Use: First result matters (brand search)
+
+\textbf{MAP} (Rare): All relevant results matter
+
+\subsection*{Online Metrics}
+
+\begin{tabular}{|p{2cm}|p{2.5cm}|p{1.3cm}|}
+\hline
+\textbf{Metric} & \textbf{Definition} & \textbf{When} \\
+\hline
+CTR & Clicks / Impressions & Early funnel \\
+Conversion & Purchases / Clicks & Revenue \\
+GMV & Total \$ value & Business \\
+Zero-result & \% no results & Coverage \\
+\hline
+\end{tabular}
+
+\textbf{North Star:} Conversion Rate (relevance + revenue)
+
+\section*{8. Training Pipeline}
+
+\subsection*{Batch vs Online Learning}
+
+\begin{tabular}{|p{1.5cm}|p{1.5cm}|p{2.5cm}|}
+\hline
+\textbf{Type} & \textbf{Frequency} & \textbf{Use Case} \\
+\hline
+Batch & Weekly & Search (stable) \\
+Mini-batch & 4-6 hours & Ads (shifts) \\
+True online & Per request & Too unstable \\
+\hline
+\end{tabular}
+
+\textbf{Standard Pipeline:}
+\begin{verbatim}
+Day 0: Logs → Label → Feature eng
+     → Train XGBoost → Eval (NDCG)
+     → Deploy model.jar
+Day 1-7: Serve (fixed model + RT features)
+Day 7: Retrain with new data
+\end{verbatim}
+
+\textbf{Key:} Real-time features fetched at inference, not retrained
+
+\section*{9. Failure Modes}
+
+\begin{tabular}{|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\textbf{Failure} & \textbf{Impact} & \textbf{Mitigation} \\
+\hline
+Index down & No results & Cache queries, fallback \\
+Hydration down & Incomplete & Serve index data \\
+Feature Store down & Bad ranking & Static ranking \\
+Model timeout & High latency & Circuit breaker \\
+\hline
+\end{tabular}
+
+\textbf{SLA:} 99.9\% → 43 min downtime/month
+
+\section*{10. Interview Checklist}
+
+\subsection*{Opening Statement Template}
+\textit{"Let me clarify [latency/scale/cost]. I see 3 approaches: [A/B/C]. I recommend [X] because [tradeoff]. Let me walk through..."}
+
+\subsection*{What They Look For}
+\begin{itemize}
+    \item[\checkyes] Structured thinking (break into components)
+    \item[\checkyes] Tradeoffs with numbers
+    \item[\checkyes] Real experience ("At X, we chose...")
+    \item[\checkyes] Business impact ("\% improvement")
+    \item[\checkyes] Scale estimates (QPS, latency)
+\end{itemize}
+
+\subsection*{Red Flags to Avoid}
+\begin{itemize}
+    \item[\checkno] No clarifying questions
+    \item[\checkno] Single approach only
+    \item[\checkno] Vague tradeoffs ("faster")
+    \item[\checkno] Over-engineering
+\end{itemize}
+
+\subsection*{Latency Breakdown Example}
+\begin{verbatim}
+200ms total budget:
+  20ms: Retrieval (index query)
+  100ms: Ranking (ML model)
+  50ms: Blending + hydration
+  30ms: Network overhead
+\end{verbatim}
+
+\subsection*{Scale Calculations}
+\textbf{At 10K QPS with 50 items/page:}
+\begin{itemize}
+    \item 500K product lookups/sec
+    \item Redis: 3-5 shards × 100K ops/sec
+    \item Cache size: 50K hot products × 1KB = 50MB
+    \item Expected hit rate: 95\%+
+\end{itemize}
+
+\section*{Quick Reference Formulas}
+
+\subsection*{Cache Hit Rate Estimation}
+\textbf{Zipf's Law:}
+$$\text{hit\_rate} = 1 - \left(\frac{\text{long\_tail}}{\text{total}}\right)^\alpha$$
+where $\alpha = 0.8\text{-}1.2$ for e-commerce
+
+\subsection*{Feature Serving Cost}
+\textbf{Per-query cost:}
+$$\text{Cost} = N_{\text{items}} \times N_{\text{features}} \times \text{lookup\_time}$$
+Example: $50 \times 100 \times 0.1\text{ms} = 500\text{ms}$ (too slow!)
+
+Solution: Batch lookups, pre-compute, cache
+
+\section*{Key Architectural Patterns}
+
+\subsection*{Two-Pass Ranking}
+\begin{verbatim}
+Pass 1: Retrieve 10K candidates (cheap)
+Pass 2: Rank top-1K (expensive ML)
+Return: Top-100
+\end{verbatim}
+
+\subsection*{Cascade Architecture}
+\begin{verbatim}
+Stage 1: Keyword (BM25) → 10K
+Stage 2: Lightweight NN → 1K
+Stage 3: Heavy BERT → 100
+\end{verbatim}
+Trade latency for quality progressively
+
+\subsection*{Lambda Architecture}
+\begin{verbatim}
+Batch Layer: Historical data → Weekly model
+Speed Layer: Recent data → Hourly adjust
+Serving: Combine both at inference
+\end{verbatim}
+
+\section*{Common Interview Questions}
+
+\subsection*{Retrieval}
+\begin{itemize}
+    \item How to handle typos at scale?
+    \item When to use vector vs keyword search?
+    \item How to keep inventory fresh?
+\end{itemize}
+
+\subsection*{Ranking}
+\begin{itemize}
+    \item Explain pointwise vs pairwise vs listwise
+    \item How to handle cold start products?
+    \item Feature engineering for new user?
+    \item Multi-objective: relevance vs revenue?
+\end{itemize}
+
+\subsection*{Scale}
+\begin{itemize}
+    \item 10K QPS with 200ms p99 → architecture?
+    \item Index vs hydration tradeoff?
+    \item Caching strategy for hot products?
+\end{itemize}
+
+\subsection*{System Design}
+\begin{itemize}
+    \item Design e-commerce search end-to-end
+    \item How to A/B test ranking changes?
+    \item Monitoring: what metrics to track?
+\end{itemize}
+
+\section*{Real-World Benchmarks}
+
+\subsection*{Latency Targets}
+\begin{itemize}
+    \item Google: 100-200ms end-to-end
+    \item Amazon: 150-250ms
+    \item Airbnb: 200-300ms (complex ranking)
+\end{itemize}
+
+\subsection*{QPS Scale}
+\begin{itemize}
+    \item Small: 100 QPS (startup)
+    \item Medium: 1K-10K QPS (growth stage)
+    \item Large: 100K+ QPS (FAANG)
+\end{itemize}
+
+\subsection*{Conversion Impact}
+\begin{itemize}
+    \item 10ms latency → 1\% conversion drop
+    \item Personalization → 5-15\% lift
+    \item Better ranking → 2-10\% lift
+\end{itemize}
+
+\vspace{6pt}
+\begin{center}
+\rule{0.9\columnwidth}{0.4pt}\\[2pt]
+{\footnotesize \textit{Final Wisdom: "Trust your 20 years of experience. Speak from what you've built. Make decisions like the Principal engineer you are."}}
+\end{center}
+
+\end{multicols}
+\end{document}

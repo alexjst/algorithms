@@ -1,163 +1,217 @@
 #!/usr/bin/env python3
 """
-Solution for Problem 6: Ads Assortment Problem
+Solution for Problem 6: Ad Blocking System
 
-🚨 ACTUAL FAIRE INTERVIEW PROBLEM - Asked 3+ times
+🚨 CONFIRMED FAIRE INTERVIEW PROBLEM (Asked 2022)
 
-Problem: Maximize ad value while respecting weekly limits per brand and per user.
+Problem: Given a list of ads that were already sent, determine which customers
+should be blocked from receiving a new advertisement.
 
-Constraints:
-- Each brand can show max N ads per week
-- Each user can see max M ads per week
-- Maximize total ad value
+Block Rules:
+1. Customer already received the SAME ad in the same week
+2. Customer already received 3 or more ads in the same week
 
 Key Approach:
-- Greedy algorithm: sort ads by value (descending)
-- Track counts per brand and per user
-- Select ads greedily while respecting limits
+- Calculate week number from day number: week = (day - 1) // 7 + 1
+- Group sent ads by customer and week
+- Check blocking conditions for the new ad
+
+Time Complexity: O(n) where n is number of sent ads
+Space Complexity: O(n) for tracking customer ad history
 """
 
 from typing import List, Tuple
+from collections import defaultdict
 
 
-def max_ad_value(ads: List[Tuple[str, str, int]], brand_limit: int, user_limit: int) -> int:
+def get_blocked_customers(sent_ads: List[Tuple[str, str, int]], new_ad: Tuple[str, str, int]) -> List[str]:
     """
-    Calculate maximum ad value respecting brand and user limits.
+    Determine which customers should be blocked from receiving the new ad.
 
     Args:
-        ads: List of (user_id, brand_id, value) tuples
-             Example: [('u1', 'Nike', 100), ('u1', 'Adidas', 90), ('u2', 'Nike', 80)]
-        brand_limit: Max ads per brand per week
-        user_limit: Max ads per user per week
+        sent_ads: List of (ad_name, customer, day_number) tuples
+        new_ad: Tuple (ad_name, customer, day_number) for the new ad to send
 
     Returns:
-        Maximum total ad value
+        List of customer IDs who should be BLOCKED from receiving the new ad
 
     Examples:
-        >>> ads = [('u1', 'Nike', 100), ('u1', 'Adidas', 90), ('u2', 'Nike', 80)]
-        >>> max_ad_value(ads, brand_limit=1, user_limit=1)
-        190  # Nike to u1 (100) + Adidas to u2 would be ideal, but u2 doesn't have Adidas
-              # Actually: Nike to u1 (100) + Nike to u2 (80) = 180 (but Nike limit is 1!)
-              # So: Nike to u1 (100) + Adidas to u1 (90) = 190 (but u1 limit is 1!)
-              # Actually optimal: Nike to u1 (100) only = 100
-              # Wait, let me recalculate properly...
+        >>> sent_ads = [('ad1', 'alice', 1), ('ad2', 'alice', 2), ('ad3', 'alice', 3)]
+        >>> new_ad = ('ad4', 'alice', 4)
+        >>> get_blocked_customers(sent_ads, new_ad)
+        ['alice']  # Alice already has 3 ads in week 1
 
-    Time: O(n log n) for sorting
-    Space: O(b + u) where b = brands, u = users
+        >>> sent_ads = [('ad1', 'alice', 1)]
+        >>> new_ad = ('ad1', 'alice', 5)
+        >>> get_blocked_customers(sent_ads, new_ad)
+        ['alice']  # Alice already received 'ad1' in week 1
     """
-    # Greedy approach: sort by value (highest first)
-    sorted_ads = sorted(ads, key=lambda x: x[2], reverse=True)
+    # Extract new ad information
+    new_ad_name, new_customer, new_day = new_ad
+    new_week = (new_day - 1) // 7 + 1
 
-    # Track counts
-    brand_count = {}  # {brand_id: count}
-    user_count = {}   # {user_id: count}
+    # TODO: Build data structure to track:
+    # 1. Which ads each customer received in each week
+    # 2. How many ads each customer received in each week
 
-    total_value = 0
-    selected_ads = []
+    # Hint: Use nested dictionaries
+    # customer_ads[customer][week] = set of ad names
+    # customer_counts[customer][week] = count of ads
 
-    for user_id, brand_id, value in sorted_ads:
-        # Check if we can show this ad
-        current_brand_count = brand_count.get(brand_id, 0)
-        current_user_count = user_count.get(user_id, 0)
+    customer_ads = defaultdict(lambda: defaultdict(set))
+    customer_counts = defaultdict(lambda: defaultdict(int))
 
-        if current_brand_count < brand_limit and current_user_count < user_limit:
-            # Select this ad
-            total_value += value
-            selected_ads.append((user_id, brand_id, value))
+    # TODO: Process all sent ads
+    for ad_name, customer, day in sent_ads:
+        week = (day - 1) // 7 + 1
+        customer_ads[customer][week].add(ad_name)
+        customer_counts[customer][week] += 1
 
-            # Update counts
-            brand_count[brand_id] = current_brand_count + 1
-            user_count[user_id] = current_user_count + 1
+    # TODO: Check blocking conditions for the new customer
+    blocked = []
 
-    return total_value
+    # Check if customer should be blocked
+    # Condition 1: Same ad already received in the same week
+    if new_ad_name in customer_ads[new_customer][new_week]:
+        blocked.append(new_customer)
+    # Condition 2: Customer already has 3 ads in the week
+    elif customer_counts[new_customer][new_week] >= 3:
+        blocked.append(new_customer)
+
+    return blocked
 
 
-def max_ad_value_optimized(ads: List[Tuple[str, str, int]], brand_limit: int, user_limit: int) -> int:
+# Alternative implementation with more explicit logic
+def get_blocked_customers_verbose(sent_ads: List[Tuple[str, str, int]], new_ad: Tuple[str, str, int]) -> List[str]:
     """
-    Optimized version using more efficient data structures.
-
-    Same interface as max_ad_value but potentially faster for large inputs.
-
-    Time: O(n log n) for sorting
-    Space: O(b + u) for tracking counts
+    More verbose implementation with explicit checks.
+    Same functionality as get_blocked_customers but easier to understand.
     """
-    # Same as max_ad_value - the greedy approach is already optimal!
-    # Any "optimization" would be micro-optimizations like:
-    # - Using defaultdict instead of get()
-    # - Pre-allocating dictionaries
-    # But these don't change Big-O complexity
+    new_ad_name, new_customer, new_day = new_ad
+    new_week = get_week_number(new_day)
 
-    from collections import defaultdict
+    # Track customer activity by week
+    customer_weekly_ads = {}  # {customer: {week: [ad_names]}}
 
-    sorted_ads = sorted(ads, key=lambda x: x[2], reverse=True)
+    for ad_name, customer, day in sent_ads:
+        week = get_week_number(day)
 
-    brand_count = defaultdict(int)
-    user_count = defaultdict(int)
+        if customer not in customer_weekly_ads:
+            customer_weekly_ads[customer] = {}
 
-    total_value = 0
+        if week not in customer_weekly_ads[customer]:
+            customer_weekly_ads[customer][week] = []
 
-    for user_id, brand_id, value in sorted_ads:
-        if brand_count[brand_id] < brand_limit and user_count[user_id] < user_limit:
-            total_value += value
-            brand_count[brand_id] += 1
-            user_count[user_id] += 1
+        customer_weekly_ads[customer][week].append(ad_name)
 
-    return total_value
+    # Check if customer should be blocked
+    blocked = []
+
+    # Check if this customer has any history
+    if new_customer in customer_weekly_ads:
+        # Check if customer has ads in the new ad's week
+        if new_week in customer_weekly_ads[new_customer]:
+            ads_in_week = customer_weekly_ads[new_customer][new_week]
+
+            # Condition 1: Same ad already received
+            if new_ad_name in ads_in_week:
+                blocked.append(new_customer)
+            # Condition 2: Already 3 ads in the week
+            elif len(ads_in_week) >= 3:
+                blocked.append(new_customer)
+
+    return blocked
+
+
+def get_week_number(day: int) -> int:
+    """
+    Convert day number to week number.
+    Days 1-7 = week 1, days 8-14 = week 2, etc.
+
+    Formula: week = (day - 1) // 7 + 1
+
+    Examples:
+        >>> get_week_number(1)
+        1
+        >>> get_week_number(7)
+        1
+        >>> get_week_number(8)
+        2
+        >>> get_week_number(14)
+        2
+    """
+    return (day - 1) // 7 + 1
 
 
 if __name__ == "__main__":
-    print("=== Ads Assortment Examples ===\n")
+    print("=== Ad Blocking System Examples ===\n")
 
-    # Example 1: Simple case
-    ads1 = [
-        ('u1', 'Nike', 100),
-        ('u1', 'Adidas', 90),
-        ('u2', 'Nike', 80),
-        ('u2', 'Adidas', 70),
+    # Example 1: Customer reached 3 ads limit
+    print("Example 1: 3 ads limit reached")
+    sent_ads1 = [
+        ('ad1', 'alice', 1),
+        ('ad2', 'alice', 2),
+        ('ad3', 'alice', 3)
     ]
+    new_ad1 = ('ad4', 'alice', 4)
+    result1 = get_blocked_customers(sent_ads1, new_ad1)
+    print(f"Sent ads: {sent_ads1}")
+    print(f"New ad: {new_ad1}")
+    print(f"Blocked: {result1}")
+    print(f"Reason: Alice already has 3 ads in week 1\n")
 
-    print("Example 1: Basic scenario")
-    print(f"Ads: {ads1}")
-    print(f"Brand limit: 2, User limit: 2")
-    result1 = max_ad_value(ads1, brand_limit=2, user_limit=2)
-    print(f"Max value: {result1}")
-    print(f"Explanation: All ads can be shown (340 total)\n")
-
-    # Example 2: Tight brand limit
-    print("Example 2: Tight brand limit")
-    print(f"Brand limit: 1, User limit: 2")
-    result2 = max_ad_value(ads1, brand_limit=1, user_limit=2)
-    print(f"Max value: {result2}")
-    print(f"Explanation: Nike-u1 (100) + Adidas-u1 (90) = 190")
-    print(f"            Can't take Nike-u2 (brand limit), but can take Adidas-u1\n")
-
-    # Example 3: Tight user limit
-    print("Example 3: Tight user limit")
-    print(f"Brand limit: 2, User limit: 1")
-    result3 = max_ad_value(ads1, brand_limit=2, user_limit=1)
-    print(f"Max value: {result3}")
-    print(f"Explanation: Nike-u1 (100) + Nike-u2 (80) = 180")
-    print(f"            Each user sees only 1 ad\n")
-
-    # Example 4: Complex scenario
-    ads4 = [
-        ('u1', 'Nike', 100),
-        ('u1', 'Adidas', 95),
-        ('u1', 'Puma', 85),
-        ('u2', 'Nike', 90),
-        ('u2', 'Adidas', 88),
-        ('u3', 'Nike', 92),
+    # Example 2: Same ad in same week
+    print("Example 2: Same ad already received")
+    sent_ads2 = [
+        ('ad1', 'alice', 1),
+        ('ad2', 'bob', 2)
     ]
+    new_ad2 = ('ad1', 'alice', 5)
+    result2 = get_blocked_customers(sent_ads2, new_ad2)
+    print(f"Sent ads: {sent_ads2}")
+    print(f"New ad: {new_ad2}")
+    print(f"Blocked: {result2}")
+    print(f"Reason: Alice already received 'ad1' in week 1\n")
 
-    print("Example 4: Complex scenario")
-    print(f"Ads: {ads4}")
-    print(f"Brand limit: 2, User limit: 2")
-    result4 = max_ad_value(ads4, brand_limit=2, user_limit=2)
-    print(f"Max value: {result4}")
-    print(f"Greedy selection (by value desc):")
-    print(f"  1. Nike-u1 (100)")
-    print(f"  2. Adidas-u1 (95)")
-    print(f"  3. Nike-u3 (92) - Nike limit still OK")
-    print(f"  4. Nike-u2 (90) - SKIP (Nike limit = 2 reached)")
-    print(f"  5. Adidas-u2 (88)")
-    print(f"Total: 100+95+92+88 = 375\n")
+    # Example 3: Not blocked - different week
+    print("Example 3: Not blocked - different week")
+    sent_ads3 = [
+        ('ad1', 'alice', 1),
+        ('ad2', 'alice', 8)
+    ]
+    new_ad3 = ('ad3', 'alice', 10)
+    result3 = get_blocked_customers(sent_ads3, new_ad3)
+    print(f"Sent ads: {sent_ads3}")
+    print(f"New ad: {new_ad3}")
+    print(f"Blocked: {result3}")
+    print(f"Reason: Only 1 ad in week 1, only 1 ad in week 2. New ad is in week 2.\n")
+
+    # Example 4: Week boundary test
+    print("Example 4: Week boundary")
+    sent_ads4 = [
+        ('ad1', 'alice', 7),  # Last day of week 1
+        ('ad2', 'alice', 8)   # First day of week 2
+    ]
+    new_ad4 = ('ad3', 'alice', 9)  # Week 2
+    result4 = get_blocked_customers(sent_ads4, new_ad4)
+    print(f"Sent ads: {sent_ads4}")
+    print(f"New ad: {new_ad4}")
+    print(f"Blocked: {result4}")
+    print(f"Weeks: day 7 = week {get_week_number(7)}, day 8 = week {get_week_number(8)}")
+    print(f"Reason: Day 7 is in week 1, days 8-9 are in week 2. Only 2 ads in week 2.\n")
+
+    # Example 5: Complex scenario
+    print("Example 5: Complex scenario - multiple weeks")
+    sent_ads5 = [
+        ('ad1', 'alice', 1),   # Week 1
+        ('ad2', 'alice', 2),   # Week 1
+        ('ad3', 'alice', 8),   # Week 2
+        ('ad4', 'alice', 9),   # Week 2
+        ('ad5', 'alice', 10)   # Week 2
+    ]
+    new_ad5 = ('ad6', 'alice', 11)  # Week 2
+    result5 = get_blocked_customers(sent_ads5, new_ad5)
+    print(f"Sent ads: {sent_ads5}")
+    print(f"New ad: {new_ad5}")
+    print(f"Blocked: {result5}")
+    print(f"Reason: Alice has 2 ads in week 1, 3 ads in week 2. Limit reached in week 2.\n")

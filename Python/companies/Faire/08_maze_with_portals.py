@@ -64,8 +64,9 @@ def run_tests():
         ['#', 'P', '.', 'P']
     ]
     result1 = shortest_path_with_portals(maze1)
-    # S -> down -> down -> portal to (2,3) -> up -> E = 3 steps
-    assert result1 == 3, f"Test 1 failed: expected 3, got {result1}"
+    # Shortest path: S(0,0) -> (0,1) -> (1,1) -> (1,2) -> (1,3) -> E(0,3) = 5 moves
+    # Portal path would be: S -> (0,1) -> (1,1) -> portal(2,1)+teleport(2,3) [3 moves] -> (1,3) -> E = also 5 moves
+    assert result1 == 5, f"Test 1 failed: expected 5, got {result1}"
     print("✓ Test 1 passed: Maze with portals")
 
     # Test Case 2: Direct path (no portals)
