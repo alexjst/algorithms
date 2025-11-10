@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 6: Course Schedule with Minimum Time
+Problem 7: Course Schedule with Minimum Time
 
 Find minimum time to complete all courses given prerequisites and course durations.
 

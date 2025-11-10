@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Problem 9: Maze with Portals
+Problem 8: Maze with Portals
 
 Find shortest path in a maze that contains portals (teleportation points).
 
@@ -33,8 +33,8 @@ Constraints:
 
 ================================================================================
 INSTRUCTIONS:
-- Implement your solution in: 09_maze_with_portals_solution.py
-- Run this file to test: python 09_maze_with_portals.py
+- Implement your solution in: 08_maze_with_portals_solution.py
+- Run this file to test: python 08_maze_with_portals.py
 - To reset and practice again: just delete/reset the solution file
 ================================================================================
 """

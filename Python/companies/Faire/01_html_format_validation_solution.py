@@ -66,4 +66,60 @@ def is_valid_tags(s: str) -> bool:
     #   - Empty string (should return True)
     #   - LIFO order for closing tags
 
-    pass
+    # invalid input (None)
+    if s is None:
+        return False
+
+    # empty string
+    if not s:
+        return True
+
+    stack = []
+    n, i = len(s), 0
+
+    # print(f"input s={s}")
+    while i < n:
+        if i < n-1 and s[i:i+2] == "{{":
+            # print(f"open tag at {i}")
+            close_tag_found = False
+            j = i+2
+            while j < n:
+                if j < n-1 and s[j:j+2] == "}}":
+                    # print(f"close tag at {j}")
+                    tag = s[i+2:j].strip()
+                    # print(f"tag is {tag}")
+                    if len(tag) >= 2 and tag[0] in ("#", "/"):
+                        if tag[0] == "#":
+                            stack.append(tag)
+                            # print(f"insert: stack={stack}")
+                        else:
+                            if len(stack) and stack[-1][1:] == tag[1:]:
+                                stack.pop()
+                                # print(f"pop: stack={stack}")
+                            else:
+                                # print(f"return False on stack")
+                                return False
+                    else:
+                        # print(f"return False on invalid tag")
+                        return False
+                    close_tag_found = True
+                    # print(f"breaking on close_tag_found")
+                    break
+                # print(f"j is now {j}")
+                j += 1
+            if not close_tag_found:
+                # print(f"return False on missing close tag")
+                return False
+            else:
+                i = j + 2
+                # print(f"i is now {i}")
+        i += 1
+
+    # print(f"final stack={stack}")
+    return len(stack) == 0
+
+if __name__ == "__main__":
+    assert is_valid_tags("") == True, "empty string should be valid"
+    assert is_valid_tags("{{}}") == False, "{{}} should be invalid tag"
+    assert is_valid_tags("{{ abc }}") == False, "{{ abc }} should be invalid tag"
+    assert is_valid_tags("{{ #   abc }}xxx{xxx}xxx{{ /   abc}}") == True, "{{ #  abc }} should be valid tag"

@@ -2,6 +2,18 @@
 
 Comprehensive preparation materials for DataHub/Acryl Data backend engineering interviews.
 
+## ⚠️ IMPORTANT: DataHub ↔️ LinkedIn Crossover
+
+**DataHub was created by LinkedIn's data team.** There's significant overlap in Java concurrency problems between the two companies.
+
+**📖 See [LINKEDIN_DATAHUB_CROSSOVER.md](../LINKEDIN_DATAHUB_CROSSOVER.md) for complete crossover analysis.**
+
+**Quick Summary:**
+- DataHub has 3 Java concurrency problems (Thread-Safe Cache, Producer-Consumer, Batch Processor)
+- LinkedIn has 2 Java concurrency problems (Bounded Blocking Queue, Web Crawler)
+- **All 5 problems are interchangeable** between the companies
+- Study **all 5 Java concurrency problems** for maximum interview coverage
+
 ## 📊 About DataHub
 
 DataHub is an open-source metadata platform that helps organizations discover, understand, and trust their data. Acryl Data (founded 2020, ~50 employees) is the company behind DataHub, offering a managed version with enterprise features. They focus on data cataloging, lineage tracking, and data governance.

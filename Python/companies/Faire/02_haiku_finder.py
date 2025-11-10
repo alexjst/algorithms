@@ -123,20 +123,55 @@ def run_tests():
     else:
         print("✓ Test 4 passed: No valid haiku (acceptable)")
 
-    # Test Case 5: Case sensitivity
-    sentence5 = "A Simple Flower grows beautifully in Spring gardens"
+    # Test Case 5: Classic pond haiku
+    sentence5 = "An old silent pond a frog jumps in the water splash the sound is heard"
     syllable_dict5 = {
-        "a": 1, "simple": 2, "flower": 2, "grows": 1,
-        "beautifully": 4, "in": 1, "spring": 1, "gardens": 2
+        "an": 1, "old": 1, "silent": 2, "pond": 1, "a": 1,
+        "frog": 1, "jumps": 1, "in": 1, "the": 1, "water": 2,
+        "splash": 1, "sound": 1, "is": 1, "heard": 1
     }
     result5 = find_haiku(sentence5, syllable_dict5)
-    if result5 is not None:
-        # Check that original case is preserved
-        assert "Simple" in str(result5) or "simple" in str(result5).lower(), \
-            "Original case should be preserved or properly handled"
-        print(f"✓ Test 5 passed: Case handling: {result5}")
-    else:
-        print("✓ Test 5 passed: No valid haiku (acceptable)")
+    expected5 = ["An old silent pond", "a frog jumps in the water", "splash the sound is heard"]
+    assert result5 == expected5, f"Test 5 failed: Expected {expected5}, got {result5}"
+    print(f"✓ Test 5 passed: Classic pond haiku: {result5}")
+
+    # Test Case 6: Haiku with punctuation preserved
+    sentence6 = "Cherry blossoms fall! Gently, drifting to the ground. Spring has now arrived."
+    syllable_dict6 = {
+        "cherry": 2, "blossoms": 2, "fall": 1, "gently": 2,
+        "drifting": 2, "to": 1, "the": 1, "ground": 1,
+        "spring": 1, "has": 1, "now": 1, "arrived": 2
+    }
+    result6 = find_haiku(sentence6, syllable_dict6)
+    expected6 = ["Cherry blossoms fall!", "Gently, drifting to the ground.", "Spring has now arrived."]
+    assert result6 == expected6, f"Test 6 failed: Expected {expected6}, got {result6}"
+    # Check punctuation preserved
+    assert "!" in result6[0] and "," in result6[1] and "." in result6[2], "Punctuation must be preserved"
+    print(f"✓ Test 6 passed: Punctuation preserved: {result6}")
+
+    # Test Case 7: Valid haiku with mostly 1-syllable words
+    sentence7 = "I am cool you are also very nice we all jump so very high"
+    syllable_dict7 = {
+        "i": 1, "am": 1, "cool": 1, "you": 1, "are": 1,
+        "also": 2, "very": 2, "nice": 1, "we": 1, "all": 1,
+        "jump": 1, "so": 1, "high": 1
+    }
+    result7 = find_haiku(sentence7, syllable_dict7)
+    expected7 = ["I am cool you are", "also very nice we all", "jump so very high"]
+    assert result7 == expected7, f"Test 7 failed: Expected {expected7}, got {result7}"
+    print(f"✓ Test 7 passed: Valid haiku with short words: {result7}")
+
+    # Test Case 8: Natural haiku about morning
+    sentence8 = "Morning dew glistens softly on the green grass blades very fresh and new"
+    syllable_dict8 = {
+        "morning": 2, "dew": 1, "glistens": 2, "softly": 2,
+        "on": 1, "the": 1, "green": 1, "grass": 1, "blades": 1,
+        "very": 2, "fresh": 1, "and": 1, "new": 1
+    }
+    result8 = find_haiku(sentence8, syllable_dict8)
+    expected8 = ["Morning dew glistens", "softly on the green grass blades", "very fresh and new"]
+    assert result8 == expected8, f"Test 8 failed: Expected {expected8}, got {result8}"
+    print(f"✓ Test 8 passed: Natural morning haiku: {result8}")
 
     print("\n" + "="*50)
     print("All basic tests passed! ✓")

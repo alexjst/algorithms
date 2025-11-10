@@ -49,5 +49,15 @@ def group_anagrams(strs: List[str]) -> List[List[str]]:
     # Hint: Use a dictionary with sorted string as key
     #   Example: "eat" → key = "aet", "tea" → key = "aet" (same group!)
     # Alternative: Use character count tuple as key
+    
+    anagrams = defaultdict(list)
 
-    pass
+    for s in strs:
+        if not s:
+            key = ""
+        else:
+            key = "".join(sorted(s))
+        anagrams[key].append(s)
+
+    return list(anagrams.values())
+
