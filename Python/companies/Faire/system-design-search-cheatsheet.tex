@@ -11,6 +11,7 @@
 \usepackage{tabularx}
 \usepackage{booktabs}
 \usepackage{pifont}
+\usepackage{graphicx}
 
 \renewcommand{\familydefault}{\sfdefault}
 \setlist[itemize]{noitemsep,topsep=1pt,leftmargin=1em,parsep=0pt}
@@ -467,6 +468,52 @@ Serving: Combine both at inference
     \item Better ranking → 2-10\% lift
 \end{itemize}
 
+\section*{Ranking Signal Categories}
+
+\textbf{Production System: 83 Total Signals}
+
+\begin{tabular}{|p{3.5cm}|p{0.8cm}|p{2.5cm}|}
+\hline
+\textbf{Category} & \textbf{Count} & \textbf{Key Examples} \\
+\hline
+\textbf{Text Relevance} & 18 & BM25, TF-IDF, unigram+bigram \\
+\hline
+\textbf{Document Quality} & 9 & Rating, sales, price, reviews \\
+\hline
+\textbf{Query-Doc Match} & 25 & Brand, category, NER \\
+\hline
+\textbf{Engagement (Doc)} & 3 & Total clicks, sales volume \\
+\hline
+\textbf{Engagement (Q-D)} & 3 & NavBoost (position-norm CTR) \\
+\hline
+\textbf{ML Predictions} & 4 & Click, purchase, cart prob \\
+\hline
+\textbf{Business Logic} & 31 & GPPU (profit), delivery, promo \\
+\hline
+\textbf{Demotion} & 6 & Out-of-stock, adult content \\
+\hline
+\textbf{Query Expansion} & 6 & Rewrite, relaxation \\
+\hline
+\textbf{Experimental} & 2 & A/B test variants \\
+\hline
+\end{tabular}
+
+\vspace{4pt}
+
+\textbf{Signal Combination:}
+\begin{verbatim}
+Score = product(
+  TextRelevance(BM25),
+  CategoryMatch(1.0-1.4x),
+  NavBoost(CTR),
+  ML_ClickProb(1.0-2.0x),
+  GPPU_Profit(1.0-1.5x),
+  Quality(rating, sales)
+)
+\end{verbatim}
+
+\textbf{Key Insight:} Multiplicative combination balances relevance, engagement, and business metrics
+
 \vspace{6pt}
 \begin{center}
 \rule{0.9\columnwidth}{0.4pt}\\[2pt]
@@ -474,4 +521,19 @@ Serving: Combine both at inference
 \end{center}
 
 \end{multicols}
+
+\newpage
+
+\section*{Complete Search System Architecture}
+
+\begin{center}
+\includegraphics[width=0.95\textwidth,keepaspectratio]{/Users/ayang/Downloads/search-architecture.png}
+\end{center}
+
+\vspace{10pt}
+
+\begin{center}
+{\small \textit{End-to-end architecture showing: Query flow $\rightarrow$ Search Root Service $\rightarrow$ Cluster fanout $\rightarrow$ Solr shards with supporting services (ML Ranking, Query Rewrite, Entity Expansion) and data layer (Catalog DB, User DB, Feature Store, Pricing/Inventory)}}
+\end{center}
+
 \end{document}
