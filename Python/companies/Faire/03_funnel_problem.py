@@ -263,3 +263,58 @@ def run_all_tests():
 
 if __name__ == "__main__":
     run_all_tests()
+
+
+# ==============================================================================
+# REFERENCE SOLUTION (for your reference after attempting the problem)
+# ==============================================================================
+"""
+class SolutionReference:
+    def compute_funnel_counts(self, funnels: List[str], events: List[str]) -> List[str]:
+        # Parse funnels
+        parsed_funnels = []
+        for funnel_str in funnels:
+            parts = funnel_str.split(',')
+            funnel_name = parts[0]
+            steps = parts[1:]  # May contain duplicates
+            parsed_funnels.append((funnel_name, steps))
+
+        # Parse and group events by user
+        user_events = defaultdict(list)  # user_id -> [(timestamp, event_name), ...]
+        for event_str in events:
+            parts = event_str.split(',')
+            user_id = int(parts[0])
+            timestamp = int(parts[1])
+            event_name = parts[2]
+            user_events[user_id].append((timestamp, event_name))
+
+        # Note: Events are already sorted by timestamp globally (guaranteed by problem)
+
+        # Process each funnel
+        results = []
+        for funnel_name, steps in parsed_funnels:
+            # Track which users reached each step index
+            step_users = [set() for _ in range(len(steps))]
+
+            # For each user, track their current position in this funnel
+            for user_id, events_list in user_events.items():
+                current_step_idx = 0  # User starts before step 0
+
+                # Process user's events in timestamp order
+                for timestamp, event_name in events_list:
+                    # Check if this event matches the next required step
+                    if current_step_idx < len(steps) and event_name == steps[current_step_idx]:
+                        # User reached this step
+                        step_users[current_step_idx].add(user_id)
+                        current_step_idx += 1
+
+            # Format output for this funnel
+            output_parts = [funnel_name]
+            for i, step_name in enumerate(steps):
+                count = len(step_users[i])
+                output_parts.append(f"{step_name}({count})")
+
+            results.append(','.join(output_parts))
+
+        return results
+"""
