@@ -1,197 +1,224 @@
 #!/usr/bin/env python3
 """
-Solution for Problem 3: Funnel Problem
+Solution for Problem 3: Funnel Analysis
 
-🚨 ACTUAL FAIRE INTERVIEW PROBLEM - Asked 4+ times
+🚨 ACTUAL FAIRE INTERVIEW PROBLEM - Reconstructed from interview
 
-Problem: Analyze user conversion funnel through multiple stages.
-Track users' progression through: Browse → View → Cart → Checkout → Purchase
+Algorithm:
+1. Parse funnels: split by comma to get funnel_name and list of steps
+2. Parse events: split by comma to get (user_id, timestamp, event_name)
+3. Group events by user_id (timestamps already sorted globally)
+4. For each funnel, track user progress through steps:
+   - Maintain state: which step each user is currently on
+   - Process events in timestamp order for each user
+   - When event matches next required step, advance user's position
+   - Count distinct users who reached each step
+5. Format output as CSV
 
-Key Approach:
-- Use hash map: stage → set of users who reached that stage
-- Calculate conversion rates between consecutive stages
-- Find biggest drop-off between stages
+Key insights:
+- Repeated steps in funnel require separate matching events
+- Events not in order are ignored (state machine doesn't advance)
+- Each funnel is evaluated independently
+
+Time Complexity: O(F * E) where F = funnels, E = events
+Space Complexity: O(U * F) where U = unique users, F = funnels (track state per user per funnel)
 """
 
-from typing import List, Tuple, Dict, Set
+from typing import List, Dict, Tuple
 from collections import defaultdict
 
 
-class FunnelAnalyzer:
-    """
-    Analyze user conversion funnel.
-
-    Funnel stages (in order):
-    1. Browse
-    2. View
-    3. Cart
-    4. Checkout
-    5. Purchase
-    """
-
-    STAGE_ORDER = ['Browse', 'View', 'Cart', 'Checkout', 'Purchase']
-
-    def __init__(self, events: List[Tuple[str, str, int]]):
+class Solution:
+    def compute_funnel_counts(
+        self,
+        funnels: List[str],
+        events: List[str]
+    ) -> List[str]:
         """
-        Initialize analyzer with user events.
+        Compute, for each funnel, how many distinct users reach each step in order.
 
-        Args:
-            events: List of (user_id, stage, timestamp) tuples
-                   Example: [('u1', 'Browse', 1), ('u1', 'View', 2), ('u2', 'Browse', 1)]
-
-        Time: O(n) where n = number of events
-        Space: O(n) to store user sets per stage
+        :param funnels: List of strings, each formatted:
+                        "funnel_name,step_1,step_2,...,step_n"
+        :param events:  List of strings, each formatted:
+                        "user_id,timestamp,event_name"
+        :return: List of strings, one per funnel, formatted:
+                 "funnel_name,step_1(count_1),step_2(count_2),...,step_n(count_n)"
         """
-        # Track which users reached each stage (users can skip stages!)
-        self.stage_users = defaultdict(set)  # {stage: set of user_ids}
+        # Parse funnels
+        parsed_funnels = []
+        for funnel_str in funnels:
+            parts = funnel_str.split(',')
+            funnel_name = parts[0]
+            steps = parts[1:]  # May contain duplicates
+            parsed_funnels.append((funnel_name, steps))
 
-        # Track user journeys in chronological order
-        self.user_journeys = defaultdict(list)  # {user_id: [(stage, timestamp)]}
+        # Parse and group events by user
+        user_events = defaultdict(list)  # user_id -> [(timestamp, event_name), ...]
+        for event_str in events:
+            parts = event_str.split(',')
+            user_id = int(parts[0])
+            timestamp = int(parts[1])
+            event_name = parts[2]
+            user_events[user_id].append((timestamp, event_name))
 
-        # Process events
-        for user_id, stage, timestamp in events:
-            # Add user to this stage (set handles duplicates automatically)
-            self.stage_users[stage].add(user_id)
+        # Note: Events are already sorted by timestamp globally (guaranteed by problem)
 
-            # Track journey
-            self.user_journeys[user_id].append((stage, timestamp))
+        # Process each funnel
+        results = []
+        for funnel_name, steps in parsed_funnels:
+            # Track which users reached each step index
+            # step_users[i] = set of users who reached step i
+            step_users = [set() for _ in range(len(steps))]
 
-        # Sort each user's journey by timestamp
-        for user_id in self.user_journeys:
-            self.user_journeys[user_id].sort(key=lambda x: x[1])
+            # For each user, track their current position in this funnel
+            for user_id, events_list in user_events.items():
+                current_step_idx = 0  # User starts before step 0
 
-    def get_funnel_metrics(self) -> Dict[str, Dict]:
+                # Process user's events in timestamp order
+                for timestamp, event_name in events_list:
+                    # Check if this event matches the next required step
+                    if current_step_idx < len(steps) and event_name == steps[current_step_idx]:
+                        # User reached this step
+                        step_users[current_step_idx].add(user_id)
+                        current_step_idx += 1
+
+            # Format output for this funnel
+            output_parts = [funnel_name]
+            for i, step_name in enumerate(steps):
+                count = len(step_users[i])
+                output_parts.append(f"{step_name}({count})")
+
+            results.append(','.join(output_parts))
+
+        return results
+
+
+# Alternative implementation with more detailed comments
+class SolutionVerbose:
+    def compute_funnel_counts(self, funnels: List[str], events: List[str]) -> List[str]:
         """
-        Get metrics for each funnel stage.
-
-        Returns:
-            Dictionary with stage names as keys, metrics as values:
-            {
-                'Browse': {
-                    'total_users': 100,
-                    'conversion_from_previous': 100.0  # Always 100% for first stage
-                },
-                'View': {
-                    'total_users': 50,
-                    'conversion_from_previous': 50.0   # 50 out of 100
-                },
-                ...
-            }
-
-        Time: O(s) where s = number of stages (constant = 5)
+        More verbose implementation with detailed comments.
         """
-        metrics = {}
+        # Step 1: Parse funnel definitions
+        funnel_definitions = []
+        for funnel_csv in funnels:
+            parts = funnel_csv.split(',')
+            name = parts[0]
+            steps = parts[1:]
+            funnel_definitions.append({
+                'name': name,
+                'steps': steps
+            })
 
-        for i, stage in enumerate(self.STAGE_ORDER):
-            current_users = len(self.stage_users[stage])
+        # Step 2: Parse user events and organize by user
+        events_by_user = defaultdict(list)
+        for event_csv in events:
+            parts = event_csv.split(',')
+            user_id = int(parts[0])
+            timestamp = int(parts[1])
+            event_name = parts[2]
 
-            # Calculate conversion from previous stage
-            if i == 0:
-                # First stage: always 100% (no previous stage)
-                conversion = 100.0
-            else:
-                # Find previous non-empty stage
-                prev_users = 0
-                for j in range(i - 1, -1, -1):
-                    prev_stage = self.STAGE_ORDER[j]
-                    prev_users = len(self.stage_users[prev_stage])
-                    if prev_users > 0:
-                        break
+            events_by_user[user_id].append({
+                'timestamp': timestamp,
+                'event_name': event_name
+            })
 
-                # Calculate conversion
-                if prev_users > 0:
-                    conversion = (current_users / prev_users) * 100
-                else:
-                    conversion = 0.0 if current_users == 0 else 100.0
+        # Step 3: Events already sorted by timestamp (guaranteed by problem)
 
-            metrics[stage] = {
-                'total_users': current_users,
-                'conversion_from_previous': round(conversion, 2)
-            }
+        # Step 4: Process each funnel
+        output_lines = []
 
-        return metrics
+        for funnel_def in funnel_definitions:
+            funnel_name = funnel_def['name']
+            funnel_steps = funnel_def['steps']
+            num_steps = len(funnel_steps)
 
-    def get_user_journey(self, user_id: str) -> List[str]:
-        """
-        Get the ordered list of stages a user went through.
+            # Track users who reached each step
+            users_at_step = [set() for _ in range(num_steps)]
 
-        Args:
-            user_id: User identifier
+            # Step 5: Simulate each user's journey through this funnel
+            for user_id, user_event_list in events_by_user.items():
+                # User's current position in the funnel (step index)
+                position = 0  # Starts before first step
 
-        Returns:
-            List of stage names in chronological order
-            Example: ['Browse', 'View', 'Cart', 'Purchase']
+                # Process user's events in chronological order
+                for event in user_event_list:
+                    event_name = event['event_name']
 
-        Time: O(1) - already pre-sorted
-        """
-        if user_id not in self.user_journeys:
-            return []
+                    # Check if this event advances the user in the funnel
+                    if position < num_steps and event_name == funnel_steps[position]:
+                        # User reached this step
+                        users_at_step[position].add(user_id)
+                        position += 1
 
-        # Return just the stage names (without timestamps)
-        return [stage for stage, timestamp in self.user_journeys[user_id]]
+                        # Early termination if user completed entire funnel
+                        if position >= num_steps:
+                            break
 
-    def find_dropoff_stage(self) -> Tuple[str, float]:
-        """
-        Find the stage-to-stage transition with the highest drop-off rate.
+            # Step 6: Format output for this funnel
+            output_parts = [funnel_name]
+            for step_idx, step_name in enumerate(funnel_steps):
+                user_count = len(users_at_step[step_idx])
+                output_parts.append(f"{step_name}({user_count})")
 
-        Returns:
-            Tuple of (transition_name, dropoff_percentage)
-            Example: ('View -> Cart', 66.7)
-            Returns ('', 0.0) if no drop-offs
+            output_line = ','.join(output_parts)
+            output_lines.append(output_line)
 
-        Key Insight:
-        - Drop-off is calculated between consecutive stages
-        - If user skips from Browse to Purchase, they "dropped off" from View, Cart, Checkout
-        - Even though they eventually converted!
-
-        Time: O(s) where s = number of stages (constant = 5)
-        """
-        max_dropoff_rate = 0.0
-        max_dropoff_stage = ""
-
-        # Check each consecutive pair of stages
-        for i in range(len(self.STAGE_ORDER) - 1):
-            current_stage = self.STAGE_ORDER[i]
-            next_stage = self.STAGE_ORDER[i + 1]
-
-            current_users = len(self.stage_users[current_stage])
-            next_users = len(self.stage_users[next_stage])
-
-            # Calculate drop-off rate
-            if current_users > 0:
-                dropoff_rate = ((current_users - next_users) / current_users) * 100
-
-                if dropoff_rate > max_dropoff_rate:
-                    max_dropoff_rate = dropoff_rate
-                    max_dropoff_stage = f"{current_stage} -> {next_stage}"
-
-        return (max_dropoff_stage, round(max_dropoff_rate, 2))
+        return output_lines
 
 
 if __name__ == "__main__":
-    # Example usage
-    events = [
-        ('u1', 'Browse', 1),
-        ('u1', 'View', 2),
-        ('u1', 'Cart', 3),
-        ('u1', 'Purchase', 5),  # u1 skips Checkout!
-        ('u2', 'Browse', 1),
-        ('u2', 'View', 2),
-        ('u3', 'Browse', 1),
+    print("=== Funnel Analysis Solution Examples ===\n")
+
+    # Example 1: Basic funnel
+    print("Example 1: Basic checkout funnel")
+    funnels1 = ["checkout,view,add,purchase"]
+    events1 = [
+        "1,100,view",
+        "1,200,add",
+        "1,300,purchase",
+        "2,100,view",
+        "2,200,add"
     ]
 
-    analyzer = FunnelAnalyzer(events)
+    sol = Solution()
+    result1 = sol.compute_funnel_counts(funnels1, events1)
+    print(f"Funnels: {funnels1}")
+    print(f"Events: {events1}")
+    print(f"Result: {result1}")
+    print("Explanation: User 1 completes all steps, User 2 stops at 'add'\n")
 
-    print("=== Funnel Metrics ===")
-    metrics = analyzer.get_funnel_metrics()
-    for stage, data in metrics.items():
-        print(f"{stage}: {data['total_users']} users ({data['conversion_from_previous']}% conversion)")
+    # Example 2: Repeated steps
+    print("Example 2: Funnel with repeated steps")
+    funnels2 = ["triple_click,click,click,click,buy"]
+    events2 = [
+        "1,100,click",
+        "1,200,click",
+        "1,300,click",
+        "1,400,buy",
+        "2,100,click",
+        "2,200,click"
+    ]
 
-    print("\n=== User Journeys ===")
-    for user in ['u1', 'u2', 'u3']:
-        journey = analyzer.get_user_journey(user)
-        print(f"{user}: {' -> '.join(journey)}")
+    result2 = sol.compute_funnel_counts(funnels2, events2)
+    print(f"Funnels: {funnels2}")
+    print(f"Events: {events2}")
+    print(f"Result: {result2}")
+    print("Explanation: User 1 does 3 clicks then buy. User 2 only does 2 clicks.\n")
 
-    print("\n=== Biggest Drop-off ===")
-    dropoff_stage, dropoff_rate = analyzer.find_dropoff_stage()
-    print(f"{dropoff_stage}: {dropoff_rate}% drop-off")
+    # Example 3: Out of order events
+    print("Example 3: Events not in funnel order")
+    funnels3 = ["ordered,a,b,c"]
+    events3 = [
+        "1,100,b",  # Wrong order - ignored
+        "1,200,a",  # Correct - matches step 1
+        "1,300,c",  # Wrong - skips step 2 (b)
+        "1,400,b",  # Correct - matches step 2
+        "1,500,c"   # Correct - matches step 3
+    ]
+
+    result3 = sol.compute_funnel_counts(funnels3, events3)
+    print(f"Funnels: {funnels3}")
+    print(f"Events: {events3}")
+    print(f"Result: {result3}")
+    print("Explanation: Only events matching current step advance the funnel\n")
