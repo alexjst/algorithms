@@ -77,17 +77,32 @@ class Solution:
 
 # Optional: Write your own test cases here
 if __name__ == "__main__":
-    # Example test
-    funnels = ["checkout,view,add,purchase"]
+    # Example from problem description
+    funnels = [
+        "checkout_process,view_product,add_to_cart,enter_payment_info,complete_order",
+        "three_clicks_then_add,click_product,click_product,click_product,add_to_cart"
+    ]
+
     events = [
-        "1,100,view",
-        "1,200,add",
-        "1,300,purchase",
-        "2,100,view",
-        "2,200,add"
+        "4,1200,view_product",
+        "4,1210,add_to_cart",
+        "4,1300,enter_payment_info",
+        "5,1250,view_product",
+        "5,1260,add_to_cart",
+        "5,1270,enter_payment_info",
+        "5,1280,complete_order",
+        "6,2000,click_product",
+        "6,2005,click_product",
+        "6,2010,click_product",
+        "6,2015,add_to_cart",
+        "7,3000,click_product",
+        "7,3005,click_product"
     ]
 
     sol = Solution()
     result = sol.compute_funnel_counts(funnels, events)
     print(f"Result: {result}")
-    # Expected: ["checkout,view(2),add(2),purchase(1)"]
+
+    # Expected:
+    # ["checkout_process,view_product(2),add_to_cart(2),enter_payment_info(2),complete_order(1)",
+    #  "three_clicks_then_add,click_product(2),click_product(2),click_product(1),add_to_cart(1)"]
