@@ -1013,7 +1013,7 @@ def prim_mst(n, edges):
 
     mst = []
     visited = set([0])
-    edges_heap = graph[0][:]
+    edges_heap = [(w, 0, v) for v, w in graph[0]]
     heapq.heapify(edges_heap)
 
     while edges_heap and len(visited) < n:

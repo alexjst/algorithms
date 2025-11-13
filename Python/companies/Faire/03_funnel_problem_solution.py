@@ -71,9 +71,69 @@ class Solution:
         :return: List of strings, one per funnel, formatted:
                  "funnel_name,step_1(count_1),step_2(count_2),...,step_n(count_n)"
         """
-        # TODO: Implement your solution here
-        pass
+        """
+        - Create a map of "funnel_name : dictionary(step_name, distinct_users_set)" -> this will turn into the result
+        - Create a map of "funnel_name : dictionary(step_name: step_idx)"
+        - Create a map of "funnel_name : dictionary(step_idx: step_name) -> or a list"
+        - Create a map of "funnel_name : dictionary(user_name: step_idx)"
+        - Scan funnel definitions to get map from step_name : set of funnels.
 
+        Now scan events:
+            - user, timestamp, event/step
+                - from step, find list of funnels.
+                    - for each funnel, find idx of that step, find idx of that user too
+                        - if idx of user is not found:
+                            - add user to step
+                        - if idx is found:
+                            if idx is last upper limit, skip
+                            if idx is not the last, move user from idx to idx+1
+
+        build final result.
+        """
+        funnel_step_user = defaultdict(lambda: defaultdict(set))
+        funnel_step = defaultdict(lambda: defaultdict(int))
+        funnel_steps = defaultdict(list)
+        funnel_user = defaultdict(lambda: defaultdict(int))
+        step_funnel = defaultdict(set)
+
+        # build funnel_step, step_funnel
+        for funnel_row in funnels:
+            parts = funnel_row.split(",")
+            funnel = parts[0]
+            steps = parts[1:]
+            funnel_steps[funnel] = steps
+            for i, step in enumerate(steps):
+                funnel_step[funnel][step] = i
+                step_funnel[step].add(funnel)
+
+        for event in events:
+            user, timestamp, step = event.split(",")
+            funnels = step_funnel[step]
+            for funnel in funnels:
+                if user not in funnel_user[funnel]:
+                    funnel_user[funnel][user] = 0
+                    funnel_step_user[funnel][step].add(user)
+                else:
+                    step_idx = funnel_user[funnel]
+                    if step_idx >= len(funnel_step[funnel]):
+                        continue
+                    else:
+                        funnel_user[funnel][user] += 1
+                        funnel_step_user[funnel][step].add(user)
+
+        result = []
+        for funnel_row in funnels:
+            parts = funnel_row.split(",")
+            funnel = parts[0]
+            steps = parts[1:]
+            step_count = []
+            for i, step in enumerate(steps):
+                user_count = len(funnel_step_user[funnel][step])
+                step_count.append(step + "(" + str(user_count) + "|")
+            step_count_str =  ",".join(step_count)
+            result.append(",".join[funnel, step_count_str])
+
+        return result 
 
 # Optional: Write your own test cases here
 if __name__ == "__main__":
