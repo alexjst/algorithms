@@ -1,0 +1,2006 @@
+\documentclass[11pt,letterpaper]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{fontawesome5}
+
+% Colors
+\definecolor{robloxred}{RGB}{227,28,42}
+\definecolor{highlight}{RGB}{255,245,230}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codegray}{RGB}{128,128,128}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DataHub Interview Day 2 Prep}
+\rhead{Alex Yang}
+\cfoot{\thepage}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+% Custom boxes
+\newtcolorbox{keyinsight}{
+    colback=highlight,
+    colframe=robloxred,
+    fonttitle=\bfseries,
+    title=\faLightbulb\ Key Insight
+}
+
+\newtcolorbox{criticalpoint}{
+    colback=red!5!white,
+    colframe=red!75!black,
+    fonttitle=\bfseries,
+    title=\faExclamationTriangle\ Critical Point
+}
+
+\newtcolorbox{actionitem}{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title=\faCheckCircle\ Action Item
+}
+
+% Title
+\title{\textbf{DataHub Day 2 Interview Preparation}\\
+\large Part 1: Project Deep Dive (Game Clickbait Detection)\\
+\large Part 2: Search Architecture Discussion}
+\author{Alex Yang\\
+Principal Software Engineer, Roblox}
+\date{Interview Date: November 20, 2025\\
+Prepared: \today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Interview Overview}
+% ============================================================
+
+\subsection{Format}
+\begin{itemize}
+    \item \textbf{Interviewer:} Abe (DataHub)
+    \item \textbf{Duration:} 45-60 minutes
+    \item \textbf{Part 1:} Project Deep Dive (25-30 min)
+    \item \textbf{Part 2:} Search Architecture Discussion (20-25 min)
+\end{itemize}
+
+\subsection{Selected Project}
+\textbf{Game Clickbait Detection System} (Q1 2024, Roblox)
+
+\textbf{Why this project:}
+\begin{itemize}[leftmargin=*]
+    \item Complete end-to-end ownership (problem definition → architecture → deployment)
+    \item High-visibility impact (CEO escalation → townhall recognition)
+    \item Cross-team leadership (5 teams: DSA, Human Eval, Brand Safety, ML Platform, Game Discovery)
+    \item Systems thinking (IP protection, search quality, policy framework)
+    \item Measurable success (99\%+ precision, real-time detection)
+    \item Recent and fresh (2024)
+\end{itemize}
+
+% ============================================================
+\section{30-Second Executive Summary}
+% ============================================================
+
+\begin{criticalpoint}
+\textbf{Practice delivering this in 30 seconds:}
+
+"In Q1 2024, our CEO escalated an urgent search quality issue: copycat games with identical names and images polluted results when searching for popular games like 'Brookhaven'. A team had spent 2 months on a CLIP-based image similarity approach, but when I evaluated it, precision was near-random.
+
+I identified the core issue within days, threw away the previous work, and redesigned from first principles. The result: a real-time, multi-modal IP protection system with 99\%+ precision that processes game updates in 10 seconds, protects hundreds of assets across billions of games, and was recognized at company townhall."
+\end{criticalpoint}
+
+% ============================================================
+\section{Project Narrative (STAR Framework)}
+% ============================================================
+
+\subsection{Situation (2-3 minutes)}
+
+\subsubsection{The Problem}
+\textbf{CEO Observation (Holiday 2023):}
+\begin{itemize}
+    \item Searching "Brookhaven" (top Roblox game) returned pages of copycat games
+    \item Copycats used identical/similar names and thumbnail images
+    \item Search results looked "ugly" and hurt platform trust
+    \item Users clicking copycats experienced low-quality, unrelated gameplay
+\end{itemize}
+
+\subsubsection{Previous Team's Approach (2 months of work)}
+\textbf{Method:} CLIP-based image similarity detection
+\begin{enumerate}
+    \item Pipeline to get top 100 popular games
+    \item Extract game thumbnail images
+    \item Generate CLIP embeddings for all game thumbnails (daily/weekly)
+    \item Find games with thumbnails semantically close to top 100
+    \item Demote these games in ranking
+\end{enumerate}
+
+\textbf{My Evaluation (within days):}
+\begin{itemize}
+    \item Ran human evaluation on their results with different thresholds (0.9, 0.95)
+    \item \textbf{Result: Precision near-random ($\sim$50\%)}
+    \item Many false positives (legitimate games with similar art styles)
+    \item Many false negatives (modified images evaded detection)
+    \item \textbf{Critical flaw: Completely ignored title duplication signal}
+\end{itemize}
+
+\begin{keyinsight}
+\textbf{Why the previous approach failed:}
+\begin{itemize}
+    \item Treated as pure image similarity problem
+    \item CLIP clusters by visual style, not deceptive intent
+    \item False positives: Anime-style games, similar genres (tycoon, obby)
+    \item False negatives: Color shifts, crops, overlays evade detection
+    \item Ignored strongest signal: title text copying
+\end{itemize}
+\end{keyinsight}
+
+\subsubsection{Problem Reframing (First Principles)}
+
+\textbf{Key question I asked:} "Why is this even a problem?"
+
+If authentic Brookhaven ranks \#1, users can identify it. So what are we \textit{really} solving?
+
+\textbf{Two distinct problems identified:}
+
+\begin{enumerate}
+    \item \textbf{IP Protection (Primary)}
+    \begin{itemize}
+        \item Platform responsibility to protect creator intellectual property
+        \item Games stealing name + image = trademark/copyright violation
+        \item Roblox's reputation as fair UGC platform at stake
+    \end{itemize}
+    
+    \item \textbf{Search Quality (Secondary)}
+    \begin{itemize}
+        \item Copycats are typically low-quality (quick cash grabs)
+        \item Crowd out higher-quality, diverse alternatives
+        \item Users want: original game (\#1) + quality similar games, NOT 50 low-effort clones
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Design Principle:} Multi-signal detection for IP violations, not just image matching
+
+\newpage
+\subsection{Task (1-2 minutes)}
+
+\subsubsection{My Responsibilities}
+\begin{itemize}
+    \item \textbf{Technical architecture:} Design end-to-end detection system
+    \item \textbf{Cross-team coordination:} Align 5 teams on approach and deliverables
+    \item \textbf{Policy framework:} Define what constitutes IP violation
+    \item \textbf{Implementation:} Build real-time detection service and offline backfill
+    \item \textbf{Evaluation:} Establish metrics and validation pipeline
+    \item \textbf{Deployment:} Launch to production with A/B testing
+\end{itemize}
+
+\subsubsection{Constraints}
+\begin{itemize}
+    \item \textbf{Time:} CEO urgency - need results in Q1 2024
+    \item \textbf{Scale:} Hundreds of millions of existing games to process
+    \item \textbf{Latency:} Real-time updates (<1 minute from game publish to ranking impact)
+    \item \textbf{Precision:} Must avoid false positives (creator backlash risk)
+    \item \textbf{Coverage:} Top 30 games covers 20-30\% of search queries (Pareto principle)
+\end{itemize}
+
+\subsubsection{Success Criteria}
+\begin{itemize}
+    \item 95\%+ precision on clickbait detection
+    \item Real-time detection (<1 min latency)
+    \item Backfill all existing games
+    \item Zero creator backlash (clear, fair policies)
+    \item CEO satisfaction (visible problem resolution)
+\end{itemize}
+
+\newpage
+\subsection{Action (5-7 minutes)}
+
+\subsubsection{Core Innovation: Protected Assets Library (PAL)}
+
+\textbf{Concept:} Centralized registry of IP assets to protect
+
+\textbf{Schema:}
+\begin{verbatim}
+Field: type        (icon, title, logo, etc.)
+Field: creatorId   
+Field: universeId  
+Field: rootPlaceId
+Field: titleMatchPolicy (for title assets: exact, substring, fuzzy)
+\end{verbatim}
+
+\textbf{Violation Logic:} Any signal triggered → demotion in ranking
+
+\textbf{Three Asset Types:}
+\begin{itemize}
+    \item \textbf{Signal A:} Text (game names)
+    \item \textbf{Signal B:} Images (full thumbnails)
+    \item \textbf{Signal C:} Logos (brand marks within images)
+\end{itemize}
+
+\subsubsection{Signal A: Text Protection (Rule-Based Heuristics)}
+
+\textbf{Why rule-based, not semantic similarity?}
+\begin{itemize}
+    \item "Microhard" doesn't violate "Microsoft" IP (semantic but not legal violation)
+    \item Need legal precision, not fuzzy matching
+    \item Semantic similarity failed in evaluation (no practical utility)
+    \item Heuristics achieved 99\%+ precision on golden dataset
+\end{itemize}
+
+\textbf{Three Match Policies (Flexible Framework):}
+
+\begin{enumerate}
+    \item \textbf{exact:} Strict 1:1 match
+    \begin{itemize}
+        \item Use case: "Evade" (common English word, don't over-protect)
+        \item Normalization: lowercase, remove spaces, strip emojis/brackets
+    \end{itemize}
+    
+    \item \textbf{substring:} Contains match
+    \begin{itemize}
+        \item Use case: "Welcome to Bloxburg" prevents "Welcome to Bloxburg Christmas!"
+        \item Protects against title stuffing: "BrookhavenRP Adopt Me! Pet Simulator"
+    \end{itemize}
+    
+    \item \textbf{fuzzy:} Edit distance tolerance
+    \begin{itemize}
+        \item Use case: "Brookhaven" with fuzzy=2 catches "bro0khaven", "Br00khaven"
+        \item Prevents simple evasion tactics
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Built-in Exceptions (Nuanced Policy):}
+\begin{itemize}
+    \item \textbf{Fan-made allowed:} "Brookhaven RP [Fan Version]" NOT clickbait
+    \item \textbf{Same creator/group:} Can create own spinoffs (ownership check)
+    \item \textbf{Typo tolerance:} "Fan Versoin" still triggers (prevents evasion)
+\end{itemize}
+
+\textbf{Cross-functional Work:}
+\begin{itemize}
+    \item Collaborated with Community Program Manager on policy drafting
+    \item Community announcement rollout (several weeks)
+    \item Clear creator communication through official channels
+    \item \textbf{Result:} Zero creator backlash
+\end{itemize}
+
+\textbf{Impact:} Solved $\sim$30\% of clickbait cases
+
+\subsubsection{Signal B: Image Protection (CLIP + PAL)}
+
+\textbf{Key Difference from Previous Approach:}
+\begin{itemize}
+    \item \textbf{Previous:} Compare ALL games to top 100 (noisy, high false positive rate)
+    \item \textbf{Mine:} Compare only against curated PAL library (precise, targeted)
+\end{itemize}
+
+\textbf{Implementation:}
+\begin{itemize}
+    \item Human Eval team curates protected assets using Label Studio
+    \item CLIP embeddings generated for full thumbnails
+    \item Embeddings stored in RSS (Roblox Similarity Search - vector database)
+    \item Fine-tuned similarity thresholds per PAL entry
+    \item Monthly pipeline reviews top 30 games + ad-hoc updates
+\end{itemize}
+
+\textbf{PAL Evolution:}
+\begin{itemize}
+    \item Started: $\sim$30-100 entries (top games)
+    \item Current: Hundreds of entries
+    \item Planned: External brands (Disney, Coca-Cola, etc.)
+\end{itemize}
+
+\textbf{Precision:} 95\%+ on image-based clickbait
+
+\subsubsection{Signal C: Logo Protection (YOLOv8 + CLIP)}
+
+\textbf{Two-Stage Detection Pipeline:}
+
+\begin{enumerate}
+    \item \textbf{Stage 1: YOLOv8 Logo Detection (Fine-tuned by me)}
+    \begin{itemize}
+        \item Detect logo regions within game thumbnails
+        \item Training: Human Eval drew bounding boxes in Label Studio
+        \item Fine-tuned YOLOv8 on Roblox-specific logo corpus
+        \item Accuracy: 95\%+
+    \end{itemize}
+    
+    \item \textbf{Stage 2: CLIP Logo Comparison}
+    \begin{itemize}
+        \item Extract detected logo regions
+        \item Generate CLIP embeddings for logos
+        \item Compare against PAL logo library (vector search)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Cross-Team Integration:}
+\begin{itemize}
+    \item Leveraged Brand Safety team's logo detection endpoint
+    \item Established versioning protocol for future model updates:
+    \begin{itemize}
+        \item Old endpoint maintained
+        \item New versioned endpoints for A/B testing
+        \item Enables safe model migrations
+    \end{itemize}
+\end{itemize}
+
+\textbf{Combined Precision:} 99.5\%+ on logo-based clickbait
+
+\subsubsection{Real-Time Detection Architecture}
+
+\textbf{Design Shift:}
+\begin{itemize}
+    \item \textbf{Previous:} Weekly batch processing (stale, reactive)
+    \item \textbf{Mine:} Event-driven, real-time (10-second latency)
+\end{itemize}
+
+\textbf{System Architecture:}
+
+\begin{verbatim}
+SNS Topics (Game Lifecycle Events):
+  - PRODUCTION_PlaceEntityChangeEvents
+  - PRODUCTION_UniverseDisplayInformationChangeEvents
+  - PRODUCTION_UniverseEntityChangeEvents
+          ↓
+    SQS Queue (~10 QPS)
+          ↓
+  Queue Processor Service
+          ↓
+Clickbait Detection Service (bedev2 microservice)
+  |-- Text rule matching (heuristics)
+  |-- CLIP embedding generation -> RSS query
+  \-- YOLO logo detection -> Brand Safety endpoint
+          ↓
+Frost Feature Store
+  Table: sdp_production_nonpii.clickbait_games_features_v0
+  Columns: universe_id, is_clickbait, metadata (JSON), updated_time_unix
+          ↓
+Experience Document Builder (SNS topic)
+          ↓
+Elasticsearch Index (for ranking)
+          ↓
+Search Retrieval & Ranking Pipeline
+\end{verbatim}
+
+\textbf{Key Design Decisions:}
+\begin{itemize}
+    \item \textbf{Event-driven:} Triggered by game lifecycle, not polling (efficient)
+    \item \textbf{SQS buffering:} Handles traffic spikes, decouples services (resilient)
+    \item \textbf{Microservice:} Modular CLIP/YOLO inference (scalable)
+    \item \textbf{Feature serving:} Signals propagate to ranking in $\sim$10 seconds (fast)
+    \item \textbf{Non-blocking:} Doesn't delay game creation/updates (user-friendly)
+\end{itemize}
+
+\textbf{API Features:}
+\begin{itemize}
+    \item REST endpoints for on-demand detection
+    \item Manual override API for edge cases (parodies, legitimate references)
+    \item JSON metadata field for detailed signal breakdown
+\end{itemize}
+
+\subsubsection{Offline Backfill Pipeline}
+
+\textbf{Challenge:} Process hundreds of millions of existing games
+
+\textbf{Solution: Modular MLP Pipelines}
+
+\begin{enumerate}
+    \item \textbf{Separate Pipeline per Feature} (title, thumbnail, logo)
+    \begin{itemize}
+        \item Load games corpus from Hive
+        \item Load PAL
+        \item Run similarity detection (text heuristics or vector search)
+        \item Output to intermediate Hive tables
+    \end{itemize}
+    
+    \item \textbf{Powerhouse Aggregation Pipeline}
+    \begin{itemize}
+        \item Load input tables: \texttt{sdp\_icon\_similarity}, \texttt{sdp\_title\_similarity}
+        \item Aggregate scores into boolean \texttt{is\_clickbait} column
+        \item Publish batch to Frost feature store
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Benefits of Modular Design:}
+\begin{itemize}
+    \item Scale compute independently per feature
+    \item Iterate on one feature without reprocessing all
+    \item Recover from failures without full reruns
+    \item Clear separation of concerns (detection vs aggregation)
+\end{itemize}
+
+\subsubsection{Cross-Team Collaboration}
+
+\textbf{Five Teams Coordinated:}
+
+\begin{enumerate}
+    \item \textbf{DSA (Jinlong Ji)}
+    \begin{itemize}
+        \item Owned initial backfill pipeline architecture
+        \item Top-K game collection logic
+        \item Hive table management
+    \end{itemize}
+    
+    \item \textbf{Human Eval (Patricia Morales)}
+    \begin{itemize}
+        \item Created PAL using Label Studio
+        \item Drew logo bounding boxes for YOLOv8 training
+        \item Ongoing evaluation pipeline (human-in-the-loop)
+    \end{itemize}
+    
+    \item \textbf{Brand Safety Team}
+    \begin{itemize}
+        \item Provided logo detection endpoint
+        \item Versioning protocol for future model updates
+    \end{itemize}
+    
+    \item \textbf{ML Platform Team}
+    \begin{itemize}
+        \item Inference infrastructure (CLIP/YOLO serving)
+        \item Model deployment support
+    \end{itemize}
+    
+    \item \textbf{Game Discovery Team}
+    \begin{itemize}
+        \item Search ranking integration
+        \item Final ownership post-launch
+        \item Ongoing policy iteration
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Key Coordination Challenge:}
+
+\textit{Handling abandonment of 2 months of work:}
+\begin{itemize}
+    \item Presented evaluation results showing near-random precision
+    \item Data spoke for itself - approach wasn't salvageable
+    \item Principal ML Engineer moved to other priorities (no friction)
+    \item Key: Show problem clearly + propose concrete alternative (not just criticize)
+\end{itemize}
+
+\newpage
+\subsection{Result (1-2 minutes)}
+
+\subsubsection{Metrics}
+
+\textbf{Precision/Recall:}
+\begin{itemize}
+    \item \textbf{Previous approach:} $\sim$50\% precision (near-random)
+    \item \textbf{Text rules:} 99\%+ precision, solved 30\% of cases
+    \item \textbf{CLIP (full image):} 95\%+ precision
+    \item \textbf{YOLO + CLIP (logos):} 99.5\%+ precision
+\end{itemize}
+
+\textbf{Scale:}
+\begin{itemize}
+    \item \textbf{PAL:} Hundreds of protected assets
+    \item \textbf{Coverage:} 20-30\% of top search queries
+    \item \textbf{Backfill:} Hundreds of millions of existing games processed
+    \item \textbf{Real-time:} $\sim$10 QPS game updates, $\sim$10-second latency end-to-end
+\end{itemize}
+
+\textbf{Business Impact:}
+\begin{itemize}
+    \item \textbf{CEO satisfaction:} Problem visibly resolved for top queries
+    \item \textbf{Townhall recognition:} Company-wide acknowledgment
+    \item \textbf{Policy framework:} Established IP protection standards for platform
+    \item \textbf{Expandable:} Foundation for other fraud detection (bait-and-switch teleport games)
+    \item \textbf{Zero creator backlash:} Clear communication, fair policies
+\end{itemize}
+
+\subsubsection{Timeline}
+
+\begin{itemize}
+    \item \textbf{Week 1:} Identified previous approach failure, proposed redesign
+    \item \textbf{Milestone 1 (March 1):} Title text protection prod launch + A/B
+    \item \textbf{Milestone 2 (March 15):} Thumbnail protection prod launch
+    \item \textbf{Milestone 3 (March 22):} Logo protection prod launch
+    \item \textbf{Q1 2024 End:} Evaluation pipeline, optimization, handoff to Game Discovery
+    \item \textbf{Ongoing:} Maintained and evolved system for several quarters
+\end{itemize}
+
+\subsubsection{Handoff}
+
+\begin{itemize}
+    \item Successfully transferred ownership to Game Discovery team
+    \item Modular architecture enabled them to iterate on policies without rewriting core services
+    \item Continued evolution: bait-and-switch detection, expanded PAL, etc.
+\end{itemize}
+
+\newpage
+\subsection{Technical Challenges \& Lessons (2-3 minutes)}
+
+\subsubsection{Challenge 1: Balancing Precision vs Coverage}
+
+\textbf{Problem:} Can't manually curate PAL for millions of games
+
+\textbf{Solution:}
+\begin{itemize}
+    \item Focus on top 30 games (Pareto principle: 20-30\% query coverage with minimal effort)
+    \item Human-in-the-loop for high-profile additions
+    \item Scalable pipeline for monthly reviews
+\end{itemize}
+
+\textbf{Lesson:} Perfect is the enemy of good - solve 80\% of the problem with 20\% of the effort
+
+\subsubsection{Challenge 2: Real-Time Latency Requirements}
+
+\textbf{Problem:} Game creation can't be blocked; search results must reflect changes quickly
+
+\textbf{Solution:}
+\begin{itemize}
+    \item Async event processing (SQS decoupling)
+    \item Non-blocking: Detection happens post-creation
+    \item Acceptable staleness: 10-second propagation vs instant blocking
+\end{itemize}
+
+\textbf{Lesson:} Understand business constraints - near real-time (seconds) $\gg$ batch (days)
+
+\subsubsection{Challenge 3: Fine-Tuning YOLOv8 for Logos}
+
+\textbf{Problem:} Off-the-shelf YOLO detects generic objects, not game logos
+
+\textbf{Solution:}
+\begin{itemize}
+    \item Created custom dataset with Human Eval (bounding boxes in Label Studio)
+    \item Fine-tuned YOLOv8 on Roblox-specific logo corpus
+    \item Achieved 95\%+ accuracy on domain-specific task
+\end{itemize}
+
+\textbf{Lesson:} Domain-specific ML requires domain-specific data - generic models aren't enough
+
+\subsubsection{Challenge 4: Policy Rollout Without Creator Backlash}
+
+\textbf{Problem:} New restrictions could anger creators (platform risk)
+
+\textbf{Solution:}
+\begin{itemize}
+    \item Clear, fair rules (spinoff patterns allowed)
+    \item Transparent communication (official community announcements)
+    \item Gradual enforcement (education before penalties)
+    \item Explainable heuristics ("Your title matches X with fuzzy=1" vs "Model score 0.87")
+\end{itemize}
+
+\textbf{Lesson:} Technical solutions need social/policy layer - engineering alone isn't enough
+
+\subsubsection{Challenge 5: Defining "Clickbait" vs "Poor Experience"}
+
+\textbf{Problem:} Initial discussions blurred clickbait (pre-game deception) with poor in-game quality
+
+\textbf{My Framing:}
+\begin{itemize}
+    \item \textbf{Clickbait =} misleading \textit{pre-game signals} (title, thumbnail) regardless of in-game content
+    \item \textbf{Poor experience =} separate problem requiring in-game scene analysis (future scope with RFM models)
+\end{itemize}
+
+\textbf{Why This Mattered:}
+\begin{itemize}
+    \item If evaluated based on in-game content, pre-game detection algorithms would falsely appear to fail
+    \item Example: Game copies "Brookhaven" title/image but has transformative gameplay $\rightarrow$ still clickbait for IP protection
+\end{itemize}
+
+\textbf{Solution:}
+\begin{itemize}
+    \item Created golden dataset focused \textit{only} on pre-game signals
+    \item Separated in-game content analysis to "poor experience detection" (out of scope for V1)
+    \item Enabled clear algorithm evaluation and explainable enforcement
+\end{itemize}
+
+\textbf{Lesson:} Precise problem definition is foundational - ambiguity leads to misaligned evaluation
+
+\subsubsection{What I'd Do Differently}
+
+\begin{enumerate}
+    \item \textbf{Earlier evaluation framework}
+    \begin{itemize}
+        \item Built golden dataset evaluation late
+        \item Should've been day-one priority to validate approach faster
+    \end{itemize}
+    
+    \item \textbf{More automated PAL maintenance}
+    \begin{itemize}
+        \item Top 30 games required manual monthly review
+        \item Could've built automated pipeline detecting trending games for Human Eval queue
+    \end{itemize}
+    
+    \item \textbf{Better internal documentation}
+    \begin{itemize}
+        \item Leadership didn't fully understand project complexity (part of reason for seeking new opportunities)
+        \item Should've created exec-level summary decks: problem $\rightarrow$ solution $\rightarrow$ impact
+    \end{itemize}
+\end{enumerate}
+
+\textbf{What Worked Well:}
+\begin{itemize}
+    \item Modular architecture paid off - Game Discovery could iterate on policies without rewriting core services
+    \item Cross-team coordination was smooth due to clear work streams and ownership
+    \item First principles thinking caught fundamental flaw early (saved months of wasted effort)
+\end{itemize}
+
+\newpage
+% ============================================================
+\section{Connection to DataHub}
+% ============================================================
+
+\begin{keyinsight}
+\textbf{How This Project Maps to DataHub's Challenges:}
+
+"This project taught me that \textbf{metadata quality} - whether it's game titles, thumbnails, or IP assets - is foundational to platform trust. At DataHub, metadata quality is the \textit{core product}.
+
+I see direct parallels:
+
+\begin{itemize}
+    \item \textbf{Protected Assets Library (PAL)} $\approx$ \textbf{DataHub's metadata registry}
+    \begin{itemize}
+        \item Both are centralized sources of truth
+        \item Both require curation, governance, and maintenance
+        \item Both enable downstream systems (search ranking vs data discovery)
+    \end{itemize}
+    
+    \item \textbf{Cross-team adoption} was key to my success at Roblox
+    \begin{itemize}
+        \item Got 5 teams (DSA, Human Eval, Brand Safety, ML Platform, Game Discovery) to trust and contribute to PAL
+        \item DataHub faces same challenge: getting engineering, data science, and business teams to trust and contribute metadata
+    \end{itemize}
+    
+    \item \textbf{Real-time propagation} (game updates $\rightarrow$ search ranking in 10 seconds)
+    \begin{itemize}
+        \item DataHub needs similar: schema changes $\rightarrow$ lineage updates $\rightarrow$ downstream awareness
+        \item Event-driven architecture patterns directly applicable
+    \end{itemize}
+    
+    \item \textbf{Policy framework} (exact/substring/fuzzy matching policies)
+    \begin{itemize}
+        \item Flexible policies > one-size-fits-all
+        \item DataHub needs governance policies: who can edit what, approval workflows, data classification rules
+    \end{itemize}
+\end{itemize}
+
+I'm excited about DataHub because it's solving the \textit{same fundamental problem} - metadata quality and governance - at the data infrastructure level rather than search/discovery."
+\end{keyinsight}
+
+% ============================================================
+\section{Mock Q\&A Scenarios}
+% ============================================================
+
+\subsection{Technical Deep Dive Questions}
+
+\subsubsection{Q: Why didn't you use a machine learning model for title detection?}
+
+\textbf{Answer:}
+
+"I evaluated both approaches. For title matching, heuristics significantly outperformed semantic similarity models for three reasons:
+
+\begin{enumerate}
+    \item \textbf{Explainability:} We needed to communicate to creators \textit{exactly why} they were flagged for policy compliance. 'Your title matches protected title X with fuzzy distance 1' is clear; 'model confidence 0.87' is not. This was critical for avoiding creator backlash.
+    
+    \item \textbf{Semantic similarity misalignment:} ML models would flag 'Zombie Night' as similar to 'Halloween Night' based on semantic meaning, but that's not IP violation. Clickbait is about exact/near-exact copying, not conceptual similarity.
+    
+    \item \textbf{Pattern recognition for evasion:} Common evasion tactics like 'title stuffing' - cramming multiple popular titles like 'BrookhavenRP Adopt Me! Pet Simulator' - are trivial to detect with substring rules but hard for models to learn without massive training data and constant retraining.
+    
+    \item \textbf{Empirical results:} When we evaluated semantic similarity on our golden dataset, it had 'no practical utility' - near-random precision. Heuristics achieved 99\%+ precision.
+\end{enumerate}
+
+We \textit{did} use ML where appropriate: CLIP for image similarity and YOLOv8 for logo detection, where embeddings and object detection excel. The key was choosing the right tool for each signal."
+
+\subsubsection{Q: How did you handle the massive backfill of hundreds of millions of games?}
+
+\textbf{Answer:}
+
+"I designed separate MLP pipelines per feature - title, thumbnail, logo - so we could run them independently and iterate on one without reprocessing all. The architecture:
+
+\begin{enumerate}
+    \item \textbf{Per-Feature Pipelines:}
+    \begin{itemize}
+        \item Each loads games corpus from Hive
+        \item Loads PAL for that feature type
+        \item Runs similarity detection (text heuristics or vector search)
+        \item Outputs to intermediate Hive tables: \texttt{sdp\_title\_similarity}, \texttt{sdp\_icon\_similarity}
+    \end{itemize}
+    
+    \item \textbf{Powerhouse Aggregation Pipeline:}
+    \begin{itemize}
+        \item Aggregates scores from intermediate tables
+        \item Publishes final \texttt{is\_clickbait} boolean to Frost in batch
+    \end{itemize}
+\end{enumerate}
+
+This modular design had three benefits:
+
+\begin{itemize}
+    \item \textbf{Independent scaling:} Could scale compute per feature based on workload (CLIP inference vs simple string matching)
+    \item \textbf{Fault tolerance:} If one pipeline failed, didn't need full rerun - just reprocess that feature
+    \item \textbf{Iterability:} Could improve title matching heuristics without re-running CLIP embeddings on billions of images
+\end{itemize}
+
+We coordinated with ML Platform team to ensure adequate CLIP inference capacity for the backfill burst."
+
+\subsubsection{Q: What metrics did you use to evaluate success?}
+
+\textbf{Answer:}
+
+"We had multi-level metrics across model performance, business impact, and operations:
+
+\textbf{Model Performance (Precision/Recall):}
+\begin{itemize}
+    \item Golden dataset evaluation on 2000+ labeled examples
+    \item Per-signal accuracy: Title (99\%), CLIP (95\%), YOLO+CLIP (99.5\%)
+    \item Confusion matrix analysis to identify systematic errors
+\end{itemize}
+
+\textbf{Business Impact:}
+\begin{itemize}
+    \item CEO satisfaction: Problem visibly resolved for top queries like 'Brookhaven'
+    \item Query coverage: Top 30 protected games covered 20-30\% of search queries (Pareto principle validated)
+    \item PAL growth: Started with $\sim$30 entries, grew to hundreds (system scaling successfully)
+    \item Creator feedback: Zero backlash (policy clarity worked)
+\end{itemize}
+
+\textbf{Operational Metrics:}
+\begin{itemize}
+    \item Real-time latency: P50/P99 for end-to-end detection
+    \item Throughput: Sustained $\sim$10 QPS game updates without queue buildup
+    \item Backfill completion: Time to process all existing games
+    \item False positive rate: Manual override API usage as proxy
+\end{itemize}
+
+The combination gave us confidence in both technical correctness and business value."
+
+\subsubsection{Q: How did you ensure high precision to avoid false positives?}
+
+\textbf{Answer:}
+
+"False positives were our biggest risk - flagging legitimate games would hurt creators and damage platform trust. I used a multi-layered approach:
+
+\begin{enumerate}
+    \item \textbf{Conservative Thresholds:}
+    \begin{itemize}
+        \item Started with stringent similarity thresholds (high confidence bar)
+        \item Fine-tuned per PAL entry based on that asset's visual distinctiveness
+        \item Used confusion matrix to optimize precision vs recall trade-off
+    \end{itemize}
+    
+    \item \textbf{Human-in-the-Loop:}
+    \begin{itemize}
+        \item Label Studio pipeline for ongoing evaluation
+        \item High-profile games get human review before PAL addition
+        \item Feedback loop: flagged games reviewed weekly, errors fed back to threshold tuning
+    \end{itemize}
+    
+    \item \textbf{Nuanced Policies:}
+    \begin{itemize}
+        \item Built-in exceptions: fan-made content, same creator ownership
+        \item Flexible match policies: 'Evade' uses exact (common word), 'Brookhaven' uses fuzzy=2
+        \item Manual override API for edge cases (parodies, legitimate references)
+    \end{itemize}
+    
+    \item \textbf{Ranking Demotion, Not Filtering:}
+    \begin{itemize}
+        \item Demoted in ranking rather than hard-filtered
+        \item Users still have choice; we just deprioritize suspected clickbait
+        \item Reduced impact of false positives
+    \end{itemize}
+\end{enumerate}
+
+The result: 99\%+ precision with zero creator backlash, which validated our approach."
+
+\subsubsection{Q: Walk me through your collaboration with the Brand Safety team on logo detection.}
+
+\textbf{Answer:}
+
+"The Brand Safety team had an existing logo detection model that hadn't been updated since deployment. I needed to integrate it while planning for future model evolution. Here's how I approached it:
+
+\textbf{Discovery Phase:}
+\begin{itemize}
+    \item Met with Brand Safety team to understand their model (YOLOv8-based)
+    \item Identified constraint: model was static, no update cadence
+    \item Learned their model detected generic logos, not game-specific ones
+\end{itemize}
+
+\textbf{Integration Strategy:}
+\begin{itemize}
+    \item Used their endpoint for initial logo region detection (bounding boxes)
+    \item Fine-tuned my own YOLOv8 on Roblox-specific logo corpus (using Label Studio dataset)
+    \item Two-stage pipeline: their model for generic detection $\rightarrow$ my model for game logo classification
+\end{itemize}
+
+\textbf{Future-Proofing:}
+\begin{itemize}
+    \item Established versioning protocol: if they update model, maintain old endpoint
+    \item Create new versioned endpoint (\texttt{/v2/detect-logos})
+    \item Enables A/B testing before migration
+    \item Asked if they could incorporate PAL into their training (potential future improvement)
+\end{itemize}
+
+\textbf{Result:}
+\begin{itemize}
+    \item Smooth integration, 99.5\%+ precision on logo-based clickbait
+    \item Reusable pattern for future cross-team ML integrations
+    \item Brand Safety team appreciated the versioning protocol (adopted it for other consumers)
+\end{itemize}
+
+This taught me that cross-team ML integration requires planning for model evolution, not just initial integration."
+
+\subsection{Systems Design Questions}
+
+\subsubsection{Q: Why event-driven architecture for real-time detection? What are the trade-offs?}
+
+\textbf{Answer:}
+
+"I chose event-driven architecture for three reasons:
+
+\textbf{Benefits:}
+\begin{enumerate}
+    \item \textbf{Efficiency:} Only process games that changed (vs polling all games periodically)
+    \begin{itemize}
+        \item Game updates are sparse events ($\sim$10 QPS vs millions of games)
+        \item Polling would waste 99.9\% of compute checking unchanged games
+    \end{itemize}
+    
+    \item \textbf{Low Latency:} React immediately to changes (10-second end-to-end)
+    \begin{itemize}
+        \item Users see updated ranking within seconds of game publish
+        \item vs batch: hours/days of staleness
+    \end{itemize}
+    
+    \item \textbf{Decoupling:} SQS buffer isolates detection service from upstream events
+    \begin{itemize}
+        \item Handles traffic spikes without dropping events
+        \item Detection service can scale independently
+        \item Failed processing goes to dead letter queue for recovery
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Trade-Offs:}
+\begin{enumerate}
+    \item \textbf{Complexity:} More moving parts (SNS, SQS, multiple services)
+    \begin{itemize}
+        \item Mitigation: Used mature AWS services with high availability
+        \item Clear ownership boundaries between teams
+    \end{itemize}
+    
+    \item \textbf{Eventual Consistency:} 10-second delay before ranking reflects changes
+    \begin{itemize}
+        \item Acceptable: game creation isn't blocked, creators don't see immediate impact anyway
+        \item Much better than batch (hours/days)
+    \end{itemize}
+    
+    \item \textbf{Ordering:} SQS doesn't guarantee FIFO (standard queue)
+    \begin{itemize}
+        \item Not a problem: we only care about final state, not order of updates
+        \item Each update is idempotent (upsert to Frost by universe\_id)
+    \end{itemize}
+\end{enumerate}
+
+For this use case, the benefits far outweighed the trade-offs. Event-driven was the right choice."
+
+\subsubsection{Q: How would you handle a sudden 10x spike in game update traffic?}
+
+\textbf{Answer:}
+
+"The architecture has natural buffers, but I'd implement additional safeguards:
+
+\textbf{Existing Resilience:}
+\begin{itemize}
+    \item SQS queue absorbs spikes (messages wait until processed)
+    \item Detection service can scale horizontally (more bedev2 instances)
+    \item Frost writes are async (doesn't block upstream)
+\end{itemize}
+
+\textbf{Additional Mitigations for 10x Spike:}
+
+\begin{enumerate}
+    \item \textbf{Rate Limiting at SQS:}
+    \begin{itemize}
+        \item Set max queue depth threshold (e.g., 100K messages)
+        \item If exceeded, temporarily drop low-priority events (minor game updates)
+        \item Prioritize new game creation events over minor metadata changes
+    \end{itemize}
+    
+    \item \textbf{Auto-Scaling Detection Service:}
+    \begin{itemize}
+        \item CloudWatch alarm on SQS ApproximateNumberOfMessages
+        \item Trigger auto-scaling policy: add bedev2 instances when queue depth $>$ 10K
+        \item Scale down when queue drains to save cost
+    \end{itemize}
+    
+    \item \textbf{Batching at Frost:}
+    \begin{itemize}
+        \item Instead of per-message Frost write, batch 100 updates
+        \item Reduces Frost write load by 100x
+        \item Trade-off: slightly higher latency (batch flush interval)
+    \end{itemize}
+    
+    \item \textbf{Circuit Breaker for Downstream:}
+    \begin{itemize}
+        \item If CLIP/YOLO inference services are overloaded, fail fast
+        \item Requeue to SQS for retry with exponential backoff
+        \item Prevents cascading failures
+    \end{itemize}
+    
+    \item \textbf{Monitoring \& Alerting:}
+    \begin{itemize}
+        \item P99 latency alerts (if $>$ 60 seconds, something's wrong)
+        \item Queue depth alerts (if $>$ 50K, need manual intervention)
+        \item Dead letter queue alerts (if messages failing, investigate)
+    \end{itemize}
+\end{enumerate}
+
+The key principle: \textbf{graceful degradation}. Accept slightly higher latency under extreme load, but never drop data or crash services."
+
+\subsection{Project Management Questions}
+
+\subsubsection{Q: How did you convince stakeholders to abandon 2 months of work?}
+
+\textbf{Answer:}
+
+"This was delicate - I had to show the problem clearly without making the previous team look bad. Here's how I approached it:
+
+\begin{enumerate}
+    \item \textbf{Data-First Approach (Week 1):}
+    \begin{itemize}
+        \item Immediately ran human evaluation on their CLIP results
+        \item Tested multiple thresholds (0.9, 0.95) on Brookhaven case
+        \item Result: precision $\sim$50\% (near-random)
+        \item Documented: false positives (legitimate anime-style games), false negatives (modified images)
+    \end{itemize}
+    
+    \item \textbf{Root Cause Analysis:}
+    \begin{itemize}
+        \item \textbf{Not:} "Your approach is wrong" (accusatory)
+        \item \textbf{Instead:} "We're solving the wrong problem" (reframe)
+        \item Showed CLIP clusters by visual style, not deceptive intent
+        \item Identified missing signal: title duplication (strongest clickbait indicator)
+    \end{itemize}
+    
+    \item \textbf{Concrete Alternative (Not Just Criticism):}
+    \begin{itemize}
+        \item Presented multi-signal architecture: text + image + logo
+        \item Showed how each signal addresses specific failure modes
+        \item Estimated timeline: M1 (title) in 3 weeks, full system in Q1
+    \end{itemize}
+    
+    \item \textbf{Meeting Dynamics:}
+    \begin{itemize}
+        \item Invited Principal ML Engineer to the discussion (respect)
+        \item Framed as "we discovered this together through evaluation"
+        \item He acknowledged CLIP-only approach had limitations
+        \item Moved to other priorities (no friction)
+    \end{itemize}
+    
+    \item \textbf{Leadership Alignment:}
+    \begin{itemize}
+        \item CEO urgency gave me leverage (problem needs solving \textit{now})
+        \item PM supported pivot after seeing evaluation data
+        \item Committed to clear milestones (M1, M2, M3) for accountability
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Key Lesson:} When proposing to scrap work, lead with \textbf{data}, offer \textbf{concrete alternatives}, and \textbf{avoid blame}. Make it about the problem, not the people."
+
+\subsubsection{Q: What was the biggest challenge in coordinating 5 teams?}
+
+\textbf{Answer:}
+
+"The biggest challenge was \textbf{aligning on scope and deliverables} - each team had different priorities and timelines. Here's what I did:
+
+\textbf{Challenge 1: Diverging Priorities}
+\begin{itemize}
+    \item DSA team wanted comprehensive backfill (all games, all time)
+    \item Human Eval had limited bandwidth (can't label millions of games)
+    \item ML Platform focused on inference efficiency (latency optimization)
+    \item Game Discovery wanted fast deployment (CEO pressure)
+\end{itemize}
+
+\textbf{Solution: Clear Work Streams}
+\begin{itemize}
+    \item Created detailed milestones doc with team ownership (M1: title by DSA, M2: thumbnail by me + Human Eval, M3: logo by Brand Safety)
+    \item Weekly sync meetings (30 min, focused agenda)
+    \item Slack channel for async updates (\texttt{\#clickbait-detection-project})
+    \item \textbf{Decision-making authority:} I had final call on architecture; PM had final call on launch timing
+\end{itemize}
+
+\textbf{Challenge 2: Human Eval Bottleneck}
+\begin{itemize}
+    \item Label Studio tasks required expert judgment (what is clickbait?)
+    \item Human Eval team had competing priorities (safety moderation)
+\end{itemize}
+
+\textbf{Solution: Prioritization + Iteration}
+\begin{itemize}
+    \item Phase 1: Top 30 games only (minimal viable PAL)
+    \item Created detailed labeling guidelines to reduce ambiguity
+    \item Automated easy cases (exact title match) to reduce human load
+    \item Phase 2: Expand PAL based on query volume analysis
+\end{itemize}
+
+\textbf{Challenge 3: Brand Safety Model Dependency}
+\begin{itemize}
+    \item Their logo model was static (no update schedule)
+    \item Risk: if model degrades, we're stuck
+\end{itemize}
+
+\textbf{Solution: Versioning Protocol + Fine-Tuning}
+\begin{itemize}
+    \item Agreed on versioned endpoints for future updates
+    \item Fine-tuned my own YOLOv8 as backup (not fully dependent)
+    \item Offered to share PAL data for their model retraining (mutual benefit)
+\end{itemize}
+
+\textbf{Key Lesson:} Cross-team projects need \textbf{clear ownership}, \textbf{explicit dependencies}, and \textbf{fallback plans}. Over-communicate, document decisions, and reduce critical path dependencies where possible."
+
+\subsubsection{Q: You mentioned leadership didn't fully understand the project. What happened there?}
+
+\textbf{Answer (Honest but Diplomatic):}
+
+"This was a learning experience for me about the importance of \textbf{executive communication}, not just technical execution.
+
+\textbf{What Happened:}
+\begin{itemize}
+    \item Project had high visibility (CEO escalation, townhall recognition)
+    \item But my direct leadership didn't fully grasp the technical complexity or business impact
+    \item This contributed to my decision to explore new opportunities
+\end{itemize}
+
+\textbf{Where I Could've Done Better:}
+\begin{enumerate}
+    \item \textbf{Executive-Level Artifacts:}
+    \begin{itemize}
+        \item I wrote detailed technical docs (architecture, APIs, pipelines)
+        \item Should've also created 1-pager for leadership: Problem $\rightarrow$ Solution $\rightarrow$ Impact
+        \item Metrics dashboard showing business value (query coverage, precision, CEO satisfaction)
+    \end{itemize}
+    
+    \item \textbf{Proactive Updates:}
+    \begin{itemize}
+        \item I communicated in team meetings and Slack
+        \item Should've done monthly 1:1 highlights with skip-level manager
+        \item "Here's what we shipped, here's the impact, here's what's next"
+    \end{itemize}
+    
+    \item \textbf{Connecting to Org Goals:}
+    \begin{itemize}
+        \item I framed as "fixing clickbait problem"
+        \item Could've framed as "establishing IP protection framework for platform" (strategic)
+        \item Or "improving search quality metrics" (measurable org goal)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{What I Learned:}
+\begin{itemize}
+    \item Technical excellence alone doesn't guarantee recognition
+    \item Senior/Principal engineers must translate technical work into business value \textit{for leadership}
+    \item Documentation, metrics, and storytelling are as important as code
+\end{itemize}
+
+\textbf{Looking Forward:}
+\begin{itemize}
+    \item At DataHub, I'd apply these lessons from day one
+    \item Create exec-friendly artifacts alongside technical design docs
+    \item Proactively communicate impact, not just features shipped
+\end{itemize}
+
+This experience taught me that \textbf{impact without visibility is wasted effort} - something I'm now very conscious of."
+
+\newpage
+% ============================================================
+\section{Part 2: Search Architecture Deep Dive}
+% ============================================================
+
+\subsection{Roblox Search Architecture Overview}
+
+\begin{keyinsight}
+\textbf{Architecture Diagrams Available:}
+
+You have two search architecture references to review:
+\begin{itemize}
+    \item \texttt{Snd-Platform\_architecture-Roblox-Simple.svg} - Roblox Search \& Discovery Platform
+    \item \texttt{search-architecture-for-coupang.excalidraw} - Coupang E-commerce Search
+\end{itemize}
+
+Review the Roblox diagram visually before the interview - it shows your actual production system. The Coupang architecture has been incorporated into this document for comparative context.
+\end{keyinsight}
+
+\subsubsection{Detailed Architecture (From Production Diagram)}
+
+\textbf{Core Systems (Top Layer):}
+
+\begin{enumerate}
+    \item \textbf{Search Service}
+    \begin{itemize}
+        \item \textbf{Service Manager:} Query Understanding \& Transformation, API Manager
+        \item \textbf{Search Service:} Core search orchestration, Query Manager
+        \item Routes queries to indexing and ranking systems
+    \end{itemize}
+
+    \item \textbf{SnD Content Service}
+    \begin{itemize}
+        \item \textbf{Content Service:} Manages content aggregation
+        \item \textbf{Blending \& Re-Ranking:} Combines results from multiple sources
+        \item \textbf{Content API Manager:} External API layer
+        \item Your clickbait signals feed into this blending layer!
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Vertical Search Services (Left Side):}
+
+Specialized search capabilities that feed into the main pipeline:
+
+\begin{itemize}
+    \item \textbf{T\&S Filtering:} Trust \& Safety filtering (includes your clickbait detection!)
+    \item \textbf{Query Similarity, Sequence Understanding, Embeddings:} Vector-based search
+    \item \textbf{Nature Entity Recognition Service:} NER for query parsing
+    \item \textbf{Autocomplete Spell Correction:} Query suggestions and typo fixing
+    \item \textbf{Category Discovery Service:} Genre/category classification
+\end{itemize}
+
+\textbf{Indexing System (Center):}
+
+\begin{itemize}
+    \item \textbf{Elastic Search Cluster:} Multiple shards for horizontal scaling
+    \item \textbf{ES Indexer Service:} Writes documents to ES
+    \item \textbf{Indexing Manager:} Orchestrates indexing pipeline
+    \item \textbf{Doc Processor:} Transforms raw data into searchable documents
+    \item \textbf{Update Listener:} Real-time updates from event streams
+    \item Your clickbait detection connects here via event-driven updates!
+\end{itemize}
+
+\textbf{Ranking System (Center-Right):}
+
+\begin{itemize}
+    \item \textbf{Ranking Framework/System:} Orchestrates multi-signal ranking
+    \item \textbf{Model Serving Endpoint:} Serves ML models for ranking
+    \item \textbf{Model Training:} Trains ranking models offline
+    \item \textbf{Ranking Data Pipeline:} ETL for ranking features
+    \item \textbf{ML Platform:} Infrastructure for model deployment
+    \item Your clickbait signals are ranking features in this system!
+\end{itemize}
+
+\textbf{Recommendation System (Right Side):}
+
+Similar architecture to Ranking System:
+
+\begin{itemize}
+    \item \textbf{Recommendation Framework/System:} Personalized recommendations
+    \item \textbf{Model Serving Endpoint:} Real-time inference
+    \item \textbf{Model Training:} Collaborative filtering, embeddings
+    \item \textbf{Ranking Data Pipeline:} User behavior data
+    \item \textbf{ML Platform:} Shared infrastructure
+\end{itemize}
+
+\textbf{Data Layer (Bottom):}
+
+\begin{itemize}
+    \item \textbf{Messaging Queue:} Event-driven communication (likely Kafka/SQS)
+    \item \textbf{SQL Store:} Vertical data, metadata, game catalog
+    \item \textbf{Signal Platform:} Centralized signal aggregation (like Frost!)
+    \item \textbf{AWS Data Store:}
+    \begin{itemize}
+        \item Data buckets (raw data, logs)
+        \item Signal buckets (computed features - your clickbait signals here!)
+        \item Model buckets (trained models)
+    \end{itemize}
+\end{itemize}
+
+\textbf{Supporting Systems (Bottom):}
+
+\begin{itemize}
+    \item \textbf{Monitoring, Alerting, Visualization:} Operational health
+    \item \textbf{Metrics \& Evaluation:} Search quality metrics (NDCG, MRR, etc.)
+    \item \textbf{Human Eval:} Label Studio for golden dataset evaluation
+    \item \textbf{Diagnostic Tools:} Debugging and performance analysis
+\end{itemize}
+
+\newpage
+\subsubsection{Data Flow Through the System}
+
+\textbf{Query Path (User Search):}
+
+\begin{verbatim}
+User Query
+    ↓
+Search Service (Query Understanding & Transformation)
+    ↓
+Vertical Search Services (parallel):
+  - Autocomplete/Spell Correction
+  - Query Similarity/Embeddings
+  - Category Discovery
+  - T&S Filtering (Clickbait check!)
+    ↓
+Elasticsearch Cluster (retrieval)
+    ↓
+Ranking System
+  - Model Serving (ML models)
+  - Ranking Data Pipeline (features from Signal Platform)
+  - Multi-signal scoring
+    ↓
+SnD Content Service (Blending & Re-Ranking)
+    ↓
+Results returned to user
+\end{verbatim}
+
+\textbf{Indexing Path (Game Updates):}
+
+\begin{verbatim}
+Game Update Event
+    ↓
+Messaging Queue
+    ↓
+Update Listener (Indexing System)
+    ↓
+Doc Processor (transform to ES document)
+    ↓
+Indexing Manager
+    ↓
+ES Indexer Service → Elasticsearch Cluster
+    ↓
+Signal Platform (update features)
+    ↓
+Available for search queries
+\end{verbatim}
+
+Your clickbait detection sits in this flow:
+\begin{verbatim}
+Game Update → Detection Service → Frost (Signal Platform)
+    → ES Indexer → Ranking System
+\end{verbatim}
+
+\subsubsection{Key Architectural Patterns}
+
+\textbf{1. Modular Service Architecture:}
+\begin{itemize}
+    \item Separate concerns: Search, Indexing, Ranking, Recommendation, Content
+    \item Each can scale independently
+    \item Clear API boundaries between services
+\end{itemize}
+
+\textbf{2. Vertical Services Pattern:}
+\begin{itemize}
+    \item Specialized services for specific capabilities (T\&S, NER, Autocomplete)
+    \item Compose into main search pipeline
+    \item Your clickbait detection is a T\&S vertical service!
+\end{itemize}
+
+\textbf{3. Centralized Signal Platform:}
+\begin{itemize}
+    \item Single source of truth for features (Frost-like)
+    \item Feeds both Ranking and Recommendation systems
+    \item Enables feature reuse across ML models
+\end{itemize}
+
+\textbf{4. ML Platform Abstraction:}
+\begin{itemize}
+    \item Shared infrastructure for model training and serving
+    \item Ranking and Recommendation use same platform
+    \item Reduces operational complexity
+\end{itemize}
+
+\textbf{5. Event-Driven Updates:}
+\begin{itemize}
+    \item Messaging queue decouples producers from consumers
+    \item Update Listener enables real-time indexing
+    \item Your SNS/SQS pattern mirrors this!
+\end{itemize}
+
+\begin{keyinsight}
+\textbf{Your Clickbait Detection Project in the Broader Architecture:}
+
+Now you can clearly articulate where your project fits:
+
+\begin{enumerate}
+    \item \textbf{Component:} Trust \& Safety (T\&S) Filtering vertical service
+    \item \textbf{Input:} Game update events via Messaging Queue
+    \item \textbf{Processing:} Multi-signal detection (text, CLIP, YOLO)
+    \item \textbf{Output:} Features to Signal Platform (Frost)
+    \item \textbf{Consumption:}
+    \begin{itemize}
+        \item Ranking System reads clickbait signals from Signal Platform
+        \item SnD Content Service applies Blending \& Re-Ranking
+        \item Demotion in final search results
+    \end{itemize}
+    \item \textbf{Evaluation:} Human Eval system for golden dataset validation
+\end{enumerate}
+
+\textbf{Interview Talking Point:}
+
+"My clickbait detection project is a Trust \& Safety vertical service in Roblox's Search \& Discovery Platform. It consumes game update events, performs multi-signal analysis, publishes quality signals to our centralized Signal Platform (Frost), and those signals feed into the Ranking System for search result demotion. This is a perfect example of how specialized vertical services compose into a larger search architecture - a pattern I see DataHub could leverage for metadata quality signals."
+\end{keyinsight}
+
+\subsection{Key Topics to Master}
+
+\subsubsection{Semantic Search \& Vector Databases}
+
+\textbf{Your Experience:}
+\begin{itemize}
+    \item Roblox Similarity Search (RSS) - vector database for CLIP embeddings
+    \item Used in clickbait detection project for image similarity
+    \item Hybrid search: keyword + semantic
+\end{itemize}
+
+\textbf{Key Points:}
+\begin{itemize}
+    \item \textbf{Embedding generation:} CLIP for images, sentence transformers for text
+    \item \textbf{Vector database technology:} RSS (internal), alternatives like FAISS, Pinecone, Weaviate
+    \item \textbf{Trade-offs:} Latency (vector search slower than keyword), recall/precision balance
+    \item \textbf{Hybrid approaches:} Combine BM25 keyword scores with vector similarity
+\end{itemize}
+
+\subsubsection{Ranking \& Relevance}
+
+\textbf{Multi-Signal Ranking Framework:}
+
+\begin{itemize}
+    \item \textbf{Textual relevance:} BM25, TF-IDF scores
+    \item \textbf{Popularity signals:} Play counts, engagement metrics
+    \item \textbf{Quality signals:} Your clickbait detection, safety scores
+    \item \textbf{Personalization:} User preferences, historical behavior
+    \item \textbf{Diversity:} Avoid ranking 50 similar games
+\end{itemize}
+
+\textbf{Evaluation Metrics:}
+\begin{itemize}
+    \item \textbf{NDCG (Normalized Discounted Cumulative Gain):} Measures ranking quality
+    \item \textbf{MRR (Mean Reciprocal Rank):} First relevant result position
+    \item \textbf{Precision@K:} Fraction of top K results that are relevant
+    \item \textbf{A/B testing:} Online evaluation with real users
+\end{itemize}
+
+\subsubsection{Query Understanding}
+
+\textbf{Challenges \& Solutions:}
+
+\begin{itemize}
+    \item \textbf{Typos:} "Brokehaven" $\rightarrow$ "Brookhaven"
+    \begin{itemize}
+        \item Fuzzy matching (edit distance)
+        \item Query autocomplete/suggestions
+        \item Did-you-mean functionality
+    \end{itemize}
+
+    \item \textbf{Synonyms:} "Roleplay" = "RP"
+    \begin{itemize}
+        \item Synonym dictionaries
+        \item Query expansion
+    \end{itemize}
+
+    \item \textbf{Intent detection:} Is user searching for a specific game or browsing a genre?
+    \begin{itemize}
+        \item Navigational (specific game) vs Exploratory (genre/category)
+        \item Affects ranking strategy
+    \end{itemize}
+\end{itemize}
+
+\newpage
+\subsection{Search Architecture Patterns (Industry Comparison)}
+
+\subsubsection{Federated Multi-Cluster Architecture (E-commerce Pattern)}
+
+\textbf{Architecture Overview:}
+
+Based on large-scale e-commerce search systems (Coupang, Amazon-style), this pattern differs from Roblox's monolithic approach:
+
+\textbf{Core Components:}
+\begin{itemize}
+    \item \textbf{Search Root Service:} Orchestration layer that routes queries
+    \item \textbf{Specialized Clusters:} Separate search clusters by use case
+    \begin{itemize}
+        \item Product Search Cluster (main catalog)
+        \item Category-Specific Cluster (optimized per vertical)
+        \item Brand Search Cluster (brand-centric queries)
+        \item Ads/Sponsored Cluster (monetization)
+    \end{itemize}
+    \item \textbf{ML Ranking Service:} Centralized LTR (Learning to Rank)
+    \item \textbf{Query Understanding Layer:} Separate service for rewriting
+    \item \textbf{Knowledge Graph:} Entity expansion and relationships
+\end{itemize}
+
+\textbf{Technology Stack:}
+\begin{itemize}
+    \item \textbf{Search Engine:} Solr (with Lucene) or Elasticsearch
+    \item \textbf{Streaming:} Kafka for real-time ingestion and logging
+    \item \textbf{ETL:} Apache Airflow + Spark for batch processing
+    \item \textbf{ML:} XGBoost, TensorFlow for ranking models
+    \item \textbf{Storage:} Feature Store, HBase (Solr backend), S3, Hive
+    \item \textbf{Observability:} ELK Stack (logging), Prometheus (metrics)
+\end{itemize}
+
+\textbf{Query Flow (Federated Pattern):}
+\begin{verbatim}
+Client → LB → Gateway → Search Root Service
+    ↓
+Query Understanding (spell check, synonyms, intent)
+    ↓
+A/B Test Assignment + Corpus Selection
+    ↓
+Parallel Fanout to Clusters (Prod, Category, Ads, Brand)
+    ↓
+Per-Cluster Processing:
+  - Lucene: parse, score, filter, facet
+  - Shard-level parallelism
+  - Cache hits
+    ↓
+ML Re-Ranking (Feature Store → LTR Service)
+    ↓
+Result Merge + Deduplication + Post-Processing
+    ↓
+Response → Gateway → Client
+\end{verbatim}
+
+\textbf{Key Patterns:}
+
+\begin{enumerate}
+    \item \textbf{Two-Stage Ranking}
+    \begin{itemize}
+        \item Stage 1: Fast retrieval with simple scoring (BM25, TF-IDF)
+        \item Stage 2: ML re-ranking on top K candidates (XGBoost/TensorFlow)
+        \item Trade-off: Recall (stage 1) vs Precision (stage 2)
+        \item Similar to your clickbait detection: Fast heuristics + ML signals
+    \end{itemize}
+
+    \item \textbf{Feature Store Pattern}
+    \begin{itemize}
+        \item Centralized storage for ML features
+        \item Precomputed features for low-latency serving
+        \item Examples: click-through rate, conversion rate, user preferences
+        \item Connection to your work: Frost feature store for clickbait signals
+    \end{itemize}
+
+    \item \textbf{Hybrid Indexing (Batch + Real-Time)}
+    \begin{itemize}
+        \item Batch: Full reindex + alias switch (zero-downtime)
+        \item Real-time: Kafka streaming for fresh content
+        \item Trade-off: Consistency vs Freshness
+        \item Your implementation: SNS/SQS events → real-time clickbait detection
+    \end{itemize}
+
+    \item \textbf{Knowledge Graph Integration}
+    \begin{itemize}
+        \item Entity relationships (Brand → Products, Category → Items)
+        \item Random walk algorithms for expansion
+        \item Enables semantic search beyond keyword matching
+        \item Potential Roblox use case: Game → Creator → Similar Games
+    \end{itemize}
+
+    \item \textbf{Comprehensive Observability}
+    \begin{itemize}
+        \item Query logs, click logs, ranking logs, error logs
+        \item Metrics: latency, QPS, cache hit rate, conversion funnel
+        \item A/B test platform integrated into query routing
+        \item Zero-result queries, top queries, abandonment analysis
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Roblox vs E-commerce: Architectural Comparison}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|p{3.5cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Dimension} & \textbf{Roblox (UGC Games)} & \textbf{E-commerce (Products)} \\ \hline
+\textbf{Index Size} & Hundreds of millions of games & Billions of products (SKUs) \\ \hline
+\textbf{Update Frequency} & High (creators constantly update games) & Medium (inventory changes, new products) \\ \hline
+\textbf{Quality Signals} & Clickbait detection, safety scores, engagement & Reviews, ratings, return rates, freshness \\ \hline
+\textbf{Personalization} & User game history, genre preferences & Purchase history, browsing, demographics \\ \hline
+\textbf{Query Intent} & Navigational (find specific game) vs Exploratory (browse genre) & Transactional (buy) vs Research (compare) \\ \hline
+\textbf{Ranking Goal} & Engagement (playtime, retention) & Revenue (conversion, AOV, profit margin) \\ \hline
+\textbf{Monetization} & Indirect (Robux in-game) & Direct (product sales, ads) \\ \hline
+\textbf{Trust \& Safety} & Critical (child safety, IP protection) & Important (counterfeit, compliance) \\ \hline
+\end{tabular}
+\end{table}
+
+\textbf{Common Challenges:}
+\begin{itemize}
+    \item \textbf{Scale:} Both need to handle millions of items and high QPS
+    \item \textbf{Quality:} Spam/fraud detection (clickbait vs fake products)
+    \item \textbf{Relevance:} Balancing keyword match vs semantic similarity
+    \item \textbf{Freshness:} New content needs to appear quickly
+    \item \textbf{Diversity:} Avoid showing 50 similar results
+\end{itemize}
+
+\subsubsection{Advanced Topics to Discuss}
+
+\textbf{1. Learning to Rank (LTR):}
+\begin{itemize}
+    \item Pointwise: Predict relevance score per item
+    \item Pairwise: Learn which of two items should rank higher
+    \item Listwise: Optimize entire ranked list (NDCG optimization)
+    \item Connection: Your multi-signal clickbait detection is a form of LTR
+\end{itemize}
+
+\textbf{2. Cold Start Problems:}
+\begin{itemize}
+    \item New games: No play counts, no reviews $\rightarrow$ rely on metadata quality
+    \item New users: No history $\rightarrow$ global popularity + explore/exploit
+    \item Solution: Hybrid of content-based + collaborative filtering
+\end{itemize}
+
+\textbf{3. Query Expansion Strategies:}
+\begin{itemize}
+    \item Synonym expansion: "RP" $\rightarrow$ "Roleplay"
+    \item Stemming/Lemmatization: "playing" $\rightarrow$ "play"
+    \item Acronym handling: "FPS" $\rightarrow$ "First Person Shooter"
+    \item Embedding-based: BERT/sentence transformers for semantic similarity
+\end{itemize}
+
+\textbf{4. Indexing Pipeline Optimization:}
+\begin{itemize}
+    \item Incremental updates vs full reindex
+    \item Index warming: Pre-load caches before switching alias
+    \item Partitioning strategies: By region, by popularity tier, by recency
+    \item Your experience: Modular MLP pipelines for clickbait backfill
+\end{itemize}
+
+\subsubsection{Search Patterns Applied to DataHub}
+
+\begin{keyinsight}
+\textbf{How Search Architecture Experience Translates to DataHub:}
+
+DataHub is fundamentally a \textbf{metadata search and discovery platform}. Many search patterns directly apply:
+
+\textbf{1. Multi-Signal Ranking for Data Assets:}
+\begin{itemize}
+    \item \textbf{Textual relevance:} Table name, column names, descriptions (BM25)
+    \item \textbf{Popularity:} Query frequency, number of downstream dependencies
+    \item \textbf{Quality:} Documentation completeness, schema validity, freshness
+    \item \textbf{Trust:} Ownership clarity, certification status, lineage depth
+    \item \textbf{Personalization:} User's team, frequently accessed tables, role-based
+\end{itemize}
+
+Similar to your clickbait detection, DataHub needs quality signals to demote low-quality metadata.
+
+\textbf{2. Real-Time Metadata Propagation:}
+\begin{itemize}
+    \item Schema change in production $\rightarrow$ lineage graph update $\rightarrow$ downstream awareness
+    \item Event-driven architecture (Kafka) mirrors your SNS/SQS pattern
+    \item Challenge: Consistency across distributed metadata sources
+    \item Your experience: Real-time feature propagation (Frost $\rightarrow$ ES $\rightarrow$ Ranking)
+\end{itemize}
+
+\textbf{3. Feature Store Pattern = Metadata Store:}
+\begin{itemize}
+    \item Your Frost feature store for ML signals
+    \item DataHub's metadata graph is analogous: centralized source of truth
+    \item Both need: versioning, lineage, governance, real-time updates
+    \item Both enable downstream systems: search ranking vs data quality tools
+\end{itemize}
+
+\textbf{4. Cross-Team Adoption Challenges:}
+\begin{itemize}
+    \item Your PAL required buy-in from 5 teams (DSA, Human Eval, Brand Safety, ML Platform, Game Discovery)
+    \item DataHub requires buy-in from engineering, data science, analytics, business teams
+    \item Common challenges: Metadata quality, contribution incentives, governance policies
+    \item Your approach: Clear policies, explainable rules, minimize friction
+\end{itemize}
+
+\textbf{5. Query Understanding for Data Discovery:}
+\begin{itemize}
+    \item Users search for "customer purchase history" $\rightarrow$ need to find:
+    \begin{itemize}
+        \item Tables: \texttt{users}, \texttt{orders}, \texttt{transactions}
+        \item Synonyms: "purchase" = "order" = "transaction"
+        \item Related concepts: Join paths, upstream sources
+    \end{itemize}
+    \item Knowledge Graph: Table $\rightarrow$ Columns $\rightarrow$ Lineage $\rightarrow$ Owners
+    \item Your potential contribution: Apply search expertise to metadata discovery
+\end{itemize}
+
+\textbf{6. Observability \& Quality Metrics:}
+\begin{itemize}
+    \item Your project: Human eval pipeline, precision/recall, zero creator backlash
+    \item DataHub needs: Metadata completeness metrics, search quality (zero results), adoption tracking
+    \item Both require: A/B testing, user feedback loops, continuous improvement
+\end{itemize}
+
+\textbf{Interview Talking Point:}
+
+"My search architecture experience at Roblox - from building real-time ranking systems to coordinating cross-team metadata adoption - directly translates to DataHub's challenges. Whether it's ranking games or ranking data assets, the core problems are the same: quality signals, real-time updates, and organizational buy-in."
+\end{keyinsight}
+
+\subsection{Trade-Offs Discussion}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{4cm}|p{9cm}|}
+\hline
+\textbf{Dimension} & \textbf{Trade-Off} \\ \hline
+Latency vs Quality & Deeper ranking (more signals, ML models) improves quality but increases latency. Must balance within P99 < 200ms constraint. \\ \hline
+Freshness vs Consistency & Real-time indexing (new games appear instantly) vs eventually consistent (batch updates, lower load). \\ \hline
+Recall vs Precision & Cast wide net (more results, some irrelevant) vs high-confidence only (fewer results, all relevant). \\ \hline
+Personalization vs Diversity & Show user preferences vs help users discover new content types. \\ \hline
+Keyword vs Semantic & Exact matches (fast, precise) vs conceptual similarity (slower, broader). \\ \hline
+Compute Cost vs Quality & Expensive ML models (BERT, neural ranking) vs simpler heuristics (BM25). \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Potential Probing Questions}
+
+\begin{enumerate}
+    \item \textbf{End-to-End Flow}
+    \begin{itemize}
+        \item "Walk me through what happens when a user types 'Brookhaven' in search."
+        \item \textit{Answer:} Query normalization $\rightarrow$ Elasticsearch retrieval $\rightarrow$ Multi-signal ranking $\rightarrow$ Clickbait filtering $\rightarrow$ Results return
+    \end{itemize}
+
+    \item \textbf{Scale Challenges}
+    \begin{itemize}
+        \item "How do you handle very popular queries that could overwhelm the system?"
+        \item \textit{Answer:} Caching (Redis), query result pre-computation for top queries, rate limiting per user
+    \end{itemize}
+
+    \item \textbf{Cold Start}
+    \begin{itemize}
+        \item "What's your strategy for ranking results for a brand new user?"
+        \item \textit{Answer:} Fall back to global popularity signals, no personalization initially, use engagement to build profile
+    \end{itemize}
+
+    \item \textbf{Quality Issues}
+    \begin{itemize}
+        \item "How do you detect and fix search quality issues?"
+        \item \textit{Answer:} Human evaluation pipeline (Label Studio - you used this!), A/B testing, monitoring query abandonment rates, user feedback loops
+    \end{itemize}
+
+    \item \textbf{New Ranking Signal}
+    \begin{itemize}
+        \item "How would you add a new ranking signal to the system?"
+        \item \textit{Answer:} Feature engineering $\rightarrow$ Offline evaluation $\rightarrow$ A/B test $\rightarrow$ Gradual rollout $\rightarrow$ Monitor metrics
+    \end{itemize}
+
+    \item \textbf{Clickbait Integration}
+    \begin{itemize}
+        \item "How does your clickbait detection integrate with search ranking?"
+        \item \textit{Answer:} Frost feature store $\rightarrow$ Elasticsearch index $\rightarrow$ Ranking demotion (not hard filter), preserves user choice
+    \end{itemize}
+\end{enumerate}
+
+\begin{keyinsight}
+\textbf{Connection Strategy:}
+
+When discussing search architecture, \textbf{connect it back to your clickbait project}:
+\begin{itemize}
+    \item "The clickbait detection system I built feeds directly into search ranking"
+    \item "We use the same Frost feature store pattern for other ranking signals"
+    \item "RSS (vector database) was central to both semantic search and image-based clickbait detection"
+    \item "The real-time event-driven architecture I designed mirrors the search indexing pipeline"
+\end{itemize}
+
+This shows you understand how your project fits into the bigger picture.
+\end{keyinsight}
+
+\newpage
+% ============================================================
+\section{Practice Checklist}
+% ============================================================
+
+\begin{actionitem}
+\textbf{2-Day Prep Plan:}
+
+\subsection*{Day 1 (3-4 hours) - Focus on Part 1: Project Deep Dive}
+\begin{itemize}
+    \item Morning (2 hours):
+    \begin{itemize}
+        \item Read this document cover-to-cover
+        \item Highlight 5-7 key talking points to memorize
+        \item Practice 30-second elevator pitch (time yourself)
+    \end{itemize}
+    \item Afternoon (2 hours):
+    \begin{itemize}
+        \item Draw clickbait detection architecture diagram from memory
+        \item Practice answering "Why heuristics?" question out loud
+        \item Write down 3 questions to ask Abe about DataHub
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Day 2 (3-4 hours) - Focus on Part 2: Search Architecture}
+\begin{itemize}
+    \item Morning (2 hours):
+    \begin{itemize}
+        \item Review Mock Q\&A section for Part 1
+        \item Practice STAR narrative out loud (record yourself, aim for 10-12 min)
+        \item Review Search Architecture Deep Dive section
+        \item Practice explaining: "Walk me through what happens when a user searches"
+    \end{itemize}
+    \item Afternoon (1-2 hours):
+    \begin{itemize}
+        \item Draw Roblox search architecture from memory (high-level)
+        \item Practice connecting clickbait project to broader search system
+        \item Review trade-offs table - be ready to discuss each
+        \item Final review: Key Insights and Critical Points boxes
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Night Before Interview}
+\begin{itemize}
+    \item Review 30-second pitch (know it cold)
+    \item Skim Technical Challenges section (3-5 lessons learned)
+    \item Prepare 3 questions for Abe (show genuine interest)
+    \item Get good sleep!
+\end{itemize}
+
+\subsection*{Interview Day Morning}
+\begin{itemize}
+    \item \textbf{Part 1 prep:} Skim Executive Summary (page 2), review clickbait architecture diagram
+    \item \textbf{Part 2 prep:} Review search architecture high-level flow, recall 3 key trade-offs
+    \item Practice: "This project taught me..." (Connection to DataHub)
+    \item Practice: "When a user searches Brookhaven..." (end-to-end flow)
+    \item Arrive 10 min early, bring water, have paper/pen ready
+\end{itemize}
+\end{actionitem}
+
+% ============================================================
+\section{Key Talking Points (Memorize These)}
+% ============================================================
+
+\subsection*{Part 1: Project Deep Dive (Clickbait Detection)}
+
+\begin{enumerate}
+    \item \textbf{First Principles Reframing}
+    \begin{itemize}
+        \item Previous team: image similarity problem
+        \item Me: IP protection + search quality problem
+        \item Multi-signal detection (text + image + logo), not single model
+    \end{itemize}
+
+    \item \textbf{Flexible Policy Framework}
+    \begin{itemize}
+        \item Three match policies: exact, substring, fuzzy
+        \item Not one-size-fits-all: "Evade" vs "Brookhaven" need different protection
+        \item Built-in exceptions: fan-made, same creator, typo tolerance
+    \end{itemize}
+
+    \item \textbf{Right Tool for Each Signal}
+    \begin{itemize}
+        \item Heuristics for text (explainable, 99\% precision)
+        \item CLIP for images (semantic similarity works here)
+        \item YOLO for logos (object detection + fine-tuning)
+    \end{itemize}
+
+    \item \textbf{Event-Driven Real-Time Architecture}
+    \begin{itemize}
+        \item SNS $\rightarrow$ SQS $\rightarrow$ Detection Service $\rightarrow$ Frost $\rightarrow$ Search Ranking
+        \item 10-second latency, non-blocking, scalable
+        \item vs previous: weekly batch (stale, reactive)
+    \end{itemize}
+
+    \item \textbf{99\%+ Precision}
+    \begin{itemize}
+        \item Systematic validation on golden dataset (2000+ examples)
+        \item Conservative thresholds, human-in-the-loop, nuanced policies
+        \item Zero creator backlash (proof of policy success)
+    \end{itemize}
+
+    \item \textbf{Cross-Team Leadership}
+    \begin{itemize}
+        \item Coordinated 5 teams (DSA, Human Eval, Brand Safety, ML Platform, Game Discovery)
+        \item Clear work streams, weekly syncs, decision-making authority
+        \item Successful handoff to Game Discovery post-launch
+    \end{itemize}
+\end{enumerate}
+
+\subsection*{Part 2: Search Architecture Discussion}
+
+\begin{enumerate}
+    \item \textbf{Search Flow Overview}
+    \begin{itemize}
+        \item Query normalization $\rightarrow$ ES retrieval $\rightarrow$ Multi-signal ranking $\rightarrow$ Results
+        \item Real-time indexing via event-driven pipeline
+        \item Latency target: P99 < 200ms
+    \end{itemize}
+
+    \item \textbf{Hybrid Search Strategy}
+    \begin{itemize}
+        \item Keyword (BM25) + Semantic (RSS/CLIP embeddings)
+        \item Trade-off: Precision vs broader discovery
+        \item Used same RSS infrastructure in clickbait detection
+    \end{itemize}
+
+    \item \textbf{Multi-Signal Ranking \& LTR}
+    \begin{itemize}
+        \item Textual relevance + Popularity + Quality (clickbait!) + Personalization
+        \item Two-stage ranking: Fast retrieval + ML re-ranking (similar to e-commerce pattern)
+        \item A/B testing framework for signal tuning
+        \item Evaluation: NDCG, MRR, precision@K
+        \item Feature Store pattern (Frost) mirrors industry best practices
+    \end{itemize}
+
+    \item \textbf{Architectural Patterns Knowledge}
+    \begin{itemize}
+        \item Can compare Roblox (monolithic) vs E-commerce (federated multi-cluster)
+        \item Understand trade-offs: UGC games vs product catalog
+        \item Knowledge Graph potential: Game $\rightarrow$ Creator $\rightarrow$ Similar Games
+        \item Query understanding: Intent detection, typo correction, expansion
+    \end{itemize}
+
+    \item \textbf{Key Trade-Offs}
+    \begin{itemize}
+        \item Latency vs Quality (more signals = better results but slower)
+        \item Freshness vs Consistency (real-time vs batch)
+        \item Personalization vs Diversity (preferences vs discovery)
+        \item Scale vs Cost (complex ML models vs simple heuristics)
+    \end{itemize}
+
+    \item \textbf{Connection to DataHub}
+    \begin{itemize}
+        \item Search/discovery is central to both Roblox and DataHub
+        \item Metadata quality challenges: game metadata vs data asset metadata
+        \item Real-time propagation patterns applicable to lineage updates
+        \item Feature Store pattern (Frost) analogous to metadata storage
+        \item My broad search experience (gaming + e-commerce patterns) directly relevant
+    \end{itemize}
+\end{enumerate}
+
+% ============================================================
+\section{Questions to Ask Abe}
+% ============================================================
+
+\begin{enumerate}
+    \item \textbf{Product Strategy:}
+    \begin{itemize}
+        \item "What's DataHub's biggest challenge in driving enterprise adoption? Is it technical (scale, latency) or organizational (getting teams to contribute metadata)?"
+    \end{itemize}
+    
+    \item \textbf{Technical Architecture:}
+    \begin{itemize}
+        \item "How does DataHub handle real-time metadata propagation? If a schema changes in production, how quickly do downstream systems see that in lineage graphs?"
+    \end{itemize}
+    
+    \item \textbf{Team Dynamics:}
+    \begin{itemize}
+        \item "For this role, what's the balance between building new platform features vs enabling customer integrations? How much is greenfield vs existing codebase evolution?"
+    \end{itemize}
+    
+    \item \textbf{Search/Discovery Expertise:}
+    \begin{itemize}
+        \item "Given my background in search and RAG systems, where do you see opportunities for me to contribute to DataHub's metadata search and discovery experience?"
+    \end{itemize}
+    
+    \item \textbf{Personal Growth:}
+    \begin{itemize}
+        \item "What does success look like for a Principal Engineer at DataHub in the first 6-12 months? What are the key milestones or projects that would demonstrate high impact?"
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Strategy:} Pick 2-3 questions that genuinely interest you. Let the conversation flow naturally - you may not need to ask all of them if the discussion covers the topics organically.
+
+% ============================================================
+\section{Final Reminders}
+% ============================================================
+
+\begin{criticalpoint}
+\textbf{Interview Execution Tips:}
+
+\begin{itemize}
+    \item \textbf{Start High-Level, Then Drill Down}
+    \begin{itemize}
+        \item 30-second summary $\rightarrow$ problem reframing $\rightarrow$ architecture $\rightarrow$ technical details
+        \item Let Abe guide depth (if he asks about YOLO fine-tuning, dive deep; if not, stay high-level)
+    \end{itemize}
+    
+    \item \textbf{Use Whiteboard/Paper}
+    \begin{itemize}
+        \item Draw architecture diagram as you explain
+        \item Visual aids help both you and interviewer follow along
+        \item Shows systems thinking
+    \end{itemize}
+    
+    \item \textbf{Be Honest About Challenges}
+    \begin{itemize}
+        \item Don't pretend everything was perfect
+        \item "What I'd do differently" shows self-awareness and learning
+        \item Leadership recognition issue: frame as learning about exec communication
+    \end{itemize}
+    
+    \item \textbf{Show Enthusiasm}
+    \begin{itemize}
+        \item This was a project you're proud of - let that show!
+        \item Technical problem-solving is fun, not drudgery
+        \item Connect excitement about this work to excitement about DataHub
+    \end{itemize}
+    
+    \item \textbf{Ask Clarifying Questions}
+    \begin{itemize}
+        \item If Abe asks something unclear, ask for clarification
+        \item Shows careful thinking, not just rushing to answer
+        \item "Just to make sure I understand, you're asking about X vs Y?"
+    \end{itemize}
+    
+    \item \textbf{Time Management}
+    \begin{itemize}
+        \item Aim for 10-12 min STAR narrative (not 20 min monologue)
+        \item Leave time for Abe's follow-up questions (the real signal)
+        \item If running long, ask: "Should I keep going or would you like to dive deeper into something specific?"
+    \end{itemize}
+\end{itemize}
+\end{criticalpoint}
+
+\vspace{1em}
+
+\begin{keyinsight}
+\textbf{You've Got This!}
+
+You have:
+\begin{itemize}
+    \item 20+ years of engineering experience
+    \item A compelling project with measurable impact (99\%+ precision, CEO recognition)
+    \item Deep technical expertise (search, ML, distributed systems)
+    \item Clear narrative arc (problem $\rightarrow$ insight $\rightarrow$ solution $\rightarrow$ impact)
+    \item Strong connection to DataHub's mission (metadata quality, cross-team adoption)
+\end{itemize}
+
+Trust your experience. Be yourself. Show your passion for solving hard problems.
+
+\textbf{Good luck!}
+\end{keyinsight}
+
+% ============================================================
+% Appendix: Quick Reference
+% ============================================================
+\newpage
+\appendix
+\section{Quick Reference: Key Numbers}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Metric} & \textbf{Value} \\ \hline
+Previous Approach Precision & $\sim$50\% (near-random) \\ \hline
+Title Heuristics Precision & 99\%+ \\ \hline
+CLIP Image Similarity Precision & 95\%+ \\ \hline
+YOLO + CLIP Logo Precision & 99.5\%+ \\ \hline
+Real-Time Latency & $\sim$10 seconds end-to-end \\ \hline
+SQS Throughput & $\sim$10 QPS game updates \\ \hline
+PAL Size (Initial) & $\sim$30-100 entries \\ \hline
+PAL Size (Current) & Hundreds of entries \\ \hline
+Query Coverage & 20-30\% of top queries \\ \hline
+Protected Games (Top) & 30 games (expandable) \\ \hline
+Backfill Scale & Hundreds of millions of games \\ \hline
+Project Timeline & Q1 2024 ($\sim$3 months) \\ \hline
+Teams Coordinated & 5 (DSA, Human Eval, Brand Safety, ML Platform, Game Discovery) \\ \hline
+Creator Backlash & Zero (policy success) \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Quick Reference: Architecture Components}
+
+\begin{itemize}
+    \item \textbf{PAL (Protected Assets Library):} Centralized registry (text, image, logo)
+    \item \textbf{SNS Topics:} PlaceEntityChangeEvents, UniverseDisplayInformationChangeEvents
+    \item \textbf{SQS Queue:} Buffer for game update events ($\sim$10 QPS)
+    \item \textbf{Queue Processor:} Consumes SQS, calls Detection Service
+    \item \textbf{Detection Service (bedev2):} Multi-signal analysis (text, CLIP, YOLO)
+    \item \textbf{RSS (Vector DB):} CLIP embeddings storage and similarity search
+    \item \textbf{Frost Feature Store:} Table \texttt{clickbait\_games\_features\_v0}
+    \item \textbf{Elasticsearch:} Indexed for search ranking integration
+    \item \textbf{MLP Pipelines:} Offline backfill (per-feature: title, thumbnail, logo)
+    \item \textbf{Powerhouse:} Aggregates scores, publishes to Frost in batch
+\end{itemize}
+
+\section{Quick Reference: Contact Info}
+
+\begin{itemize}
+    \item \textbf{Interviewer:} Abe (DataHub)
+    \item \textbf{Interview Type:} Day 2 Onsite - Project Deep Dive + Search Architecture
+    \item \textbf{Format:} 45-60 minutes
+    \item \textbf{Your Role:} Principal Software Engineer, Roblox
+    \item \textbf{Project:} Game Clickbait Detection System (Q1 2024)
+\end{itemize}
+
+\end{document}
