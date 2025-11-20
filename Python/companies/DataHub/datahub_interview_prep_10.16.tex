@@ -1,0 +1,1292 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Code listing style
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=8pt,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    showstringspaces=false
+}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{DataHub Interview Prep}
+\lhead{Alex Yang}
+\rfoot{Page \thepage}
+
+% Custom boxes
+\newtcolorbox{warningbox}{
+    colback=red!5!white,
+    colframe=red!75!black,
+    title=! Critical
+}
+
+\newtcolorbox{tipbox}{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    title=* Key Insight
+}
+
+\newtcolorbox{actionbox}{
+    colback=green!5!white,
+    colframe=green!75!black,
+    title=+ Action Item
+}
+
+\title{\Huge\textbf{DataHub Interview Preparation Guide}}
+\author{Alex Yang \\ Principal Software Engineer, Roblox}
+\date{\textbf{Day 1 (Coding):} November 18, 2025 \\ \textbf{Day 2 (Onsite):} November 20, 2025 \\ \small Prepared: \today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Interview Overview}
+
+\subsection{Schedule Summary}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Day 1}: Coding interview with Andrew (SharedPad, Python 3.8.10)
+    \item \textbf{Day 2}: Onsite with Abe
+    \begin{itemize}
+        \item Project deep dive (significant Roblox project)
+        \item Search architecture deep dive
+    \end{itemize}
+\end{itemize}
+
+\subsection{Recruiter Contact}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Recruiter}: Myra (DataHub)
+    \item \textbf{Interviewer (Day 1)}: Andrew
+    \item \textbf{Interviewer (Day 2)}: Abe
+\end{itemize}
+
+\begin{warningbox}
+\textbf{Platform Note}: SharedPad uses Python 3.8.10, not the latest version. Avoid Python 3.9+ features like \texttt{list[str]} type hints (use \texttt{List[str]} from \texttt{typing} instead) and \texttt{match/case} statements (use \texttt{if/elif} instead).
+\end{warningbox}
+
+\newpage
+
+\section{Day 1: Coding Interview (Andrew)}
+
+\subsection{Problem Description}
+
+You will be asked to implement a \textbf{concurrent request executor system} that processes a stream of incoming requests using a pool of worker threads. This is essentially a producer-consumer pattern with a thread pool.
+
+\subsubsection{Core Requirements}
+\begin{enumerate}[leftmargin=*]
+    \item Accept a stream of incoming requests/jobs
+    \item Process them using a pool of worker threads
+    \item Ensure thread safety across all operations
+    \item Handle request partitioning/routing to workers
+    \item Maintain correctness under concurrent execution
+\end{enumerate}
+
+\subsection{Follow-Up Questions (Expect These)}
+
+\subsubsection{Thread Count Decisions}
+\textbf{Q: How many threads should we use? How should we make that decision?}
+
+\textit{Answer Framework:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Starting point}: \texttt{os.cpu\_count()} for CPU-bound, \texttt{cpu\_count() * 2} for I/O-bound
+    \item \textbf{Considerations}:
+    \begin{itemize}
+        \item Workload type (CPU-bound vs I/O-bound)
+        \item Latency requirements (more threads = better throughput, but overhead)
+        \item Memory constraints (each thread has stack space)
+        \item External resource limits (DB connections, API rate limits)
+    \end{itemize}
+    \item \textbf{Maximum}: Limited by memory, context switching overhead, OS file descriptor limits
+\end{itemize}
+
+\begin{tipbox}
+For this interview, assume I/O-bound workload (network requests, disk I/O). Start with 4-8 threads and explain you'd tune based on profiling.
+\end{tipbox}
+
+\subsubsection{Testing \& Correctness}
+\textbf{Q: How do we test this code? How do we ensure correctness?}
+
+\textit{Testing Strategy:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Unit tests}: Mock requests, verify processing logic
+    \item \textbf{Race condition tests}: Submit many concurrent requests, verify no data corruption
+    \item \textbf{Correctness invariants}:
+    \begin{itemize}
+        \item No dropped requests (submitted count = processed count)
+        \item No duplicate processing (track request IDs)
+        \item Thread-safe state updates (atomic operations)
+    \end{itemize}
+    \item \textbf{Shutdown tests}: Verify graceful termination, no orphaned threads
+    \item \textbf{Stress tests}: Submit requests faster than processing capacity
+\end{itemize}
+
+\subsubsection{Backpressure Detection}
+\textbf{Q: How can we detect backpressure? What should we do if workers are overwhelmed?}
+
+\textit{Detection Mechanisms:}
+\begin{itemize}[leftmargin=*]
+    \item Monitor queue depth (\texttt{queue.qsize()})
+    \item Track worker thread utilization/idle time
+    \item Measure request latency (time from submit to completion)
+    \item Calculate processing rate vs arrival rate
+\end{itemize}
+
+\textit{Response Actions:}
+\begin{itemize}[leftmargin=*]
+    \item Use bounded queue (blocks submissions when full)
+    \item Return backpressure signal to upstream
+    \item Implement adaptive rate limiting
+    \item Add more workers dynamically (if resources allow)
+    \item Reject requests with appropriate error code
+\end{itemize}
+
+\subsubsection{Worker Thread Failures}
+\textbf{Q: How can we detect if a worker thread dies? How do we handle it?}
+
+\textit{Detection \& Recovery:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Try/except in worker loop}: Catch exceptions, log, continue
+    \item \textbf{Heartbeat mechanism}: Workers report liveness periodically
+    \item \textbf{Monitoring}: Track last activity timestamp per worker
+    \item \textbf{Recovery options}:
+    \begin{itemize}
+        \item Restart dead worker thread
+        \item Requeue failed request to different worker
+        \item Send to dead letter queue for manual review
+        \item Alert/log for operator intervention
+    \end{itemize}
+\end{itemize}
+
+\begin{warningbox}
+\textbf{Critical Python Gotcha}: Exceptions in threads don't propagate to the main thread! Always wrap worker code in try/except.
+\end{warningbox}
+
+\subsection{Extension Problems}
+
+\subsubsection{Execution Order Invariants}
+\textbf{Q: How can we maintain an invariant that requests are always executed in order?}
+
+\textit{Solution: Request Partitioning}
+\begin{itemize}[leftmargin=*]
+    \item Assign requests to workers based on partition key (e.g., user\_id)
+    \item Use consistent hashing: \texttt{hash(request.key) \% num\_workers}
+    \item All requests with same key go to same worker thread
+    \item Trade-off: Preserves order per partition, but reduces parallelism
+\end{itemize}
+
+\subsubsection{Backpressure Reporting}
+\textbf{Q: If we could tell upstream to slow down, when should we do that? How do we make an informed decision?}
+
+\textit{Signal Conditions:}
+\begin{itemize}[leftmargin=*]
+    \item Queue depth $>$ 80\% capacity
+    \item Request latency $>$ acceptable threshold (e.g., p99 $>$ 5s)
+    \item Worker saturation $>$ 90\% (all workers busy)
+    \item Queue growth rate trending upward
+\end{itemize}
+
+\textit{Decision Framework:}
+\begin{itemize}[leftmargin=*]
+    \item Monitor queue depth over time window (avoid false alarms)
+    \item Calculate: arrival\_rate - processing\_rate
+    \item If negative trend persists for N seconds, signal backpressure
+    \item Expose metrics endpoint for upstream monitoring
+\end{itemize}
+
+\subsection{Deep Dive: Request Partitioning for Ordering}
+
+\subsubsection{The Problem}
+
+\textbf{Why do we need ordering?}
+
+Some requests must be processed in the order they arrive. For example:
+\begin{itemize}[leftmargin=*]
+    \item All requests from the same user (login $\rightarrow$ update $\rightarrow$ logout)
+    \item Database operations on the same record (read $\rightarrow$ update $\rightarrow$ delete)
+    \item Sequential workflow steps (step1 $\rightarrow$ step2 $\rightarrow$ step3)
+\end{itemize}
+
+\textbf{Without partitioning (broken ordering):}
+
+\begin{verbatim}
+Request(user="alice", action="login")   → Worker 2
+Request(user="alice", action="update")  → Worker 1  ← Executes first!
+Request(user="alice", action="logout")  → Worker 3
+
+Problem: "update" might execute before "login"!
+\end{verbatim}
+
+\subsubsection{The Solution: Partition Key Routing}
+
+\textbf{Core Insight:} We only need order within \textit{related} requests. Different users can process in parallel.
+
+\textbf{With partitioning (order guaranteed):}
+
+\begin{verbatim}
+Request(user="alice", action="login")   → Worker 2
+Request(user="alice", action="update")  → Worker 2  ← Same worker!
+Request(user="alice", action="logout")  → Worker 2  ← Same worker!
+
+Request(user="bob", action="login")     → Worker 0  ← Different user
+Request(user="bob", action="update")    → Worker 0  ← Same worker!
+
+Result:
+- Alice's requests execute in order on Worker 2
+- Bob's requests execute in order on Worker 0
+- Alice and Bob process in parallel!
+\end{verbatim}
+
+\subsubsection{Implementation: Consistent Hashing}
+
+\textbf{The Key Formula:}
+\begin{verbatim}
+worker_id = hash(partition_key) % num_workers
+\end{verbatim}
+
+\textbf{Why this works:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{hash("alice")} always returns the same value
+    \item Same hash mod num\_workers = same worker\_id every time
+    \item Different partition keys likely map to different workers
+    \item Evenly distributed across workers (on average)
+\end{itemize}
+
+\textbf{Example with 3 workers:}
+\begin{verbatim}
+hash("alice") % 3 = 2  → Worker 2
+hash("alice") % 3 = 2  → Worker 2 (always!)
+hash("alice") % 3 = 2  → Worker 2 (always!)
+
+hash("bob") % 3 = 0    → Worker 0
+hash("bob") % 3 = 0    → Worker 0 (always!)
+
+hash("carol") % 3 = 1  → Worker 1
+\end{verbatim}
+
+\subsubsection{Trade-offs Discussion}
+
+\textbf{Benefits:}
+\begin{itemize}[leftmargin=*]
+    \item Guarantees order within partition (same user)
+    \item Parallel processing across partitions (different users)
+    \item Simple implementation with consistent hashing
+    \item Predictable routing behavior
+\end{itemize}
+
+\textbf{Costs:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Hot partition problem}: If one partition is very active, that worker becomes bottleneck
+    \item \textbf{Load imbalance}: Cannot redistribute work from busy to idle workers
+    \item \textbf{More complex}: Multiple queues vs single shared queue
+\end{itemize}
+
+\textbf{Hot Partition Example:}
+\begin{verbatim}
+alice sends 1000 requests → Worker-2 (overloaded!)
+bob sends 1 request       → Worker-0 (idle)
+carol sends 1 request     → Worker-1 (idle)
+
+Worker-2 is bottleneck while others sit idle!
+\end{verbatim}
+
+\begin{tipbox}
+\textbf{When asked about maintaining order:}
+
+"To maintain execution order, I'd use \textbf{request partitioning} with consistent hashing. The key insight is we only need order for related requests - like all requests from the same user - while different users can process in parallel.
+
+I'd implement by:
+\begin{enumerate}
+    \item Adding a partition\_key field (e.g., user\_id)
+    \item Using worker\_id = hash(partition\_key) mod num\_workers to route
+    \item Having per-worker queues instead of a shared queue
+    \item Each worker processes its queue sequentially
+\end{enumerate}
+
+\textbf{Trade-off}: This guarantees order per partition but reduces load balancing flexibility. If one user is very active (hot partition), that worker might be overloaded. For most use cases, this is acceptable since user activity is typically well-distributed."
+\end{tipbox}
+
+\newpage
+
+\section{Python Threading Fundamentals}
+
+\subsection{Why Threading? The GIL Caveat}
+
+\begin{tipbox}
+\textbf{Python's GIL (Global Interpreter Lock)}: Only one thread executes Python bytecode at a time.
+\begin{itemize}
+    \item Threading helps: I/O-bound work (network, disk, sleep)
+    \item Threading doesn't help: CPU-bound work (use \texttt{multiprocessing} instead)
+    \item For your interview: Assume I/O-bound request processing
+\end{itemize}
+\end{tipbox}
+
+\subsection{Core Concepts}
+
+\subsubsection{Starting and Joining Threads}
+
+\begin{lstlisting}
+import threading
+import time
+
+def worker(name, delay):
+    print(f"{name} starting")
+    time.sleep(delay)  # Simulate I/O work
+    print(f"{name} done")
+
+# Create threads
+t1 = threading.Thread(target=worker, args=("Worker-1", 2))
+t2 = threading.Thread(target=worker, args=("Worker-2", 1))
+
+# Start threads (non-blocking)
+t1.start()
+t2.start()
+
+# Wait for completion (blocking)
+t1.join()
+t2.join()
+
+print("All workers finished")
+\end{lstlisting}
+
+\textbf{Key Points:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{start()}: Launches thread, returns immediately
+    \item \texttt{join()}: Blocks until thread completes
+    \item Without \texttt{join()}, main thread may exit while workers are running
+\end{itemize}
+
+\subsubsection{Thread-Safe Shared State (Locks)}
+
+\begin{lstlisting}
+import threading
+
+counter = 0
+lock = threading.Lock()
+
+def increment():
+    global counter
+    for _ in range(100000):
+        with lock:  # CRITICAL: prevents race conditions
+            counter += 1
+
+# Start 10 threads
+threads = [threading.Thread(target=increment) for _ in range(10)]
+for t in threads: t.start()
+for t in threads: t.join()
+
+print(f"Counter: {counter}")  # Should be 1,000,000
+\end{lstlisting}
+
+\begin{warningbox}
+\textbf{Without the lock}, you'll get wrong results due to race conditions! The \texttt{+=} operation is not atomic:
+\begin{enumerate}
+    \item Read counter value
+    \item Add 1
+    \item Write back
+\end{enumerate}
+Multiple threads can interleave these steps, causing lost updates.
+\end{warningbox}
+
+\subsubsection{Producer-Consumer with Queue}
+
+\begin{lstlisting}
+import queue
+import threading
+import time
+
+# Thread-safe queue
+task_queue = queue.Queue(maxsize=100)  # Bounded queue
+
+def producer():
+    for i in range(20):
+        task_queue.put(f"Task-{i}")
+        time.sleep(0.1)
+    print("Producer done")
+
+def consumer(consumer_id):
+    while True:
+        try:
+            task = task_queue.get(timeout=1)  # 1 second timeout
+            print(f"Consumer-{consumer_id} processing {task}")
+            time.sleep(0.3)  # Simulate work
+            task_queue.task_done()
+        except queue.Empty:
+            break  # No more tasks
+
+# Start producer
+producer_thread = threading.Thread(target=producer)
+producer_thread.start()
+
+# Start 3 consumers
+consumers = [threading.Thread(target=consumer, args=(i,))
+             for i in range(3)]
+for c in consumers: c.start()
+
+# Wait for completion
+producer_thread.join()
+task_queue.join()  # Wait until all tasks processed
+
+for c in consumers: c.join()
+print("All tasks completed")
+\end{lstlisting}
+
+\textbf{Key Methods:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{queue.Queue()}: Thread-safe FIFO queue
+    \item \texttt{put(item, block=True)}: Add item (blocks if queue full)
+    \item \texttt{get(timeout=None)}: Remove and return item (blocks if empty)
+    \item \texttt{task\_done()}: Signal task completion
+    \item \texttt{join()}: Block until all tasks done
+    \item \texttt{qsize()}: Approximate queue size (for monitoring)
+\end{itemize}
+
+\subsubsection{Graceful Shutdown with Event}
+
+\begin{lstlisting}
+import threading
+import queue
+import time
+
+class ThreadPool:
+    def __init__(self, num_workers):
+        self.task_queue = queue.Queue()
+        self.workers = []
+        self.shutdown_event = threading.Event()  # Signal flag
+
+        for i in range(num_workers):
+            worker = threading.Thread(target=self._worker, args=(i,))
+            worker.start()
+            self.workers.append(worker)
+
+    def _worker(self, worker_id):
+        while not self.shutdown_event.is_set():
+            try:
+                task = self.task_queue.get(timeout=0.5)
+                # Process task
+                print(f"Worker-{worker_id}: {task}")
+                self.task_queue.task_done()
+            except queue.Empty:
+                continue  # Check shutdown flag again
+
+        print(f"Worker-{worker_id} shutting down")
+
+    def submit(self, task):
+        self.task_queue.put(task)
+
+    def shutdown(self):
+        print("Initiating shutdown...")
+        self.shutdown_event.set()  # Signal all workers
+        for worker in self.workers:
+            worker.join()  # Wait for each to finish
+        print("Shutdown complete")
+
+# Usage
+pool = ThreadPool(num_workers=3)
+for i in range(10):
+    pool.submit(f"Task-{i}")
+
+time.sleep(2)
+pool.shutdown()
+\end{lstlisting}
+
+\textbf{Why Event instead of a boolean?}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{Event} is thread-safe (no race conditions)
+    \item \texttt{set()} and \texttt{is\_set()} are atomic operations
+    \item A simple boolean would need a lock
+\end{itemize}
+
+\subsection{Common Pitfalls}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Forgetting join()}: Threads keep running after main exits
+    \item \textbf{Shared state without locks}: Data corruption, race conditions
+    \item \textbf{Ignoring thread exceptions}: Silent failures (wrap in try/except!)
+    \item \textbf{Infinite blocking}: Always use timeouts on \texttt{get()}
+    \item \textbf{Deadlocks}: Multiple locks acquired in different order
+\end{enumerate}
+
+\newpage
+
+\section{Interview-Ready Implementation}
+
+\subsection{Complete Request Executor Template}
+
+\begin{lstlisting}
+import queue
+import threading
+import time
+from typing import Callable, Any, Dict
+from dataclasses import dataclass
+
+@dataclass
+class Request:
+    """Request object with metadata"""
+    request_id: int
+    partition_key: str  # For ordering within partition
+    payload: Any
+    timestamp: float = None
+
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = time.time()
+
+class RequestExecutor:
+    """
+    Thread-safe request executor with backpressure detection,
+    graceful shutdown, and request partitioning.
+    """
+
+    def __init__(self, num_workers: int, max_queue_size: int = 1000):
+        self.num_workers = num_workers
+        self.max_queue_size = max_queue_size
+
+        # Bounded queue for backpressure
+        self.request_queue = queue.Queue(maxsize=max_queue_size)
+
+        # Worker management
+        self.workers = []
+        self.shutdown_event = threading.Event()
+
+        # Metrics (thread-safe with locks)
+        self.metrics_lock = threading.Lock()
+        self.total_processed = 0
+        self.total_failed = 0
+        self.worker_stats: Dict[int, int] = {}
+
+        # Start workers
+        self._start_workers()
+
+    def _start_workers(self):
+        """Initialize and start worker threads"""
+        for worker_id in range(self.num_workers):
+            worker = threading.Thread(
+                target=self._worker_loop,
+                args=(worker_id,),
+                name=f"Worker-{worker_id}"
+            )
+            worker.start()
+            self.workers.append(worker)
+            self.worker_stats[worker_id] = 0
+
+        print(f"Started {self.num_workers} worker threads")
+
+    def _worker_loop(self, worker_id: int):
+        """Main worker thread loop"""
+        print(f"Worker-{worker_id} started")
+
+        while not self.shutdown_event.is_set():
+            try:
+                # Get request with timeout to check shutdown flag
+                request = self.request_queue.get(timeout=0.5)
+
+                # Process the request
+                try:
+                    self._process_request(worker_id, request)
+
+                    # Update metrics
+                    with self.metrics_lock:
+                        self.total_processed += 1
+                        self.worker_stats[worker_id] += 1
+
+                except Exception as e:
+                    # Handle processing errors
+                    print(f"Worker-{worker_id} error processing "
+                          f"request {request.request_id}: {e}")
+
+                    with self.metrics_lock:
+                        self.total_failed += 1
+
+                finally:
+                    self.request_queue.task_done()
+
+            except queue.Empty:
+                # No request available, loop again
+                continue
+
+        print(f"Worker-{worker_id} shutting down gracefully")
+
+    def _process_request(self, worker_id: int, request: Request):
+        """Process a single request (override in subclass)"""
+        # Simulate I/O-bound work
+        print(f"Worker-{worker_id} processing request "
+              f"{request.request_id} (key: {request.partition_key})")
+        time.sleep(0.1)  # Simulated work
+
+    def submit(self, request: Request, block: bool = True,
+               timeout: float = None):
+        """
+        Submit a request for processing
+
+        Args:
+            request: Request to process
+            block: If True, blocks when queue is full
+            timeout: Timeout for blocking (None = infinite)
+
+        Raises:
+            queue.Full: If queue is full and block=False
+        """
+        if self.shutdown_event.is_set():
+            raise RuntimeError("Executor is shutting down")
+
+        try:
+            self.request_queue.put(request, block=block,
+                                   timeout=timeout)
+        except queue.Full:
+            print(f"BACKPRESSURE: Queue full, rejecting request "
+                  f"{request.request_id}")
+            raise
+
+    def get_queue_depth(self) -> int:
+        """Get current queue depth (for backpressure monitoring)"""
+        return self.request_queue.qsize()
+
+    def is_backpressure(self, threshold: float = 0.8) -> bool:
+        """
+        Check if system is under backpressure
+
+        Args:
+            threshold: Queue fullness ratio (0-1) to trigger
+
+        Returns:
+            True if queue depth exceeds threshold
+        """
+        current = self.get_queue_depth()
+        return current > (self.max_queue_size * threshold)
+
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get executor metrics (thread-safe)"""
+        with self.metrics_lock:
+            return {
+                "total_processed": self.total_processed,
+                "total_failed": self.total_failed,
+                "queue_depth": self.get_queue_depth(),
+                "worker_stats": self.worker_stats.copy(),
+                "backpressure": self.is_backpressure()
+            }
+
+    def shutdown(self, wait: bool = True, timeout: float = None):
+        """
+        Gracefully shutdown executor
+
+        Args:
+            wait: If True, wait for in-flight requests to complete
+            timeout: Maximum time to wait (None = infinite)
+        """
+        print("Initiating executor shutdown...")
+
+        if wait:
+            # Wait for queue to drain
+            print("Waiting for queue to drain...")
+            self.request_queue.join()
+
+        # Signal shutdown to all workers
+        self.shutdown_event.set()
+
+        # Wait for workers to terminate
+        print("Waiting for workers to terminate...")
+        for worker in self.workers:
+            worker.join(timeout=timeout)
+
+        print("Executor shutdown complete")
+        print(f"Final metrics: {self.get_metrics()}")
+
+# ============================================================
+# Extension: Partitioned Executor (for ordering)
+# ============================================================
+
+class PartitionedExecutor:
+    """
+    Executor with request partitioning for per-partition ordering.
+    Requests with same partition_key go to same worker thread.
+    """
+
+    def __init__(self, num_workers: int, max_queue_size: int = 1000):
+        self.num_workers = num_workers
+
+        # One queue per worker (partition)
+        self.queues = [queue.Queue(maxsize=max_queue_size // num_workers)
+                       for _ in range(num_workers)]
+
+        self.workers = []
+        self.shutdown_event = threading.Event()
+
+        self._start_workers()
+
+    def _start_workers(self):
+        for worker_id in range(self.num_workers):
+            worker = threading.Thread(
+                target=self._worker_loop,
+                args=(worker_id,)
+            )
+            worker.start()
+            self.workers.append(worker)
+
+    def _worker_loop(self, worker_id: int):
+        my_queue = self.queues[worker_id]
+
+        while not self.shutdown_event.is_set():
+            try:
+                request = my_queue.get(timeout=0.5)
+                self._process_request(worker_id, request)
+                my_queue.task_done()
+            except queue.Empty:
+                continue
+            except Exception as e:
+                print(f"Worker-{worker_id} error: {e}")
+
+    def _process_request(self, worker_id: int, request: Request):
+        print(f"Worker-{worker_id} processing request "
+              f"{request.request_id} (key: {request.partition_key})")
+        time.sleep(0.1)
+
+    def submit(self, request: Request):
+        """Route request to worker based on partition key"""
+        worker_id = hash(request.partition_key) % self.num_workers
+        self.queues[worker_id].put(request)
+        print(f"Request {request.request_id} routed to "
+              f"Worker-{worker_id} (key: {request.partition_key})")
+
+    def shutdown(self):
+        self.shutdown_event.set()
+        for worker in self.workers:
+            worker.join()
+        print("Partitioned executor shutdown complete")
+
+# ============================================================
+# Example Usage & Testing
+# ============================================================
+
+if __name__ == "__main__":
+    print("=== Testing Basic Executor ===")
+    executor = RequestExecutor(num_workers=3, max_queue_size=10)
+
+    # Submit requests
+    for i in range(15):
+        try:
+            req = Request(
+                request_id=i,
+                partition_key=f"user-{i % 3}",
+                payload={"data": f"payload-{i}"}
+            )
+            executor.submit(req, block=False)  # Non-blocking
+        except queue.Full:
+            print(f"Request {i} rejected due to backpressure")
+
+    # Monitor metrics
+    time.sleep(1)
+    print(f"Metrics: {executor.get_metrics()}")
+
+    # Graceful shutdown
+    executor.shutdown()
+
+    print("\n=== Testing Partitioned Executor ===")
+    partitioned = PartitionedExecutor(num_workers=3)
+
+    # Submit requests with same key (will be ordered)
+    for i in range(9):
+        req = Request(
+            request_id=i,
+            partition_key=f"user-{i % 3}",
+            payload={"data": f"payload-{i}"}
+        )
+        partitioned.submit(req)
+
+    time.sleep(2)
+    partitioned.shutdown()
+\end{lstlisting}
+
+\subsection{Key Implementation Points}
+
+\begin{actionbox}
+\textbf{What to Emphasize During Interview:}
+\begin{enumerate}
+    \item \textbf{Thread safety}: All shared state protected by locks
+    \item \textbf{Graceful shutdown}: Event-based signaling, wait for completion
+    \item \textbf{Backpressure}: Bounded queue, monitoring, rejection
+    \item \textbf{Error handling}: Try/except in worker loop, no silent failures
+    \item \textbf{Metrics}: Track processed, failed, per-worker stats
+    \item \textbf{Partitioning}: Consistent hashing for per-key ordering
+\end{enumerate}
+\end{actionbox}
+
+\newpage
+
+\section{3-Day Study Plan}
+
+\subsection{Day 1: Foundation (3-4 hours)}
+
+\subsubsection{Morning (2 hours)}
+\begin{enumerate}[leftmargin=*]
+    \item Read Python \texttt{threading} docs: \url{https://docs.python.org/3/library/threading.html}
+    \item Read Python \texttt{queue} docs: \url{https://docs.python.org/3/library/queue.html}
+    \item Watch: Corey Schafer's Python Threading tutorial (25 min) \\
+          \url{https://www.youtube.com/watch?v=IEEhzQoKtQU}
+\end{enumerate}
+
+\subsubsection{Afternoon (2 hours)}
+\begin{enumerate}[leftmargin=*]
+    \item Code Exercise 1: Simple thread creation and joining
+    \item Code Exercise 2: Shared counter with Lock (test with/without lock)
+    \item Code Exercise 3: Producer-consumer with Queue
+\end{enumerate}
+
+\textbf{Success Criteria:}
+\begin{itemize}[leftmargin=*]
+    \item Can explain why locks are needed
+    \item Can start/join threads correctly
+    \item Understand \texttt{queue.Queue} is thread-safe
+\end{itemize}
+
+\subsection{Day 2: Thread Pool Implementation (4-5 hours)}
+
+\subsubsection{Morning (2.5 hours)}
+\begin{enumerate}[leftmargin=*]
+    \item Implement basic thread pool from scratch (no \texttt{concurrent.futures})
+    \item Add graceful shutdown with \texttt{Event}
+    \item Add metrics tracking with locks
+\end{enumerate}
+
+\subsubsection{Afternoon (2 hours)}
+\begin{enumerate}[leftmargin=*]
+    \item Add backpressure detection (queue monitoring)
+    \item Add exception handling in workers
+    \item Test with different worker counts and load
+\end{enumerate}
+
+\textbf{Success Criteria:}
+\begin{itemize}[leftmargin=*]
+    \item Can implement thread pool in 30 minutes
+    \item Can explain every line of code
+    \item Can handle worker failures gracefully
+\end{itemize}
+
+\subsection{Day 3: Polish \& Extensions (4-5 hours)}
+
+\subsubsection{Morning (2.5 hours)}
+\begin{enumerate}[leftmargin=*]
+    \item Implement request partitioning for ordering
+    \item Add backpressure reporting logic
+    \item Review \texttt{concurrent.futures.ThreadPoolExecutor} source
+\end{enumerate}
+
+\subsubsection{Afternoon (2 hours)}
+\begin{enumerate}[leftmargin=*]
+    \item Timed practice: Implement basic executor in 30 min
+    \item Practice explaining follow-up questions out loud
+    \item Review common pitfalls and gotchas
+\end{enumerate}
+
+\textbf{Success Criteria:}
+\begin{itemize}[leftmargin=*]
+    \item Can solve problem end-to-end in 30-40 minutes
+    \item Can confidently answer all follow-up questions
+    \item Can discuss trade-offs clearly
+\end{itemize}
+
+\subsection{Python 3.8 Compatibility Checklist}
+
+\begin{warningbox}
+\textbf{Avoid These (Python 3.9+ features):}
+\begin{itemize}
+    \item Type hints: \texttt{list[str]} → Use \texttt{List[str]} from \texttt{typing}
+    \item Type hints: \texttt{dict[str, int]} → Use \texttt{Dict[str, int]}
+    \item \texttt{match/case} statements → Use \texttt{if/elif}
+    \item Walrus operator in complex contexts (available in 3.8, but be careful)
+\end{itemize}
+
+\textbf{Safe to Use:}
+\begin{itemize}
+    \item All \texttt{threading} and \texttt{queue} features
+    \item Type hints from \texttt{typing} module
+    \item \texttt{dataclasses} (Python 3.7+)
+    \item \texttt{concurrent.futures}
+    \item All patterns in this guide
+\end{itemize}
+\end{warningbox}
+
+\newpage
+
+\section{Day 2: Onsite Interview (Abe)}
+
+\subsection{Part 1: Project Deep Dive}
+
+\subsubsection{Select Your Project}
+
+Choose ONE significant Roblox project from the last 2 years. Recommended options based on your background:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{BuilderAI / LMaaS Platform}
+    \begin{itemize}
+        \item Language Model as a Service platform
+        \item Multi-LLM evaluation systems
+        \item Dynamic NPC dialogue generation
+    \end{itemize}
+
+    \item \textbf{Search Infrastructure Modernization}
+    \begin{itemize}
+        \item Vector database implementation
+        \item Semantic search with embeddings
+        \item RAG (Retrieval-Augmented Generation) platform
+    \end{itemize}
+
+    \item \textbf{AI Safety Model Development}
+    \begin{itemize}
+        \item Content classification with BERT
+        \item Community feedback systems
+        \item Safety model evaluation framework
+    \end{itemize}
+\end{enumerate}
+
+\begin{actionbox}
+\textbf{Preparation Task}: Write a 2-page document covering your chosen project with these sections:
+\begin{enumerate}
+    \item Problem statement (2-3 sentences)
+    \item Technical approach \& architecture
+    \item Your specific contributions
+    \item Collaborators \& team dynamics
+    \item Impact \& results (quantitative if possible)
+    \item Challenges \& lessons learned
+    \item What you'd do differently
+\end{enumerate}
+\end{actionbox}
+
+\subsubsection{Discussion Framework}
+
+Expect Abe to probe on:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Problem \& Context}
+    \begin{itemize}
+        \item What was the business/technical problem?
+        \item Why was it important? What was at stake?
+        \item What constraints did you face (time, resources, tech debt)?
+    \end{itemize}
+
+    \item \textbf{Technical Architecture}
+    \begin{itemize}
+        \item High-level design diagram (draw on whiteboard)
+        \item Key components and their interactions
+        \item Technology choices and trade-offs
+        \item Scalability considerations
+    \end{itemize}
+
+    \item \textbf{Your Contributions}
+    \begin{itemize}
+        \item What did YOU specifically build/design/own?
+        \item What was most technically challenging?
+        \item How did you make key technical decisions?
+    \end{itemize}
+
+    \item \textbf{Collaboration}
+    \begin{itemize}
+        \item Who did you work with? What were their roles?
+        \item How did you coordinate across teams?
+        \item How did you handle disagreements?
+    \end{itemize}
+
+    \item \textbf{Impact}
+    \begin{itemize}
+        \item What metrics improved? (latency, accuracy, adoption, etc.)
+        \item How did you measure success?
+        \item What was the business impact?
+    \end{itemize}
+
+    \item \textbf{Retrospective}
+    \begin{itemize}
+        \item What went well? Why?
+        \item What didn't go well? Why?
+        \item What would you do differently knowing what you know now?
+        \item What did you learn?
+    \end{itemize}
+\end{enumerate}
+
+\begin{tipbox}
+\textbf{Interview Tip}: Use the STAR method (Situation, Task, Action, Result) for structuring answers. Be specific with numbers when possible (``reduced latency from 500ms to 50ms'' beats ``made it faster'').
+\end{tipbox}
+
+\subsection{Part 2: Search Deep Dive}
+
+\subsubsection{Roblox Search Architecture Overview}
+
+Prepare to discuss:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{High-Level Architecture}
+    \begin{itemize}
+        \item Indexing pipeline (data ingestion → processing → index building)
+        \item Query processing flow
+        \item Ranking \& relevance
+        \item Serving infrastructure
+    \end{itemize}
+
+    \item \textbf{Technical Components}
+    \begin{itemize}
+        \item Search index technology (Elasticsearch? Custom?)
+        \item Vector database for semantic search
+        \item Query understanding (parsing, intent detection)
+        \item Ranking models (traditional vs ML-based)
+        \item Autocomplete/suggestions
+    \end{itemize}
+
+    \item \textbf{Scale \& Performance}
+    \begin{itemize}
+        \item Index size, query volume
+        \item Latency requirements (p50, p99)
+        \item Freshness requirements
+        \item Availability targets
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Key Topics to Master}
+
+\paragraph{Indexing}
+\begin{itemize}[leftmargin=*]
+    \item How do you build and update the search index?
+    \item How do you handle schema changes?
+    \item What's your strategy for freshness vs consistency?
+    \item How do you handle large documents or assets?
+\end{itemize}
+
+\paragraph{Query Understanding}
+\begin{itemize}[leftmargin=*]
+    \item How do you parse and normalize queries?
+    \item How do you handle typos and synonyms?
+    \item Do you do query rewriting or expansion?
+    \item How do you detect user intent?
+\end{itemize}
+
+\paragraph{Ranking \& Relevance}
+\begin{itemize}[leftmargin=*]
+    \item What signals do you use for ranking? (textual relevance, popularity, personalization)
+    \item How do you combine multiple signals?
+    \item Do you use machine learning for ranking? What features?
+    \item How do you evaluate ranking quality?
+\end{itemize}
+
+\paragraph{Semantic Search}
+\begin{itemize}[leftmargin=*]
+    \item How do you generate embeddings? (model, training data)
+    \item Vector database technology and configuration
+    \item Hybrid search: combining keyword + semantic
+    \item Trade-offs: latency, recall, precision
+\end{itemize}
+
+\paragraph{Personalization}
+\begin{itemize}[leftmargin=*]
+    \item What personalization signals do you use?
+    \item How do you balance personalization vs diversity?
+    \item Cold start problem: new users, new content
+    \item Privacy considerations
+\end{itemize}
+
+\paragraph{Evaluation \& Metrics}
+\begin{itemize}[leftmargin=*]
+    \item How do you measure search quality? (NDCG, MRR, precision@k)
+    \item A/B testing strategy
+    \item Offline evaluation datasets
+    \item Human evaluation process
+\end{itemize}
+
+\subsubsection{Trade-Offs Discussion}
+
+Be ready to articulate these common search trade-offs:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{5cm}|p{5cm}|}
+\hline
+\textbf{Dimension} & \textbf{Trade-Off} \\
+\hline
+Latency vs Quality & Deeper ranking improves quality but increases latency \\
+\hline
+Freshness vs Consistency & Real-time indexing vs eventually consistent \\
+\hline
+Recall vs Precision & Cast wide net vs return only high-confidence results \\
+\hline
+Personalization vs Diversity & User preferences vs exploration/discovery \\
+\hline
+Keyword vs Semantic & Exact matches vs conceptual similarity \\
+\hline
+Compute Cost vs Quality & Expensive ML models vs simpler heuristics \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{tipbox}
+\textbf{Interview Approach}: Don't just describe what Roblox does. Explain WHY those decisions were made, what alternatives you considered, and what you learned. Show systems thinking by discussing upstream/downstream dependencies.
+\end{tipbox}
+
+\subsubsection{Potential Probing Questions}
+
+\begin{enumerate}[leftmargin=*]
+    \item ``Walk me through what happens when a user types a search query.''
+    \item ``How do you handle very popular queries that could overwhelm the system?''
+    \item ``What's your strategy for ranking results for a brand new user?''
+    \item ``How do you detect and fix search quality issues?''
+    \item ``Describe a time when search relevance was particularly bad. What did you do?''
+    \item ``How would you add a new ranking signal to the system?''
+    \item ``What's your biggest challenge with search at Roblox's scale?''
+\end{enumerate}
+
+\subsection{General Onsite Tips}
+
+\begin{actionbox}
+\textbf{Day Before Interview:}
+\begin{itemize}
+    \item Review your project document (know it cold)
+    \item Practice drawing architecture diagrams
+    \item Prepare 3-5 questions to ask Abe about DataHub
+    \item Get good sleep
+\end{itemize}
+\end{actionbox}
+
+\begin{tipbox}
+\textbf{During Interview:}
+\begin{itemize}
+    \item Start with high-level, then drill into details
+    \item Use whiteboard/paper to draw diagrams
+    \item Be honest about challenges and failures
+    \item Show enthusiasm for technical problem-solving
+    \item Ask clarifying questions if needed
+    \item Connect your experience to DataHub's problems
+\end{itemize}
+\end{tipbox}
+
+\newpage
+
+\section{Quick Reference Cheat Sheet}
+
+\subsection{Python Threading API}
+
+\begin{table}[h]
+\small
+\begin{tabular}{|p{4cm}|p{7cm}|}
+\hline
+\textbf{Class/Method} & \textbf{Purpose} \\
+\hline
+\texttt{threading.Thread} & Create a thread \\
+\texttt{thread.start()} & Begin thread execution \\
+\texttt{thread.join()} & Wait for thread to finish \\
+\texttt{threading.Lock()} & Mutual exclusion lock \\
+\texttt{with lock:} & Acquire and release lock (RAII) \\
+\texttt{threading.Event()} & Thread signaling flag \\
+\texttt{event.set()} & Set flag to True \\
+\texttt{event.is\_set()} & Check if flag is True \\
+\texttt{queue.Queue()} & Thread-safe FIFO queue \\
+\texttt{queue.put(item)} & Add item to queue \\
+\texttt{queue.get(timeout)} & Remove item from queue \\
+\texttt{queue.task\_done()} & Signal task completion \\
+\texttt{queue.join()} & Wait for all tasks done \\
+\texttt{queue.qsize()} & Approximate queue size \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Common Interview Patterns}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Worker Thread Pattern}
+    \begin{lstlisting}[basicstyle=\ttfamily\tiny]
+def worker_loop():
+    while not shutdown_event.is_set():
+        try:
+            item = queue.get(timeout=0.5)
+            process(item)
+            queue.task_done()
+        except queue.Empty:
+            continue
+    \end{lstlisting}
+
+    \item \textbf{Thread-Safe Update Pattern}
+    \begin{lstlisting}[basicstyle=\ttfamily\tiny]
+with metrics_lock:
+    self.counter += 1
+    \end{lstlisting}
+
+    \item \textbf{Graceful Shutdown Pattern}
+    \begin{lstlisting}[basicstyle=\ttfamily\tiny]
+def shutdown():
+    shutdown_event.set()  # Signal workers
+    for worker in workers:
+        worker.join()  # Wait for completion
+    \end{lstlisting}
+
+    \item \textbf{Backpressure Detection Pattern}
+    \begin{lstlisting}[basicstyle=\ttfamily\tiny]
+if queue.qsize() > threshold:
+    raise BackpressureError("System overwhelmed")
+    \end{lstlisting}
+\end{enumerate}
+
+\subsection{Key Concepts Checklist}
+
+\begin{itemize}[leftmargin=*]
+    \item[$\square$] Understand the GIL and when threading helps
+    \item[$\square$] Can implement basic thread pool from scratch
+    \item[$\square$] Know when to use Lock vs Event vs Queue
+    \item[$\square$] Can explain race conditions with examples
+    \item[$\square$] Understand bounded queues for backpressure
+    \item[$\square$] Can implement graceful shutdown
+    \item[$\square$] Can handle exceptions in worker threads
+    \item[$\square$] Understand request partitioning for ordering
+    \item[$\square$] Can discuss thread count trade-offs
+    \item[$\square$] Know how to monitor queue depth
+\end{itemize}
+
+\subsection{Before Interview Checklist}
+
+\begin{actionbox}
+\textbf{Final Prep (Morning of Interview):}
+\begin{enumerate}
+    \item Review this guide's key sections (30 min)
+    \item Practice drawing thread pool architecture (10 min)
+    \item Review your project document (20 min)
+    \item Practice explaining one technical decision (10 min)
+    \item Prepare 3 questions for interviewer (5 min)
+\end{enumerate}
+\end{actionbox}
+
+\subsection{Contact Information}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Recruiter}: Myra (DataHub)
+    \item \textbf{Day 1 Interviewer}: Andrew (Coding)
+    \item \textbf{Day 2 Interviewer}: Abe (Project \& Search)
+    \item \textbf{Platform}: SharedPad (Python 3.8.10)
+\end{itemize}
+
+\vfill
+
+\begin{center}
+\large
+\textbf{Good luck with your DataHub interview!}
+
+You've got this. Trust your experience and preparation.
+\end{center}
+
+\end{document}
