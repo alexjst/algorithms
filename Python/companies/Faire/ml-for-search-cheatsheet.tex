@@ -1529,15 +1529,17 @@ def auc_roc(y_true, y_scores):
     if num_pos == 0 or num_neg == 0:
         return 0.5  # Undefined, return random
 
-    # For each positive, count negatives ranked below
+    # Iterate high score to low score
+    # If we see a Negative, it is ranked lower than all
+    # preceding Positives (which is good).
     correct_pairs = 0
-    negatives_so_far = 0
+    positives_so_far = 0
 
     for label in sorted_labels:
         if label == 1:  # Positive
-            correct_pairs += negatives_so_far
+            positives_so_far += 1
         else:  # Negative
-            negatives_so_far += 1
+            correct_pairs += positives_so_far
 
     auc = correct_pairs / (num_pos * num_neg)
     return auc
