@@ -1,0 +1,2050 @@
+\documentclass[11pt,letterpaper]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{graphicx}
+
+% Colors
+\definecolor{faireblue}{RGB}{41,128,185}
+\definecolor{highlight}{RGB}{255,245,230}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codegray}{RGB}{128,128,128}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Faire ML Interview Prep}
+\rhead{Alex Yang}
+\cfoot{\thepage}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+% Code listing style
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=8pt,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    showstringspaces=false
+}
+
+% Custom boxes
+\newtcolorbox{keyinsight}{
+    colback=blue!5!white,
+    colframe=faireblue,
+    fonttitle=\bfseries,
+    title=Key Insight
+}
+
+\newtcolorbox{criticalpoint}{
+    colback=red!5!white,
+    colframe=red!75!black,
+    fonttitle=\bfseries,
+    title=! Critical
+}
+
+\newtcolorbox{actionitem}{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title=+ Action Item
+}
+
+\newtcolorbox{example}{
+    colback=yellow!5!white,
+    colframe=orange!75!black,
+    fonttitle=\bfseries,
+    title=Example
+}
+
+% Title
+\title{\textbf{Machine Learning for Search: Complete Study Guide}\\
+\large Faire ML Interview Preparation}
+\author{Alex Yang\\
+Principal Software Engineer, Roblox}
+\date{Prepared: \today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Introduction \& Study Approach}
+% ============================================================
+
+\subsection{What This Guide Covers}
+
+This is a \textbf{study guide}, not a cheatsheet. It's designed to help you deeply understand ML concepts for search, recommendations, and ads systems from first principles. You should:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Read actively:} Take notes, work through examples
+    \item \textbf{Code along:} Implement the algorithms yourself
+    \item \textbf{Practice explaining:} Teach concepts out loud
+    \item \textbf{Connect to experience:} Relate to your past projects
+\end{itemize}
+
+\subsection{Interview Format at Faire (Expected)}
+
+Based on typical ML for Search interviews, expect:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{ML System Design} (45-60 min)
+    \begin{itemize}
+        \item "Design a search ranking system"
+        \item "Build a recommendation engine for products"
+        \item "Design an ads click prediction system"
+    \end{itemize}
+
+    \item \textbf{ML Fundamentals} (30-45 min)
+    \begin{itemize}
+        \item Theory questions (bias-variance, regularization, etc.)
+        \item Metric selection and evaluation
+        \item Model selection trade-offs
+    \end{itemize}
+
+    \item \textbf{ML Coding} (30-60 min, possibly)
+    \begin{itemize}
+        \item Implement algorithm from scratch
+        \item Calculate metric (AUC, NDCG)
+        \item Feature engineering problem
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Recommended Study Schedule}
+
+\begin{table}[h]
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Day} & \textbf{Hours} & \textbf{Topics} \\
+\hline
+1 & 4-5 & ML Fundamentals, Metrics, Learning to Rank \\
+2 & 4-5 & Model Architectures, Feature Engineering \\
+3 & 4-5 & System Design Framework, Practice Problems \\
+4 & 3-4 & ML Coding, Implementation Practice \\
+5 & 2-3 & Review, Mock Interview Practice \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+% ============================================================
+\section{ML Fundamentals: Core Concepts}
+% ============================================================
+
+\subsection{The Bias-Variance Tradeoff}
+
+\subsubsection{What Is It?}
+
+The bias-variance tradeoff is the fundamental tension in machine learning between two types of errors:
+
+\textbf{Bias} = Error from wrong assumptions\\
+\textbf{Variance} = Error from sensitivity to training data
+
+$$\text{Total Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error}$$
+
+\subsubsection{Understanding Through Examples}
+
+\begin{example}
+\textbf{High Bias (Underfitting):}
+
+Imagine fitting a linear model to data that's actually quadratic:
+\begin{itemize}
+    \item Model: $y = ax + b$
+    \item True relationship: $y = x^2$
+    \item Problem: Model can't capture curvature (wrong assumption)
+    \item Result: Poor performance on both training and test data
+\end{itemize}
+
+\textbf{High Variance (Overfitting):}
+
+Imagine fitting a 10th degree polynomial to data with only 5 points:
+\begin{itemize}
+    \item Model: $y = a_{10}x^{10} + ... + a_1x + b$
+    \item Problem: Model memorizes noise in training data
+    \item Result: Perfect on training data, terrible on test data
+\end{itemize}
+\end{example}
+
+\subsubsection{How to Identify in Practice}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Symptom} & \textbf{High Bias} & \textbf{High Variance} \\
+\hline
+Train Error & High (e.g., 20\%) & Low (e.g., 1\%) \\
+Test Error & High (e.g., 22\%) & High (e.g., 25\%) \\
+Gap & Small & Large \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Solutions}
+
+\textbf{For High Bias (Underfitting):}
+\begin{itemize}
+    \item Add more features or feature interactions
+    \item Increase model complexity (more layers, higher degree)
+    \item Reduce regularization
+    \item Try different model family (linear → tree-based → neural net)
+\end{itemize}
+
+\textbf{For High Variance (Overfitting):}
+\begin{itemize}
+    \item Get more training data
+    \item Add regularization (L1, L2, dropout)
+    \item Reduce model complexity
+    \item Early stopping
+    \item Ensemble methods (reduce variance)
+\end{itemize}
+
+\begin{keyinsight}
+\textbf{Interview Tip:} When asked about model performance issues, ALWAYS start by diagnosing bias vs variance:
+\begin{enumerate}
+    \item Look at train error vs test error
+    \item Identify which problem you have
+    \item Propose targeted solutions
+    \item Explain why each solution helps
+\end{enumerate}
+\end{keyinsight}
+
+\subsection{Regularization: L1 vs L2}
+
+\subsubsection{What Is Regularization?}
+
+Regularization adds a penalty term to the loss function to discourage overly complex models:
+
+$$\text{Loss}_{\text{total}} = \text{Loss}_{\text{data}} + \lambda \times \text{Penalty}$$
+
+Where $\lambda$ controls the strength of regularization.
+
+\subsubsection{L1 Regularization (Lasso)}
+
+$$\text{Penalty}_{\text{L1}} = \sum_{i=1}^{n} |w_i|$$
+
+\textbf{Key Properties:}
+\begin{itemize}
+    \item Encourages \textbf{sparse solutions} (many weights = 0)
+    \item Acts as feature selection
+    \item Non-differentiable at zero (use subgradient methods)
+\end{itemize}
+
+\textbf{When to Use:}
+\begin{itemize}
+    \item Many irrelevant or redundant features
+    \item Need interpretability (identify important features)
+    \item Want automatic feature selection
+\end{itemize}
+
+\subsubsection{L2 Regularization (Ridge)}
+
+$$\text{Penalty}_{\text{L2}} = \sum_{i=1}^{n} w_i^2$$
+
+\textbf{Key Properties:}
+\begin{itemize}
+    \item Shrinks weights smoothly (no sparsity)
+    \item Handles multicollinearity well
+    \item Differentiable everywhere
+\end{itemize}
+
+\textbf{When to Use:}
+\begin{itemize}
+    \item All features potentially useful
+    \item Correlated features (multicollinearity)
+    \item Want smooth weight distributions
+\end{itemize}
+
+\subsubsection{Visual Comparison}
+
+\textbf{Why L1 creates sparsity:}
+\begin{itemize}
+    \item L1 constraint region is diamond-shaped (sharp corners at axes)
+    \item Solution likely touches a corner (one weight = 0)
+    \item L2 constraint region is circular (no sharp corners)
+    \item Solution smoothly shrinks all weights
+\end{itemize}
+
+\begin{example}
+\textbf{Concrete Example:}
+
+Dataset: 100 features, only 10 are actually useful
+
+\begin{itemize}
+    \item \textbf{L1:} Might select 12-15 features (sparse), setting 85-88 weights to 0
+    \item \textbf{L2:} Shrinks all 100 weights, but none exactly to 0
+    \item \textbf{Elastic Net (L1 + L2):} Best of both - sparse selection + smooth shrinkage
+\end{itemize}
+\end{example}
+
+\subsection{Gradient Descent Variants}
+
+\subsubsection{The Core Algorithm}
+
+$$w_{t+1} = w_t - \eta \nabla L(w_t)$$
+
+Where:
+\begin{itemize}
+    \item $w_t$ = current weights
+    \item $\eta$ = learning rate
+    \item $\nabla L$ = gradient of loss function
+\end{itemize}
+
+\subsubsection{Three Variants}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3cm}|p{4cm}|p{4cm}|p{2cm}|}
+\hline
+\textbf{Type} & \textbf{Batch Size} & \textbf{Pros} & \textbf{Cons} \\
+\hline
+Batch GD & All data & Stable, converges to optimum & Slow, memory intensive \\
+\hline
+Stochastic GD & 1 sample & Fast, can escape local minima & Noisy, unstable \\
+\hline
+Mini-batch GD & 32-512 & \textbf{Best tradeoff} & Need to tune batch size \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Industry Standard:} Mini-batch with batch size 32-256 (depends on problem)
+
+\subsubsection{Advanced Optimizers}
+
+\textbf{1. SGD with Momentum}
+\begin{itemize}
+    \item Adds "velocity" term: accumulates gradients over time
+    \item Reduces oscillations, accelerates in consistent directions
+    \item Hyperparameter: momentum $\beta$ (typically 0.9)
+\end{itemize}
+
+\textbf{2. Adam (Adaptive Moment Estimation)} - \textbf{Most Popular}
+\begin{itemize}
+    \item Combines momentum (first moment) + RMSprop (second moment)
+    \item Adaptive learning rates per parameter
+    \item Robust to learning rate choice
+    \item Default for deep learning
+\end{itemize}
+
+\textbf{3. RMSprop}
+\begin{itemize}
+    \item Adapts learning rate based on recent gradient magnitudes
+    \item Good for non-stationary objectives (online learning)
+\end{itemize}
+
+\begin{keyinsight}
+\textbf{Interview Question: "Which optimizer should we use?"}
+
+\textbf{Answer Framework:}
+\begin{itemize}
+    \item \textbf{Default choice:} Adam (works well in 90\% of cases)
+    \item \textbf{When to use SGD + Momentum:}
+    \begin{itemize}
+        \item Simple models (logistic regression, linear)
+        \item Want better generalization (Adam can overfit)
+        \item Have time to tune learning rate
+    \end{itemize}
+    \item \textbf{When to use RMSprop:} Non-stationary problems, online learning
+\end{itemize}
+\end{keyinsight}
+
+\newpage
+
+% ============================================================
+\section{Evaluation Metrics: Deep Dive}
+% ============================================================
+
+\subsection{Classification Metrics}
+
+\subsubsection{Confusion Matrix Foundation}
+
+Everything starts from the confusion matrix:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+& \textbf{Predicted Positive} & \textbf{Predicted Negative} \\
+\hline
+\textbf{Actual Positive} & True Positive (TP) & False Negative (FN) \\
+\hline
+\textbf{Actual Negative} & False Positive (FP) & True Negative (TN) \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Precision vs Recall}
+
+$$\text{Precision} = \frac{TP}{TP + FP} \quad \text{Recall} = \frac{TP}{TP + FN}$$
+
+\begin{example}
+\textbf{Spam Detection Scenario:}
+
+100 emails: 10 are actual spam, 90 are legitimate
+
+Model predicts: 15 emails as spam
+\begin{itemize}
+    \item 8 correct spam detections (TP)
+    \item 7 false alarms (FP) - legitimate emails marked as spam
+    \item 2 missed spam emails (FN)
+\end{itemize}
+
+\textbf{Metrics:}
+\begin{itemize}
+    \item Precision = $8/(8+7) = 53\%$ - "Of emails I marked spam, how many were actually spam?"
+    \item Recall = $8/(8+2) = 80\%$ - "Of all actual spam, how many did I catch?"
+\end{itemize}
+
+\textbf{Trade-off:}
+\begin{itemize}
+    \item Make threshold stricter → Higher precision, lower recall (fewer false alarms, but miss more spam)
+    \item Make threshold looser → Higher recall, lower precision (catch more spam, but more false alarms)
+\end{itemize}
+\end{example}
+
+\subsubsection{When to Optimize for What}
+
+\textbf{Optimize Precision when FP is costly:}
+\begin{itemize}
+    \item Spam detection (don't block real emails)
+    \item Medical diagnosis (don't scare healthy patients)
+    \item Fraud detection with manual review (don't waste investigator time)
+\end{itemize}
+
+\textbf{Optimize Recall when FN is costly:}
+\begin{itemize}
+    \item Disease screening (don't miss sick patients)
+    \item Airport security (don't miss threats)
+    \item Fraud detection without review (catch all fraud)
+\end{itemize}
+
+\textbf{Balance both with F1:}
+$$F_1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$$
+
+\subsubsection{AUC-ROC: The Gold Standard}
+
+\textbf{What it measures:} Probability that a random positive example is ranked higher than a random negative example.
+
+\textbf{Range:} [0.5, 1.0]
+\begin{itemize}
+    \item 0.5 = Random guessing
+    \item 0.7-0.8 = Good model
+    \item 0.8-0.9 = Excellent model
+    \item 0.9+ = Outstanding (or data leakage!)
+\end{itemize}
+
+\textbf{Why use it:}
+\begin{itemize}
+    \item Threshold-independent (unlike precision/recall)
+    \item Works well with imbalanced data
+    \item Measures ranking quality, not just binary classification
+    \item Industry standard for CTR prediction
+\end{itemize}
+
+\begin{criticalpoint}
+\textbf{When NOT to use AUC-ROC:}
+\begin{itemize}
+    \item \textbf{Highly imbalanced data (CTR < 1\%):} Use PR-AUC instead
+    \item \textbf{When you care about a specific threshold:} Use precision/recall at that threshold
+    \item \textbf{When calibrated probabilities matter:} Use log loss instead
+\end{itemize}
+\end{criticalpoint}
+
+\subsubsection{Log Loss (Binary Cross-Entropy)}
+
+$$\text{LogLoss} = -\frac{1}{N}\sum_{i=1}^{N} [y_i \log(p_i) + (1-y_i)\log(1-p_i)]$$
+
+\textbf{What it measures:} Penalizes confident wrong predictions
+
+\textbf{When to use:}
+\begin{itemize}
+    \item Need calibrated probabilities (not just rankings)
+    \item Used as training objective (not just evaluation)
+    \item Example: Ad auctions (need actual probability for bid calculation)
+\end{itemize}
+
+\textbf{Interpretation:}
+\begin{itemize}
+    \item Lower is better (0 = perfect)
+    \item Heavily penalizes confident mistakes (predicting 0.99 when truth is 0)
+\end{itemize}
+
+\subsection{Ranking Metrics}
+
+\subsubsection{NDCG@K: The Industry Standard}
+
+\textbf{Normalized Discounted Cumulative Gain at position K}
+
+$$\text{DCG@K} = \sum_{i=1}^{K} \frac{2^{\text{rel}_i} - 1}{\log_2(i+1)}$$
+
+$$\text{NDCG@K} = \frac{\text{DCG@K}}{\text{IDCG@K}}$$
+
+Where IDCG@K is the ideal (best possible) DCG@K.
+
+\subsubsection{Why NDCG?}
+
+\textbf{Advantages:}
+\begin{itemize}
+    \item \textbf{Graded relevance:} Can handle 0, 1, 2, 3 (not just binary)
+    \item \textbf{Position-aware:} Top results matter more (logarithmic discount)
+    \item \textbf{Normalized:} [0, 1] range, comparable across queries
+    \item \textbf{Industry standard:} Used by Google, Amazon, LinkedIn, etc.
+\end{itemize}
+
+\begin{example}
+\textbf{Concrete Example:}
+
+Search query: "bluetooth headphones"
+
+Top-5 results with relevance scores (0=irrelevant, 3=highly relevant):
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Position} & \textbf{Relevance} & \textbf{Contribution to DCG} \\
+\hline
+1 & 3 & $(2^3 - 1) / \log_2(2) = 7.0$ \\
+2 & 2 & $(2^2 - 1) / \log_2(3) = 1.89$ \\
+3 & 1 & $(2^1 - 1) / \log_2(4) = 0.5$ \\
+4 & 0 & $(2^0 - 1) / \log_2(5) = 0$ \\
+5 & 2 & $(2^2 - 1) / \log_2(6) = 1.16$ \\
+\hline
+\end{tabular}
+\end{table}
+
+DCG@5 = $7.0 + 1.89 + 0.5 + 0 + 1.16 = 10.55$
+
+If ideal ordering was [3, 2, 2, 1, 0]: IDCG@5 = 11.7
+
+NDCG@5 = $10.55 / 11.7 = 0.90$ (pretty good!)
+\end{example}
+
+\subsubsection{MRR: Mean Reciprocal Rank}
+
+$$\text{MRR} = \frac{1}{|Q|} \sum_{q=1}^{|Q|} \frac{1}{\text{rank}_q}$$
+
+\textbf{When to use:}
+\begin{itemize}
+    \item \textbf{Navigational queries:} User looking for ONE specific result
+    \item Example: "Facebook login", "Amazon", brand searches
+    \item Only cares about position of FIRST relevant result
+\end{itemize}
+
+\begin{example}
+\textbf{Navigational Query Example:}
+
+Query: "Starbucks near me"
+
+User wants: Nearest Starbucks location
+
+If nearest location appears at position 3:
+\begin{itemize}
+    \item MRR = 1/3 = 0.33
+    \item User likely has to scroll past 2 irrelevant results
+    \item Poor experience, even though result is present
+\end{itemize}
+
+For this query type, MRR is more meaningful than NDCG.
+\end{example}
+
+\subsection{Online Metrics (A/B Testing)}
+
+\subsubsection{Engagement Metrics}
+
+\textbf{Click-Through Rate (CTR):}
+$$\text{CTR} = \frac{\text{Number of Clicks}}{\text{Number of Impressions}}$$
+
+\textbf{When it matters:}
+\begin{itemize}
+    \item Early funnel metric (interest)
+    \item Correlation with relevance
+    \item Can be gamed (clickbait)
+\end{itemize}
+
+\textbf{Conversion Rate:}
+$$\text{CVR} = \frac{\text{Number of Conversions}}{\text{Number of Clicks}}$$
+
+\textbf{When it matters:}
+\begin{itemize}
+    \item Revenue generation
+    \item True value metric
+    \item Harder to game
+\end{itemize}
+
+\subsubsection{Business Metrics}
+
+\textbf{GMV (Gross Merchandise Value):}
+\begin{itemize}
+    \item Total dollar value of transactions
+    \item Ultimate business metric for e-commerce
+    \item May lag other metrics (need time to convert)
+\end{itemize}
+
+\textbf{Revenue Per Search (RPS):}
+$$\text{RPS} = \frac{\text{Total Revenue}}{\text{Number of Searches}}$$
+
+\begin{keyinsight}
+\textbf{Metric Selection Framework for Interviews:}
+
+When asked "What metrics would you use?", structure answer as:
+\begin{enumerate}
+    \item \textbf{Offline metrics:} For development (NDCG@10, AUC)
+    \item \textbf{Online guardrail metrics:} Must not degrade (latency, zero-result rate)
+    \item \textbf{Online engagement metrics:} Want to improve (CTR, add-to-cart)
+    \item \textbf{Business metrics:} Ultimate goal (GMV, revenue, retention)
+\end{enumerate}
+
+Explain trade-offs between metrics and why you'd prioritize certain ones.
+\end{keyinsight}
+
+\newpage
+
+% ============================================================
+\section{Learning to Rank (LTR): Complete Guide}
+% ============================================================
+
+\subsection{Problem Formulation}
+
+\textbf{Goal:} Given query $q$ and documents $D = \{d_1, d_2, ..., d_n\}$, produce optimal ranking $\pi$.
+
+\textbf{Input:}
+\begin{itemize}
+    \item Query features: query length, query type, user location
+    \item Document features: title, category, price, rating
+    \item Query-document features: BM25 score, embedding similarity
+\end{itemize}
+
+\textbf{Output:}
+\begin{itemize}
+    \item Ranking: Ordered list of documents
+    \item Scores: Relevance scores for each document
+\end{itemize}
+
+\subsection{Pointwise Approach}
+
+\subsubsection{Core Idea}
+
+Treat ranking as independent classification/regression for each document.
+
+$$\text{score}(q, d) = f(\text{features}(q, d))$$
+
+Predict relevance score for each document independently, then sort by score.
+
+\subsubsection{Methods}
+
+\begin{itemize}
+    \item \textbf{Regression:} Predict continuous relevance score
+    \item \textbf{Classification:} Predict relevance category (0, 1, 2, 3)
+    \item \textbf{Models:} Linear regression, logistic regression, neural networks
+\end{itemize}
+
+\subsubsection{Pros and Cons}
+
+\textbf{Pros:}
+\begin{itemize}
+    \item Simple to implement and understand
+    \item Fast training (standard classification/regression)
+    \item Works with small data
+    \item Easy to interpret (feature weights)
+\end{itemize}
+
+\textbf{Cons:}
+\begin{itemize}
+    \item Ignores relative order between documents
+    \item Not optimized for ranking metrics (NDCG, MRR)
+    \item Absolute scores may be miscalibrated
+    \item Treats each document independently (no comparisons)
+\end{itemize}
+
+\textbf{When to use:}
+\begin{itemize}
+    \item Cold start (limited training data)
+    \item Simple baseline
+    \item When absolute scores matter (not just order)
+\end{itemize}
+
+\subsection{Pairwise Approach}
+
+\subsubsection{Core Idea}
+
+Learn to compare pairs of documents: which should rank higher?
+
+$$P(d_i \succ d_j | q) = \sigma(f(q, d_i) - f(q, d_j))$$
+
+Train model to predict pairwise preferences.
+
+\subsubsection{Key Algorithm: RankNet}
+
+\textbf{Neural network approach:}
+\begin{enumerate}
+    \item For each pair $(d_i, d_j)$ where $d_i$ should rank higher
+    \item Compute scores: $s_i = f(q, d_i)$, $s_j = f(q, d_j)$
+    \item Probability $d_i$ ranks higher: $P_{ij} = \sigma(s_i - s_j)$
+    \item Loss: Binary cross-entropy on pair preferences
+\end{enumerate}
+
+\textbf{Gradient flows through pairs} to optimize ranking order.
+
+\subsubsection{Extension: LambdaRank}
+
+\textbf{Key insight:} Not all pairs are equally important!
+
+Pairs that would change NDCG more should have higher loss weight.
+
+$$\lambda_{ij} = \frac{\partial \text{Loss}}{\partial s_i} \times |\Delta \text{NDCG}_{ij}|$$
+
+Weight each pair by how much swapping would change NDCG.
+
+\subsubsection{Pros and Cons}
+
+\textbf{Pros:}
+\begin{itemize}
+    \item Directly optimizes ranking order
+    \item Better than pointwise for most use cases
+    \item More training signal (quadratic pairs)
+    \item Models relative preferences
+\end{itemize}
+
+\textbf{Cons:}
+\begin{itemize}
+    \item More complex than pointwise
+    \item Slower training (all pairs = $O(n^2)$)
+    \item Still not directly optimizing NDCG
+    \item May need pair sampling for efficiency
+\end{itemize}
+
+\textbf{When to use:}
+\begin{itemize}
+    \item Moderate-sized datasets
+    \item Need better ranking than pointwise
+    \item Can't afford full listwise training
+\end{itemize}
+
+\subsection{Listwise Approach}
+
+\subsubsection{Core Idea}
+
+Optimize the entire list directly for ranking metrics.
+
+Consider all documents together, not independently or pairwise.
+
+\subsubsection{LambdaMART: Production Standard}
+
+\textbf{Combination of:}
+\begin{itemize}
+    \item \textbf{LambdaRank:} Gradient weighting by $\Delta$NDCG
+    \item \textbf{MART:} Multiple Additive Regression Trees (gradient boosting)
+\end{itemize}
+
+\textbf{Implementation:} XGBoost or LightGBM with \texttt{rank:ndcg} objective
+
+\begin{lstlisting}
+import xgboost as xgb
+
+# Configuration for ranking
+params = {
+    'objective': 'rank:ndcg',  # Listwise ranking
+    'eval_metric': 'ndcg@10',  # Optimize NDCG@10
+    'eta': 0.1,                # Learning rate
+    'max_depth': 6,            # Tree depth
+    'subsample': 0.8           # Row sampling
+}
+
+# Train
+dtrain = xgb.DMatrix(X_train, label=y_train)
+dtrain.set_group(group_sizes)  # Queries as groups
+
+model = xgb.train(params, dtrain, num_boost_round=100)
+\end{lstlisting}
+
+\subsubsection{Why LambdaMART Dominates}
+
+\textbf{Advantages:}
+\begin{itemize}
+    \item Directly optimizes NDCG (or other ranking metrics)
+    \item Best offline performance
+    \item Handles non-linear feature interactions
+    \item Robust to feature scales
+    \item Feature importance built-in
+    \item Industry battle-tested
+\end{itemize}
+
+\textbf{Use cases:}
+\begin{itemize}
+    \item Production search ranking systems
+    \item Large-scale recommendation systems
+    \item Any problem with sufficient training data
+\end{itemize}
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Sufficient data (thousands of queries)
+    \item Graded relevance labels (0, 1, 2, 3)
+    \item Grouping by query (queries as independent samples)
+\end{itemize}
+
+\subsection{LTR Comparison Table}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|p{2.5cm}|p{3cm}|p{3cm}|p{3cm}|p{2cm}|}
+\hline
+\textbf{Approach} & \textbf{Unit} & \textbf{Pros} & \textbf{Cons} & \textbf{Use} \\
+\hline
+Pointwise & Single doc & Simple, fast & Ignores order & Baseline \\
+\hline
+Pairwise & Doc pairs & Better ranking & Not direct NDCG & Medium data \\
+\hline
+Listwise & Full list & Best metrics & Complex, slow & Production \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{actionitem}
+\textbf{Practice Exercise:}
+
+Explain to someone (or out loud) when you would use each LTR approach. Give concrete scenarios:
+\begin{itemize}
+    \item Pointwise: Cold start with 100 labeled queries
+    \item Pairwise: 1K queries, need better than baseline
+    \item Listwise: 10K+ queries, production deployment
+\end{itemize}
+\end{actionitem}
+
+\newpage
+
+% ============================================================
+\section{Model Selection for Search \& Ads}
+% ============================================================
+
+\subsection{Gradient Boosted Decision Trees (GBDT)}
+
+\subsubsection{Why GBDT Dominates Ranking}
+
+\textbf{Market Share:} 80\%+ of production ranking systems use XGBoost/LightGBM
+
+\textbf{Key Advantages:}
+\begin{enumerate}
+    \item \textbf{Handles mixed feature types} - numeric, categorical, sparse
+    \item \textbf{Captures non-linear interactions} automatically
+    \item \textbf{Robust to outliers} - tree splits are threshold-based
+    \item \textbf{Feature importance} built-in
+    \item \textbf{Fast training and inference}
+    \item \textbf{Less hyperparameter tuning} than neural networks
+    \item \textbf{Interpretable} - can visualize trees
+\end{enumerate}
+
+\subsubsection{How Gradient Boosting Works}
+
+\textbf{Core Idea:} Build trees sequentially, each correcting previous errors.
+
+\begin{enumerate}
+    \item Start with initial prediction (mean or constant)
+    \item For each round $t = 1, 2, ..., T$:
+    \begin{itemize}
+        \item Compute residuals (errors from previous prediction)
+        \item Fit tree to residuals (not original targets!)
+        \item Add tree prediction to ensemble
+        \item Update prediction: $F_t = F_{t-1} + \eta \cdot h_t$
+    \end{itemize}
+    \item Final prediction: sum of all trees
+\end{enumerate}
+
+$$F(x) = \sum_{t=1}^{T} \eta \cdot h_t(x)$$
+
+Where $\eta$ is learning rate (shrinkage).
+
+\subsubsection{XGBoost Best Practices}
+
+\textbf{Starting Configuration:}
+\begin{lstlisting}
+params = {
+    'objective': 'rank:ndcg',    # For ranking
+    'eta': 0.1,                  # Learning rate
+    'max_depth': 6,              # Tree depth
+    'min_child_weight': 1,       # Min samples per leaf
+    'subsample': 0.8,            # Row sampling
+    'colsample_bytree': 0.8,     # Column sampling
+    'lambda': 1.0,               # L2 regularization
+    'alpha': 0.0                 # L1 regularization
+}
+\end{lstlisting}
+
+\textbf{Tuning Process:}
+\begin{enumerate}
+    \item Fix \texttt{n\_estimators=100}, tune \texttt{max\_depth} and \texttt{min\_child\_weight}
+    \item Tune \texttt{subsample} and \texttt{colsample\_bytree} (regularization)
+    \item Tune \texttt{lambda} (L2) if overfitting
+    \item Finally, tune \texttt{eta} and scale up \texttt{n\_estimators}
+\end{enumerate}
+
+\textbf{Early Stopping:}
+\begin{lstlisting}
+# Stop if validation metric doesn't improve for 20 rounds
+model = xgb.train(
+    params, dtrain,
+    num_boost_round=1000,
+    evals=[(dval, 'validation')],
+    early_stopping_rounds=20
+)
+\end{lstlisting}
+
+\subsection{Deep Neural Networks for Ranking}
+
+\subsubsection{When to Use DNNs}
+
+\textbf{Advantages over GBDT:}
+\begin{itemize}
+    \item Better with high-cardinality categorical features (embeddings)
+    \item Can leverage pre-trained representations (BERT, Word2Vec)
+    \item End-to-end learning (features + model)
+    \item Can share representations across tasks (multi-task learning)
+\end{itemize}
+
+\textbf{Disadvantages:}
+\begin{itemize}
+    \item Need more data (10x-100x more)
+    \item Harder to tune (many hyperparameters)
+    \item Slower training
+    \item Less interpretable
+    \item Sensitive to feature scales
+\end{itemize}
+
+\textbf{When to choose DNN:}
+\begin{itemize}
+    \item Very large datasets (millions of examples)
+    \item Text/image features (need embeddings)
+    \item Multi-task learning (CTR + CVR jointly)
+    \item End-to-end learning important
+\end{itemize}
+
+\subsubsection{Architecture: Wide \& Deep}
+
+\textbf{Google's production model for recommendations}
+
+\begin{verbatim}
+Wide Component (Linear):
+- Memorization of specific user-item interactions
+- Cross-product features (user_id x item_id)
+- Captures historical patterns
+
+Deep Component (DNN):
+- Generalization to unseen combinations
+- Embedding layers for categorical features
+- Dense layers to learn representations
+
+Combined:
+Output = sigmoid(Wide_output + Deep_output)
+\end{verbatim}
+
+\textbf{Why it works:}
+\begin{itemize}
+    \item Wide: Memorizes frequent patterns (precision)
+    \item Deep: Generalizes to new combinations (recall)
+    \item Together: Best of both worlds
+\end{itemize}
+
+\subsubsection{Architecture: DeepFM}
+
+\textbf{For CTR prediction (ads, recommendations)}
+
+\begin{verbatim}
+FM Component:
+- Factorization Machine
+- Captures 2nd-order feature interactions
+- All feature pairs
+
+Deep Component:
+- Same embeddings as FM
+- MLP to learn higher-order interactions
+
+Advantage: Shared embeddings reduce parameters
+\end{verbatim}
+
+\subsection{Two-Tower Models}
+
+\subsubsection{Use Case: Candidate Generation}
+
+\textbf{Problem:} Retrieve top-K items from millions (too slow for deep ranking)
+
+\textbf{Solution:} Pre-compute item embeddings, fast retrieval via ANN
+
+\textbf{Architecture:}
+\begin{verbatim}
+Query Tower:               Item Tower:
+User features -->          Item features -->
+Dense(128) -->             Dense(128) -->
+Dense(128) -->             Dense(128) -->
+Query Embedding (64-dim)   Item Embedding (64-dim)
+
+Similarity: dot(query_emb, item_emb)
+\end{verbatim}
+
+\textbf{Training:}
+\begin{itemize}
+    \item Positive pairs: (user, clicked\_item)
+    \item Negative sampling: (user, random\_items)
+    \item Loss: Contrastive loss or softmax
+\end{itemize}
+
+\textbf{Serving:}
+\begin{enumerate}
+    \item Pre-compute all item embeddings offline
+    \item Index in vector DB (Faiss, ScaNN)
+    \item At query time: compute query embedding (1ms)
+    \item ANN search for top-1000 (5-10ms)
+    \item Pass to ranking model for top-100
+\end{enumerate}
+
+\textbf{Used by:} YouTube, Pinterest, Spotify, Netflix
+
+\newpage
+
+% ============================================================
+\section{Feature Engineering for Search}
+% ============================================================
+
+\subsection{Feature Categories}
+
+\subsubsection{1. Query Features}
+
+\textbf{Basic:}
+\begin{itemize}
+    \item Query length (characters, words, tokens)
+    \item Query type (navigational, transactional, informational)
+    \item Has numbers, special characters, etc.
+\end{itemize}
+
+\textbf{Historical:}
+\begin{itemize}
+    \item Query frequency (head vs tail)
+    \item Historical CTR for this query
+    \item Average conversion rate
+    \item Seasonality signals
+\end{itemize}
+
+\subsubsection{2. Document Features}
+
+\textbf{Content:}
+\begin{itemize}
+    \item Title, description text
+    \item Category, brand
+    \item Tags, attributes
+\end{itemize}
+
+\textbf{Quality:}
+\begin{itemize}
+    \item User rating (average, count)
+    \item Review count and sentiment
+    \item Sales volume, popularity
+    \item Age (days since published)
+\end{itemize}
+
+\textbf{Business:}
+\begin{itemize}
+    \item Price, discount
+    \item Inventory level
+    \item Shipping speed
+    \item Profit margin
+\end{itemize}
+
+\subsubsection{3. Query-Document Features (Most Important!)}
+
+\textbf{Text Matching:}
+\begin{itemize}
+    \item \textbf{BM25 score} (strongest signal for text relevance)
+    \item TF-IDF similarity
+    \item Exact match (title, brand, category)
+    \item Edit distance (fuzzy matching)
+    \item N-gram overlap (unigram, bigram)
+\end{itemize}
+
+\textbf{Semantic:}
+\begin{itemize}
+    \item Embedding cosine similarity
+    \item BERT score (if using neural ranking)
+\end{itemize}
+
+\textbf{Behavioral:}
+\begin{itemize}
+    \item Historical CTR for (query, document) pair
+    \item Conversion rate for pair
+    \item Co-occurrence patterns
+\end{itemize}
+
+\subsubsection{4. User Features}
+
+\textbf{Demographics:}
+\begin{itemize}
+    \item Location (country, city, postal code)
+    \item Language preference
+    \item Device type (mobile, desktop)
+\end{itemize}
+
+\textbf{Behavioral:}
+\begin{itemize}
+    \item Search history
+    \item Purchase history
+    \item Browse history
+    \item User cohort (new, power user, dormant)
+\end{itemize}
+
+\textbf{Session:}
+\begin{itemize}
+    \item Previous queries in session
+    \item Clicks in session
+    \item Time on page
+    \item Scroll depth
+\end{itemize}
+
+\subsubsection{5. Context Features}
+
+\begin{itemize}
+    \item Time of day, day of week
+    \item Season, holidays
+    \item Trending signals (surging interest)
+    \item A/B test variant
+\end{itemize}
+
+\subsection{Feature Engineering Techniques}
+
+\subsubsection{Numerical Features}
+
+\textbf{Normalization:}
+\begin{lstlisting}
+# Standard scaling
+X_scaled = (X - mean) / std
+
+# Min-max scaling
+X_scaled = (X - min) / (max - min)
+\end{lstlisting}
+
+\textbf{Log Transform:} For skewed distributions
+\begin{lstlisting}
+# For features like price, view count
+X_log = np.log1p(X)  # log(1 + X), handles X=0
+\end{lstlisting}
+
+\textbf{Binning:} Convert continuous to categorical
+\begin{lstlisting}
+# Price buckets
+price_bucket = pd.cut(price,
+    bins=[0, 10, 50, 100, np.inf],
+    labels=['cheap', 'medium', 'expensive', 'premium'])
+\end{lstlisting}
+
+\subsubsection{Categorical Features}
+
+\textbf{One-Hot Encoding:} For low cardinality
+\begin{lstlisting}
+# For features with <50 unique values
+category_encoded = pd.get_dummies(category)
+\end{lstlisting}
+
+\textbf{Target Encoding:} For high cardinality
+\begin{lstlisting}
+# Replace category with mean target value
+category_mean = df.groupby('category')['click'].mean()
+df['category_encoded'] = df['category'].map(category_mean)
+\end{lstlisting}
+
+\textbf{Embedding:} For very high cardinality (DNN)
+\begin{lstlisting}
+# Learn embedding for category_id
+embedding_layer = Embedding(
+    input_dim=num_categories,
+    output_dim=16  # Embedding dimension
+)
+\end{lstlisting}
+
+\subsubsection{Feature Interactions}
+
+\textbf{Explicit Cross Features:}
+\begin{lstlisting}
+# Create new feature from combinations
+df['price_x_rating'] = df['price'] * df['rating']
+df['query_in_title'] = (df['query'] in df['title'])
+\end{lstlisting}
+
+\textbf{Let Model Learn:} XGBoost, neural nets learn interactions automatically
+
+\subsection{Feature Selection}
+
+\subsubsection{Why Feature Selection?}
+
+\begin{itemize}
+    \item Reduce overfitting (simpler model)
+    \item Faster training and inference
+    \item Improved interpretability
+    \item Lower maintenance cost
+\end{itemize}
+
+\subsubsection{Methods}
+
+\textbf{1. Correlation-Based:}
+\begin{itemize}
+    \item Remove highly correlated features (redundant)
+    \item Threshold: correlation $>$ 0.95
+\end{itemize}
+
+\textbf{2. Feature Importance (XGBoost):}
+\begin{lstlisting}
+# Get feature importance from trained model
+importance = model.get_score(importance_type='gain')
+
+# Keep top-K features
+top_features = sorted(importance.items(),
+    key=lambda x: x[1], reverse=True)[:100]
+\end{lstlisting}
+
+\textbf{3. Ablation Study:}
+\begin{itemize}
+    \item Remove one feature at a time
+    \item Measure impact on validation metric
+    \item Drop if impact $<$ threshold
+\end{itemize}
+
+\textbf{4. L1 Regularization:}
+\begin{itemize}
+    \item Use Lasso or L1-regularized model
+    \item Automatically drives weak features to zero
+\end{itemize}
+
+\begin{keyinsight}
+\textbf{Feature Engineering Interview Strategy:}
+
+When asked "What features would you use?", structure answer as:
+\begin{enumerate}
+    \item \textbf{Start with must-haves:} Query-doc text match (BM25), category match
+    \item \textbf{Add quality signals:} Rating, sales, reviews
+    \item \textbf{Add behavioral:} Historical CTR (if available)
+    \item \textbf{Add user context:} Location, device, history
+    \item \textbf{Explain why each matters} for the specific problem
+    \item \textbf{Discuss feature engineering} (normalization, encoding)
+    \item \textbf{Mention feature selection} (importance, ablation)
+\end{enumerate}
+\end{keyinsight}
+
+\newpage
+
+% ============================================================
+\section{ML System Design Framework}
+% ============================================================
+
+\subsection{Overview: The 6-Step Framework}
+
+Use this framework for ANY "Design X system" question:
+
+\begin{enumerate}
+    \item Problem Formulation (5 min)
+    \item Data Strategy (5-7 min)
+    \item Feature Engineering (7-10 min)
+    \item Model Selection (7-10 min)
+    \item Training \& Evaluation (5-7 min)
+    \item Deployment \& Monitoring (5-7 min)
+\end{enumerate}
+
+\textbf{Total time:} 45 minutes, leaving 15 min for Q\&A
+
+\subsection{Step 1: Problem Formulation}
+
+\subsubsection{Questions to Ask}
+
+\begin{actionitem}
+\textbf{Always clarify before designing:}
+\begin{enumerate}
+    \item What exactly are we optimizing? (relevance, engagement, revenue)
+    \item What's the scale? (QPS, users, items, latency)
+    \item What constraints exist? (latency budget, compute, cost)
+    \item What data is available? (logs, labels, user history)
+\end{enumerate}
+\end{actionitem}
+
+\subsubsection{Frame as ML Problem}
+
+\textbf{Common patterns:}
+\begin{itemize}
+    \item \textbf{Search ranking:} Listwise ranking problem (optimize NDCG)
+    \item \textbf{Recommendations:} Two-stage (retrieval + ranking)
+    \item \textbf{Ad CTR:} Binary classification (predict click probability)
+    \item \textbf{Feed ranking:} Multi-objective (relevance + diversity + freshness)
+\end{itemize}
+
+\subsubsection{Define Success Metrics}
+
+\textbf{Two levels:}
+\begin{enumerate}
+    \item \textbf{ML metrics} (offline): NDCG@10, AUC-ROC, precision@K
+    \item \textbf{Business metrics} (online): CTR, conversion, GMV, retention
+\end{enumerate}
+
+\begin{example}
+\textbf{Example: E-commerce Search}
+
+\textbf{Clarifying questions:}
+\begin{itemize}
+    \item "What's the latency requirement?" → 200ms p99
+    \item "How many products?" → 10M SKUs
+    \item "What's the query volume?" → 10K QPS peak
+\end{itemize}
+
+\textbf{ML framing:}
+\begin{itemize}
+    \item Ranking problem: optimize NDCG@20
+    \item Two-stage: Retrieve 1000 → Rank to 100
+\end{itemize}
+
+\textbf{Metrics:}
+\begin{itemize}
+    \item Offline: NDCG@10, MRR (navigational queries)
+    \item Online: CTR, add-to-cart rate, GMV per search
+\end{itemize}
+\end{example}
+
+\subsection{Step 2: Data Strategy}
+
+\subsubsection{Data Sources}
+
+\textbf{What data do we have?}
+\begin{itemize}
+    \item User logs (searches, clicks, purchases)
+    \item Product catalog (title, category, price, inventory)
+    \item User profiles (demographics, history)
+    \item External data (trends, seasonality)
+\end{itemize}
+
+\subsubsection{Label Generation}
+
+\textbf{Options:}
+\begin{enumerate}
+    \item \textbf{Explicit labels:} Human raters (expensive, high quality)
+    \item \textbf{Implicit labels:} Clicks, purchases (free, biased)
+    \item \textbf{Hybrid:} Combine both
+\end{enumerate}
+
+\textbf{Label schema for ranking:}
+\begin{itemize}
+    \item 0 = Irrelevant (no click, bounce)
+    \item 1 = Somewhat relevant (click, short dwell)
+    \item 2 = Relevant (click, medium dwell, add to cart)
+    \item 3 = Highly relevant (purchase)
+\end{itemize}
+
+\subsubsection{Handling Biases}
+
+\textbf{Position bias:}
+\begin{itemize}
+    \item Top results get more clicks (regardless of relevance)
+    \item Solution: Inverse propensity weighting, randomization
+\end{itemize}
+
+\textbf{Selection bias:}
+\begin{itemize}
+    \item Only see clicks on shown items (not all items)
+    \item Solution: Exploration (occasionally show random items)
+\end{itemize}
+
+\subsection{Step 3: Feature Engineering}
+
+\textbf{Covered in previous section - reference that content}
+
+Key points to mention:
+\begin{itemize}
+    \item Query features, doc features, query-doc features
+    \item Text matching (BM25), semantic (embeddings)
+    \item Behavioral (CTR, purchases)
+    \item Normalization, encoding, interactions
+\end{itemize}
+
+\subsection{Step 4: Model Selection}
+
+\subsubsection{Propose Multiple Approaches}
+
+\textbf{Always discuss 2-3 options with tradeoffs!}
+
+\begin{example}
+\textbf{Example: Search Ranking}
+
+\textbf{Approach 1: Traditional Ranking (Baseline)}
+\begin{itemize}
+    \item BM25 for text matching
+    \item Boost by popularity, rating
+    \item Pros: Fast, interpretable, no training needed
+    \item Cons: No personalization, limited signals
+\end{itemize}
+
+\textbf{Approach 2: GBDT Ranking (Recommended)}
+\begin{itemize}
+    \item LambdaMART (XGBoost)
+    \item Features: BM25, category match, CTR, user history
+    \item Optimize NDCG@10
+    \item Pros: Best offline metrics, handles non-linearity, feature importance
+    \item Cons: Need training data, retraining pipeline
+\end{itemize}
+
+\textbf{Approach 3: Two-Stage with DNN (Advanced)}
+\begin{itemize}
+    \item Stage 1: Retrieve 10K via BM25 + vector search
+    \item Stage 2: DNN ranking on top-1K
+    \item Pros: Handles semantic search, end-to-end learning
+    \item Cons: Complex, needs more data, higher latency
+\end{itemize}
+
+\textbf{Recommendation:} Start with Approach 2 (GBDT), iterate to 3 if needed.
+\end{example}
+
+\subsubsection{Justify Your Choice}
+
+Always explain:
+\begin{itemize}
+    \item Why this model for this problem?
+    \item What are the trade-offs?
+    \item What are alternatives and why not choose them?
+    \item What would you do if requirements change?
+\end{itemize}
+
+\subsection{Step 5: Training \& Evaluation}
+
+\subsubsection{Data Split}
+
+\textbf{Time-based split (NOT random!):}
+\begin{verbatim}
+Train: Days 1-60 (80%)
+Val:   Days 61-75 (10%)
+Test:  Days 76-90 (10%)
+\end{verbatim}
+
+\textbf{Why time-based?}
+\begin{itemize}
+    \item Prevents data leakage (future can't predict past)
+    \item Realistic evaluation (model serves future data)
+    \item Detects temporal drift
+\end{itemize}
+
+\subsubsection{Training Frequency}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Domain} & \textbf{Frequency} & \textbf{Reasoning} \\
+\hline
+Search & Weekly & Patterns stable, query dist doesn't change fast \\
+\hline
+Ads & Daily & Campaigns change, CTR shifts quickly \\
+\hline
+Recommendations & 2-3 days & Medium drift, new items arrive \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Evaluation}
+
+\textbf{Offline:}
+\begin{itemize}
+    \item Hold-out test set evaluation
+    \item NDCG@10, MRR
+    \item Per-query analysis (head vs tail)
+    \item Error analysis (where does model fail?)
+\end{itemize}
+
+\textbf{Online (A/B Test):}
+\begin{itemize}
+    \item Traffic: 5-10\% treatment, 90-95\% control
+    \item Duration: 1-2 weeks (statistical significance)
+    \item Metrics: CTR, conversion, GMV
+    \item Guardrails: Latency p99, zero-result rate
+\end{itemize}
+
+\subsection{Step 6: Deployment \& Monitoring}
+
+\subsubsection{Serving Architecture}
+
+\textbf{Latency Budget Example (200ms total):}
+\begin{verbatim}
+Retrieval:     50ms  (Elasticsearch query)
+Feature Fetch: 30ms  (Redis lookup)
+Model Infer:   80ms  (XGBoost scoring)
+Hydration:     30ms  (DB fetch for top-K)
+Network:       10ms
+\end{verbatim}
+
+\subsubsection{Optimization Strategies}
+
+\textbf{Model Optimization:}
+\begin{itemize}
+    \item Quantization (float32 → int8)
+    \item Pruning (remove weak trees/neurons)
+    \item Distillation (train smaller model to mimic large one)
+\end{itemize}
+
+\textbf{Serving Optimization:}
+\begin{itemize}
+    \item Feature store: Redis for low-latency (<1ms) feature access
+    \item Caching: Cache popular query results (80/20 rule)
+    \item Batch inference: Process multiple queries together
+    \item Two-stage ranking: Cheap first-pass, expensive rerank
+\end{itemize}
+
+\subsubsection{Monitoring}
+
+\textbf{Model Metrics:}
+\begin{itemize}
+    \item NDCG drop $>$2\% → Alert
+    \item Prediction distribution shift → Retrain
+\end{itemize}
+
+\textbf{Business Metrics:}
+\begin{itemize}
+    \item CTR drop $>$5\% → Investigate
+    \item Conversion drop → Rollback
+\end{itemize}
+
+\textbf{System Metrics:}
+\begin{itemize}
+    \item Latency p99 $>$500ms → Scale up
+    \item Error rate $>$0.1\% → Alert
+    \item QPS spike → Auto-scale
+\end{itemize}
+
+\textbf{Data Quality:}
+\begin{itemize}
+    \item Feature drift (distribution changes)
+    \item Missing values spike
+    \item Label quality degradation
+\end{itemize}
+
+\newpage
+
+% ============================================================
+\section{ML Coding: Essential Implementations}
+% ============================================================
+
+\subsection{Calculate AUC-ROC from Scratch}
+
+\subsubsection{Understanding AUC-ROC}
+
+\textbf{Definition:} Area Under ROC Curve = Probability that a random positive is ranked higher than a random negative.
+
+\textbf{Intuition:} For all positive-negative pairs, how often does the model rank the positive higher?
+
+\subsubsection{Implementation}
+
+\begin{lstlisting}
+def auc_roc(y_true, y_scores):
+    """
+    Calculate AUC-ROC from scratch.
+
+    Args:
+        y_true: True binary labels (0 or 1)
+        y_scores: Predicted scores (higher = more confident)
+
+    Returns:
+        AUC-ROC score [0.5, 1.0]
+    """
+    # Sort by scores descending
+    sorted_indices = sorted(range(len(y_scores)),
+                          key=lambda i: y_scores[i],
+                          reverse=True)
+
+    sorted_labels = [y_true[i] for i in sorted_indices]
+
+    # Count correctly ranked pairs
+    num_pos = sum(y_true)
+    num_neg = len(y_true) - num_pos
+
+    if num_pos == 0 or num_neg == 0:
+        return 0.5  # Undefined, return random
+
+    # For each positive, count negatives ranked below it
+    correct_pairs = 0
+    negatives_so_far = 0
+
+    for label in sorted_labels:
+        if label == 1:  # Positive
+            # All negatives seen so far are ranked below
+            correct_pairs += negatives_so_far
+        else:  # Negative
+            negatives_so_far += 1
+
+    # AUC = fraction of correct pairs
+    total_pairs = num_pos * num_neg
+    auc = correct_pairs / total_pairs
+
+    return auc
+
+# Test
+y_true = [1, 0, 1, 0, 1]
+y_scores = [0.9, 0.3, 0.8, 0.2, 0.7]
+print(f"AUC: {auc_roc(y_true, y_scores)}")  # Should be 1.0
+\end{lstlisting}
+
+\subsubsection{Time Complexity}
+
+\begin{itemize}
+    \item Sorting: $O(n \log n)$
+    \item Counting pairs: $O(n)$
+    \item Total: $O(n \log n)$
+\end{itemize}
+
+\subsection{Calculate NDCG@K}
+
+\subsubsection{Implementation}
+
+\begin{lstlisting}
+import numpy as np
+
+def dcg_at_k(relevances, k):
+    """
+    Calculate DCG@K.
+
+    Args:
+        relevances: Relevance scores in ranked order
+        k: Cutoff position
+
+    Returns:
+        DCG@K score
+    """
+    relevances = np.array(relevances)[:k]
+    if len(relevances) == 0:
+        return 0.0
+
+    # DCG = sum((2^rel - 1) / log2(pos + 1))
+    positions = np.arange(1, len(relevances) + 1)
+    dcg = np.sum((2**relevances - 1) / np.log2(positions + 1))
+
+    return dcg
+
+def ndcg_at_k(y_true, y_scores, k):
+    """
+    Calculate NDCG@K.
+
+    Args:
+        y_true: True relevance scores
+        y_scores: Predicted scores
+        k: Cutoff position
+
+    Returns:
+        NDCG@K score [0, 1]
+    """
+    # Sort by predicted scores (descending)
+    sorted_indices = np.argsort(y_scores)[::-1]
+    sorted_relevances = np.array(y_true)[sorted_indices]
+
+    # Actual DCG
+    dcg = dcg_at_k(sorted_relevances, k)
+
+    # Ideal DCG (sort by true relevances)
+    ideal_relevances = sorted(y_true, reverse=True)
+    idcg = dcg_at_k(ideal_relevances, k)
+
+    if idcg == 0:
+        return 0.0
+
+    return dcg / idcg
+
+# Test
+y_true = [3, 2, 1, 0, 2]     # True relevances
+y_scores = [0.9, 0.7, 0.5, 0.3, 0.8]  # Predictions
+print(f"NDCG@5: {ndcg_at_k(y_true, y_scores, 5)}")
+\end{lstlisting}
+
+\subsection{Logistic Regression with Gradient Descent}
+
+\begin{lstlisting}
+import numpy as np
+
+def sigmoid(z):
+    """Sigmoid activation function."""
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def logistic_regression(X, y, learning_rate=0.01, epochs=1000):
+    """
+    Train logistic regression with gradient descent.
+
+    Args:
+        X: Features (n_samples, n_features)
+        y: Binary labels (n_samples,)
+        learning_rate: Step size
+        epochs: Number of iterations
+
+    Returns:
+        weights, bias
+    """
+    n_samples, n_features = X.shape
+    weights = np.zeros(n_features)
+    bias = 0
+
+    for epoch in range(epochs):
+        # Forward pass
+        linear = np.dot(X, weights) + bias
+        predictions = sigmoid(linear)
+
+        # Compute gradients
+        dw = (1/n_samples) * np.dot(X.T, (predictions - y))
+        db = (1/n_samples) * np.sum(predictions - y)
+
+        # Update parameters
+        weights -= learning_rate * dw
+        bias -= learning_rate * db
+
+        # Log loss (optional monitoring)
+        if epoch % 100 == 0:
+            loss = -np.mean(y * np.log(predictions + 1e-15) +
+                          (1 - y) * np.log(1 - predictions + 1e-15))
+            print(f"Epoch {epoch}, Loss: {loss:.4f}")
+
+    return weights, bias
+
+# Test
+X = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
+y = np.array([0, 0, 1, 1])
+weights, bias = logistic_regression(X, y)
+print(f"Weights: {weights}, Bias: {bias}")
+\end{lstlisting}
+
+\begin{actionitem}
+\textbf{Coding Practice Checklist:}
+\begin{itemize}
+    \item[$\square$] Implement AUC-ROC from scratch (no sklearn)
+    \item[$\square$] Implement NDCG@K from scratch
+    \item[$\square$] Implement logistic regression with gradient descent
+    \item[$\square$] Implement K-Means clustering
+    \item[$\square$] Calculate precision, recall, F1 manually
+    \item[$\square$] Implement train/test split (time-based)
+\end{itemize}
+
+\textbf{Practice on:} LeetCode, HackerRank, or implement in Jupyter notebook
+\end{actionitem}
+
+\newpage
+
+% ============================================================
+\section{Common Interview Questions \& Answers}
+% ============================================================
+
+\subsection{Conceptual Questions}
+
+\subsubsection{Q: Explain pointwise, pairwise, and listwise LTR. When to use each?}
+
+\textbf{Answer:}
+
+\textbf{Pointwise:}
+\begin{itemize}
+    \item Treats each document independently
+    \item Predicts relevance score for each doc
+    \item Use when: Cold start, baseline, small data
+    \item Example: Logistic regression for relevance classification
+\end{itemize}
+
+\textbf{Pairwise:}
+\begin{itemize}
+    \item Learns to compare pairs: which should rank higher?
+    \item Optimizes pairwise ranking preferences
+    \item Use when: Moderate data, need better than baseline
+    \item Example: RankNet, LambdaRank
+\end{itemize}
+
+\textbf{Listwise:}
+\begin{itemize}
+    \item Optimizes entire list for ranking metrics (NDCG)
+    \item Considers all documents together
+    \item Use when: Production system, lots of data, want best performance
+    \item Example: LambdaMART (XGBoost with rank:ndcg)
+\end{itemize}
+
+\textbf{Recommendation:} Start with pointwise baseline, move to listwise for production.
+
+\subsubsection{Q: How do you handle cold start for new items/users?}
+
+\textbf{Answer:}
+
+\textbf{New Items:}
+\begin{enumerate}
+    \item \textbf{Content-based features:} Use item metadata (category, brand, price)
+    \item \textbf{Popularity bias:} Show to fraction of traffic, measure engagement
+    \item \textbf{Exploration:} Random boosting (epsilon-greedy)
+    \item \textbf{Transfer learning:} Use similar items' patterns
+\end{enumerate}
+
+\textbf{New Users:}
+\begin{enumerate}
+    \item \textbf{Global popularity:} Show trending/popular items
+    \item \textbf{Demographic features:} Use location, device
+    \item \textbf{Quick profiling:} Ask preferences upfront
+    \item \textbf{Rapid learning:} Update user model after each interaction
+\end{enumerate}
+
+\textbf{Example:} Netflix's "New User Experience" - asks genre preferences immediately.
+
+\subsubsection{Q: How do you detect and handle training/serving skew?}
+
+\textbf{Answer:}
+
+\textbf{Causes:}
+\begin{itemize}
+    \item Features change between train and serve time
+    \item Example: Inventory (in-stock → out-of-stock)
+    \item Time lag: Training on yesterday's data, serving today
+\end{itemize}
+
+\textbf{Detection:}
+\begin{itemize}
+    \item Monitor feature distributions (train vs serve)
+    \item Compare prediction distributions
+    \item Track model performance over time
+\end{itemize}
+
+\textbf{Solutions:}
+\begin{enumerate}
+    \item \textbf{Point-in-time features:} Train with historical features (as they were)
+    \item \textbf{Bucketize fast-moving features:} Inventory: [0, 1-10, 10-100, 100+]
+    \item \textbf{Exclude problematic features:} If can't fix, don't use
+    \item \textbf{Online learning:} Update model frequently
+\end{enumerate}
+
+\subsection{System Design Questions}
+
+\subsubsection{Q: Design a product search ranking system for e-commerce.}
+
+\textbf{Answer Framework:}
+
+\textbf{1. Problem Formulation:}
+\begin{itemize}
+    \item Optimize NDCG@20 (graded relevance)
+    \item Latency: 200ms p99
+    \item Scale: 10M products, 10K QPS
+\end{itemize}
+
+\textbf{2. Data:}
+\begin{itemize}
+    \item Logs: searches, clicks, purchases
+    \item Product catalog: title, category, price, rating
+    \item Labels: Implicit (clicks → rel=1, purchase → rel=3)
+\end{itemize}
+
+\textbf{3. Features:}
+\begin{itemize}
+    \item Query-doc: BM25, category match, brand match
+    \item Doc quality: Rating, sales, review count
+    \item Behavioral: Historical CTR, conversion rate
+\end{itemize}
+
+\textbf{4. Model:}
+\begin{itemize}
+    \item Two-stage architecture
+    \item Stage 1: BM25 retrieval → 1000 candidates
+    \item Stage 2: LambdaMART ranking → top-100
+\end{itemize}
+
+\textbf{5. Training:}
+\begin{itemize}
+    \item Weekly retraining
+    \item Time-based split: Train (60d), Val (10d), Test (10d)
+    \item Optimize NDCG@10
+\end{itemize}
+
+\textbf{6. Serving:}
+\begin{itemize}
+    \item ES for retrieval (50ms)
+    \item Redis for features (30ms)
+    \item XGBoost inference (80ms)
+    \item A/B test: CTR, conversion, GMV
+\end{itemize}
+
+\subsection{Trade-Off Questions}
+
+\subsubsection{Q: XGBoost vs Neural Networks for ranking?}
+
+\textbf{Answer:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Dimension} & \textbf{XGBoost} & \textbf{Neural Network} \\
+\hline
+Data needed & 10K-100K samples & 100K-1M+ samples \\
+\hline
+Training time & Minutes to hours & Hours to days \\
+\hline
+Interpretability & High (feature importance) & Low (black box) \\
+\hline
+Feature engineering & Manual (but important) & Automatic (embeddings) \\
+\hline
+Categorical features & Needs encoding & Embeddings (better) \\
+\hline
+Performance & Excellent (80\% use case) & Best (with enough data) \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Recommendation:}
+\begin{itemize}
+    \item Start with XGBoost (faster iteration, good enough)
+    \item Move to NN if: Very large data, text/image features, multi-task learning
+\end{itemize}
+
+\newpage
+
+% ============================================================
+\section{Final Preparation Checklist}
+% ============================================================
+
+\subsection{Knowledge Checklist}
+
+\begin{actionitem}
+\textbf{Before your interview, ensure you can:}
+
+\textbf{Fundamentals:}
+\begin{itemize}
+    \item[$\square$] Explain bias-variance tradeoff with examples
+    \item[$\square$] Compare L1 vs L2 regularization
+    \item[$\square$] Describe gradient descent variants
+    \item[$\square$] Explain overfitting and solutions
+\end{itemize}
+
+\textbf{Metrics:}
+\begin{itemize}
+    \item[$\square$] Calculate precision, recall, F1 by hand
+    \item[$\square$] Explain AUC-ROC and when to use
+    \item[$\square$] Explain NDCG@K formula and intuition
+    \item[$\square$] Compare MRR vs NDCG vs MAP
+\end{itemize}
+
+\textbf{Learning to Rank:}
+\begin{itemize}
+    \item[$\square$] Explain pointwise, pairwise, listwise LTR
+    \item[$\square$] Describe LambdaMART algorithm
+    \item[$\square$] Discuss when to use each approach
+\end{itemize}
+
+\textbf{Models:}
+\begin{itemize}
+    \item[$\square$] Explain why XGBoost is effective
+    \item[$\square$] Describe Wide \& Deep architecture
+    \item[$\square$] Explain two-tower models for retrieval
+    \item[$\square$] Compare GBDT vs neural networks
+\end{itemize}
+
+\textbf{System Design:}
+\begin{itemize}
+    \item[$\square$] Memorize 6-step framework
+    \item[$\square$] Can design search ranking end-to-end
+    \item[$\square$] Can design recommendation system
+    \item[$\square$] Can design CTR prediction for ads
+\end{itemize}
+
+\textbf{Coding:}
+\begin{itemize}
+    \item[$\square$] Implement AUC-ROC from scratch
+    \item[$\square$] Implement NDCG@K from scratch
+    \item[$\square$] Implement logistic regression
+\end{itemize}
+\end{actionitem}
+
+\subsection{Day Before Interview}
+
+\begin{enumerate}
+    \item \textbf{Review} this guide (2 hours)
+    \begin{itemize}
+        \item Focus on sections you marked as weak
+        \item Re-read key insights and examples
+    \end{itemize}
+
+    \item \textbf{Practice} explaining concepts out loud (1 hour)
+    \begin{itemize}
+        \item Record yourself
+        \item Explain to a friend/family
+        \item Use a rubber duck!
+    \end{itemize}
+
+    \item \textbf{Mock interview} (1 hour)
+    \begin{itemize}
+        \item "Design a search ranking system"
+        \item Use 6-step framework
+        \item Time yourself (45 min)
+    \end{itemize}
+
+    \item \textbf{Prepare questions} for interviewer
+    \begin{itemize}
+        \item About Faire's ML stack
+        \item About team structure
+        \item About interesting ML problems
+    \end{itemize}
+
+    \item \textbf{Rest} and get good sleep!
+\end{enumerate}
+
+\subsection{Interview Day}
+
+\begin{actionitem}
+\textbf{Morning of interview:}
+\begin{enumerate}
+    \item Quick review of framework (30 min)
+    \item Practice one coding problem (15 min)
+    \item Review your past ML projects (20 min)
+    \item Prepare to connect your experience to questions
+\end{enumerate}
+\end{actionitem}
+
+\subsection{During Interview}
+
+\begin{criticalpoint}
+\textbf{Interview Best Practices:}
+\begin{itemize}
+    \item \textbf{Clarify first:} Ask questions before designing
+    \item \textbf{Structure your answer:} Use frameworks (6-step, STAR)
+    \item \textbf{Think out loud:} Verbalize your reasoning
+    \item \textbf{Draw diagrams:} Visualize architectures
+    \item \textbf{Discuss trade-offs:} Every decision has pros/cons
+    \item \textbf{Give concrete numbers:} "NDCG 0.75", "latency 100ms", not "good" or "fast"
+    \item \textbf{Connect to experience:} "At company X, we did Y and saw Z\% improvement"
+    \item \textbf{Be honest:} Say "I don't know, but here's how I'd find out"
+\end{itemize}
+\end{criticalpoint}
+
+\vfill
+
+\begin{center}
+\Large
+\textbf{You're ready for your Faire ML interview!}
+
+\vspace{10pt}
+
+Trust your preparation and experience.
+
+Good luck!
+\end{center}
+
+\end{document}
