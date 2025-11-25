@@ -1664,10 +1664,13 @@ def confusion_matrix(y_true, y_pred):
     return {'TP': tp, 'FP': fp, 'TN': tn, 'FN': fn}
 
 def metrics_from_cm(cm):
-    precision = cm['TP'] / (cm['TP'] + cm['FP'])
-    recall = cm['TP'] / (cm['TP'] + cm['FN'])
+    precision = cm['TP'] / (cm['TP'] + cm['FP']) \
+                if (cm['TP'] + cm['FP']) > 0 else 0
+    recall = cm['TP'] / (cm['TP'] + cm['FN']) \
+             if (cm['TP'] + cm['FN']) > 0 else 0
     accuracy = (cm['TP'] + cm['TN']) / sum(cm.values())
-    f1 = 2 * (precision * recall) / (precision + recall)
+    f1 = 2 * (precision * recall) / (precision + recall) \
+         if (precision + recall) > 0 else 0
     return {'precision': precision, 'recall': recall,
             'accuracy': accuracy, 'f1': f1}
 \end{verbatim}
