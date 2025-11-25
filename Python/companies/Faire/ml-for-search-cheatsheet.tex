@@ -1547,6 +1547,8 @@ def auc_roc(y_true, y_scores):
 \begin{verbatim}
 def kmeans(X, k, max_iters=100):
     # Random init centroids
+    if k > len(X):
+        raise ValueError(f"k={k} cannot exceed n_samples={len(X)}")
     centroids = X[np.random.choice(len(X), k, replace=False)]
 
     for _ in range(max_iters):
@@ -1621,6 +1623,8 @@ def ndcg_at_k(y_true, y_scores, k):
 \textbf{4a. Precision@K, Recall@K, MRR}
 \begin{verbatim}
 def precision_at_k(y_true, y_scores, k):
+    if k == 0:
+        return 0
     top_k_idx = np.argsort(y_scores)[::-1][:k]
     relevant_in_topk = sum(y_true[i] for i in top_k_idx)
     return relevant_in_topk / k
@@ -1646,6 +1650,8 @@ def cosine_similarity(v1, v2):
     dot_product = np.dot(v1, v2)
     norm_v1 = np.linalg.norm(v1)
     norm_v2 = np.linalg.norm(v2)
+    if norm_v1 == 0 or norm_v2 == 0:
+        return 0  # Undefined, return 0
     return dot_product / (norm_v1 * norm_v2)
 \end{verbatim}
 
