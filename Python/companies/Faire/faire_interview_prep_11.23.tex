@@ -1,0 +1,993 @@
+\documentclass[11pt,letterpaper]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{fontawesome5}
+
+% Colors
+\definecolor{faireblue}{RGB}{0,120,212}
+\definecolor{highlight}{RGB}{255,245,230}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codepurple}{RGB}{153,0,153}
+\definecolor{backcolour}{RGB}{248,248,248}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Faire Interview Prep}
+\rhead{Alex Yang}
+\cfoot{\thepage}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+% Custom boxes
+\newtcolorbox{keyinsight}{
+    colback=highlight,
+    colframe=faireblue,
+    fonttitle=\bfseries,
+    title=\faLightbulb\ Key Insight
+}
+
+\newtcolorbox{criticalpoint}{
+    colback=red!5!white,
+    colframe=red!75!black,
+    fonttitle=\bfseries,
+    title=\faExclamationTriangle\ Critical Point
+}
+
+\newtcolorbox{actionitem}{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title=\faCheckCircle\ Action Item
+}
+
+\newtcolorbox{testfocus}{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=\faVial\ Testing Focus
+}
+
+% Python code styling
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Python
+}
+
+\lstset{style=pythonstyle}
+
+% Title
+\title{\textbf{Faire Coding Interview Preparation}\\
+\large Funnel Analysis Problem}
+\author{Alex Yang}
+\date{Prepared: November 23, 2024}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Interview Overview}
+% ============================================================
+
+\subsection{Problem Type}
+\begin{itemize}
+    \item \textbf{Category:} Data Processing / State Machine
+    \item \textbf{Difficulty:} Medium
+    \item \textbf{Source:} Confirmed Faire Interview Problem
+    \item \textbf{Key Focus:} Algorithm correctness + comprehensive testing
+\end{itemize}
+
+\begin{criticalpoint}
+\textbf{Faire's Testing Emphasis:}
+
+Faire places exceptional emphasis on testing. Your solution must include:
+\begin{itemize}
+    \item Comprehensive pytest test cases
+    \item Edge case coverage (repeated steps, out-of-order events, drop-offs)
+    \item Clear test descriptions
+    \item High test coverage mindset
+\end{itemize}
+\end{criticalpoint}
+
+% ============================================================
+\section{Problem Statement}
+% ============================================================
+
+\subsection{Overview}
+Given multiple funnels (sequences of steps) and user events, determine how many distinct users reached each step of each funnel \textbf{IN ORDER}.
+
+\subsection{Input Format}
+
+\textbf{Input 1 - Funnels (CSV format):}
+\begin{verbatim}
+funnel_name,step_1,step_2,...,step_n
+\end{verbatim}
+
+\textbf{Examples:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{checkout\_process,view\_product,add\_to\_cart,enter\_payment\_info,complete\_order}
+    \item \texttt{three\_clicks\_then\_add,click\_product,click\_product,click\_product,add\_to\_cart}
+\end{itemize}
+
+\begin{keyinsight}
+Funnels may contain \textbf{REPEATED} steps (same step name multiple times). This is a critical requirement that trips up many candidates.
+\end{keyinsight}
+
+\textbf{Input 2 - User Events (CSV format):}
+\begin{verbatim}
+user_id,timestamp,event_name
+\end{verbatim}
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{user\_id}: integer user identifier
+    \item \texttt{timestamp}: integer (guaranteed to be sorted chronologically)
+    \item \texttt{event\_name}: step name or irrelevant event
+\end{itemize}
+
+\textbf{Output Format:}
+\begin{verbatim}
+funnel_name,step_1(count_1),step_2(count_2),...,step_n(count_n)
+\end{verbatim}
+
+\subsection{Rules}
+\begin{enumerate}[leftmargin=*]
+    \item Events are processed in timestamp order for each user
+    \item User advances to next step only when event matches current required step
+    \item Repeated steps require separate matching events
+    \item Each funnel is evaluated independently
+    \item Out-of-order events are ignored (don't advance the funnel)
+\end{enumerate}
+
+\subsection{Example}
+
+\textbf{Funnels:}
+\begin{verbatim}
+checkout_process,view_product,add_to_cart,enter_payment_info,complete_order
+three_clicks_then_add,click_product,click_product,click_product,add_to_cart
+\end{verbatim}
+
+\textbf{Events:}
+\begin{verbatim}
+4,1200,view_product       5,1250,view_product
+4,1210,add_to_cart        5,1260,add_to_cart
+4,1300,enter_payment_info 5,1270,enter_payment_info
+                          5,1280,complete_order
+6,2000,click_product      7,3000,click_product
+6,2005,click_product      7,3005,click_product
+6,2010,click_product
+6,2015,add_to_cart
+\end{verbatim}
+
+\textbf{Output:}
+\begin{verbatim}
+checkout_process,view_product(2),add_to_cart(2),enter_payment_info(2),complete_order(1)
+three_clicks_then_add,click_product(2),click_product(2),click_product(1),add_to_cart(1)
+\end{verbatim}
+
+\textbf{Explanation:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{checkout\_process}: Users 4 and 5 both reach view\_product, add\_to\_cart, enter\_payment\_info. Only user 5 completes the entire funnel.
+    \item \texttt{three\_clicks\_then\_add}: User 6 does 3 click\_product events then add\_to\_cart (completes all 4 steps). User 7 only reaches the first 2 clicks.
+\end{itemize}
+
+\subsection{Constraints}
+\begin{itemize}[leftmargin=*]
+    \item $1 \leq \text{funnels} \leq 100$
+    \item $1 \leq \text{events} \leq 10^5$
+    \item Funnel steps may repeat
+    \item Events are globally sorted by timestamp
+\end{itemize}
+
+\newpage
+
+% ============================================================
+\section{Optimal Solution}
+% ============================================================
+
+\subsection{Algorithm Overview}
+
+The optimal solution uses a \textbf{state machine approach} for each user in each funnel:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Parse funnels}: Extract funnel name and list of steps
+    \item \textbf{Group events by user}: Create user $\rightarrow$ events mapping
+    \item \textbf{Track progress}: For each funnel, maintain sets of users who reached each step
+    \item \textbf{Process events}: For each user, maintain current step index and advance when matching event occurs
+    \item \textbf{Format output}: Convert step-user sets to counts
+\end{enumerate}
+
+\subsection{Key Insights}
+
+\begin{keyinsight}
+\textbf{State Machine Pattern:}
+\begin{itemize}
+    \item Each user maintains their own position (state) in each funnel
+    \item Users can only advance sequentially through funnel steps
+    \item Repeated step names are handled naturally by step \textit{index} tracking
+    \item Using sets ensures each user is counted once per step
+\end{itemize}
+\end{keyinsight}
+
+\subsection{Common Mistakes to Avoid}
+
+\begin{criticalpoint}
+\textbf{Don't make these errors:}
+\begin{enumerate}
+    \item \textbf{Using step name as key}: Won't work for repeated steps like \texttt{click,click,click}
+    \item \textbf{Not using sets}: Will count users multiple times per step
+    \item \textbf{Incorrect state management}: Not maintaining separate state per user per funnel
+    \item \textbf{Off-by-one errors}: Starting index at 1 instead of 0
+    \item \textbf{Sorting per user}: Events are already globally sorted (don't re-sort)
+\end{enumerate}
+\end{criticalpoint}
+
+\subsection{Time \& Space Complexity}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Time}: $O(F \times U \times E_u)$ where:
+    \begin{itemize}
+        \item $F$ = number of funnels
+        \item $U$ = number of users
+        \item $E_u$ = average events per user
+    \end{itemize}
+    \item \textbf{Space}: $O(F \times S \times U)$ where $S$ = average steps per funnel
+    \item \textbf{Optimization}: For given constraints ($10^5$ events), this is optimal
+\end{itemize}
+
+\newpage
+
+\subsection{Python Implementation}
+
+\begin{lstlisting}
+from typing import List
+from collections import defaultdict
+
+
+class Solution:
+    def compute_funnel_counts(
+        self,
+        funnels: List[str],
+        events: List[str]
+    ) -> List[str]:
+        """
+        Compute, for each funnel, how many distinct users reach each step in order.
+
+        :param funnels: List of strings, each formatted:
+                        "funnel_name,step_1,step_2,...,step_n"
+        :param events:  List of strings, each formatted:
+                        "user_id,timestamp,event_name"
+        :return: List of strings, one per funnel, formatted:
+                 "funnel_name,step_1(count_1),step_2(count_2),...,step_n(count_n)"
+        """
+        # Parse funnels into (name, steps_list) tuples
+        parsed_funnels = []
+        for funnel_str in funnels:
+            parts = funnel_str.split(',')
+            funnel_name = parts[0]
+            steps = parts[1:]  # May contain duplicate step names
+            parsed_funnels.append((funnel_name, steps))
+
+        # Parse and group events by user_id
+        # user_id -> [(timestamp, event_name), ...]
+        user_events = defaultdict(list)
+        for event_str in events:
+            parts = event_str.split(',')
+            user_id = int(parts[0])
+            timestamp = int(parts[1])
+            event_name = parts[2]
+            user_events[user_id].append((timestamp, event_name))
+
+        # Events are already sorted globally by timestamp (guaranteed)
+
+        # Process each funnel independently
+        results = []
+        for funnel_name, steps in parsed_funnels:
+            # Track which users reached each step index
+            # step_users[i] = set of user_ids who reached step i
+            step_users = [set() for _ in range(len(steps))]
+
+            # For each user, track their current position in this funnel
+            for user_id, events_list in user_events.items():
+                current_step_idx = 0  # User starts before step 0
+
+                # Process user's events in timestamp order
+                for timestamp, event_name in events_list:
+                    # Check if this event matches the next required step
+                    if current_step_idx < len(steps) and \
+                       event_name == steps[current_step_idx]:
+                        # User reached this step
+                        step_users[current_step_idx].add(user_id)
+                        current_step_idx += 1
+
+            # Format output for this funnel
+            output_parts = [funnel_name]
+            for i, step_name in enumerate(steps):
+                count = len(step_users[i])
+                output_parts.append(f"{step_name}({count})")
+
+            results.append(','.join(output_parts))
+
+        return results
+\end{lstlisting}
+
+\newpage
+
+% ============================================================
+\section{Comprehensive Test Suite}
+% ============================================================
+
+\subsection{Testing Philosophy at Faire}
+
+\begin{testfocus}
+\textbf{Why Faire emphasizes testing:}
+\begin{itemize}
+    \item E-commerce platform requires high reliability
+    \item Bugs in analytics/funnel tracking can lead to incorrect business decisions
+    \item Test coverage demonstrates engineering maturity
+    \item Well-tested code is maintainable code
+\end{itemize}
+
+\textbf{What to test:}
+\begin{enumerate}
+    \item \textbf{Happy path}: Basic functionality works
+    \item \textbf{Edge cases}: Empty states, single elements, boundaries
+    \item \textbf{Repeated steps}: The tricky part of this problem
+    \item \textbf{Out-of-order events}: Events that don't advance funnel
+    \item \textbf{Drop-offs}: Users leaving at various stages
+    \item \textbf{Multiple users}: Concurrent progress through funnels
+\end{enumerate}
+\end{testfocus}
+
+\subsection{Complete Test Implementation}
+
+\begin{lstlisting}
+import pytest
+from typing import List
+
+
+class TestFunnelAnalysis:
+    """
+    Comprehensive test suite for Funnel Analysis problem.
+
+    Faire Interview Focus: Tests demonstrate understanding of:
+    - Edge cases and boundary conditions
+    - Repeated step handling
+    - State machine correctness
+    - Multiple user scenarios
+    """
+
+    def test_basic_example(self):
+        """Test the main example from problem description."""
+        funnels = [
+            "checkout_process,view_product,add_to_cart,enter_payment_info,complete_order",
+            "new_user_signup,visit_landing_page,click_signup,complete_profile,first_purchase",
+            "three_clicks_then_add,click_product,click_product,click_product,add_to_cart",
+        ]
+
+        events = [
+            "1,1000,visit_landing_page",
+            "1,1005,click_signup",
+            "1,1030,complete_profile",
+            "2,1001,visit_landing_page",
+            "2,1010,click_signup",
+            "2,1020,complete_profile",
+            "3,1002,visit_landing_page",
+            "3,1100,click_signup",
+            "4,1200,view_product",
+            "4,1210,add_to_cart",
+            "4,1300,enter_payment_info",
+            "5,1250,view_product",
+            "5,1260,add_to_cart",
+            "5,1270,enter_payment_info",
+            "5,1280,complete_order",
+            "6,2000,click_product",
+            "6,2005,click_product",
+            "6,2010,click_product",
+            "6,2015,add_to_cart",
+            "7,3000,click_product",
+            "7,3005,click_product",
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+
+        expected = [
+            "checkout_process,view_product(2),add_to_cart(2),enter_payment_info(2),complete_order(1)",
+            "new_user_signup,visit_landing_page(3),click_signup(3),complete_profile(2),first_purchase(0)",
+            "three_clicks_then_add,click_product(2),click_product(2),click_product(1),add_to_cart(1)",
+        ]
+
+        assert set(result) == set(expected)
+
+
+    def test_single_user_complete_funnel(self):
+        """Test single user completing entire funnel - happy path."""
+        funnels = ["simple,a,b,c"]
+        events = [
+            "1,100,a",
+            "1,200,b",
+            "1,300,c"
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["simple,a(1),b(1),c(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_user_drops_off_middle(self):
+        """Test user dropping off at middle step."""
+        funnels = ["dropout,step1,step2,step3"]
+        events = [
+            "1,100,step1",
+            "1,200,step2",
+            # User 1 stops here
+            "2,100,step1",
+            # User 2 stops after step1
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["dropout,step1(2),step2(1),step3(0)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_out_of_order_events_ignored(self):
+        """
+        Test events not matching funnel order are ignored.
+        Critical: Out-of-order events should NOT advance the funnel.
+        """
+        funnels = ["ordered,first,second,third"]
+        events = [
+            "1,100,second",  # Out of order - should be ignored
+            "1,200,first",   # Now starts the funnel
+            "1,300,second",  # Now in order
+            "1,400,third"    # Completes
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["ordered,first(1),second(1),third(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_repeated_steps_double_click(self):
+        """
+        Test funnel with repeated step names - the tricky case.
+        This is what differentiates index-based vs name-based tracking.
+        """
+        funnels = ["double_click,click,click,purchase"]
+        events = [
+            "1,100,click",
+            "1,200,click",
+            "1,300,purchase",
+            "2,100,click",     # Only one click
+            "2,200,purchase"   # Doesn't count - missing second click
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["double_click,click(2),click(1),purchase(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_repeated_steps_triple_click(self):
+        """Test funnel requiring three identical events."""
+        funnels = ["triple,click,click,click"]
+        events = [
+            "1,100,click",
+            "1,200,click",
+            "1,300,click",
+            "2,100,click",
+            "2,200,click",
+            # User 2 only has 2 clicks
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["triple,click(2),click(2),click(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_multiple_users_different_progress(self):
+        """Test multiple users progressing at different rates."""
+        funnels = ["test,a,b,c"]
+        events = [
+            "1,100,a",
+            "1,200,b",
+            "1,300,c",
+            "2,500,a",
+            "2,600,b"   # User 2 stops at b
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        # Both users reach a and b, only user 1 reaches c
+        expected = ["test,a(2),b(2),c(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_no_users_complete_any_step(self):
+        """Test when no users reach any funnel steps."""
+        funnels = ["empty,step1,step2"]
+        events = [
+            "1,100,unrelated_event",
+            "2,200,other_event"
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["empty,step1(0),step2(0)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_all_users_drop_at_first_step(self):
+        """Test all users drop off immediately after first step."""
+        funnels = ["early_exit,start,middle,end"]
+        events = [
+            "1,100,start",
+            "2,200,start",
+            "3,300,start"
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["early_exit,start(3),middle(0),end(0)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_multiple_funnels_same_events(self):
+        """
+        Test user progressing through multiple funnels simultaneously.
+        Same events can advance user in multiple independent funnels.
+        """
+        funnels = [
+            "funnel_a,x,y,z",
+            "funnel_b,x,y,z"
+        ]
+        events = [
+            "1,100,x",
+            "1,200,y",
+            "1,300,z"
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = [
+            "funnel_a,x(1),y(1),z(1)",
+            "funnel_b,x(1),y(1),z(1)"
+        ]
+
+        assert set(result) == set(expected)
+
+
+    def test_extra_events_after_completion(self):
+        """
+        Test that events after funnel completion don't affect counts.
+        Once a user completes, additional matching events are ignored.
+        """
+        funnels = ["complete,a,b"]
+        events = [
+            "1,100,a",
+            "1,200,b",
+            "1,300,a",  # Repeating 'a' after completion
+            "1,400,b"   # Repeating 'b' after completion
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["complete,a(1),b(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_interleaved_events_multiple_users(self):
+        """Test multiple users with interleaved events."""
+        funnels = ["interleaved,step1,step2,step3"]
+        events = [
+            "1,100,step1",
+            "2,101,step1",
+            "1,102,step2",
+            "2,103,step2",
+            "1,104,step3",
+            # User 2 doesn't complete
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["interleaved,step1(2),step2(2),step3(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_single_step_funnel(self):
+        """Test funnel with only one step - boundary case."""
+        funnels = ["single,only_step"]
+        events = [
+            "1,100,only_step",
+            "2,200,only_step",
+            "3,300,only_step"
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["single,only_step(3)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_many_irrelevant_events(self):
+        """
+        Test filtering when most events are irrelevant.
+        Performance consideration: should efficiently skip non-matching events.
+        """
+        funnels = ["signal,start,end"]
+        events = [
+            "1,100,noise1",
+            "1,101,noise2",
+            "1,102,start",   # Signal
+            "1,103,noise3",
+            "1,104,noise4",
+            "1,105,end",     # Signal
+            "1,106,noise5"
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["signal,start(1),end(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_user_restarts_funnel(self):
+        """
+        Test user who appears to restart but funnel doesn't reset.
+        Important: Once started, continue from current position.
+        """
+        funnels = ["no_restart,a,b,c"]
+        events = [
+            "1,100,a",
+            "1,200,b",
+            "1,300,a",  # Not a restart - stays at position after b
+            "1,400,c"   # Completes from where they were
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["no_restart,a(1),b(1),c(1)"]
+
+        assert set(result) == set(expected)
+
+
+    def test_empty_funnel_list(self):
+        """Test edge case: no funnels defined."""
+        funnels = []
+        events = [
+            "1,100,some_event"
+        ]
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = []
+
+        assert result == expected
+
+
+    def test_empty_events_list(self):
+        """Test edge case: no events occurred."""
+        funnels = ["empty,a,b,c"]
+        events = []
+
+        sol = Solution()
+        result = sol.compute_funnel_counts(funnels, events)
+        expected = ["empty,a(0),b(0),c(0)"]
+
+        assert set(result) == set(expected)
+
+
+# Run with: pytest -v faire_interview_prep_11.23_tests.py
+# For coverage: pytest --cov=solution --cov-report=html
+\end{lstlisting}
+
+\newpage
+
+% ============================================================
+\section{Edge Cases Deep Dive}
+% ============================================================
+
+\subsection{Critical Edge Cases}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Repeated Steps}
+    \begin{itemize}
+        \item Funnel: \texttt{click,click,click}
+        \item Requires 3 separate click events
+        \item Must use index-based tracking, not name-based
+    \end{itemize}
+
+    \item \textbf{Out-of-Order Events}
+    \begin{itemize}
+        \item Events not matching current step are skipped
+        \item State machine doesn't go backwards
+        \item Example: \texttt{second,first,second,third} $\rightarrow$ \texttt{first,second,third}
+    \end{itemize}
+
+    \item \textbf{Empty Completion}
+    \begin{itemize}
+        \item All users drop off before any step
+        \item Output: \texttt{funnel,step1(0),step2(0),...}
+    \end{itemize}
+
+    \item \textbf{Post-Completion Events}
+    \begin{itemize}
+        \item Events after funnel completion are ignored
+        \item User counted once per step, not multiple times
+    \end{itemize}
+
+    \item \textbf{Multiple Funnels}
+    \begin{itemize}
+        \item Same events can advance user in multiple independent funnels
+        \item Each funnel maintains separate state per user
+    \end{itemize}
+
+    \item \textbf{Boundary Conditions}
+    \begin{itemize}
+        \item Empty funnel list: return empty result
+        \item Empty events list: all steps show count(0)
+        \item Single-step funnel: valid and should work
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Common Implementation Bugs}
+
+\begin{criticalpoint}
+\textbf{Watch out for these bugs:}
+
+\begin{enumerate}
+    \item \textbf{Using step name as dictionary key}
+    \begin{itemize}
+        \item Won't work: \texttt{step\_users[step\_name].add(user)}
+        \item Correct: \texttt{step\_users[step\_index].add(user)}
+    \end{itemize}
+
+    \item \textbf{Not resetting user state per funnel}
+    \begin{itemize}
+        \item Each user needs independent state for each funnel
+        \item Don't share state across funnels
+    \end{itemize}
+
+    \item \textbf{Sorting events unnecessarily}
+    \begin{itemize}
+        \item Events are already globally sorted (given)
+        \item Don't waste time re-sorting
+    \end{itemize}
+
+    \item \textbf{String formatting errors}
+    \begin{itemize}
+        \item Output: \texttt{step(count)} not \texttt{step (count)} or \texttt{step:count}
+        \item Use \texttt{f"\{step\_name\}(\{count\})"} for correctness
+    \end{itemize}
+\end{enumerate}
+\end{criticalpoint}
+
+\newpage
+
+% ============================================================
+\section{Interview Execution Strategy}
+% ============================================================
+
+\subsection{Clarifying Questions to Ask}
+
+\begin{actionitem}
+\textbf{Start with these questions:}
+
+\begin{enumerate}
+    \item Are events guaranteed to be sorted by timestamp? \textit{(Yes)}
+    \item Can a funnel have repeated step names? \textit{(Yes - critical!)}
+    \item Should we count each user only once per step? \textit{(Yes)}
+    \item Can users be in multiple funnels simultaneously? \textit{(Yes)}
+    \item What happens if a user performs events out of order? \textit{(Ignored)}
+    \item Are user IDs always integers? \textit{(Yes)}
+    \item What's the scale? \textit{($10^5$ events)}
+\end{enumerate}
+\end{actionitem}
+
+\subsection{Implementation Approach}
+
+\textbf{Time Management (30-35 minutes for coding):}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{5 min}: Clarify requirements, discuss approach
+    \item \textbf{15 min}: Implement core solution
+    \item \textbf{10 min}: Write basic test cases
+    \item \textbf{5 min}: Walk through edge cases, add more tests
+\end{enumerate}
+
+\textbf{Incremental Testing Strategy:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Start with simplest test: 1 user, 1 funnel, complete path
+    \item Add complexity: multiple users
+    \item Test critical feature: repeated steps
+    \item Test edge case: out-of-order events
+    \item Test boundary: empty states
+\end{enumerate}
+
+\subsection{What to Verbalize During Interview}
+
+\begin{actionitem}
+\textbf{Communicate your thinking:}
+
+\begin{itemize}
+    \item "I'm using a state machine approach where each user maintains position in each funnel"
+    \item "The key insight is using step \textit{index} not step \textit{name} to handle repeated steps"
+    \item "I'm using sets to ensure each user is counted once per step"
+    \item "Events are already sorted, so I don't need to re-sort"
+    \item "Let me write a test for repeated steps since that's the tricky part"
+\end{itemize}
+\end{actionitem}
+
+\newpage
+
+% ============================================================
+\section{Optimization Discussion}
+% ============================================================
+
+\subsection{Current Solution Analysis}
+
+\textbf{Time Complexity: } $O(F \times U \times E_u)$
+\begin{itemize}[leftmargin=*]
+    \item $F$ = number of funnels ($\leq 100$)
+    \item $U$ = number of unique users
+    \item $E_u$ = average events per user
+    \item For $10^5$ total events: very manageable
+\end{itemize}
+
+\textbf{Space Complexity: } $O(F \times S \times U + E)$
+\begin{itemize}[leftmargin=*]
+    \item $F \times S \times U$ for step-user sets
+    \item $E$ for storing events grouped by user
+\end{itemize}
+
+\subsection{Alternative Approaches (and why they're not better)}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Pre-filter events by funnel steps}
+    \begin{itemize}
+        \item Idea: Only process events that match some funnel step
+        \item Why not better: Still need to track state, adds overhead
+    \end{itemize}
+
+    \item \textbf{Use hash maps for step tracking}
+    \begin{itemize}
+        \item Idea: \texttt{dict[step\_name] -> set(users)}
+        \item Why not better: Doesn't work for repeated steps
+    \end{itemize}
+
+    \item \textbf{Process events in single pass without grouping}
+    \begin{itemize}
+        \item Idea: Maintain user state dictionary during event iteration
+        \item Why not better: Same complexity, harder to implement correctly
+    \end{itemize}
+\end{enumerate}
+
+\subsection{When to Optimize}
+
+\begin{keyinsight}
+\textbf{Don't over-optimize:}
+\begin{itemize}
+    \item Current solution is already optimal for given constraints
+    \item Premature optimization wastes interview time
+    \item Focus on correctness and testing first
+    \item Only optimize if interviewer asks or constraints change
+\end{itemize}
+\end{keyinsight}
+
+\newpage
+
+% ============================================================
+\section{Summary \& Key Takeaways}
+% ============================================================
+
+\subsection{Algorithm Checklist}
+
+\begin{actionitem}
+\textbf{Before submitting solution, verify:}
+
+\begin{itemize}
+    \item[\faCheckSquare] Parse funnels correctly (name, steps list)
+    \item[\faCheckSquare] Group events by user\_id
+    \item[\faCheckSquare] Use step INDEX not step NAME for tracking
+    \item[\faCheckSquare] Use sets for user counting (not lists)
+    \item[\faCheckSquare] Process events in order (don't re-sort)
+    \item[\faCheckSquare] Format output correctly: \texttt{funnel,step(count),...}
+    \item[\faCheckSquare] Handle repeated steps correctly
+    \item[\faCheckSquare] Ignore out-of-order events
+\end{itemize}
+\end{actionitem}
+
+\subsection{Testing Checklist}
+
+\begin{testfocus}
+\textbf{Minimum test coverage:}
+
+\begin{itemize}
+    \item[\faCheckSquare] Happy path (complete funnel)
+    \item[\faCheckSquare] Repeated steps (e.g., click,click,click)
+    \item[\faCheckSquare] Out-of-order events
+    \item[\faCheckSquare] User drop-offs
+    \item[\faCheckSquare] Multiple users
+    \item[\faCheckSquare] Edge cases (empty funnels/events, single step)
+\end{itemize}
+\end{testfocus}
+
+\subsection{Interview Success Factors}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Clarify requirements}: Ask about repeated steps
+    \item \textbf{Explain approach}: State machine pattern
+    \item \textbf{Implement incrementally}: Start simple, add complexity
+    \item \textbf{Test thoroughly}: Faire values comprehensive testing
+    \item \textbf{Handle edge cases}: Repeated steps, out-of-order, empty states
+    \item \textbf{Communicate clearly}: Verbalize your thought process
+\end{enumerate}
+
+\subsection{Final Preparation}
+
+\begin{actionitem}
+\textbf{Practice plan:}
+
+\begin{enumerate}
+    \item Implement solution from scratch (no looking): 20 minutes
+    \item Write all test cases: 15 minutes
+    \item Run tests and debug: 10 minutes
+    \item Explain algorithm to someone: 5 minutes
+    \item \textbf{Total practice time: 50 minutes}
+\end{enumerate}
+
+\textbf{Do this 2-3 times before interview for mastery.}
+\end{actionitem}
+
+\end{document}
