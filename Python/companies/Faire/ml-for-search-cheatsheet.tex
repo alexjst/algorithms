@@ -1404,7 +1404,8 @@ $$\hat{m}_t = \frac{m_t}{1-\beta_1^t} \quad \hat{v}_t = \frac{v_t}{1-\beta_2^t} 
     \end{itemize}
     \item \textbf{Random Search:} Sample randomly (often better than grid!)
     \begin{itemize}
-        \item 60\% as good with 5\% compute (Bergstra \& Bengio)
+        \item More efficient than grid search (Bergstra \& Bengio 2012)
+        \item Can match grid performance with fewer trials
         \item Use: Many hyperparameters, continuous spaces
     \end{itemize}
     \item \textbf{Bayesian Optimization:} Model which params work best
