@@ -1,0 +1,255 @@
+\documentclass[8pt,landscape]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{amsmath}
+
+\titlespacing*{\section}{0pt}{1.5ex}{0.5ex}
+\titlespacing*{\subsection}{0pt}{1ex}{0.3ex}
+\setlist{nosep, leftmargin=1em}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.3in}
+
+\begin{document}
+\begin{multicols}{3}
+
+\section*{ML Search Interview Cheatsheet}
+
+%==============================================================================
+\section{Diagnosis Framework (CLIP)}
+%==============================================================================
+\textbf{C}larify $\rightarrow$ \textbf{L}ocate $\rightarrow$ \textbf{I}nvestigate $\rightarrow$ \textbf{P}ropose
+
+\begin{enumerate}
+  \item What's the symptom? (latency, accuracy, staleness)
+  \item Where in pipeline is the bottleneck?
+  \item WHY is it happening? (root cause)
+  \item Propose fixes: quick wins $\rightarrow$ medium $\rightarrow$ architectural
+\end{enumerate}
+
+%==============================================================================
+\section{Scenario 1: Latency Bottlenecks}
+%==============================================================================
+
+\subsection{P50 vs P99 Gap}
+Large gap = tail query problem (not systemic)
+
+\subsection{Model Inference Slow (Tail Queries)}
+\begin{itemize}
+  \item Feature sparsity $\rightarrow$ default value computation
+  \item Feature fetch bleeding into inference (waiting)
+  \item Batching irregularity (less common)
+\end{itemize}
+
+\subsection{Feature Fetch Slow (Tail Queries)}
+\begin{itemize}
+  \item Cache misses (tail products not cached)
+  \item Data locality (scattered across shards)
+  \item Missing features $\rightarrow$ fallback computation
+\end{itemize}
+
+\subsection{Fixes (Priority Order)}
+\begin{enumerate}
+  \item Timeout + degrade to simpler model w/ core features
+  \item Embed core features in ES (eliminate fetch)
+  \item Pre-compute ALL features offline
+  \item Two-stage ranking: cheap model 1000 $\rightarrow$ expensive model 200
+  \item Partition by popularity (hot/cold separation)
+\end{enumerate}
+
+%==============================================================================
+\section{Scenario 2: Offline/Online Metric Gap}
+%==============================================================================
+
+\subsection{NDCG Good Offline, CTR Bad Online}
+\begin{itemize}
+  \item Training/serving skew (feature mismatch)
+  \item Metric mismatch (NDCG label $\neq$ CTR)
+  \item Position bias in training data
+  \item Cold users diluting results (Simpson's Paradox)
+\end{itemize}
+
+\subsection{Training/Serving Skew}
+\textbf{Fix:} Log-and-wait -- log features at serving time, use logged features for training
+
+\subsection{DCG vs NDCG}
+Standard NDCG: IDCG from retrieved items only\\
+\textbf{Problem:} [1,0,0,0,0,0] gets NDCG=1.0 (perfect!)\\
+\textbf{Better:} Assume ideal = [1,1,1,1,1,1]
+
+\subsection{Position Bias Causes}
+\begin{itemize}
+  \item Exposure bias (only see top results)
+  \item Click $\neq$ relevance (users click position 1 by habit)
+\end{itemize}
+\textbf{Fix:} Inverse propensity weighting, randomization
+
+\subsection{Cold Users (Simpson's Paradox)}
+\textbf{Tiered ranking:}
+\begin{itemize}
+  \item Cold users ($<$N actions): popularity baseline
+  \item Warm users: hybrid model
+  \item Hot users: full personalized model
+\end{itemize}
+
+%==============================================================================
+\section{Scenario 3: Retrieval Recall}
+%==============================================================================
+
+\subsection{BM25 Missing Relevant Products}
+\begin{itemize}
+  \item Semantic mismatch (no synonyms)
+  \item Scatter-gather / shard imbalance
+  \item Tokenization issues (hyphens, case)
+  \item No phrase/bigram matching
+  \item Spell correction missing on doc side
+\end{itemize}
+
+\subsection{Scatter-Gather Problem}
+Top-K per shard cutoff $\rightarrow$ miss relevant items clustered on one shard\\
+\textbf{Fix:} Better shard routing, increase per-shard K
+
+\subsection{Hybrid Search (BM25 + Vector)}
+\textbf{Combine with RRF:}
+\[ \text{RRF}(d) = \sum_i \frac{1}{k + \text{rank}_i(d)} \quad (k=60) \]
+
+\subsection{When to Use What}
+\begin{itemize}
+  \item BM25: navigational, exact match (``Nike shoes'')
+  \item Vector: semantic, exploratory (``cozy home decor'')
+  \item Hybrid: union results for max recall
+\end{itemize}
+
+\subsection{Reduce Hybrid Latency}
+\begin{itemize}
+  \item Route queries (BM25 for navigational)
+  \item Run parallel, not sequential
+  \item Offline semantic $\rightarrow$ synonym lists $\rightarrow$ BM25 only
+  \item Early termination if BM25 confident
+\end{itemize}
+
+%==============================================================================
+\section{Scenario 4: Model Degradation}
+%==============================================================================
+
+\subsection{Performance Drops Over Time}
+\begin{itemize}
+  \item Stale model (not retrained)
+  \item Feature drift (distributions changed)
+  \item New products (no signals)
+  \item New users (sparse history)
+  \item Seasonality
+\end{itemize}
+
+\subsection{Feature Drift vs Training/Serving Skew}
+\begin{itemize}
+  \item Feature drift = symptom (distributions change)
+  \item Training/serving skew = problem (train $\neq$ serve)
+  \item Log-and-wait = solution
+\end{itemize}
+
+\subsection{Cold Start Products (Feedback Loop)}
+No signals $\rightarrow$ low rank $\rightarrow$ no exposure $\rightarrow$ no signals
+
+\textbf{Exploration strategies:}
+\begin{itemize}
+  \item Reserved slots (positions 8-10 for new items)
+  \item Epsilon-greedy (10\% random new product)
+  \item Thompson Sampling (uncertainty bonus)
+  \item Time-decayed boost (fades over 7-14 days)
+\end{itemize}
+
+\subsection{Retraining Cadence}
+Weekly or monthly, depending on drift rate\\
+Trigger on: performance drop, major catalog change, goal change
+
+%==============================================================================
+\section{Scenario 5: A/B Test \& Multi-Objective}
+%==============================================================================
+
+\subsection{Metric Disagreement}
+CTR up, GMV down $\rightarrow$ investigate before shipping!
+\begin{itemize}
+  \item Clickbait (high CTR, no conversion)
+  \item Cheap products ranked higher
+  \item Cannibalizing discovery
+\end{itemize}
+
+\subsection{Guardrail Metric}
+Metric that must NOT degrade even if primary improves\\
+Example: CTR is primary, GMV is guardrail
+
+\subsection{Multi-Objective Optimization}
+\begin{itemize}
+  \item Weighted combination: $\alpha \cdot \text{CTR} + \beta \cdot \text{GMV}$
+  \item Revenue-weighted labels: click = GMV value (not 1)
+  \item Multi-task learning (shared representations)
+\end{itemize}
+
+\subsection{Revenue-Weighted Labels Downside}
+Sparse signal: most clicks don't convert $\rightarrow$ 95\% zeros
+
+\subsection{Tuning Weights}
+\begin{enumerate}
+  \item Normalize scores to same scale
+  \item Start with business intuition (0.5, 0.5)
+  \item Grid search offline
+  \item A/B test top candidates online
+\end{enumerate}
+
+\subsection{Pareto Frontier}
+Set of solutions where you can't improve one objective without hurting another\\
+\textbf{Present to product team:} ``Pick a point based on business priority''
+
+%==============================================================================
+\section{Key Formulas}
+%==============================================================================
+
+\textbf{DCG@K:}
+\[ \text{DCG@K} = \sum_{i=1}^{K} \frac{2^{rel_i} - 1}{\log_2(i+1)} \]
+
+\textbf{NDCG@K:}
+\[ \text{NDCG@K} = \frac{\text{DCG@K}}{\text{IDCG@K}} \]
+
+\textbf{RRF:}
+\[ \text{RRF}(d) = \sum_{r \in \text{rankers}} \frac{1}{k + r(d)} \]
+
+\textbf{Statistical Significance:}\\
+$p < 0.05$ = 95\% confident result is not random chance
+
+%==============================================================================
+\section{Quick Reference}
+%==============================================================================
+
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Problem} & \textbf{First Question to Ask} \\
+\midrule
+High P99 latency & P50 vs P99 gap? \\
+Offline/online gap & Training/serving skew? \\
+Low recall & BM25 or semantic issue? \\
+Model degradation & When last retrained? \\
+Metric disagreement & What's the guardrail? \\
+\bottomrule
+\end{tabular}
+
+\vspace{1em}
+
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Term} & \textbf{Meaning} \\
+\midrule
+Log-and-wait & Log serving features, train on them \\
+Simpson's Paradox & Subgroup trend reverses when combined \\
+Feedback loop & No signal $\rightarrow$ no exposure $\rightarrow$ stuck \\
+Pareto frontier & Best tradeoff curve \\
+Guardrail metric & Must not degrade \\
+\bottomrule
+\end{tabular}
+
+\end{multicols}
+\end{document}
