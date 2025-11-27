@@ -1,0 +1,1659 @@
+\documentclass[11pt,letterpaper]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{fontawesome5}
+
+% Colors
+\definecolor{augmentblue}{RGB}{0,102,204}
+\definecolor{highlight}{RGB}{255,245,230}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codepurple}{RGB}{153,0,153}
+\definecolor{backcolour}{RGB}{248,248,248}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Augment Code Interview Prep}
+\rhead{Alex Yang}
+\cfoot{\thepage}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+% Custom boxes
+\newtcolorbox{keyinsight}{
+    colback=highlight,
+    colframe=augmentblue,
+    fonttitle=\bfseries,
+    title=\faLightbulb\ Key Insight
+}
+
+\newtcolorbox{criticalpoint}{
+    colback=red!5!white,
+    colframe=red!75!black,
+    fonttitle=\bfseries,
+    title=\faExclamationTriangle\ Critical Point
+}
+
+\newtcolorbox{actionitem}{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title=\faCheckCircle\ Action Item
+}
+
+\newtcolorbox{conceptbox}{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=\faBook\ Concept Review
+}
+
+% Python code styling
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Python
+}
+
+\lstset{style=pythonstyle}
+
+% Title
+\title{\textbf{Augment Code Interview Preparation}\\
+\large Network Ports \& Process Management}
+\author{Alex Yang}
+\date{Prepared: November 26, 2024}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Interview Overview}
+% ============================================================
+
+\subsection{Problem Type}
+\begin{itemize}
+    \item \textbf{Category:} Systems Programming / Process Management
+    \item \textbf{Difficulty:} Medium-Hard
+    \item \textbf{Duration:} 50 minutes
+    \item \textbf{Company:} Augment Code (AI Coding Startup)
+\end{itemize}
+
+\subsection{Interview Structure}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Part 1 (20-25 min):} Implement network port finding function
+    \begin{itemize}
+        \item Uses recursion, hash set, array iteration
+        \item Process hierarchy traversal
+        \item Performance optimization discussion
+    \end{itemize}
+
+    \item \textbf{Part 2 (15-20 min):} Implement garbage collection logic
+    \begin{itemize}
+        \item Similar to moving 1s in binary array
+        \item In-place swap approach
+        \item Array manipulation efficiency
+    \end{itemize}
+
+    \item \textbf{Part 3 (5-10 min):} Thread safety discussion
+    \begin{itemize}
+        \item Read-Write (RW) locks
+        \item Concurrency techniques
+        \item Design discussion (no coding)
+    \end{itemize}
+\end{enumerate}
+
+\begin{criticalpoint}
+\textbf{Key Interview Signals Based on Past Feedback:}
+
+\textbf{What they look for:}
+\begin{itemize}
+    \item Quick recognition of design issues (recursion, flat-list pitfalls)
+    \item Understanding of space vs. time complexity tradeoffs
+    \item Clean, correct implementations (not sloppy)
+    \item Strong communication about design decisions
+    \item Knowledge of concurrency primitives
+\end{itemize}
+
+\textbf{Common pitfalls from past candidates:}
+\begin{itemize}
+    \item Missing that \texttt{get\_children()} returns PIDs, not full records
+    \item Spending too long trying to avoid copying the database
+    \item Not knowing \texttt{del} from list is $O(n)$ operation
+    \item Sloppy implementations with edge case bugs
+    \item Weak concurrency knowledge (thinking single lock suffices)
+\end{itemize}
+\end{criticalpoint}
+
+\newpage
+
+% ============================================================
+\section{Part 1: Network Ports Problem}
+% ============================================================
+
+\subsection{Problem Statement}
+
+\textbf{Context:} You have a database of processes where each process can have child processes forming a tree hierarchy. Some processes are listening on network ports. You need to find all ports used by a given process and all its descendants.
+
+\subsubsection{Data Structures}
+
+\textbf{Process Record:}
+\begin{lstlisting}
+class ProcessRecord:
+    def __init__(self, pid, parent_pid, ports, is_alive):
+        self.pid = pid              # Process ID (unique)
+        self.parent_pid = parent_pid # Parent PID (None for root)
+        self.ports = ports          # List of port numbers [80, 443]
+        self.is_alive = is_alive    # Boolean: True/False
+\end{lstlisting}
+
+\textbf{Database Interface:}
+\begin{lstlisting}
+class ProcessDatabase:
+    def __init__(self, processes: List[ProcessRecord]):
+        """Store processes in flat list (database table)"""
+        self.processes = processes
+
+    def get_process(self, pid: int) -> ProcessRecord:
+        """Get process by PID - O(n) lookup"""
+        for proc in self.processes:
+            if proc.pid == pid:
+                return proc
+        return None
+
+    def get_children(self, pid: int) -> List[int]:
+        """Get child PIDs (not full records!) - O(n) scan"""
+        children_pids = []
+        for proc in self.processes:
+            if proc.parent_pid == pid:
+                children_pids.append(proc.pid)
+        return children_pids
+\end{lstlisting}
+
+\subsection{Requirements}
+
+\textbf{Implement:}
+\begin{lstlisting}
+def find_all_ports(database: ProcessDatabase, root_pid: int) -> List[int]:
+    """
+    Find all network ports used by root_pid and all its descendants.
+
+    Args:
+        database: ProcessDatabase instance
+        root_pid: Starting process ID
+
+    Returns:
+        List of unique port numbers (no duplicates)
+
+    Notes:
+        - Only include ALIVE processes
+        - Traverse entire subtree recursively
+        - Handle dead processes gracefully
+    """
+    pass
+\end{lstlisting}
+
+\textbf{Example:}
+\begin{verbatim}
+Process Tree:
+    1 (ports=[80], alive=True)
+    +-- 2 (ports=[443], alive=True)
+    |   +-- 4 (ports=[8080], alive=False)  # Dead - ignore
+    +-- 3 (ports=[3000, 3001], alive=True)
+        +-- 5 (ports=[5000], alive=True)
+
+find_all_ports(db, 1) -> [80, 443, 3000, 3001, 5000]
+find_all_ports(db, 2) -> [443]  # Ignores dead child 4
+find_all_ports(db, 3) -> [3000, 3001, 5000]
+\end{verbatim}
+
+\subsection{Solution Approach}
+
+\begin{keyinsight}
+\textbf{Key Design Decisions:}
+
+\begin{enumerate}
+    \item \textbf{Recursion:} Natural fit for tree traversal
+    \item \textbf{Hash set:} Track unique ports (automatic deduplication)
+    \item \textbf{Filter dead processes:} Check \texttt{is\_alive} before processing
+    \item \textbf{Understand API:} \texttt{get\_children()} returns PIDs, need \texttt{get\_process()} to get records
+\end{enumerate}
+\end{keyinsight}
+
+\subsection{Implementation - Version 1 (Recursive DFS)}
+
+\begin{lstlisting}
+def find_all_ports(database: ProcessDatabase, root_pid: int) -> List[int]:
+    """
+    Find all ports using recursive DFS with hash set for deduplication.
+
+    Time: O(n) where n = number of alive processes in subtree
+    Space: O(h + p) where h = height, p = unique ports
+    """
+    # Use set for automatic deduplication
+    ports_set = set()
+
+    def dfs(pid: int) -> None:
+        """Recursive helper to traverse process tree"""
+        # Get process record
+        process = database.get_process(pid)
+
+        # Handle missing or dead process
+        if process is None or not process.is_alive:
+            return
+
+        # Add this process's ports
+        for port in process.ports:
+            ports_set.add(port)
+
+        # Recursively process children
+        # CRITICAL: get_children returns PIDs, not ProcessRecords!
+        child_pids = database.get_children(pid)
+        for child_pid in child_pids:
+            dfs(child_pid)
+
+    # Start DFS from root
+    dfs(root_pid)
+
+    # Convert set to list
+    return list(ports_set)
+\end{lstlisting}
+
+\begin{criticalpoint}
+\textbf{Common Mistake - Past Candidate Error:}
+
+Many candidates miss that \texttt{get\_children(pid)} returns \textbf{PIDs} (integers), not \texttt{ProcessRecord} objects!
+
+\textbf{Wrong:}
+\begin{lstlisting}
+children = database.get_children(pid)
+for child in children:
+    for port in child.ports:  # ERROR: child is int, not ProcessRecord!
+        ports_set.add(port)
+\end{lstlisting}
+
+\textbf{Correct:}
+\begin{lstlisting}
+child_pids = database.get_children(pid)
+for child_pid in child_pids:
+    child_process = database.get_process(child_pid)
+    if child_process and child_process.is_alive:
+        # Now we have the actual ProcessRecord
+\end{lstlisting}
+\end{criticalpoint}
+
+\subsection{Complexity Analysis}
+
+\textbf{Time Complexity: } $O(n \times m)$ where:
+\begin{itemize}
+    \item $n$ = number of alive processes in subtree
+    \item $m$ = average number of children per process
+    \item Each \texttt{get\_children()} scans entire database ($O(m)$)
+    \item Total: $n$ calls $\times$ $O(m)$ per call = $O(n \times m)$
+\end{itemize}
+
+\textbf{Space Complexity: } $O(h + p)$ where:
+\begin{itemize}
+    \item $h$ = tree height (recursion stack)
+    \item $p$ = number of unique ports
+\end{itemize}
+
+\subsection{Optimization Discussion}
+
+\begin{keyinsight}
+\textbf{Performance Bottleneck:}
+
+The \texttt{get\_children()} method scans the entire database on every call. For large databases, this becomes expensive.
+
+\textbf{Interviewer might ask:} "Can you optimize this?"
+
+\textbf{Key insight from feedback:} One candidate proposed "filtering out dead processes" early but communicated it oddly. The interviewer wants to hear:
+
+\textbf{Two-pass optimization:}
+\begin{enumerate}
+    \item \textbf{Pass 1:} Build parent$\rightarrow$children map once ($O(n)$)
+    \item \textbf{Pass 2:} DFS using map for instant child lookup ($O(1)$)
+\end{enumerate}
+
+This reduces time from $O(n \times m)$ to $O(n)$.
+\end{keyinsight}
+
+\subsection{Implementation - Version 2 (Optimized)}
+
+\begin{lstlisting}
+def find_all_ports_optimized(database: ProcessDatabase, root_pid: int) -> List[int]:
+    """
+    Optimized version: Build parent->children map first.
+
+    Time: O(n) total - single pass to build map + DFS
+    Space: O(n + p) - map storage + ports set
+    """
+    # Pass 1: Build parent->children mapping (O(n))
+    parent_to_children = {}
+    pid_to_process = {}
+
+    for process in database.processes:
+        pid_to_process[process.pid] = process
+        if process.parent_pid is not None:
+            if process.parent_pid not in parent_to_children:
+                parent_to_children[process.parent_pid] = []
+            parent_to_children[process.parent_pid].append(process.pid)
+
+    # Pass 2: DFS using precomputed map
+    ports_set = set()
+
+    def dfs(pid: int) -> None:
+        # Get process from our map
+        process = pid_to_process.get(pid)
+
+        if process is None or not process.is_alive:
+            return
+
+        # Add ports
+        ports_set.update(process.ports)  # More pythonic than loop
+
+        # Get children from map (O(1) lookup)
+        child_pids = parent_to_children.get(pid, [])
+        for child_pid in child_pids:
+            dfs(child_pid)
+
+    dfs(root_pid)
+    return list(ports_set)
+
+
+def find_all_ports_space_optimized(database: ProcessDatabase, root_pid: int) -> List[int]:
+    """
+    Space-Optimized Approach: "Traverse + Scan"
+    
+    This addresses the interviewer's specific question about Space Complexity.
+    Instead of building a full O(N) map of the database, we only store PIDs 
+    for the relevant subtree.
+    
+    Strategy:
+    1. Collect target PIDs (recursively) -> Set of PIDs
+    2. Scan database once -> Filter against Set
+    
+    Time: O(N + M) where N=database size, M=subtree size
+    Space: O(M) - Only store PIDs in the subtree (vs O(N) for full map)
+    """
+    # Pass 1: Collect all PIDs in subtree using get_children
+    subtree_pids = set()
+
+    def collect_pids(pid: int) -> None:
+        """Recursively collect all PIDs in subtree"""
+        subtree_pids.add(pid)
+        child_pids = database.get_children(pid)
+        for child_pid in child_pids:
+            collect_pids(child_pid)
+
+    collect_pids(root_pid)
+
+    # Pass 2: Single scan through database, lookup against PIDs
+    ports_set = set()
+    for process in database.processes:
+        # Check if this process is in our subtree
+        if process.pid in subtree_pids and process.is_alive:
+            ports_set.update(process.ports)
+
+    return list(ports_set)
+\end{lstlisting}
+
+\begin{actionitem}
+\textbf{What to communicate in interview:}
+
+"The naive approach calls \texttt{get\_children()} repeatedly, scanning the entire database each time. I see two optimization approaches:"
+
+\textbf{Approach 1 - Build parent$\rightarrow$children map:}
+\begin{itemize}
+    \item Preprocess database to build lookup structure
+    \item DFS with $O(1)$ child lookups
+    \item Time: $O(m + n)$ where $m$=database size, $n$=subtree size
+\end{itemize}
+
+\textbf{Approach 2 - Collect PIDs then scan (Space Optimization):}
+\begin{itemize}
+    \item First pass: DFS to collect only relevant PIDs in subtree
+    \item Second pass: Single database scan, filter by PID set
+    \item \textbf{Why this matters:} Reduces space from $O(\text{Database})$ to $O(\text{Subtree})$.
+    \item \textit{This matches the "aha" hint: "iterate database and lookup against pids"}
+\end{itemize}
+
+\textbf{Space vs Time Tradeoff (Critical Discussion):}
+\begin{itemize}
+    \item \textbf{Naive DFS:} Time $O(N \times \text{Children})$, Space $O(Height)$
+    \item \textbf{Map Optimization:} Time $O(N)$, Space $O(N)$ (Index entire DB)
+    \item \textbf{Traverse + Scan:} Time $O(N)$, Space $O(Subtree)$ (Index only relevant items)
+    \item \textit{Candidate 1 missed this distinction when asked about space!}
+\end{itemize}
+\end{actionitem}
+
+\subsection{Edge Cases}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Root process is dead:} Return empty list
+    \item \textbf{Root has no children:} Return only root's ports
+    \item \textbf{All descendants dead:} Return only root's ports
+    \item \textbf{Duplicate ports in tree:} Set handles deduplication
+    \item \textbf{Process with no ports:} Empty \texttt{ports} list is valid
+    \item \textbf{Invalid root PID:} Handle gracefully (return empty)
+\end{enumerate}
+
+\newpage
+
+% ============================================================
+\section{Part 2: Garbage Collection}
+% ============================================================
+
+\subsection{Problem Statement}
+
+After finding ports, we need to compact the process database by removing dead processes. The interviewer describes this as "similar to moving all 1s in a binary array to the beginning."
+
+\textbf{Task:} Implement garbage collection that:
+\begin{itemize}
+    \item Moves all alive processes to the front of the array
+    \item Moves all dead processes to the back
+    \item Maintains relative order of alive processes
+    \item Operates in-place (minimal extra space)
+\end{itemize}
+
+\subsection{Array Analogy}
+
+\begin{conceptbox}
+\textbf{Binary Array Problem (Classic Pattern):}
+
+\textbf{Input:} \texttt{[0, 1, 0, 1, 1, 0, 1, 0]}
+
+\textbf{Output:} \texttt{[1, 1, 1, 1, 0, 0, 0, 0]}
+
+\textbf{Approach:} Two-pointer swap
+\begin{itemize}
+    \item Left pointer: Next position for a 1
+    \item Right pointer: Current element being examined
+    \item Swap when we find a 1
+\end{itemize}
+
+\textbf{For processes:}
+\begin{itemize}
+    \item 1 = alive process
+    \item 0 = dead process
+    \item Goal: Move all alive to front
+\end{itemize}
+\end{conceptbox}
+
+\subsection{Implementation}
+
+\begin{lstlisting}
+def garbage_collect(processes: List[ProcessRecord]) -> int:
+    """
+    Compact process list: move alive processes to front.
+
+    Returns:
+        Number of alive processes (boundary index)
+
+    Time: O(n) - single pass
+    Space: O(1) - in-place swaps
+    """
+    # Two-pointer approach
+    write_idx = 0  # Next position for alive process
+
+    # Scan through array
+    for read_idx in range(len(processes)):
+        if processes[read_idx].is_alive:
+            # Found alive process - swap to front
+            if read_idx != write_idx:
+                processes[write_idx], processes[read_idx] = \
+                    processes[read_idx], processes[write_idx]
+            write_idx += 1
+
+    # write_idx now points to first dead process
+    # Processes[0:write_idx] are alive
+    # Processes[write_idx:] are dead
+    return write_idx
+
+
+def garbage_collect_with_truncation(processes: List[ProcessRecord]) -> None:
+    """
+    Alternative: Truncate dead processes entirely.
+    Modifies list in-place by removing dead entries.
+    """
+    alive_count = garbage_collect(processes)
+    # Remove dead processes from end
+    del processes[alive_count:]
+\end{lstlisting}
+
+\begin{criticalpoint}
+\textbf{Performance Trap - Past Candidate Error:}
+
+One candidate "didn't know that \texttt{del} from a list was linear time and didn't effectively internalize that after explanation."
+
+\textbf{Why this matters:}
+\begin{lstlisting}
+# WRONG: O(n^2) approach
+i = 0
+while i < len(processes):
+    if not processes[i].is_alive:
+        del processes[i]  # O(n) operation!
+        # Don't increment i
+    else:
+        i += 1
+\end{lstlisting}
+
+\textbf{Problem:}
+\begin{itemize}
+    \item Each \texttt{del} operation shifts all subsequent elements
+    \item If half the list is dead: $n/2$ deletions $\times$ $O(n)$ each = $O(n^2)$
+\end{itemize}
+
+\textbf{Correct approach:}
+\begin{itemize}
+    \item Use two-pointer swap (shown above) - $O(n)$
+    \item Single \texttt{del} at end to truncate - $O(k)$ where $k$ = dead count
+    \item Total: $O(n)$
+\end{itemize}
+\end{criticalpoint}
+
+\subsection{Visualization}
+
+\begin{verbatim}
+Initial: [A1, D1, A2, D2, A3, D3]  (A=alive, D=dead)
+         w=0  r=0
+
+Step 1: r=0, A1 is alive
+        [A1, D1, A2, D2, A3, D3]
+         w$\rightarrow$r
+        Swap A1 with itself, w++, r++
+
+Step 2: r=1, D1 is dead
+        [A1, D1, A2, D2, A3, D3]
+             w   r
+        Skip, r++
+
+Step 3: r=2, A2 is alive
+        [A1, D1, A2, D2, A3, D3]
+             w       r
+        Swap D1 $\leftrightarrow$ A2
+        [A1, A2, D1, D2, A3, D3]
+                 w
+        w++, r++
+
+Step 4: r=3, D2 is dead
+        Skip, r++
+
+Step 5: r=4, A3 is alive
+        [A1, A2, D1, D2, A3, D3]
+                 w           r
+        Swap D1 $\leftrightarrow$ A3
+        [A1, A2, A3, D2, D1, D3]
+                     w
+        w++, r++
+
+Final: [A1, A2, A3, D2, D1, D3]
+                     ^boundary (w=3)
+       Alive: [0:3], Dead: [3:6]
+\end{verbatim}
+
+\subsection{Alternative: Stable Partition}
+
+\begin{lstlisting}
+def garbage_collect_stable(processes: List[ProcessRecord]) -> int:
+    """
+    Alternative using Python's stable partition.
+    Maintains relative order more explicitly.
+    """
+    alive = [p for p in processes if p.is_alive]
+    dead = [p for p in processes if not p.is_alive]
+
+    # Rebuild list
+    processes.clear()
+    processes.extend(alive)
+    processes.extend(dead)
+
+    return len(alive)
+\end{lstlisting}
+
+\begin{keyinsight}
+\textbf{Trade-offs:}
+
+\textbf{Two-pointer swap:}
+\begin{itemize}
+    \item Pros: True in-place ($O(1)$ extra space), fast
+    \item Cons: Slightly more complex logic
+\end{itemize}
+
+\textbf{List comprehension rebuild:}
+\begin{itemize}
+    \item Pros: Cleaner, more Pythonic, easier to understand
+    \item Cons: $O(n)$ extra space for temporary lists
+\end{itemize}
+
+\textbf{In interview:} Mention both, explain trade-offs. Candidate who proposed "swap approach" in feedback was on the right track but implementation was "sloppy" with edge cases.
+\end{keyinsight}
+
+\newpage
+
+% ============================================================
+\section{Part 3: Thread Safety \& Concurrency}
+% ============================================================
+
+\subsection{Problem Context}
+
+The interviewer asks: "How would you make this system thread-safe if multiple threads are reading/writing the process database simultaneously?"
+
+\textbf{No coding required - design discussion only.}
+
+\subsection{Concurrency Concepts}
+
+\begin{conceptbox}
+\textbf{Read-Write Lock (RWLock):}
+
+A synchronization primitive that allows:
+\begin{itemize}
+    \item \textbf{Multiple readers} simultaneously (read-shared)
+    \item \textbf{Single writer} exclusively (write-exclusive)
+    \item Writers block all readers and other writers
+\end{itemize}
+
+\textbf{When to use:}
+\begin{itemize}
+    \item Read-heavy workloads (common for process databases)
+    \item Reads far outnumber writes
+    \item Want to maximize read concurrency
+\end{itemize}
+
+\textbf{Python implementation:}
+\begin{lstlisting}
+import threading
+
+class ProcessDatabase:
+    def __init__(self):
+        self.processes = []
+        self.lock = threading.RLock()  # or RWLock from external lib
+
+    def get_process(self, pid):
+        with self.lock:  # Acquire for read
+            # Search logic
+            pass
+
+    def update_process(self, process):
+        with self.lock:  # Acquire for write
+            # Update logic
+            pass
+\end{lstlisting}
+\end{conceptbox}
+
+\subsection{Design Discussion Points}
+
+\begin{actionitem}
+\textbf{Key points to articulate:}
+
+\textbf{1. Identify Read vs Write Operations:}
+\begin{itemize}
+    \item \textbf{Reads:} \texttt{find\_all\_ports()}, \texttt{get\_process()}, \texttt{get\_children()}
+    \item \textbf{Writes:} \texttt{garbage\_collect()}, adding/updating processes
+\end{itemize}
+
+\textbf{2. RW Lock Strategy:}
+\begin{lstlisting}
+class ThreadSafeProcessDatabase:
+    def __init__(self):
+        self.processes = []
+        self.rw_lock = RWLock()
+
+    def find_all_ports(self, root_pid):
+        """Read operation - shared lock"""
+        with self.rw_lock.read():
+            # Multiple threads can execute concurrently
+            return self._find_all_ports_impl(root_pid)
+
+    def garbage_collect(self):
+        """Write operation - exclusive lock"""
+        with self.rw_lock.write():
+            # Only one thread at a time
+            # Blocks all readers
+            return self._garbage_collect_impl()
+\end{lstlisting}
+
+\textbf{3. Granularity Considerations:}
+\begin{itemize}
+    \item \textbf{Coarse-grained:} Lock entire database
+    \begin{itemize}
+        \item Simple to reason about
+        \item May limit concurrency
+    \end{itemize}
+    \item \textbf{Fine-grained:} Lock individual processes
+    \begin{itemize}
+        \item Better concurrency
+        \item Risk of deadlocks
+        \item More complex
+    \end{itemize}
+\end{itemize}
+
+\textbf{4. Transaction Safety:}
+\begin{lstlisting}
+def safe_update_and_gc(self):
+    """Atomic operation: update + GC"""
+    with self.rw_lock.write():
+        # Both operations happen atomically
+        self.update_processes()
+        self.garbage_collect()
+        # No other thread can read inconsistent state
+\end{lstlisting}
+\end{actionitem}
+
+\subsection{Common Mistakes}
+
+\begin{criticalpoint}
+\textbf{Past candidate error:} "Seemed to think he could get the benefit of locking by having a \texttt{with thread.Lock()} on \texttt{gc()} only."
+
+\textbf{Why this is wrong:}
+\begin{lstlisting}
+# INSUFFICIENT: Only locks GC, not reads
+class BadDatabase:
+    def __init__(self):
+        self.processes = []
+        self.lock = threading.Lock()
+
+    def find_all_ports(self, root_pid):
+        # NO LOCK - race condition!
+        for proc in self.processes:  # Another thread might be GC'ing!
+            ...
+
+    def garbage_collect(self):
+        with self.lock:  # Lock only here - not enough!
+            # Swapping elements while readers access them = crash
+            ...
+\end{lstlisting}
+
+\textbf{Problem:}
+\begin{itemize}
+    \item \texttt{find\_all\_ports()} can run while \texttt{garbage\_collect()} modifies array
+    \item Reader might access invalid indices during swap
+    \item Data races, undefined behavior, crashes
+\end{itemize}
+
+\textbf{Correct approach:}
+\begin{itemize}
+    \item ALL reads must acquire read lock
+    \item ALL writes must acquire write lock
+    \item No exceptions
+\end{itemize}
+\end{criticalpoint}
+
+\subsection{Advanced Considerations}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Copy-on-Write (COW):}
+    \begin{itemize}
+        \item Readers use immutable snapshot
+        \item Writers create new version
+        \item Atomic pointer swap
+        \item Good for read-heavy workloads
+    \end{itemize}
+
+    \item \textbf{Lock-Free Data Structures:}
+    \begin{itemize}
+        \item Use atomic operations (CAS)
+        \item Avoid locks entirely
+        \item Complex to implement correctly
+        \item Better for high-contention scenarios
+    \end{itemize}
+
+    \item \textbf{Thread-Local Caching:}
+    \begin{itemize}
+        \item Each thread caches recent lookups
+        \item Reduce lock contention
+        \item Trade-off: Stale data risk
+    \end{itemize}
+\end{enumerate}
+
+\begin{keyinsight}
+\textbf{For this interview:}
+
+Start with RW lock explanation. Only mention COW or lock-free if you have time and interviewer seems interested. Keep it practical and focused on correctness first, optimization second.
+
+\textbf{Good answer structure:}
+\begin{enumerate}
+    \item Identify read vs write operations
+    \item Explain why simple lock isn't optimal (blocks readers)
+    \item Propose RW lock with clear acquire points
+    \item Discuss granularity trade-offs
+    \item Mention testing strategy (race detectors, stress tests)
+\end{enumerate}
+\end{keyinsight}
+
+\newpage
+
+% ============================================================
+\section{Complete Solution Code}
+% ============================================================
+
+\begin{lstlisting}
+"""
+Augment Code Interview - Network Ports Problem
+Complete solution with all three parts
+"""
+
+import threading
+from typing import List, Set, Dict
+from dataclasses import dataclass
+
+
+@dataclass
+class ProcessRecord:
+    """Process information"""
+    pid: int
+    parent_pid: int  # None for root
+    ports: List[int]
+    is_alive: bool
+
+
+class ProcessDatabase:
+    """Process database interface"""
+
+    def __init__(self, processes: List[ProcessRecord]):
+        self.processes = processes
+
+    def get_process(self, pid: int) -> ProcessRecord:
+        """Get process by PID - O(n) scan"""
+        for proc in self.processes:
+            if proc.pid == pid:
+                return proc
+        return None
+
+    def get_children(self, pid: int) -> List[int]:
+        """Get child PIDs - O(n) scan"""
+        return [proc.pid for proc in self.processes
+                if proc.parent_pid == pid]
+
+
+class ThreadSafeProcessDatabase(ProcessDatabase):
+    """Thread-safe version with RW lock"""
+
+    def __init__(self, processes: List[ProcessRecord]):
+        super().__init__(processes)
+        # In production, use threading.RLock() or external RWLock library
+        self.lock = threading.RLock()
+
+    def find_all_ports_safe(self, root_pid: int) -> List[int]:
+        """Thread-safe port finding"""
+        with self.lock:  # Acquire for read
+            return find_all_ports_optimized(self, root_pid)
+
+    def garbage_collect_safe(self) -> int:
+        """Thread-safe garbage collection"""
+        with self.lock:  # Acquire for write
+            return garbage_collect(self.processes)
+
+
+# ============================================================
+# Part 1: Find All Ports
+# ============================================================
+
+def find_all_ports(database: ProcessDatabase, root_pid: int) -> List[int]:
+    """
+    Basic recursive solution.
+
+    Time: O(n * m) where n=processes, m=avg children
+    Space: O(h + p) where h=height, p=unique ports
+    """
+    ports_set = set()
+
+    def dfs(pid: int) -> None:
+        process = database.get_process(pid)
+
+        if process is None or not process.is_alive:
+            return
+
+        # Add this process's ports
+        ports_set.update(process.ports)
+
+        # Traverse children (remember: get_children returns PIDs!)
+        child_pids = database.get_children(pid)
+        for child_pid in child_pids:
+            dfs(child_pid)
+
+    dfs(root_pid)
+    return list(ports_set)
+
+
+def find_all_ports_optimized(database: ProcessDatabase,
+                             root_pid: int) -> List[int]:
+    """
+    Optimized with preprocessing.
+
+    Time: O(n) - single pass to build map + DFS
+    Space: O(n + p) - map storage + ports set
+    """
+    # Preprocessing: Build maps
+    parent_to_children: Dict[int, List[int]] = {}
+    pid_to_process: Dict[int, ProcessRecord] = {}
+
+    for process in database.processes:
+        pid_to_process[process.pid] = process
+        if process.parent_pid is not None:
+            parent_to_children.setdefault(
+                process.parent_pid, []
+            ).append(process.pid)
+
+    # DFS with O(1) lookups
+    ports_set = set()
+
+    def dfs(pid: int) -> None:
+        process = pid_to_process.get(pid)
+
+        if process is None or not process.is_alive:
+            return
+
+        ports_set.update(process.ports)
+
+        # O(1) lookup from map
+        for child_pid in parent_to_children.get(pid, []):
+            dfs(child_pid)
+
+    dfs(root_pid)
+    return list(ports_set)
+
+
+# ============================================================
+# Part 2: Garbage Collection
+# ============================================================
+
+def garbage_collect(processes: List[ProcessRecord]) -> int:
+    """
+    Move alive processes to front using two-pointer swap.
+
+    Time: O(n) - single pass
+    Space: O(1) - in-place swaps
+
+    Returns:
+        Index of first dead process (= count of alive)
+    """
+    write_idx = 0
+
+    for read_idx in range(len(processes)):
+        if processes[read_idx].is_alive:
+            # Swap alive process to front
+            if read_idx != write_idx:
+                processes[write_idx], processes[read_idx] = \
+                    processes[read_idx], processes[write_idx]
+            write_idx += 1
+
+    return write_idx
+
+
+def garbage_collect_with_removal(processes: List[ProcessRecord]) -> None:
+    """
+    Variant: Actually remove dead processes from list.
+    """
+    alive_count = garbage_collect(processes)
+    # Single O(k) deletion at end, not O(n^2) loop
+    del processes[alive_count:]
+
+
+# ============================================================
+# Testing
+# ============================================================
+
+def test_basic_tree():
+    """Test basic process tree traversal"""
+    processes = [
+        ProcessRecord(1, None, [80], True),
+        ProcessRecord(2, 1, [443], True),
+        ProcessRecord(3, 1, [3000, 3001], True),
+        ProcessRecord(4, 2, [8080], False),  # Dead
+        ProcessRecord(5, 3, [5000], True),
+    ]
+
+    db = ProcessDatabase(processes)
+
+    # Test from root
+    ports = find_all_ports(db, 1)
+    assert set(ports) == {80, 443, 3000, 3001, 5000}
+
+    # Test from subtree
+    ports = find_all_ports(db, 2)
+    assert set(ports) == {443}  # Ignores dead child
+
+    # Test optimized version
+    ports = find_all_ports_optimized(db, 1)
+    assert set(ports) == {80, 443, 3000, 3001, 5000}
+
+    print("[PASS] Basic tree test passed")
+
+
+def test_garbage_collection():
+    """Test GC compaction"""
+    processes = [
+        ProcessRecord(1, None, [80], True),
+        ProcessRecord(2, 1, [], False),
+        ProcessRecord(3, 1, [443], True),
+        ProcessRecord(4, 1, [], False),
+        ProcessRecord(5, 3, [8080], True),
+    ]
+
+    alive_count = garbage_collect(processes)
+
+    assert alive_count == 3
+    # First 3 should be alive
+    for i in range(3):
+        assert processes[i].is_alive
+    # Rest should be dead
+    for i in range(3, 5):
+        assert not processes[i].is_alive
+
+    print("[PASS] Garbage collection test passed")
+
+
+def test_edge_cases():
+    """Test edge cases"""
+    # Dead root
+    processes = [ProcessRecord(1, None, [80], False)]
+    db = ProcessDatabase(processes)
+    ports = find_all_ports(db, 1)
+    assert ports == []
+
+    # Empty ports
+    processes = [ProcessRecord(1, None, [], True)]
+    db = ProcessDatabase(processes)
+    ports = find_all_ports(db, 1)
+    assert ports == []
+
+    # Single process
+    processes = [ProcessRecord(1, None, [80, 443], True)]
+    db = ProcessDatabase(processes)
+    ports = find_all_ports(db, 1)
+    assert set(ports) == {80, 443}
+
+    print("[PASS] Edge cases test passed")
+
+
+if __name__ == "__main__":
+    test_basic_tree()
+    test_garbage_collection()
+    test_edge_cases()
+    print("\n[SUCCESS] All tests passed!")
+\end{lstlisting}
+
+\newpage
+
+% ============================================================
+\section{Interview Execution Strategy}
+% ============================================================
+
+\subsection{Time Management (50 minutes)}
+
+\begin{actionitem}
+\textbf{Recommended breakdown:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Minutes 0-5:} Understand problem, ask clarifications
+    \begin{itemize}
+        \item What does \texttt{get\_children()} return? (PIDs!)
+        \item Should we filter dead processes? (Yes)
+        \item Can ports be duplicated? (Yes - use set)
+    \end{itemize}
+
+    \item \textbf{Minutes 5-10:} Explain approach
+    \begin{itemize}
+        \item "I'll use recursive DFS with a hash set"
+        \item "Key insight: \texttt{get\_children()} returns PIDs, need \texttt{get\_process()}"
+        \item Draw small tree example
+    \end{itemize}
+
+    \item \textbf{Minutes 10-25:} Implement Part 1
+    \begin{itemize}
+        \item Write basic recursive solution first
+        \item Test with simple example
+        \item Discuss optimization if interviewer asks
+    \end{itemize}
+
+    \item \textbf{Minutes 25-30:} Complexity analysis
+    \begin{itemize}
+        \item Time: $O(n \times m)$ basic, $O(n)$ optimized
+        \item Space: $O(h)$ stack, $O(p)$ ports set
+        \item Explain trade-offs
+    \end{itemize}
+
+    \item \textbf{Minutes 30-40:} Implement Part 2 (GC)
+    \begin{itemize}
+        \item Explain two-pointer approach
+        \item "Like partitioning 1s and 0s in array"
+        \item Mention \texttt{del} is $O(n)$ pitfall
+    \end{itemize}
+
+    \item \textbf{Minutes 40-50:} Part 3 discussion
+    \begin{itemize}
+        \item Identify reads vs writes
+        \item Explain RW lock benefit
+        \item Discuss where to acquire locks
+        \item Mention testing strategy
+    \end{itemize}
+\end{enumerate}
+\end{actionitem}
+
+\subsection{Communication Tips}
+
+\begin{keyinsight}
+\textbf{Based on feedback - What interviewers want to hear:}
+
+\textbf{Design recognition (early in interview):}
+\begin{itemize}
+    \item "I notice this is a tree traversal - recursion makes sense"
+    \item "The flat list means lookups are $O(n)$ - we could optimize with a map"
+    \item "Need to be careful: \texttt{get\_children()} returns IDs, not objects"
+\end{itemize}
+
+\textbf{During implementation:}
+\begin{itemize}
+    \item "I'm using a set here for automatic deduplication"
+    \item "Need to check \texttt{is\_alive} before processing"
+    \item "This recurses down the tree, collecting ports at each level"
+\end{itemize}
+
+\textbf{Performance discussion:}
+\begin{itemize}
+    \item "Current approach calls \texttt{get\_children()} $n$ times, each scanning the database"
+    \item "Trade-off: We could precompute a map for $O(1)$ lookups using $O(n)$ space"
+    \item "For production, the optimization is worth it"
+\end{itemize}
+
+\textbf{Don't say (from feedback):}
+\begin{itemize}
+    \item Vague statements about "filtering" without clear explanation
+    \item "I think this works" without walking through logic
+    \item Proposing approach you don't understand
+\end{itemize}
+\end{keyinsight}
+
+\subsection{What to Write on Whiteboard}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Small tree example:}
+    \begin{verbatim}
+        1 [80]
+       / \
+      2   3 [443]
+     /     \
+    4(D)    5 [8080]
+
+    Output: {80, 443, 8080}
+    \end{verbatim}
+
+    \item \textbf{Two-pointer GC visualization:}
+    \begin{verbatim}
+    [A, D, A, D, A] $\rightarrow$ [A, A, A, D, D]
+     w  r              w=3
+    \end{verbatim}
+
+    \item \textbf{Lock hierarchy:}
+    \begin{verbatim}
+    Read operations     Write operations
+    ----------------    ----------------
+    find_all_ports  $\leftrightarrow$  garbage_collect
+    get_process     $\leftrightarrow$  update_process
+    (multiple concurrent) (exclusive)
+    \end{verbatim}
+\end{enumerate}
+
+\newpage
+
+% ============================================================
+\section{Key Concepts Review}
+% ============================================================
+
+\subsection{Process Hierarchy}
+
+\begin{conceptbox}
+\textbf{Process Tree Concepts:}
+
+\begin{itemize}
+    \item \textbf{PID (Process ID):} Unique identifier for each process
+    \item \textbf{Parent PID (PPID):} ID of parent process
+    \item \textbf{Root process:} Has \texttt{parent\_pid = None} (e.g., init/systemd)
+    \item \textbf{Child processes:} Created via fork/spawn
+    \item \textbf{Orphan processes:} Parent died, re-parented to init
+    \item \textbf{Zombie processes:} Dead but not yet reaped
+\end{itemize}
+
+\textbf{Real-world examples:}
+\begin{itemize}
+    \item Web server (nginx) spawns worker processes
+    \item Each worker inherits parent's listening ports
+    \item \texttt{ps auxf} shows tree hierarchy
+    \item \texttt{pstree} visualizes process relationships
+\end{itemize}
+\end{conceptbox}
+
+\subsection{Data Structures}
+
+\begin{conceptbox}
+\textbf{Hash Set Properties:}
+
+\begin{itemize}
+    \item \textbf{Insertion:} $O(1)$ average
+    \item \textbf{Lookup:} $O(1)$ average
+    \item \textbf{Automatic deduplication:} Adding same element is no-op
+    \item \textbf{No ordering:} Iteration order undefined
+    \item \textbf{Python:} \texttt{set()} built-in type
+\end{itemize}
+
+\textbf{When to use:}
+\begin{itemize}
+    \item Need unique elements
+    \item Fast membership testing
+    \item Collecting distinct values
+\end{itemize}
+
+\textbf{Array vs Hash Set:}
+\begin{itemize}
+    \item Array: Order preserved, duplicates allowed, $O(n)$ search
+    \item Set: No order, no duplicates, $O(1)$ search
+\end{itemize}
+\end{conceptbox}
+
+\subsection{Recursion Patterns}
+
+\begin{conceptbox}
+\textbf{Tree Recursion Template:}
+
+\begin{lstlisting}
+def traverse_tree(node):
+    # Base case
+    if node is None:
+        return
+
+    # Process current node
+    process(node)
+
+    # Recursive case: visit children
+    for child in node.children:
+        traverse_tree(child)
+\end{lstlisting}
+
+\textbf{Key considerations:}
+\begin{itemize}
+    \item \textbf{Base case:} When to stop recursing (null node, leaf)
+    \item \textbf{Stack depth:} Recursion uses call stack - $O(h)$ space
+    \item \textbf{Tail recursion:} Can be optimized by compiler (not Python)
+    \item \textbf{Alternative:} Iterative with explicit stack
+\end{itemize}
+\end{conceptbox}
+
+\subsection{Concurrency Primitives}
+
+\begin{conceptbox}
+\textbf{Lock Types:}
+
+\begin{enumerate}
+    \item \textbf{Mutex (Mutual Exclusion):}
+    \begin{itemize}
+        \item One thread at a time (read or write)
+        \item Simple but restrictive
+        \item Python: \texttt{threading.Lock()}
+    \end{itemize}
+
+    \item \textbf{RWLock (Read-Write Lock):}
+    \begin{itemize}
+        \item Multiple readers OR single writer
+        \item Better for read-heavy workloads
+        \item Python: Need external library (e.g., \texttt{readerwriterlock})
+    \end{itemize}
+
+    \item \textbf{Semaphore:}
+    \begin{itemize}
+        \item $N$ threads at a time
+        \item Rate limiting, connection pools
+        \item Python: \texttt{threading.Semaphore(n)}
+    \end{itemize}
+
+    \item \textbf{Condition Variable:}
+    \begin{itemize}
+        \item Wait for specific condition
+        \item Producer-consumer patterns
+        \item Python: \texttt{threading.Condition()}
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Common patterns:}
+\begin{lstlisting}
+# Context manager (automatic release)
+with lock:
+    # Critical section
+    access_shared_data()
+
+# Manual (error-prone)
+lock.acquire()
+try:
+    access_shared_data()
+finally:
+    lock.release()
+\end{lstlisting}
+\end{conceptbox}
+
+\subsection{Networking Basics}
+
+\begin{conceptbox}
+\textbf{Network Ports:}
+
+\begin{itemize}
+    \item \textbf{Port number:} 16-bit integer (0-65535)
+    \item \textbf{Well-known:} 0-1023 (HTTP=80, HTTPS=443, SSH=22)
+    \item \textbf{Registered:} 1024-49151 (Application-specific)
+    \item \textbf{Dynamic:} 49152-65535 (Ephemeral)
+\end{itemize}
+
+\textbf{Process port binding:}
+\begin{itemize}
+    \item Process calls \texttt{bind(port)} to listen
+    \item Only one process per port (usually)
+    \item \texttt{SO\_REUSEADDR} allows exceptions
+    \item Child processes can inherit listening sockets
+\end{itemize}
+
+\textbf{Checking ports:}
+\begin{itemize}
+    \item Linux: \texttt{lsof -i :port} or \texttt{netstat -tulpn}
+    \item macOS: \texttt{lsof -i :port}
+    \item Windows: \texttt{netstat -ano}
+\end{itemize}
+\end{conceptbox}
+
+\newpage
+
+% ============================================================
+\section{Common Mistakes \& How to Avoid}
+% ============================================================
+
+\begin{criticalpoint}
+\textbf{Mistake 1: Misunderstanding \texttt{get\_children()} return type}
+
+\textbf{Error:}
+\begin{lstlisting}
+children = database.get_children(pid)
+for child in children:
+    ports.extend(child.ports)  # child is int, not ProcessRecord!
+\end{lstlisting}
+
+\textbf{Fix:}
+\begin{lstlisting}
+child_pids = database.get_children(pid)
+for child_pid in child_pids:
+    child = database.get_process(child_pid)
+    if child and child.is_alive:
+        ports.extend(child.ports)
+\end{lstlisting}
+
+\textbf{Prevention:} Read method signatures carefully!
+\end{criticalpoint}
+
+\begin{criticalpoint}
+\textbf{Mistake 2: Premature optimization}
+
+\textbf{Error:} Spending 10+ minutes trying to avoid copying database
+
+\textbf{Interviewer feedback:} "Candidate spent ~10min spinning wheels trying linear-time approach avoiding copying"
+
+\textbf{Better approach:}
+\begin{enumerate}
+    \item Write correct basic solution first (5 min)
+    \item Explain optimization opportunity (2 min)
+    \item Implement optimization if interviewer interested (5 min)
+\end{enumerate}
+
+\textbf{Remember:} Correct > Fast
+\end{criticalpoint}
+
+\begin{criticalpoint}
+\textbf{Mistake 3: Using \texttt{del} in loop}
+
+\textbf{Error:}
+\begin{lstlisting}
+i = 0
+while i < len(processes):
+    if not processes[i].is_alive:
+        del processes[i]  # O(n) operation in loop!
+    else:
+        i += 1
+# Total: O(n^2)
+\end{lstlisting}
+
+\textbf{Fix:} Use two-pointer approach ($O(n)$) or single deletion at end
+
+\textbf{When interviewer explains:} Acknowledge, internalize, and use knowledge
+\end{criticalpoint}
+
+\begin{criticalpoint}
+\textbf{Mistake 4: Insufficient locking}
+
+\textbf{Error:}
+\begin{lstlisting}
+def garbage_collect(self):
+    with self.lock:  # Only lock writes
+        # Swap elements
+
+def find_ports(self, pid):
+    # NO LOCK - race condition!
+    for proc in self.processes:  # Being modified by GC!
+        ...
+\end{lstlisting}
+
+\textbf{Fix:} ALL access to shared data must be synchronized
+
+\textbf{Key principle:} Locks protect data, not functions
+\end{criticalpoint}
+
+\begin{criticalpoint}
+\textbf{Mistake 5: Sloppy implementation}
+
+\textbf{Feedback:} "Part 2 implementation showed right ideas but needlessly complex and generated edge-case problems"
+
+\textbf{How to avoid:}
+\begin{itemize}
+    \item Write pseudocode first
+    \item Test with simple example before finalizing
+    \item Check boundary conditions (empty list, single element)
+    \item Walk through code line-by-line with example
+\end{itemize}
+\end{criticalpoint}
+
+\newpage
+
+% ============================================================
+\section{Final Preparation Checklist}
+% ============================================================
+
+\subsection{Day Before Interview}
+
+\begin{actionitem}
+\textbf{Practice drill (do this 2-3 times):}
+
+\begin{enumerate}
+    \item \textbf{Part 1 (20 min):}
+    \begin{itemize}
+        \item Implement \texttt{find\_all\_ports()} from scratch
+        \item Write 2-3 test cases
+        \item Explain optimization
+    \end{itemize}
+
+    \item \textbf{Part 2 (15 min):}
+    \begin{itemize}
+        \item Implement \texttt{garbage\_collect()} with two-pointer
+        \item Test with example array
+        \item Explain why \texttt{del} in loop is bad
+    \end{itemize}
+
+    \item \textbf{Part 3 (10 min):}
+    \begin{itemize}
+        \item Explain RW lock concept
+        \item Sketch where locks go in code
+        \item Discuss granularity trade-offs
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Total practice time: 45 minutes per iteration}
+\end{actionitem}
+
+\subsection{Interview Day Checklist}
+
+\begin{actionitem}
+\textbf{Before interview:}
+
+\begin{itemize}[label=\faCheckSquare]
+    \item Review process tree concepts
+    \item Review hash set properties
+    \item Review recursion patterns
+    \item Review RW lock behavior
+    \item Practice explaining your thinking out loud
+\end{itemize}
+
+\textbf{During interview:}
+
+\begin{itemize}[label=\faCheckSquare]
+    \item Ask clarifying questions upfront
+    \item Explain approach before coding
+    \item Communicate assumptions
+    \item Test code with examples
+    \item Discuss complexity analysis
+    \item Be receptive to hints
+\end{itemize}
+
+\textbf{Red flags to avoid:}
+
+\begin{itemize}[label=\faTimesCircle]
+    \item Silent coding without explanation
+    \item Not testing your code
+    \item Ignoring interviewer hints
+    \item Defensive about mistakes
+    \item Giving up when stuck
+\end{itemize}
+\end{actionitem}
+
+\subsection{Key Reminders}
+
+\begin{keyinsight}
+\textbf{Success factors from past feedback:}
+
+\textbf{What got candidates hired:}
+\begin{itemize}
+    \item Quick recognition of recursion and flat-list issues
+    \item Clear communication of design decisions
+    \item Clean, correct implementations
+    \item Strong understanding of complexity trade-offs
+    \item Immediately picking up on swapping approach for GC
+\end{itemize}
+
+\textbf{What led to rejection:}
+\begin{itemize}
+    \item Consistently substantial gaps in implementation
+    \item Not understanding performance implications
+    \item Sloppy code with edge case bugs
+    \item Weak concurrency knowledge
+    \item Poor communication about design choices
+\end{itemize}
+
+\textbf{Bottom line:}
+\begin{itemize}
+    \item Correctness first, optimization second
+    \item Communicate clearly throughout
+    \item Be receptive to feedback and hints
+    \item Test your code with examples
+    \item Show systems thinking (not just coding)
+\end{itemize}
+\end{keyinsight}
+
+\newpage
+
+% ============================================================
+\section{Summary}
+% ============================================================
+
+\subsection{Core Algorithms}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Part 1 - Find All Ports:}
+    \begin{itemize}
+        \item DFS recursion through process tree
+        \item Hash set for deduplication
+        \item Filter dead processes
+        \item Optional: Precompute parent$\rightarrow$children map
+        \item Time: $O(n)$ optimized, Space: $O(n)$
+    \end{itemize}
+
+    \item \textbf{Part 2 - Garbage Collection:}
+    \begin{itemize}
+        \item Two-pointer in-place swap
+        \item Move alive to front, dead to back
+        \item Single pass, $O(n)$ time, $O(1)$ space
+        \item Avoid \texttt{del} in loop ($O(n^2)$)
+    \end{itemize}
+
+    \item \textbf{Part 3 - Thread Safety:}
+    \begin{itemize}
+        \item RW lock for read-heavy workloads
+        \item Multiple readers, single writer
+        \item All access must be synchronized
+        \item Discuss granularity trade-offs
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Interview Mindset}
+
+\textbf{Technical competence:}
+\begin{itemize}
+    \item Solid understanding of data structures
+    \item Clean implementation skills
+    \item Performance awareness
+\end{itemize}
+
+\textbf{Communication:}
+\begin{itemize}
+    \item Explain approach before coding
+    \item Think out loud
+    \item Acknowledge and learn from hints
+\end{itemize}
+
+\textbf{Problem-solving:}
+\begin{itemize}
+    \item Ask clarifying questions
+    \item Start with correct solution
+    \item Optimize after basics work
+\end{itemize}
+
+\begin{center}
+\Large\textbf{You've got this!}
+\end{center}
+
+\end{document}
