@@ -636,7 +636,7 @@ def test_document_processor():
     result = execute(events, doc)
     assert result["content"] == "Hello", f"Expected 'Hello', got '{result['content']}'"
     assert result["lastUpdated"] == 100, f"Expected 100, got {result['lastUpdated']}"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 2: Multiple appends to different lines
     print("\n[Test 2] Multiple lines")
@@ -651,7 +651,7 @@ def test_document_processor():
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == "Line1\nLine2"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 3: Multiple appends to SAME line (critical!)
     print("\n[Test 3] Same line appends (CRITICAL)")
@@ -667,7 +667,7 @@ def test_document_processor():
     result = execute(events, doc)
     assert result["content"] == "Hello World", \
         f"Must APPEND not replace! Got: '{result['content']}'"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 4: Delete event
     print("\n[Test 4] Delete clears all content")
@@ -676,7 +676,7 @@ def test_document_processor():
            "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == ""
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 5: Delete then append
     print("\n[Test 5] Delete then append")
@@ -689,7 +689,7 @@ def test_document_processor():
     doc = {"title": "Test", "content": "Old", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == "New"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 6: Out-of-order events (CRITICAL!)
     print("\n[Test 6] Out-of-order events (CRITICAL)")
@@ -705,7 +705,7 @@ def test_document_processor():
     result = execute(events, doc)
     assert result["content"] == "First\nSecond", \
         "Must sort by timestamp!"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 7: Case-insensitive event names
     print("\n[Test 7] Case-insensitive names")
@@ -720,7 +720,7 @@ def test_document_processor():
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == "A\nB\nC"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 8: Gap in line numbers
     print("\n[Test 8] Gap in line numbers")
@@ -736,7 +736,7 @@ def test_document_processor():
     assert len(lines) == 5, f"Expected 5 lines, got {len(lines)}"
     assert lines[4] == "Line5", f"Expected 'Line5' at index 4, got '{lines[4]}'"
     assert lines[0] == "", "Empty lines should fill gap"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 9: Empty events list
     print("\n[Test 9] Empty events")
@@ -746,7 +746,7 @@ def test_document_processor():
     result = execute(events, doc)
     assert result["content"] == "Original"
     assert result["lastUpdated"] == 50
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 10: Document without content field
     print("\n[Test 10] No initial content field")
@@ -759,7 +759,7 @@ def test_document_processor():
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}  # No "content"
     result = execute(events, doc)
     assert result["content"] == "New"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 11: Existing content with append
     print("\n[Test 11] Append to existing content")
@@ -773,7 +773,7 @@ def test_document_processor():
            "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == "Existing more"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     # Test 12: Mixed operations
     print("\n[Test 12] Complex mixed operations")
@@ -790,10 +790,10 @@ def test_document_processor():
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == "A1\nB\nC"
-    print("  ✓ Passed")
+    print("  PASSED")
 
     print("\n" + "="*50)
-    print("ALL TESTS PASSED! ✓✓✓")
+    print("ALL TESTS PASSED!")
     print("="*50)
 
 if __name__ == "__main__":
@@ -1400,13 +1400,13 @@ In production, ClickUp likely uses:
 \subsection{Common Mistakes to Avoid}
 
 \begin{itemize}
-    \item ✗ Forgetting to sort events
-    \item ✗ Not handling case-insensitive event names
-    \item ✗ Using \texttt{=} instead of \texttt{+=} for append (replaces instead of appends!)
-    \item ✗ Off-by-one errors with 1-indexed vs 0-indexed
-    \item ✗ Not handling empty events or missing content
-    \item ✗ Modifying input document directly
-    \item ✗ Not testing edge cases
+    \item X Forgetting to sort events
+    \item X Not handling case-insensitive event names
+    \item X Using \texttt{=} instead of \texttt{+=} for append (replaces instead of appends!)
+    \item X Off-by-one errors with 1-indexed vs 0-indexed
+    \item X Not handling empty events or missing content
+    \item X Modifying input document directly
+    \item X Not testing edge cases
 \end{itemize}
 
 \subsection{Python Quick Reference}
