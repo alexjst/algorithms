@@ -5,6 +5,7 @@
 \usepackage{listings}
 \usepackage{enumitem}
 \usepackage{hyperref}
+\usepackage{amssymb}
 
 % Configure hyperref for blue links without boxes
 \hypersetup{
@@ -20,6 +21,7 @@
 \definecolor{solutiongreen}{RGB}{39, 174, 96}
 \definecolor{testpurple}{RGB}{142, 68, 173}
 \definecolor{warningorange}{RGB}{230, 126, 34}
+\definecolor{tipblue}{RGB}{52, 152, 219}
 
 % Define colored boxes
 \newtcolorbox{problembox}{
@@ -46,7 +48,14 @@
 \newtcolorbox{warningbox}{
     colback=warningorange!5,
     colframe=warningorange,
-    title=Important Edge Cases,
+    title=Important Edge Cases \& Gotchas,
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{tipbox}{
+    colback=tipblue!5,
+    colframe=tipblue,
+    title=Pro Tips,
     fonttitle=\bfseries
 }
 
@@ -64,7 +73,7 @@
 }
 
 \title{\textbf{ClickUp Backend Interview\\Document Event Processing}}
-\author{Complete Preparation Guide - November 30, 2024}
+\author{Complete Preparation Guide - November 30, 2024 (v2)}
 \date{\today}
 
 \begin{document}
@@ -108,6 +117,52 @@
 
 \newpage
 
+\section{CRITICAL: Questions to Ask First!}
+
+\begin{tipbox}
+\textbf{Before you start coding, ask these clarifying questions:}
+
+\begin{enumerate}
+    \item \textbf{lastUpdated behavior:} "Should lastUpdated be set to the timestamp of the latest event, or should it be incremented by 1?"
+    \begin{itemize}
+        \item The examples show inconsistent behavior - clarify this!
+        \item Most logical: use the latest event's timestamp
+    \end{itemize}
+
+    \item \textbf{Invalid line numbers:} "What should happen if startLine is 0 or negative?"
+    \begin{itemize}
+        \item Skip the event? Return error? Assume line 1?
+    \end{itemize}
+
+    \item \textbf{Event validation:} "Should I validate event structure and handle malformed events?"
+    \begin{itemize}
+        \item Missing required fields?
+        \item Unknown event types?
+    \end{itemize}
+
+    \item \textbf{Same timestamp:} "If multiple events have the same timestamp, what determines their order?"
+    \begin{itemize}
+        \item Use event\_id as tiebreaker?
+        \item Stable sort (preserve original order)?
+    \end{itemize}
+
+    \item \textbf{Document mutation:} "Should I modify the input document in place or return a new copy?"
+    \begin{itemize}
+        \item Safer to return a copy
+        \item But in-place is more efficient
+    \end{itemize}
+
+    \item \textbf{Content initialization:} "If document doesn't have a content field initially, should I initialize it as empty string?"
+
+    \item \textbf{Trailing newlines:} "Should the final content have a trailing newline character?"
+\end{enumerate}
+
+\vspace{10pt}
+\textbf{These questions show you think critically and catch ambiguities!}
+\end{tipbox}
+
+\newpage
+
 \section{Core Problem: Document Event Processor}
 
 \begin{problembox}
@@ -133,7 +188,7 @@
 \begin{verbatim}
 {
     event_id: number,
-    event_name: string,       // Case-insensitive
+    event_name: string,       // Case-insensitive: "append", "APPEND", "Append"
     payload: object,
     timestamp: timestamp
 }
@@ -146,10 +201,10 @@
 \begin{verbatim}
 payload: {
     newContent: string,
-    startLine: number        // 1-indexed
+    startLine: number        // 1-indexed (line 1 = first line)
 }
 \end{verbatim}
-If content exists at that line, append newContent to the end of that line.
+\textbf{Important:} If content exists at that line, \textbf{append} newContent to the end of that line (don't replace!).
 
 2. \textbf{delete} - Delete all content from document
 \begin{verbatim}
@@ -159,47 +214,69 @@ payload: {}  // Empty
 \vspace{10pt}
 \textbf{Requirements:}
 \begin{itemize}
-    \item Process events in timestamp order
+    \item Process events in timestamp order (may arrive out-of-order)
     \item Update document.lastUpdated to latest event timestamp
     \item Handle case-insensitive event names
     \item Return updated document object
 \end{itemize}
 \end{problembox}
 
-\begin{testbox}
-\textbf{Example 1: Multiple Appends}
+\begin{warningbox}
+\textbf{IMPORTANT NOTE:} The provided examples show lastUpdated incrementing by 1 (123456789 → 123456790), but event timestamps are in the billions (1641024000001). This appears to be an inconsistency in the problem statement.
+
+\vspace{10pt}
+\textbf{Most logical interpretation:} Set lastUpdated to the timestamp of the most recent event.
+
+\vspace{10pt}
+\textbf{Action:} Ask the interviewer to clarify this behavior before coding!
+\end{warningbox}
+
+\newpage
+
+\section{Examples with Step-by-Step Trace}
+
+\subsection{Example 1: Multiple Appends}
 
 \textbf{Input:}
 \begin{lstlisting}
 events = [
-    {
-        "event_id": 1,
-        "event_name": "append",
-        "payload": {"newContent": "Line 1 ", "startLine": 1},
-        "timestamp": 1641024000001
-    },
-    {
-        "event_id": 2,
-        "event_name": "APPEND",
-        "payload": {"newContent": "Line 2 ", "startLine": 2},
-        "timestamp": 1641024000002
-    },
-    {
-        "event_id": 3,
-        "event_name": "APPEND",
-        "payload": {"newContent": "Line 3 ", "startLine": 3},
-        "timestamp": 1641024000003
-    }
+    {"event_id": 1, "event_name": "append",
+     "payload": {"newContent": "Line 1 ", "startLine": 1},
+     "timestamp": 1641024000001},
+    {"event_id": 2, "event_name": "APPEND",
+     "payload": {"newContent": "Line 2 ", "startLine": 2},
+     "timestamp": 1641024000002},
+    {"event_id": 3, "event_name": "APPEND",
+     "payload": {"newContent": "Line 3 ", "startLine": 3},
+     "timestamp": 1641024000003}
 ]
 
-document = {
-    "title": "Lorem Ipsum",
-    "lastUpdated": 123456789,
-    "createdOn": 123456789
-}
+document = {"title": "Lorem Ipsum", "lastUpdated": 123456789, "createdOn": 123456789}
 \end{lstlisting}
 
-\textbf{Output:}
+\textbf{Step-by-Step Execution:}
+\begin{verbatim}
+Initial state:
+  lines = []
+  lastUpdated = 123456789
+
+After Event 1 (append to line 1):
+  lines = ["Line 1 "]
+  lastUpdated = 1641024000001
+
+After Event 2 (append to line 2):
+  lines = ["Line 1 ", "Line 2 "]
+  lastUpdated = 1641024000002
+
+After Event 3 (append to line 3):
+  lines = ["Line 1 ", "Line 2 ", "Line 3 "]
+  lastUpdated = 1641024000003
+
+Final: Join lines with "\n"
+  content = "Line 1 \nLine 2 \nLine 3 "
+\end{verbatim}
+
+\textbf{Expected Output:}
 \begin{lstlisting}
 {
     "title": "Lorem Ipsum",
@@ -209,18 +286,11 @@ document = {
 }
 \end{lstlisting}
 
-\vspace{10pt}
-\textbf{Example 2: Delete Event}
+\subsection{Example 2: Delete Event}
 
 \textbf{Input:}
 \begin{lstlisting}
-events = [
-    {
-        "event_id": 1,
-        "event_name": "delete",
-        "timestamp": 1641024000000
-    }
-]
+events = [{"event_id": 1, "event_name": "delete", "timestamp": 1641024000000}]
 
 document = {
     "title": "Lorem Ipsum",
@@ -230,7 +300,18 @@ document = {
 }
 \end{lstlisting}
 
-\textbf{Output:}
+\textbf{Step-by-Step:}
+\begin{verbatim}
+Initial state:
+  lines = ["This is Lorem ipsum"]
+
+After Event 1 (delete):
+  lines = []
+  content = ""
+  lastUpdated = 1641024000000
+\end{verbatim}
+
+\textbf{Expected Output:}
 \begin{lstlisting}
 {
     "title": "Lorem Ipsum",
@@ -239,7 +320,6 @@ document = {
     "createdOn": 123456789
 }
 \end{lstlisting}
-\end{testbox}
 
 \newpage
 
@@ -248,25 +328,36 @@ document = {
 \subsection{Approach}
 
 \begin{enumerate}
-    \item \textbf{Sort events by timestamp} (handle out-of-order)
-    \item \textbf{Initialize content} as list of lines (if document has content)
+    \item \textbf{Sort events by timestamp} (handle out-of-order delivery)
+    \item \textbf{Initialize content} as list of lines
     \item \textbf{Process each event} in order:
     \begin{itemize}
         \item For \texttt{append}: Update/create line at specified position
         \item For \texttt{delete}: Clear all content
     \end{itemize}
     \item \textbf{Join lines} back into string with \textbackslash n
-    \item \textbf{Update lastUpdated} to latest timestamp
+    \item \textbf{Update lastUpdated} to latest event timestamp
+    \item \textbf{Return updated document}
 \end{enumerate}
 
 \subsection{Key Insights}
 
 \begin{itemize}
-    \item Use \textbf{list for lines} - efficient indexing and modification
-    \item Handle \textbf{1-indexed lines} (convert to 0-indexed internally)
-    \item \textbf{Extend list} if startLine exceeds current length
-    \item Event names are \textbf{case-insensitive} (use .lower())
-    \item \textbf{Preserve existing line content} when appending
+    \item Use \textbf{list for lines} - O(1) indexing, easy modification
+    \item Handle \textbf{1-indexed lines} (convert to 0-indexed: \texttt{line\_idx = start\_line - 1})
+    \item \textbf{Extend list} with empty strings if startLine exceeds current length
+    \item Event names are \textbf{case-insensitive} (use \texttt{.lower()})
+    \item \textbf{Append, don't replace} - use \texttt{lines[idx] += new\_content}
+    \item Return a \textbf{copy} to avoid modifying input (safer)
+\end{itemize}
+
+\subsection{Why List Over String Manipulation?}
+
+\begin{itemize}
+    \item \textbf{Strings are immutable} in Python - expensive to modify
+    \item \textbf{List operations} are O(1) for append and indexed assignment
+    \item \textbf{Only convert} to string once at the end
+    \item Much more efficient for multiple operations
 \end{itemize}
 
 \newpage
@@ -274,35 +365,42 @@ document = {
 \section{Complete Solution}
 
 \begin{solutionbox}
-\textbf{Python Implementation}
+\textbf{Clean Production-Ready Implementation}
 
 \begin{lstlisting}
 def execute(events, document):
     """
     Process document events and return updated document.
 
+    This solution handles:
+    - Out-of-order events (sorts by timestamp)
+    - Case-insensitive event names
+    - Line gaps (fills with empty strings)
+    - Multiple appends to same line
+    - Document without initial content
+
     Args:
         events: List of event dictionaries
         document: Document dictionary
 
     Returns:
-        Updated document dictionary
+        New document dictionary with processed changes
     """
-    # Handle empty events
+    # Handle empty events - return unchanged
     if not events:
         return document
 
-    # Sort events by timestamp (handle out-of-order)
+    # Sort events by timestamp (handle out-of-order delivery)
     sorted_events = sorted(events, key=lambda e: e["timestamp"])
 
     # Initialize content as list of lines
     content = document.get("content", "")
     lines = content.split("\n") if content else []
 
-    # Track latest timestamp
-    latest_timestamp = document["lastUpdated"]
+    # Track latest timestamp for lastUpdated
+    latest_timestamp = document.get("lastUpdated", 0)
 
-    # Process each event
+    # Process each event in chronological order
     for event in sorted_events:
         event_name = event["event_name"].lower()
         timestamp = event["timestamp"]
@@ -315,64 +413,97 @@ def execute(events, document):
             # Convert to 0-indexed
             line_idx = start_line - 1
 
-            # Extend lines list if necessary
+            # Extend lines list if necessary (fill gaps with empty strings)
             while len(lines) <= line_idx:
                 lines.append("")
 
-            # Append to existing line content
+            # Append to existing line content (don't replace!)
             lines[line_idx] += new_content
 
         elif event_name == "delete":
             # Clear all content
             lines = []
 
-        # Update latest timestamp
+        # Update to most recent timestamp
         latest_timestamp = max(latest_timestamp, timestamp)
 
-    # Join lines back to string
-    document["content"] = "\n".join(lines)
-    document["lastUpdated"] = latest_timestamp
+    # Create result (don't modify input)
+    result = document.copy()
+    result["content"] = "\n".join(lines)
+    result["lastUpdated"] = latest_timestamp
 
-    return document
+    return result
+\end{lstlisting}
 
+\textbf{Time Complexity:} O(n log n + n*m) where:
+\begin{itemize}
+    \item n = number of events
+    \item m = average line length
+    \item Sorting: O(n log n)
+    \item Processing: O(n) events × O(m) average line operations
+\end{itemize}
 
-# Alternative: More explicit version with error handling
+\textbf{Space Complexity:} O(L) where L = total lines in final document
+\end{solutionbox}
+
+\newpage
+
+\section{Robust Version with Validation}
+
+\begin{solutionbox}
+\textbf{Enterprise Version with Error Handling}
+
+\begin{lstlisting}
 def execute_robust(events, document):
     """
-    Robust version with explicit error handling.
+    Robust version with comprehensive validation and error handling.
+    Use this if interviewer asks about production considerations.
     """
+    # Validate inputs
     if not events:
-        return document
+        return document.copy()
 
-    # Sort by timestamp
+    if not isinstance(events, list):
+        raise ValueError("events must be a list")
+
+    if not isinstance(document, dict):
+        raise ValueError("document must be a dictionary")
+
+    # Sort by timestamp (with fallback for missing timestamps)
     sorted_events = sorted(events, key=lambda e: e.get("timestamp", 0))
 
     # Initialize content
     content = document.get("content", "")
     lines = content.split("\n") if content else []
 
-    # Remove empty trailing line if present
+    # Remove trailing empty line if present (from content ending in \n)
     if lines and lines[-1] == "":
         lines = lines[:-1]
 
     latest_timestamp = document.get("lastUpdated", 0)
 
+    # Process each event with validation
     for event in sorted_events:
+        # Validate event structure
+        if not isinstance(event, dict):
+            continue  # Skip malformed events
+
         event_name = event.get("event_name", "").lower()
         timestamp = event.get("timestamp", 0)
         payload = event.get("payload", {})
 
         if event_name == "append":
+            # Validate payload
             new_content = payload.get("newContent", "")
             start_line = payload.get("startLine", 1)
 
-            # Validate line number
+            # Validate line number (must be positive)
             if start_line < 1:
                 continue  # Skip invalid line numbers
 
             line_idx = start_line - 1
 
-            # Extend lines to accommodate new line
+            # Extend lines if needed
             while len(lines) <= line_idx:
                 lines.append("")
 
@@ -380,102 +511,121 @@ def execute_robust(events, document):
             lines[line_idx] += new_content
 
         elif event_name == "delete":
+            # Clear all content
             lines = []
 
+        # Update timestamp
         latest_timestamp = max(latest_timestamp, timestamp)
 
-    # Reconstruct content
-    document["content"] = "\n".join(lines)
-    document["lastUpdated"] = latest_timestamp
+    # Build result
+    result = document.copy()
+    result["content"] = "\n".join(lines)
+    result["lastUpdated"] = latest_timestamp
 
-    return document
+    return result
 \end{lstlisting}
-
-\textbf{Time Complexity:} O(n log n + n*m) where n = events, m = max lines \\
-\textbf{Space Complexity:} O(m) for storing lines
 \end{solutionbox}
 
 \newpage
 
-\section{Edge Cases to Handle}
+\section{Critical Edge Cases}
 
 \begin{warningbox}
-\textbf{Critical Edge Cases:}
+\textbf{YOU MUST HANDLE THESE:}
 
 \begin{enumerate}
     \item \textbf{Empty Events List}
-    \begin{itemize}
-        \item Return original document unchanged
-        \item Don't crash on empty input
-    \end{itemize}
+    \begin{lstlisting}
+events = []
+# Should return document unchanged
+    \end{lstlisting}
 
-    \item \textbf{Out-of-Order Events}
-    \begin{itemize}
-        \item Events may not arrive sorted by timestamp
-        \item MUST sort before processing
-    \end{itemize}
+    \item \textbf{Out-of-Order Events} - CRITICAL!
+    \begin{lstlisting}
+events = [
+    {"event_id": 2, ..., "timestamp": 102},  # Second
+    {"event_id": 1, ..., "timestamp": 101}   # First
+]
+# Must sort by timestamp before processing!
+    \end{lstlisting}
 
     \item \textbf{Case-Insensitive Event Names}
-    \begin{itemize}
-        \item "append", "APPEND", "Append" all valid
-        \item Use .lower() for comparison
-    \end{itemize}
+    \begin{lstlisting}
+"append", "APPEND", "Append", "aPpEnD"  # All valid
+# Use event_name.lower() for comparison
+    \end{lstlisting}
 
-    \item \textbf{Gaps in Line Numbers}
-    \begin{itemize}
-        \item Append to line 5 when only 2 lines exist
-        \item Fill with empty lines in between
-    \end{itemize}
+    \item \textbf{Multiple Appends to Same Line} - MUST APPEND, NOT REPLACE!
+    \begin{lstlisting}
+events = [
+    {"payload": {"newContent": "Hello ", "startLine": 1}, ...},
+    {"payload": {"newContent": "World", "startLine": 1}, ...}
+]
+# Result: lines[0] = "Hello World" NOT "World"
+    \end{lstlisting}
 
-    \item \textbf{Appending to Same Line}
-    \begin{itemize}
-        \item Multiple appends to line 1: concatenate all
-        \item Don't replace, append to existing content
-    \end{itemize}
+    \item \textbf{Gap in Line Numbers}
+    \begin{lstlisting}
+events = [{"payload": {"newContent": "Line5", "startLine": 5}, ...}]
+# Result: lines = ["", "", "", "", "Line5"]
+# Fill gaps with empty strings!
+    \end{lstlisting}
 
     \item \textbf{Delete Then Append}
-    \begin{itemize}
-        \item Delete clears all lines
-        \item Subsequent appends start fresh
-    \end{itemize}
+    \begin{lstlisting}
+events = [
+    {"event_name": "delete", "timestamp": 100},
+    {"event_name": "append", "payload": {..., "startLine": 1}, "timestamp": 101}
+]
+# Delete clears lines = [], then append starts fresh
+    \end{lstlisting}
 
     \item \textbf{Document Without Content Field}
-    \begin{itemize}
-        \item Initialize as empty string
-        \item Use document.get("content", "")
-    \end{itemize}
+    \begin{lstlisting}
+document = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
+# No "content" key initially
+# Use document.get("content", "") to handle safely
+    \end{lstlisting}
 
-    \item \textbf{Empty Payload}
-    \begin{itemize}
-        \item Delete event has empty payload
-        \item Handle missing keys gracefully
-    \end{itemize}
+    \item \textbf{Empty Payload or Missing Fields}
+    \begin{lstlisting}
+{"event_name": "delete", "timestamp": 100}
+# Delete has no payload - that's valid
+# Use payload.get("key", default) for safety
+    \end{lstlisting}
 
-    \item \textbf{Line Number Edge Cases}
-    \begin{itemize}
-        \item startLine = 1 (first line, 1-indexed)
-        \item startLine = 0 or negative (invalid - skip or error)
-        \item startLine = 1000 (fill gaps with empty lines)
-    \end{itemize}
+    \item \textbf{Line Number 0 or Negative}
+    \begin{lstlisting}
+{"payload": {"newContent": "X", "startLine": 0}, ...}
+{"payload": {"newContent": "Y", "startLine": -1}, ...}
+# Invalid! Lines are 1-indexed. Skip or error.
+    \end{lstlisting}
 
-    \item \textbf{Trailing Newline Handling}
-    \begin{itemize}
-        \item Be careful with split/join creating extra empty lines
-        \item Test with content ending in \textbackslash n
-    \end{itemize}
+    \item \textbf{Same Timestamp, Different Events}
+    \begin{lstlisting}
+events = [
+    {"event_id": 1, ..., "timestamp": 100},
+    {"event_id": 2, ..., "timestamp": 100}  # Same timestamp!
+]
+# Python's sort is stable - preserves original order
+# Or ask interviewer: use event_id as tiebreaker?
+    \end{lstlisting}
 \end{enumerate}
 \end{warningbox}
 
 \newpage
 
-\section{Comprehensive Test Cases}
+\section{Comprehensive Test Suite}
 
 \begin{testbox}
 \begin{lstlisting}
 def test_document_processor():
-    """Comprehensive test suite."""
+    """Complete test suite covering all edge cases."""
 
-    # Test 1: Basic append
+    print("Running comprehensive test suite...")
+
+    # Test 1: Basic append to empty document
+    print("\n[Test 1] Basic append")
     events = [{
         "event_id": 1,
         "event_name": "append",
@@ -484,26 +634,27 @@ def test_document_processor():
     }]
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
-    assert result["content"] == "Hello"
-    assert result["lastUpdated"] == 100
-    print("Test 1 passed: Basic append")
+    assert result["content"] == "Hello", f"Expected 'Hello', got '{result['content']}'"
+    assert result["lastUpdated"] == 100, f"Expected 100, got {result['lastUpdated']}"
+    print("  ✓ Passed")
 
     # Test 2: Multiple appends to different lines
+    print("\n[Test 2] Multiple lines")
     events = [
         {"event_id": 1, "event_name": "append",
-         "payload": {"newContent": "Line1 ", "startLine": 1},
+         "payload": {"newContent": "Line1", "startLine": 1},
          "timestamp": 100},
         {"event_id": 2, "event_name": "append",
-         "payload": {"newContent": "Line2 ", "startLine": 2},
+         "payload": {"newContent": "Line2", "startLine": 2},
          "timestamp": 101}
     ]
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
-    assert result["content"] == "Line1 \nLine2 "
-    assert result["lastUpdated"] == 101
-    print("Test 2 passed: Multiple appends")
+    assert result["content"] == "Line1\nLine2"
+    print("  ✓ Passed")
 
-    # Test 3: Multiple appends to SAME line
+    # Test 3: Multiple appends to SAME line (critical!)
+    print("\n[Test 3] Same line appends (CRITICAL)")
     events = [
         {"event_id": 1, "event_name": "append",
          "payload": {"newContent": "Hello ", "startLine": 1},
@@ -514,64 +665,65 @@ def test_document_processor():
     ]
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
-    assert result["content"] == "Hello World"
-    print("Test 3 passed: Same line appends")
+    assert result["content"] == "Hello World", \
+        f"Must APPEND not replace! Got: '{result['content']}'"
+    print("  ✓ Passed")
 
     # Test 4: Delete event
-    events = [{
-        "event_id": 1,
-        "event_name": "delete",
-        "timestamp": 100
-    }]
+    print("\n[Test 4] Delete clears all content")
+    events = [{"event_id": 1, "event_name": "delete", "timestamp": 100}]
     doc = {"title": "Test", "content": "Some content",
            "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == ""
-    assert result["lastUpdated"] == 100
-    print("Test 4 passed: Delete event")
+    print("  ✓ Passed")
 
     # Test 5: Delete then append
+    print("\n[Test 5] Delete then append")
     events = [
         {"event_id": 1, "event_name": "delete", "timestamp": 100},
         {"event_id": 2, "event_name": "append",
          "payload": {"newContent": "New", "startLine": 1},
          "timestamp": 101}
     ]
-    doc = {"title": "Test", "content": "Old content",
-           "lastUpdated": 0, "createdOn": 0}
+    doc = {"title": "Test", "content": "Old", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == "New"
-    print("Test 5 passed: Delete then append")
+    print("  ✓ Passed")
 
-    # Test 6: Out-of-order events
+    # Test 6: Out-of-order events (CRITICAL!)
+    print("\n[Test 6] Out-of-order events (CRITICAL)")
     events = [
         {"event_id": 2, "event_name": "append",
          "payload": {"newContent": "Second", "startLine": 2},
-         "timestamp": 102},
+         "timestamp": 102},  # Later timestamp
         {"event_id": 1, "event_name": "append",
          "payload": {"newContent": "First", "startLine": 1},
-         "timestamp": 101}
+         "timestamp": 101}   # Earlier timestamp
     ]
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
-    assert result["content"] == "First\nSecond"
-    print("Test 6 passed: Out-of-order events")
+    assert result["content"] == "First\nSecond", \
+        "Must sort by timestamp!"
+    print("  ✓ Passed")
 
     # Test 7: Case-insensitive event names
+    print("\n[Test 7] Case-insensitive names")
     events = [
         {"event_id": 1, "event_name": "APPEND",
-         "payload": {"newContent": "A", "startLine": 1},
-         "timestamp": 100},
+         "payload": {"newContent": "A", "startLine": 1}, "timestamp": 100},
         {"event_id": 2, "event_name": "Append",
-         "payload": {"newContent": "B", "startLine": 2},
-         "timestamp": 101}
+         "payload": {"newContent": "B", "startLine": 2}, "timestamp": 101},
+        {"event_id": 3, "event_name": "aPpEnD",
+         "payload": {"newContent": "C", "startLine": 3}, "timestamp": 102}
     ]
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
-    assert result["content"] == "A\nB"
-    print("Test 7 passed: Case-insensitive")
+    assert result["content"] == "A\nB\nC"
+    print("  ✓ Passed")
 
     # Test 8: Gap in line numbers
+    print("\n[Test 8] Gap in line numbers")
     events = [{
         "event_id": 1,
         "event_name": "append",
@@ -581,33 +733,68 @@ def test_document_processor():
     doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
     result = execute(events, doc)
     lines = result["content"].split("\n")
-    assert len(lines) == 5
-    assert lines[4] == "Line5"
-    assert lines[0] == ""  # Empty lines before
-    print("Test 8 passed: Gap in line numbers")
+    assert len(lines) == 5, f"Expected 5 lines, got {len(lines)}"
+    assert lines[4] == "Line5", f"Expected 'Line5' at index 4, got '{lines[4]}'"
+    assert lines[0] == "", "Empty lines should fill gap"
+    print("  ✓ Passed")
 
     # Test 9: Empty events list
+    print("\n[Test 9] Empty events")
     events = []
     doc = {"title": "Test", "content": "Original",
            "lastUpdated": 50, "createdOn": 0}
     result = execute(events, doc)
     assert result["content"] == "Original"
     assert result["lastUpdated"] == 50
-    print("Test 9 passed: Empty events")
+    print("  ✓ Passed")
 
     # Test 10: Document without content field
+    print("\n[Test 10] No initial content field")
     events = [{
         "event_id": 1,
         "event_name": "append",
         "payload": {"newContent": "New", "startLine": 1},
         "timestamp": 100
     }]
-    doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
+    doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}  # No "content"
     result = execute(events, doc)
     assert result["content"] == "New"
-    print("Test 10 passed: No initial content")
+    print("  ✓ Passed")
 
-    print("\nAll tests passed!")
+    # Test 11: Existing content with append
+    print("\n[Test 11] Append to existing content")
+    events = [{
+        "event_id": 1,
+        "event_name": "append",
+        "payload": {"newContent": " more", "startLine": 1},
+        "timestamp": 100
+    }]
+    doc = {"title": "Test", "content": "Existing",
+           "lastUpdated": 0, "createdOn": 0}
+    result = execute(events, doc)
+    assert result["content"] == "Existing more"
+    print("  ✓ Passed")
+
+    # Test 12: Mixed operations
+    print("\n[Test 12] Complex mixed operations")
+    events = [
+        {"event_id": 1, "event_name": "append",
+         "payload": {"newContent": "A", "startLine": 1}, "timestamp": 100},
+        {"event_id": 2, "event_name": "append",
+         "payload": {"newContent": "B", "startLine": 2}, "timestamp": 101},
+        {"event_id": 3, "event_name": "append",
+         "payload": {"newContent": "1", "startLine": 1}, "timestamp": 102},
+        {"event_id": 4, "event_name": "append",
+         "payload": {"newContent": "C", "startLine": 3}, "timestamp": 103}
+    ]
+    doc = {"title": "Test", "lastUpdated": 0, "createdOn": 0}
+    result = execute(events, doc)
+    assert result["content"] == "A1\nB\nC"
+    print("  ✓ Passed")
+
+    print("\n" + "="*50)
+    print("ALL TESTS PASSED! ✓✓✓")
+    print("="*50)
 
 if __name__ == "__main__":
     test_document_processor()
@@ -616,22 +803,90 @@ if __name__ == "__main__":
 
 \newpage
 
+\section{Debugging Strategy}
+
+\begin{tipbox}
+\textbf{If Your Tests Are Failing:}
+
+\begin{enumerate}
+    \item \textbf{Add Debug Prints}
+    \begin{lstlisting}
+for event in sorted_events:
+    print(f"Processing: {event['event_name']} at line {event.get('payload', {}).get('startLine')}")
+    print(f"Lines before: {lines}")
+    # ... process event ...
+    print(f"Lines after: {lines}")
+    print()
+    \end{lstlisting}
+
+    \item \textbf{Check Event Sorting}
+    \begin{lstlisting}
+print("Events before sorting:")
+for e in events:
+    print(f"  {e['event_id']}: timestamp={e['timestamp']}")
+
+sorted_events = sorted(events, key=lambda e: e["timestamp"])
+
+print("\nEvents after sorting:")
+for e in sorted_events:
+    print(f"  {e['event_id']}: timestamp={e['timestamp']}")
+    \end{lstlisting}
+
+    \item \textbf{Verify Line Indexing}
+    \begin{lstlisting}
+print(f"startLine={start_line} (1-indexed)")
+print(f"line_idx={line_idx} (0-indexed)")
+print(f"lines length before: {len(lines)}")
+# ... extend lines ...
+print(f"lines length after: {len(lines)}")
+    \end{lstlisting}
+
+    \item \textbf{Check Append vs Replace}
+    \begin{lstlisting}
+print(f"Line {line_idx} before: '{lines[line_idx]}'")
+lines[line_idx] += new_content  # Should use +=, not =
+print(f"Line {line_idx} after: '{lines[line_idx]}'")
+    \end{lstlisting}
+
+    \item \textbf{Verify Final Join}
+    \begin{lstlisting}
+print(f"Lines array: {lines}")
+content = "\n".join(lines)
+print(f"Joined content: '{content}'")
+print(f"Content length: {len(content)}")
+    \end{lstlisting}
+\end{enumerate}
+
+\textbf{Common Mistakes:}
+\begin{itemize}
+    \item Forgetting to sort events by timestamp
+    \item Using \texttt{=} instead of \texttt{+=} for append
+    \item Off-by-one error with 1-indexed vs 0-indexed
+    \item Not handling case-insensitive event names
+    \item Creating extra empty lines with improper split/join
+\end{itemize}
+\end{tipbox}
+
+\newpage
+
 \section{Follow-Up Questions \& Variations}
 
 \subsection{Expected Follow-Ups}
 
 \begin{enumerate}
-    \item \textbf{What if events can arrive out of order?}
+    \item \textbf{What if events can arrive significantly out of order?}
     \begin{itemize}
-        \item Already handled by sorting
-        \item Could use priority queue for streaming
+        \item Current solution handles this with sorting
+        \item For streaming: use priority queue or buffering window
+        \item Trade-off: latency vs correctness
     \end{itemize}
 
-    \item \textbf{What if we need to support undo/redo?}
+    \item \textbf{How would you handle millions of events?}
     \begin{itemize}
-        \item Store event history
-        \item Apply events up to specific point in time
-        \item Implement reverse operations
+        \item Batch processing
+        \item Periodic snapshots + incremental updates
+        \item Event sourcing pattern
+        \item Compaction/aggregation of old events
     \end{itemize}
 
     \item \textbf{What about concurrent editing by multiple users?}
@@ -639,37 +894,36 @@ if __name__ == "__main__":
         \item Operational Transform (OT)
         \item Conflict-free Replicated Data Types (CRDTs)
         \item Last-write-wins with timestamps
+        \item Use event\_id as tiebreaker
     \end{itemize}
 
     \item \textbf{How would you optimize for very large documents?}
     \begin{itemize}
+        \item Rope data structure instead of list
         \item Lazy loading of content
         \item Chunk-based storage
-        \item Only load/process visible lines
+        \item Only process visible viewport
     \end{itemize}
 
     \item \textbf{What if we add more event types?}
     \begin{itemize}
-        \item Insert at position within line
-        \item Delete specific line
-        \item Replace content
-        \item Format events (bold, italic)
+        \item \texttt{insert}: Insert at character position within line
+        \item \texttt{delete\_range}: Delete specific line range
+        \item \texttt{replace}: Replace content at line
+        \item \texttt{format}: Apply formatting (bold, italic)
     \end{itemize}
 \end{enumerate}
 
-\subsection{Variation: Insert Event}
+\subsection{Variation 1: Insert at Character Position}
 
-\textbf{New Event Type: insert}
-
-Instead of appending to end of line, insert at specific character position:
-
+\textbf{New Event Type:}
 \begin{lstlisting}
 {
     "event_name": "insert",
     "payload": {
         "newContent": "text",
         "startLine": 2,
-        "position": 5  # Character position in line
+        "position": 5  # Character position in line (0-indexed)
     },
     "timestamp": 100
 }
@@ -687,14 +941,13 @@ elif event_name == "insert":
         lines.append("")
 
     line = lines[line_idx]
-    # Insert at position
+    # Insert at character position
     lines[line_idx] = line[:position] + new_content + line[position:]
 \end{lstlisting}
 
-\subsection{Variation: Delete Specific Lines}
+\subsection{Variation 2: Delete Specific Lines}
 
-\textbf{Delete Range Event:}
-
+\textbf{New Event Type:}
 \begin{lstlisting}
 {
     "event_name": "delete_range",
@@ -720,46 +973,32 @@ elif event_name == "delete_range":
         del lines[start_idx:min(end_idx + 1, len(lines))]
 \end{lstlisting}
 
-\subsection{Variation: Event Validation}
+\subsection{Variation 3: Replace Line Content}
 
-\textbf{Add validation and return errors:}
-
+\textbf{New Event Type:}
 \begin{lstlisting}
-def execute_with_validation(events, document):
-    """
-    Version that validates events and returns errors.
-    """
-    errors = []
-    valid_events = []
+{
+    "event_name": "replace",
+    "payload": {
+        "newContent": "completely new text",
+        "startLine": 3
+    },
+    "timestamp": 100
+}
+\end{lstlisting}
 
-    for event in events:
-        # Validate event structure
-        if "event_name" not in event:
-            errors.append(f"Event {event.get('event_id')} missing event_name")
-            continue
+\textbf{Implementation:}
+\begin{lstlisting}
+elif event_name == "replace":
+    new_content = payload["newContent"]
+    start_line = payload["startLine"]
 
-        if "timestamp" not in event:
-            errors.append(f"Event {event.get('event_id')} missing timestamp")
-            continue
+    line_idx = start_line - 1
+    while len(lines) <= line_idx:
+        lines.append("")
 
-        event_name = event["event_name"].lower()
-
-        if event_name == "append":
-            payload = event.get("payload", {})
-            if "newContent" not in payload or "startLine" not in payload:
-                errors.append(f"Event {event['event_id']} invalid append payload")
-                continue
-
-            if payload["startLine"] < 1:
-                errors.append(f"Event {event['event_id']} invalid line number")
-                continue
-
-        valid_events.append(event)
-
-    # Process valid events
-    result = execute(valid_events, document)
-
-    return result, errors
+    # Replace entire line (use = instead of +=)
+    lines[line_idx] = new_content
 \end{lstlisting}
 
 \newpage
@@ -772,7 +1011,7 @@ def execute_with_validation(events, document):
 function execute(events, document) {
     // Handle empty events
     if (!events || events.length === 0) {
-        return document;
+        return { ...document };
     }
 
     // Sort by timestamp
@@ -784,7 +1023,7 @@ function execute(events, document) {
     let content = document.content || "";
     let lines = content ? content.split("\n") : [];
 
-    let latestTimestamp = document.lastUpdated;
+    let latestTimestamp = document.lastUpdated || 0;
 
     // Process events
     for (const event of sortedEvents) {
@@ -810,12 +1049,35 @@ function execute(events, document) {
         latestTimestamp = Math.max(latestTimestamp, timestamp);
     }
 
-    // Update document
+    // Return new document (don't mutate input)
     return {
         ...document,
         content: lines.join("\n"),
         lastUpdated: latestTimestamp
     };
+}
+
+// TypeScript version with types
+interface Event {
+    event_id: number;
+    event_name: string;
+    payload: {
+        newContent?: string;
+        startLine?: number;
+    };
+    timestamp: number;
+}
+
+interface Document {
+    title: string;
+    content?: string;
+    lastUpdated: number;
+    createdOn: number;
+}
+
+function executeTyped(events: Event[], document: Document): Document {
+    // Same implementation as above
+    // TypeScript provides compile-time type safety
 }
 \end{lstlisting}
 
@@ -826,7 +1088,7 @@ class DocumentProcessor:
     """OOP approach for document event processing."""
 
     def __init__(self, document):
-        self.document = document
+        self.document = document.copy()
         self.lines = self._init_lines()
 
     def _init_lines(self):
@@ -847,13 +1109,14 @@ class DocumentProcessor:
         return self._finalize()
 
     def _process_event(self, event):
-        """Process single event."""
+        """Process single event based on type."""
         event_name = event["event_name"].lower()
 
         if event_name == "append":
             self._handle_append(event)
         elif event_name == "delete":
             self._handle_delete(event)
+        # Easy to add more event types here
 
     def _handle_append(self, event):
         """Handle append event."""
@@ -863,11 +1126,11 @@ class DocumentProcessor:
 
         line_idx = start_line - 1
 
+        # Extend lines if needed
         while len(self.lines) <= line_idx:
             self.lines.append("")
 
         self.lines[line_idx] += new_content
-
         self.document["lastUpdated"] = event["timestamp"]
 
     def _handle_delete(self, event):
@@ -882,329 +1145,342 @@ class DocumentProcessor:
 
 
 # Usage
-processor = DocumentProcessor(document)
-result = processor.process_events(events)
+def execute(events, document):
+    processor = DocumentProcessor(document)
+    return processor.process_events(events)
 \end{lstlisting}
 
 \newpage
 
-\section{System Design Considerations}
+\section{System Design Discussion}
 
 \subsection{Real-World ClickUp Architecture}
 
 In production, ClickUp likely uses:
 
 \begin{enumerate}
-    \item \textbf{Event Store}
+    \item \textbf{Event Store / Event Sourcing}
     \begin{itemize}
         \item Kafka or similar for event streaming
         \item Permanent event log (source of truth)
         \item Can replay events to rebuild state
+        \item Enables time-travel debugging
     \end{itemize}
 
     \item \textbf{CRDT (Conflict-free Replicated Data Types)}
     \begin{itemize}
         \item Handle concurrent edits from multiple users
-        \item Eventual consistency
+        \item Eventual consistency without conflicts
         \item Examples: Yjs, Automerge
+        \item Used by: Figma, Notion, Google Docs
     \end{itemize}
 
-    \item \textbf{Operational Transform}
+    \item \textbf{Operational Transform (OT)}
     \begin{itemize}
         \item Transform conflicting operations
         \item Maintain causal ordering
-        \item Used by Google Docs
+        \item More complex but deterministic
+        \item Used by: Google Docs originally
     \end{itemize}
 
-    \item \textbf{Snapshot + Events}
+    \item \textbf{Snapshot + Delta Pattern}
     \begin{itemize}
         \item Store periodic snapshots
         \item Apply only recent events
-        \item Faster recovery
+        \item Faster recovery and queries
+        \item Reduce memory usage
+    \end{itemize}
+
+    \item \textbf{WebSocket for Real-time Sync}
+    \begin{itemize}
+        \item Push events to all connected clients
+        \item Low latency updates
+        \item Handle reconnection gracefully
     \end{itemize}
 \end{enumerate}
 
 \subsection{Scalability Challenges}
 
 \begin{itemize}
-    \item \textbf{Large Documents}: Millions of characters
-    \item \textbf{High Event Rate}: Hundreds of events per second
-    \item \textbf{Many Concurrent Users}: Real-time collaboration
-    \item \textbf{Offline Support}: Sync when reconnected
-    \item \textbf{Undo/Redo}: Maintain operation history
+    \item \textbf{Large Documents}: Millions of characters, thousands of lines
+    \item \textbf{High Event Rate}: Hundreds of events per second per document
+    \item \textbf{Many Concurrent Users}: 10+ people editing simultaneously
+    \item \textbf{Offline Support}: Sync when reconnected, handle conflicts
+    \item \textbf{Undo/Redo}: Maintain operation history efficiently
+    \item \textbf{Performance}: Sub-second response time even for large docs
 \end{itemize}
 
-\subsection{Follow-Up Discussion Points}
+\subsection{Data Structures for Large Documents}
 
-Be ready to discuss:
-
-\begin{enumerate}
-    \item How would you handle conflicts in real-time collaboration?
-    \item What data structures optimize for large documents?
-    \item How do you ensure consistency across multiple clients?
-    \item What's your strategy for event ordering with distributed systems?
-    \item How would you implement autosave with event batching?
-\end{enumerate}
+\begin{itemize}
+    \item \textbf{Rope}: Tree-based string for efficient insertions/deletions
+    \item \textbf{Gap Buffer}: Used by Emacs, good for cursor-based editing
+    \item \textbf{Piece Table}: Used by VS Code, great for undo/redo
+    \item \textbf{CRDT Text}: Yjs uses linked list with tombstones
+\end{itemize}
 
 \newpage
 
-\section{Interview Tips \& Strategy}
+\section{Interview Execution Strategy}
+
+\subsection{Time Allocation (60 minutes)}
+
+\begin{itemize}
+    \item \textbf{5 min}: Clarify requirements, ask questions, confirm understanding
+    \item \textbf{3 min}: Discuss approach, mention data structures, complexity
+    \item \textbf{2 min}: Write function signature and comments
+    \item \textbf{25 min}: Implement core solution (clean, working code)
+    \item \textbf{10 min}: Write and run tests (catch bugs early!)
+    \item \textbf{5 min}: Add error handling and edge cases
+    \item \textbf{10 min}: Follow-up questions, optimizations, discussion
+\end{itemize}
 
 \subsection{Before You Code}
 
+\begin{tipbox}
+\textbf{The First 5 Minutes Are Critical!}
+
 \begin{enumerate}
-    \item \textbf{Clarify Requirements} (2-3 minutes)
+    \item \textbf{Clarify Requirements}
     \begin{itemize}
-        \item Ask about edge cases
-        \item Confirm input/output format
-        \item Understand constraints
+        \item "Should lastUpdated use the event timestamp or increment?"
+        \item "What happens with invalid line numbers?"
+        \item "Should I validate event structure?"
     \end{itemize}
 
-    \item \textbf{Discuss Approach} (3-5 minutes)
+    \item \textbf{Confirm Examples}
     \begin{itemize}
-        \item Explain your strategy
-        \item Mention data structures
-        \item Discuss time/space complexity
+        \item Walk through Example 1 verbally
+        \item Confirm expected output matches your understanding
+        \item Note any inconsistencies in examples
     \end{itemize}
 
-    \item \textbf{Consider Edge Cases}
+    \item \textbf{Discuss Approach}
     \begin{itemize}
-        \item Empty inputs
-        \item Out-of-order events
-        \item Invalid data
-        \item Boundary conditions
+        \item "I'll sort events by timestamp first..."
+        \item "I'll use a list for lines for O(1) indexing..."
+        \item "Time complexity will be O(n log n) for sorting..."
+    \end{itemize}
+
+    \item \textbf{Mention Edge Cases}
+    \begin{itemize}
+        \item "I'll need to handle out-of-order events..."
+        \item "Case-insensitive event names..."
+        \item "Multiple appends to same line..."
     \end{itemize}
 \end{enumerate}
+
+\textbf{This shows you're thinking critically and builds trust!}
+\end{tipbox}
 
 \subsection{While Coding}
 
 \begin{enumerate}
     \item \textbf{Think Out Loud}
     \begin{itemize}
-        \item Explain your thought process
-        \item Voice concerns and trade-offs
-        \item Ask questions if stuck
+        \item "Now I'll sort the events by timestamp..."
+        \item "Converting to 0-indexed here because Python lists..."
+        \item "Using += here to append, not replace..."
     \end{itemize}
 
     \item \textbf{Write Clean Code}
     \begin{itemize}
-        \item Clear variable names
-        \item Logical structure
-        \item Add comments for complex logic
+        \item Descriptive variable names: \texttt{line\_idx}, not \texttt{i}
+        \item Add comments for non-obvious logic
+        \item Consistent spacing and formatting
     \end{itemize}
 
     \item \textbf{Handle Errors Gracefully}
     \begin{itemize}
-        \item Check for None/null
-        \item Validate inputs
-        \item Use .get() for dictionaries
+        \item Use \texttt{.get()} for optional dictionary keys
+        \item Check for None/empty before processing
+        \item Validate inputs if time permits
+    \end{itemize}
+
+    \item \textbf{Ask If Stuck}
+    \begin{itemize}
+        \item "I'm debating between X and Y, which would you prefer?"
+        \item "Should I prioritize robustness or simplicity here?"
+        \item Don't sit in silence - communicate!
     \end{itemize}
 \end{enumerate}
 
 \subsection{After Coding}
 
 \begin{enumerate}
-    \item \textbf{Test Your Code}
+    \item \textbf{Test Immediately}
     \begin{itemize}
-        \item Run provided examples
-        \item Test edge cases
+        \item Run provided examples first
+        \item Test edge cases (empty, out-of-order, same line)
         \item Fix any bugs found
+    \end{itemize}
+
+    \item \textbf{Walk Through Code}
+    \begin{itemize}
+        \item Explain your solution at high level
+        \item Point out key design decisions
+        \item Mention trade-offs considered
     \end{itemize}
 
     \item \textbf{Discuss Improvements}
     \begin{itemize}
-        \item Optimization opportunities
-        \item Alternative approaches
-        \item Production considerations
+        \item "For production, I'd add validation..."
+        \item "Could optimize with rope data structure..."
+        \item "Would need CRDT for real-time collaboration..."
     \end{itemize}
 
     \item \textbf{Handle Follow-Ups}
     \begin{itemize}
-        \item Be ready for variations
+        \item Be ready for variations (insert, delete range)
         \item Explain how to extend solution
         \item Discuss system design implications
     \end{itemize}
 \end{enumerate}
 
-\subsection{Communication Checklist}
+\newpage
+
+\section{Communication Checklist}
+
+\subsection{Before Interview}
 
 \begin{itemize}
-    \item[$\square$] Clarified requirements upfront
+    \item[$\square$] Practiced core solution multiple times (can code in 20-25 min)
+    \item[$\square$] Memorized critical edge cases
+    \item[$\square$] Tested with all provided examples
+    \item[$\square$] Understand time/space complexity
+    \item[$\square$] Reviewed follow-up variations
+    \item[$\square$] Comfortable with both Python and JavaScript
+    \item[$\square$] Practiced explaining thought process out loud
+    \item[$\square$] Prepared clarifying questions to ask
+\end{itemize}
+
+\subsection{During Interview - Execution}
+
+\begin{itemize}
+    \item[$\square$] Asked clarifying questions upfront
+    \item[$\square$] Confirmed understanding of examples
     \item[$\square$] Explained approach before coding
     \item[$\square$] Thought out loud while implementing
     \item[$\square$] Handled edge cases explicitly
+    \item[$\square$] Wrote clean, readable code
     \item[$\square$] Tested code with examples
     \item[$\square$] Discussed complexity analysis
     \item[$\square$] Proposed optimizations
     \item[$\square$] Asked intelligent follow-up questions
 \end{itemize}
 
+\subsection{During Interview - Communication}
+
+\begin{itemize}
+    \item[$\square$] Maintained conversational tone
+    \item[$\square$] Explained reasoning for decisions
+    \item[$\square$] Asked for feedback/hints when stuck
+    \item[$\square$] Admitted when unsure (don't fake it)
+    \item[$\square$] Showed enthusiasm and engagement
+    \item[$\square$] Treated interviewer as collaborator
+\end{itemize}
+
 \newpage
 
-\section{Quick Reference}
+\section{Quick Reference Card}
 
 \subsection{Key Points to Remember}
 
 \begin{enumerate}
-    \item \textbf{Sort events by timestamp first}
+    \item \textbf{ALWAYS sort events by timestamp first!}
     \item \textbf{Use list for lines} (not string manipulation)
-    \item \textbf{Handle 1-indexed lines} (subtract 1 for array index)
-    \item \textbf{Case-insensitive event names} (use .lower())
-    \item \textbf{Append to existing content} (don't replace)
-    \item \textbf{Fill gaps with empty lines}
-    \item \textbf{Update lastUpdated to latest event}
+    \item \textbf{Lines are 1-indexed} in problem, 0-indexed in Python
+    \item \textbf{Case-insensitive event names} - use \texttt{.lower()}
+    \item \textbf{APPEND to line} with \texttt{+=}, DON'T REPLACE with \texttt{=}
+    \item \textbf{Fill gaps} with empty strings when extending
+    \item \textbf{Update lastUpdated} to latest event timestamp
+    \item \textbf{Return a copy} - don't mutate input document
 \end{enumerate}
 
 \subsection{Common Mistakes to Avoid}
 
 \begin{itemize}
-    \item Forgetting to sort events
-    \item Not handling case-insensitive names
-    \item Replacing line content instead of appending
-    \item Off-by-one errors with line numbers
-    \item Not handling empty/missing fields
-    \item Creating extra empty lines with split/join
-\end{itemize}
-
-\subsection{Time Allocation (60 minutes)}
-
-\begin{itemize}
-    \item \textbf{5 min}: Clarify requirements, ask questions
-    \item \textbf{5 min}: Discuss approach and edge cases
-    \item \textbf{30 min}: Implement solution
-    \item \textbf{10 min}: Test with examples and edge cases
-    \item \textbf{10 min}: Follow-up questions and discussion
+    \item ✗ Forgetting to sort events
+    \item ✗ Not handling case-insensitive event names
+    \item ✗ Using \texttt{=} instead of \texttt{+=} for append (replaces instead of appends!)
+    \item ✗ Off-by-one errors with 1-indexed vs 0-indexed
+    \item ✗ Not handling empty events or missing content
+    \item ✗ Modifying input document directly
+    \item ✗ Not testing edge cases
 \end{itemize}
 
 \subsection{Python Quick Reference}
 
 \begin{lstlisting}
-# Sort by timestamp
-sorted_events = sorted(events, key=lambda e: e["timestamp"])
+# Safe dictionary access
+content = document.get("content", "")  # Default empty string
+payload = event.get("payload", {})     # Default empty dict
 
 # Case-insensitive comparison
 event_name = event["event_name"].lower()
 
-# Safe dictionary access
-content = document.get("content", "")
-payload = event.get("payload", {})
-
 # List operations
 lines = []
-lines.append("new line")
-lines[idx] += "append"
-del lines[start:end]
+lines.append("new")           # Add to end
+lines[idx] += "text"          # Append to existing
+while len(lines) <= idx:      # Extend with gaps
+    lines.append("")
 
 # String operations
-lines = content.split("\n")
-content = "\n".join(lines)
+lines = content.split("\n")   # Split into list
+content = "\n".join(lines)    # Join back to string
+
+# Sorting
+sorted_events = sorted(events, key=lambda e: e["timestamp"])
+
+# List comprehension
+valid = [e for e in events if e.get("timestamp") is not None]
 \end{lstlisting}
 
 \newpage
 
-\section{Additional Practice Problems}
+\section{Final Preparation Checklist}
 
-\subsection{Problem 1: Event Replay with Time Window}
-
-Modify the solution to replay events only within a time window:
-
-\begin{lstlisting}
-def execute_with_window(events, document, start_time, end_time):
-    """
-    Process only events within time window [start_time, end_time].
-    """
-    # Filter events by time window
-    filtered = [e for e in events
-                if start_time <= e["timestamp"] <= end_time]
-
-    return execute(filtered, document)
-\end{lstlisting}
-
-\subsection{Problem 2: Event History}
-
-Return both the final document and the complete history:
-
-\begin{lstlisting}
-def execute_with_history(events, document):
-    """
-    Return final document plus history of all intermediate states.
-    """
-    history = [document.copy()]
-
-    sorted_events = sorted(events, key=lambda e: e["timestamp"])
-    lines = []
-
-    for event in sorted_events:
-        # Process event (similar to original)
-        # ...
-
-        # Snapshot current state
-        snapshot = document.copy()
-        snapshot["content"] = "\n".join(lines)
-        snapshot["lastUpdated"] = event["timestamp"]
-        history.append(snapshot)
-
-    return history[-1], history
-\end{lstlisting}
-
-\subsection{Problem 3: Collaborative Conflict Resolution}
-
-Handle concurrent edits from multiple users:
-
-\begin{lstlisting}
-def execute_with_conflicts(events, document):
-    """
-    Detect and resolve conflicts in concurrent edits.
-
-    Conflict: Same line modified at same timestamp by different users.
-    Resolution: Last event_id wins.
-    """
-    sorted_events = sorted(events,
-                          key=lambda e: (e["timestamp"], e["event_id"]))
-
-    # Rest similar to original execute()
-    return execute(sorted_events, document)
-\end{lstlisting}
-
-\newpage
-
-\section{Final Checklist}
-
-\subsection{Before Interview}
+\subsection{Technical Readiness}
 
 \begin{itemize}
-    \item[$\square$] Practiced core problem multiple times
-    \item[$\square$] Can implement solution in under 30 minutes
-    \item[$\square$] Memorized edge cases
-    \item[$\square$] Tested with all provided examples
-    \item[$\square$] Understand time/space complexity
-    \item[$\square$] Reviewed follow-up variations
-    \item[$\square$] Comfortable with both Python and JavaScript
-    \item[$\square$] Practiced explaining thought process out loud
+    \item[$\square$] Can implement solution in under 25 minutes
+    \item[$\square$] All 12+ test cases pass without bugs
+    \item[$\square$] Understand why each edge case matters
+    \item[$\square$] Can explain time/space complexity
+    \item[$\square$] Know how to extend for new event types
+    \item[$\square$] Comfortable with alternative approaches (OOP, JS)
 \end{itemize}
 
-\subsection{During Interview}
+\subsection{Interview Skills}
 
 \begin{itemize}
-    \item[$\square$] Listen carefully to requirements
-    \item[$\square$] Ask clarifying questions
-    \item[$\square$] Explain approach before coding
-    \item[$\square$] Write clean, readable code
-    \item[$\square$] Think out loud
-    \item[$\square$] Test with examples
-    \item[$\square$] Handle edge cases explicitly
-    \item[$\square$] Be open to feedback and hints
+    \item[$\square$] Practiced asking clarifying questions
+    \item[$\square$] Can explain approach before coding
+    \item[$\square$] Comfortable thinking out loud
+    \item[$\square$] Know how to debug when tests fail
+    \item[$\square$] Can discuss system design implications
+    \item[$\square$] Ready for follow-up variations
 \end{itemize}
 
-\subsection{Key Success Factors}
+\subsection{Day Before Interview}
 
-\begin{enumerate}
-    \item \textbf{Correctness} - Solution works for all cases
-    \item \textbf{Code Quality} - Clean, maintainable code
-    \item \textbf{Communication} - Clear explanation of thinking
-    \item \textbf{Problem-Solving} - Handle unexpected challenges
-    \item \textbf{Collaboration} - Work well with interviewer
-\end{enumerate}
+\begin{itemize}
+    \item[$\square$] Do one final practice run (timed, 30 min)
+    \item[$\square$] Review edge cases one more time
+    \item[$\square$] Read through this guide's key sections
+    \item[$\square$] Prepare 2-3 questions to ask interviewer
+    \item[$\square$] Get good sleep - fresh mind is critical!
+\end{itemize}
+
+\subsection{Interview Day}
+
+\begin{itemize}
+    \item[$\square$] Test internet connection and mic/camera
+    \item[$\square$] Have this guide open for reference (if allowed)
+    \item[$\square$] Water nearby, comfortable environment
+    \item[$\square$] Positive mindset - you've got this!
+\end{itemize}
 
 \vspace{2cm}
 
@@ -1212,10 +1488,25 @@ def execute_with_conflicts(events, document):
 
 \vspace{0.5cm}
 
-\noindent\textbf{\Large Good luck with your ClickUp interview!}
+\noindent\textbf{\Large You Are Ready!}
 
 \vspace{0.5cm}
 
-\noindent Remember: The interviewer wants you to succeed. They're evaluating not just your coding skills, but how you think, communicate, and collaborate. Show your problem-solving process, ask good questions, and demonstrate your passion for building great products.
+\noindent You've prepared thoroughly. You know the solution inside-out. You understand the edge cases. You can handle follow-ups. Now trust your preparation and show them what you can do!
+
+\vspace{0.5cm}
+
+\noindent\textbf{Remember:}
+\begin{itemize}
+    \item The interviewer wants you to succeed
+    \item They're evaluating how you think, not just coding speed
+    \item Communication matters as much as the solution
+    \item It's okay to ask questions - that's smart!
+    \item One bug doesn't fail you - recovery matters
+\end{itemize}
+
+\vspace{0.5cm}
+
+\noindent\textbf{\Large Good luck with your ClickUp interview!}
 
 \end{document}
