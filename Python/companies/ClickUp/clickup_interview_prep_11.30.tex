@@ -117,52 +117,6 @@
 
 \newpage
 
-\section{CRITICAL: Questions to Ask First!}
-
-\begin{tipbox}
-\textbf{Before you start coding, ask these clarifying questions:}
-
-\begin{enumerate}
-    \item \textbf{lastUpdated behavior:} "Should lastUpdated be set to the timestamp of the latest event, or should it be incremented by 1?"
-    \begin{itemize}
-        \item The examples show inconsistent behavior - clarify this!
-        \item Most logical: use the latest event's timestamp
-    \end{itemize}
-
-    \item \textbf{Invalid line numbers:} "What should happen if startLine is 0 or negative?"
-    \begin{itemize}
-        \item Skip the event? Return error? Assume line 1?
-    \end{itemize}
-
-    \item \textbf{Event validation:} "Should I validate event structure and handle malformed events?"
-    \begin{itemize}
-        \item Missing required fields?
-        \item Unknown event types?
-    \end{itemize}
-
-    \item \textbf{Same timestamp:} "If multiple events have the same timestamp, what determines their order?"
-    \begin{itemize}
-        \item Use event\_id as tiebreaker?
-        \item Stable sort (preserve original order)?
-    \end{itemize}
-
-    \item \textbf{Document mutation:} "Should I modify the input document in place or return a new copy?"
-    \begin{itemize}
-        \item Safer to return a copy
-        \item But in-place is more efficient
-    \end{itemize}
-
-    \item \textbf{Content initialization:} "If document doesn't have a content field initially, should I initialize it as empty string?"
-
-    \item \textbf{Trailing newlines:} "Should the final content have a trailing newline character?"
-\end{enumerate}
-
-\vspace{10pt}
-\textbf{These questions show you think critically and catch ambiguities!}
-\end{tipbox}
-
-\newpage
-
 \section{Core Problem: Document Event Processor}
 
 \begin{problembox}
@@ -230,6 +184,52 @@ payload: {}  // Empty
 \vspace{10pt}
 \textbf{Action:} Ask the interviewer to clarify this behavior before coding!
 \end{warningbox}
+
+\newpage
+
+\section{CRITICAL: Questions to Ask First!}
+
+\begin{tipbox}
+\textbf{Before you start coding, ask these clarifying questions:}
+
+\begin{enumerate}
+    \item \textbf{lastUpdated behavior:} "Should lastUpdated be set to the timestamp of the latest event, or should it be incremented by 1?"
+    \begin{itemize}
+        \item The examples show inconsistent behavior - clarify this!
+        \item Most logical: use the latest event's timestamp
+    \end{itemize}
+
+    \item \textbf{Invalid line numbers:} "What should happen if startLine is 0 or negative?"
+    \begin{itemize}
+        \item Skip the event? Return error? Assume line 1?
+    \end{itemize}
+
+    \item \textbf{Event validation:} "Should I validate event structure and handle malformed events?"
+    \begin{itemize}
+        \item Missing required fields?
+        \item Unknown event types?
+    \end{itemize}
+
+    \item \textbf{Same timestamp:} "If multiple events have the same timestamp, what determines their order?"
+    \begin{itemize}
+        \item Use event\_id as tiebreaker?
+        \item Stable sort (preserve original order)?
+    \end{itemize}
+
+    \item \textbf{Document mutation:} "Should I modify the input document in place or return a new copy?"
+    \begin{itemize}
+        \item Safer to return a copy
+        \item But in-place is more efficient
+    \end{itemize}
+
+    \item \textbf{Content initialization:} "If document doesn't have a content field initially, should I initialize it as empty string?"
+
+    \item \textbf{Trailing newlines:} "Should the final content have a trailing newline character?"
+\end{enumerate}
+
+\vspace{10pt}
+\textbf{These questions show you think critically and catch ambiguities!}
+\end{tipbox}
 
 \newpage
 
