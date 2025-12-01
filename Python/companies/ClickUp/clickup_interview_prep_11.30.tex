@@ -93,7 +93,7 @@
     \item CodeSignal platform (browser-based IDE)
     \item No pre-written test suite
     \item You must test your own code
-    \item Recommended languages: Python, JavaScript, TypeScript
+    \item Recommended language: Python
     \item Focus on correctness, edge cases, and code quality
 \end{itemize}
 
@@ -1005,83 +1005,7 @@ elif event_name == "replace":
 
 \section{Alternative Implementations}
 
-\subsection{JavaScript/TypeScript Version}
-
-\begin{lstlisting}[language=Java]
-function execute(events, document) {
-    // Handle empty events
-    if (!events || events.length === 0) {
-        return { ...document };
-    }
-
-    // Sort by timestamp
-    const sortedEvents = [...events].sort((a, b) =>
-        a.timestamp - b.timestamp
-    );
-
-    // Initialize content
-    let content = document.content || "";
-    let lines = content ? content.split("\n") : [];
-
-    let latestTimestamp = document.lastUpdated || 0;
-
-    // Process events
-    for (const event of sortedEvents) {
-        const eventName = event.event_name.toLowerCase();
-        const timestamp = event.timestamp;
-
-        if (eventName === "append") {
-            const { newContent, startLine } = event.payload;
-            const lineIdx = startLine - 1;
-
-            // Extend lines array if needed
-            while (lines.length <= lineIdx) {
-                lines.push("");
-            }
-
-            // Append to line
-            lines[lineIdx] += newContent;
-
-        } else if (eventName === "delete") {
-            lines = [];
-        }
-
-        latestTimestamp = Math.max(latestTimestamp, timestamp);
-    }
-
-    // Return new document (don't mutate input)
-    return {
-        ...document,
-        content: lines.join("\n"),
-        lastUpdated: latestTimestamp
-    };
-}
-
-// TypeScript version with types
-interface Event {
-    event_id: number;
-    event_name: string;
-    payload: {
-        newContent?: string;
-        startLine?: number;
-    };
-    timestamp: number;
-}
-
-interface Document {
-    title: string;
-    content?: string;
-    lastUpdated: number;
-    createdOn: number;
-}
-
-function executeTyped(events: Event[], document: Document): Document {
-    // Same implementation as above
-    // TypeScript provides compile-time type safety
-}
-\end{lstlisting}
-
-\subsection{Object-Oriented Approach}
+\subsection{Object-Oriented Approach (Python)}
 
 \begin{lstlisting}
 class DocumentProcessor:
@@ -1349,7 +1273,7 @@ In production, ClickUp likely uses:
     \item[$\square$] Tested with all provided examples
     \item[$\square$] Understand time/space complexity
     \item[$\square$] Reviewed follow-up variations
-    \item[$\square$] Comfortable with both Python and JavaScript
+    \item[$\square$] Comfortable with Python
     \item[$\square$] Practiced explaining thought process out loud
     \item[$\square$] Prepared clarifying questions to ask
 \end{itemize}
@@ -1481,6 +1405,987 @@ valid = [e for e in events if e.get("timestamp") is not None]
     \item[$\square$] Water nearby, comfortable environment
     \item[$\square$] Positive mindset - you've got this!
 \end{itemize}
+
+\newpage
+
+\section{PART 2: Search Architecture Deep Dive Prep}
+
+\subsection{Interview Format}
+
+\textbf{Session:} Search Architecture Deep Dive (60 minutes)
+
+\textbf{Focus Areas:}
+\begin{itemize}
+    \item Multi-tenanted Search (ClickUp has workspaces - critical!)
+    \item Search Ranking (BM25, field boosting, relevance)
+    \item ElasticSearch/OpenSearch architecture
+    \item Vector Search (semantic search for tasks/docs)
+    \item Query DSL and practical search scenarios
+\end{itemize}
+
+\textbf{Your Knowledge Level:}
+\begin{itemize}
+    \item ✓ Strong: Vector search concepts, high-level architecture, autocomplete
+    \item ⚠ Need refresh: BM25 details, field boosting, relevance scoring
+    \item ✗ Gap: Multi-tenancy strategies, cross-tenant data leaks, Query DSL
+\end{itemize}
+
+\newpage
+
+\section{Priority 1: Multi-Tenanted Search (MUST KNOW)}
+
+\subsection{The Problem}
+
+ClickUp has multiple workspaces (tenants). When User A in Workspace 1 searches "project update", they should ONLY see results from their workspace, never from Workspace 2.
+
+\textbf{Critical Requirements:}
+\begin{itemize}
+    \item \textbf{Data Isolation}: Tenant A can't see Tenant B's data
+    \item \textbf{Performance}: Don't slow down search for isolation
+    \item \textbf{Scalability}: Support millions of tenants
+    \item \textbf{Cost}: Balance resources vs isolation
+\end{itemize}
+
+\subsection{Strategy 1: Index-Per-Tenant}
+
+\textbf{Concept:} Each tenant gets their own dedicated index.
+
+\begin{verbatim}
+workspace_123_tasks  # Workspace 123's task index
+workspace_456_tasks  # Workspace 456's task index
+workspace_789_tasks  # Workspace 789's task index
+\end{verbatim}
+
+\textbf{Pros:}
+\begin{itemize}
+    \item ✓ Perfect isolation (impossible to leak data)
+    \item ✓ Easy to delete tenant data (drop the index)
+    \item ✓ Can tune per-tenant settings
+    \item ✓ Clear billing/resource tracking
+\end{itemize}
+
+\textbf{Cons:}
+\begin{itemize}
+    \item ✗ ES has limits (1000s of indices max)
+    \item ✗ Overhead per index (shards, mappings)
+    \item ✗ Can't search across tenants (admin features)
+    \item ✗ Cluster management complexity
+\end{itemize}
+
+\textbf{When to use:}
+\begin{itemize}
+    \item Small number of large tenants (B2B SaaS)
+    \item Strict compliance requirements
+    \item Tenants need custom settings
+\end{itemize}
+
+\subsection{Strategy 2: Shared Index with Filtering}
+
+\textbf{Concept:} All tenants share one index, filter by tenant\_id field.
+
+\begin{verbatim}
+tasks_index:
+{
+  "task_id": "t123",
+  "workspace_id": "ws_123",  # <-- CRITICAL field
+  "title": "Project update",
+  "description": "..."
+}
+\end{verbatim}
+
+\textbf{Query Pattern:}
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"match": {"title": "project update"}}
+      ],
+      "filter": [
+        {"term": {"workspace_id": "ws_123"}}  // ALWAYS filter!
+      ]
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{Pros:}
+\begin{itemize}
+    \item ✓ Scales to millions of tenants
+    \item ✓ Lower overhead (fewer indices)
+    \item ✓ Can search across tenants (admin)
+    \item ✓ Easier cluster management
+\end{itemize}
+
+\textbf{Cons:}
+\begin{itemize}
+    \item ✗ Data leak risk if filter missed
+    \item ✗ Noisy neighbor problem
+    \item ✗ Can't delete tenant data easily
+    \item ✗ Query complexity increases
+\end{itemize}
+
+\textbf{When to use:}
+\begin{itemize}
+    \item Many small-medium tenants (ClickUp likely uses this)
+    \item Need cross-tenant analytics
+    \item Cost optimization critical
+\end{itemize}
+
+\subsection{Strategy 3: Hybrid (Index Pools)}
+
+\textbf{Concept:} Group tenants into pools, multiple tenants per index.
+
+\begin{verbatim}
+pool_1_tasks   # Tenants 1-1000
+pool_2_tasks   # Tenants 1001-2000
+pool_3_tasks   # Tenants 2001-3000
+\end{verbatim}
+
+Balance between isolation and scalability.
+
+\subsection{Preventing Cross-Tenant Data Leaks}
+
+\begin{warningbox}
+\textbf{CRITICAL: How to Prevent Leaks}
+
+\begin{enumerate}
+    \item \textbf{ALWAYS Filter at Query Time}
+    \begin{lstlisting}[language=Java]
+// WRONG - can leak data!
+{"query": {"match": {"title": "update"}}}
+
+// CORRECT - always filter
+{
+  "query": {
+    "bool": {
+      "must": [{"match": {"title": "update"}}],
+      "filter": [{"term": {"workspace_id": "ws_123"}}]
+    }
+  }
+}
+    \end{lstlisting}
+
+    \item \textbf{Middleware Enforcement}
+    \begin{lstlisting}
+class SearchService:
+    def search(self, user, query):
+        # ALWAYS inject workspace_id from auth context
+        workspace_id = user.workspace_id
+
+        # Force filter into query
+        query["query"]["bool"]["filter"].append({
+            "term": {"workspace_id": workspace_id}
+        })
+
+        return es.search(query)
+    \end{lstlisting}
+
+    \item \textbf{Index-Time Validation}
+    \begin{itemize}
+        \item Verify workspace\_id exists in every document
+        \item Reject documents without workspace\_id
+        \item Validate workspace\_id format
+    \end{itemize}
+
+    \item \textbf{Security Audits}
+    \begin{itemize}
+        \item Log all search queries
+        \item Alert on queries without tenant filter
+        \item Periodic security reviews
+        \item Test with penetration testing
+    \end{itemize}
+
+    \item \textbf{Query Templates}
+    \begin{itemize}
+        \item Use parameterized query templates
+        \item Never build queries with string concatenation
+        \item workspace\_id as required parameter
+    \end{itemize}
+\end{enumerate}
+\end{warningbox}
+
+\subsection{ClickUp-Specific Multi-Tenancy}
+
+\textbf{ClickUp's Architecture (likely):}
+\begin{itemize}
+    \item Shared index with workspace\_id filtering
+    \item Tasks, docs, comments in same index (tagged by type)
+    \item High-traffic workspaces might get dedicated indices
+    \item Filter: \texttt{workspace\_id AND user\_permissions}
+\end{itemize}
+
+\textbf{Interview Question:} "How would you design search for ClickUp with 1M+ workspaces?"
+
+\textbf{Your Answer:}
+\begin{enumerate}
+    \item Start with shared index (scales to millions)
+    \item Every document: workspace\_id (indexed, not analyzed)
+    \item Middleware ALWAYS injects workspace filter
+    \item Large workspaces (>10K users) → dedicated indices
+    \item Route queries to correct index pool
+    \item Security: audit logs, query templates, validation
+\end{enumerate}
+
+\subsection{Performance Optimizations (HIGH IMPACT)}
+
+\textbf{1. Routing by workspace\_id}
+
+\textbf{Problem:} Query searches ALL shards even if workspace data is on one shard.
+
+\textbf{Solution:} Route documents and queries by workspace\_id
+
+\begin{lstlisting}
+# Index with routing
+PUT /tasks/_doc/task_123?routing=ws_456
+
+# Query with routing (searches only relevant shard!)
+GET /tasks/_search?routing=ws_456
+
+# Benefit: If workspace has 1M docs across 10 shards,
+# query searches 1 shard instead of all 10!
+# 10x performance improvement!
+\end{lstlisting}
+
+\textbf{2. Hierarchical Filtering (ClickUp Realistic)}
+
+Beyond just workspace\_id, ClickUp has complex permissions:
+
+\begin{lstlisting}
+# Document structure
+{
+  "task_id": "t123",
+  "workspace_id": "ws_456",
+  "accessible_by_user_ids": ["user_1", "user_2", "user_3"],
+  "accessible_by_team_ids": ["team_10", "team_15"],
+  "is_public": false
+}
+
+# Query: workspace AND (user OR team OR public)
+{
+  "query": {
+    "bool": {
+      "must": [{"match": {"title": "project"}}],
+      "filter": [
+        {"term": {"workspace_id": "ws_456"}},
+        {
+          "bool": {
+            "should": [
+              {"term": {"accessible_by_user_ids": "user_1"}},
+              {"terms": {"accessible_by_team_ids": ["team_10", "team_15"]}},
+              {"term": {"is_public": true}}
+            ],
+            "minimum_should_match": 1
+          }
+        }
+      ]
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{3. Caching Strategy}
+
+\begin{itemize}
+    \item \textbf{Query Cache}: ES caches entire query results
+    \begin{itemize}
+        \item Best for: Repeated identical queries
+        \item Example: "status:open" query cached per workspace
+    \end{itemize}
+
+    \item \textbf{Filter Cache}: Caches filter bit sets
+    \begin{itemize}
+        \item \texttt{workspace\_id} filters cached (high reuse!)
+        \item \texttt{status}, \texttt{priority} filters cached
+        \item Filters in "filter" context are cached (not "must")
+    \end{itemize}
+
+    \item \textbf{Request Cache}: Caches aggregations
+    \begin{itemize}
+        \item Dashboard: "How many tasks per status?"
+        \item Cached at shard level
+    \end{itemize}
+\end{itemize}
+
+\textbf{4. Rate Limiting \& Noisy Neighbors}
+
+\begin{lstlisting}
+# Prevent one workspace from overwhelming cluster
+class SearchService:
+    def search(self, user, query):
+        workspace_id = user.workspace_id
+
+        # Rate limit per workspace (e.g., 100 QPS)
+        if not rate_limiter.allow(workspace_id, max_qps=100):
+            raise RateLimitError("Too many requests")
+
+        # Inject mandatory filter
+        query = inject_workspace_filter(query, workspace_id)
+        return es.search(query)
+\end{lstlisting}
+
+\textbf{5. Tier-Based Architecture}
+
+\begin{verbatim}
+Small workspaces (< 10K docs):
+  → shared_index_pool_1 (10K workspaces)
+
+Medium workspaces (10K-100K docs):
+  → shared_index_pool_2 (1K workspaces)
+
+Large enterprise (> 100K docs):
+  → dedicated_index_enterprise_A
+  → dedicated_index_enterprise_B
+
+Benefits:
+- Large customers get guaranteed performance
+- Small customers share resources efficiently
+- Can migrate between tiers as workspace grows
+\end{verbatim}
+
+\textbf{Interview Impact:} Mentioning routing + caching shows deep understanding!
+
+\newpage
+
+\section{Priority 2: Relevance Scoring \& Ranking}
+
+\subsection{BM25 Algorithm (ElasticSearch Default)}
+
+\textbf{BM25 Formula (you should know this):}
+
+\begin{verbatim}
+score(D,Q) = Σ IDF(q_i) × [f(q_i,D) × (k1 + 1)] /
+                          [f(q_i,D) + k1 × (1 - b + b × |D|/avgdl)]
+
+Where:
+- D = document
+- Q = query
+- q_i = query term i
+- f(q_i,D) = frequency of term q_i in document D
+- |D| = length of document D (in words)
+- avgdl = average document length in collection
+- k1 = term frequency saturation parameter (default: 1.2)
+- b = length normalization parameter (default: 0.75)
+- IDF(q_i) = inverse document frequency of term q_i
+\end{verbatim}
+
+\textbf{Key Concepts:}
+
+\begin{enumerate}
+    \item \textbf{TF (Term Frequency)}: More occurrences = higher score
+    \begin{itemize}
+        \item But with diminishing returns (saturation)
+        \item "project project project" isn't 3x better than "project"
+    \end{itemize}
+
+    \item \textbf{IDF (Inverse Document Frequency)}: Rare terms matter more
+    \begin{itemize}
+        \item "the" appears everywhere → low IDF → low weight
+        \item "kubernetes" is rare → high IDF → high weight
+    \end{itemize}
+
+    \item \textbf{Document Length Normalization}: Longer docs penalized
+    \begin{itemize}
+        \item Short doc with "project" beats long doc with same term
+        \item Parameter b controls strength (0=off, 1=full)
+    \end{itemize}
+
+    \item \textbf{Saturation (k1)}: Diminishing returns on term frequency
+    \begin{itemize}
+        \item 2nd occurrence matters less than 1st
+        \item 10th occurrence barely matters
+    \end{itemize}
+\end{enumerate}
+
+\textbf{BM25 vs TF-IDF:}
+\begin{itemize}
+    \item TF-IDF: Linear relationship (2x frequency = 2x score)
+    \item BM25: Logarithmic (2x frequency $\approx$ 1.2x score)
+    \item BM25 handles document length better
+    \item BM25 is more robust to keyword stuffing
+\end{itemize}
+
+\subsection{Field Boosting}
+
+\textbf{Problem:} Title matches should rank higher than body matches.
+
+\textbf{ElasticSearch Syntax:}
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "multi_match": {
+      "query": "project update",
+      "fields": [
+        "title^3",        // 3x boost
+        "description^1",  // 1x (normal)
+        "comments^0.5"    // 0.5x (less important)
+      ]
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{How Boosting Works:}
+\begin{itemize}
+    \item Base score calculated per field
+    \item Final score = title\_score × 3 + desc\_score × 1 + comments\_score × 0.5
+    \item Title match contributes 3x more than description
+\end{itemize}
+
+\textbf{ClickUp Example:}
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "multi_match": {
+      "query": "project update",
+      "fields": [
+        "task_name^5",     // Task name most important
+        "task_description^2",
+        "comments^1",
+        "attachments.filename^1.5"
+      ]
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Custom Scoring}
+
+\textbf{Beyond BM25:} Incorporate business logic.
+
+\textbf{Function Score Query:}
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "function_score": {
+      "query": {"match": {"title": "project"}},
+      "functions": [
+        {
+          "filter": {"term": {"priority": "high"}},
+          "weight": 2  // Boost high priority tasks
+        },
+        {
+          "gauss": {  // Decay based on date
+            "created_date": {
+              "origin": "now",
+              "scale": "30d",
+              "decay": 0.5
+            }
+          }
+        },
+        {
+          "field_value_factor": {
+            "field": "likes_count",  // Popular tasks rank higher
+            "modifier": "log1p"
+          }
+        }
+      ],
+      "boost_mode": "multiply"
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{ClickUp Ranking Factors:}
+\begin{enumerate}
+    \item Text relevance (BM25)
+    \item Task priority (high/medium/low)
+    \item Recency (newer tasks slightly boosted)
+    \item User activity (tasks user interacted with)
+    \item Completion status (open > completed)
+    \item Assignee (user's own tasks boosted)
+\end{enumerate}
+
+\subsection{Interview Question: Rank "project update"}
+
+\textbf{Scenario:} User searches "project update" in ClickUp.
+
+\textbf{Your Answer:}
+\begin{enumerate}
+    \item \textbf{Base Score}: BM25 on task name, description
+    \item \textbf{Field Boosts}: task\_name^5, description^2
+    \item \textbf{Priority}: High priority tasks +50\% boost
+    \item \textbf{Recency}: Exponential decay over 90 days
+    \item \textbf{Status}: Open tasks +30\%, completed -20\%
+    \item \textbf{Personalization}: User's assigned tasks +40\%
+    \item \textbf{Workspace Activity}: Recently viewed/edited +20\%
+\end{enumerate}
+
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "bool": {
+          "must": [{
+            "multi_match": {
+              "query": "project update",
+              "fields": ["task_name^5", "description^2"]
+            }
+          }],
+          "filter": [{"term": {"workspace_id": "ws_123"}}]
+        }
+      },
+      "functions": [
+        {"filter": {"term": {"priority": "high"}}, "weight": 1.5},
+        {"filter": {"term": {"status": "open"}}, "weight": 1.3},
+        {"filter": {"term": {"assignee_id": "user_abc"}}, "weight": 1.4},
+        {"gauss": {"updated_at": {"origin": "now", "scale": "90d"}}}
+      ]
+    }
+  }
+}
+\end{lstlisting}
+
+\newpage
+
+\section{Priority 3: Query DSL Essentials}
+
+\subsection{Core Query Types}
+
+\textbf{1. Match Query} (Full-text search)
+\begin{lstlisting}[language=Java]
+{"query": {"match": {"title": "project update"}}}
+// Analyzes text, finds "project" OR "update"
+\end{lstlisting}
+
+\textbf{2. Term Query} (Exact match, no analysis)
+\begin{lstlisting}[language=Java]
+{"query": {"term": {"status": "open"}}}
+// Exact match, case-sensitive, used for IDs, enums
+\end{lstlisting}
+
+\textbf{3. Bool Query} (Combine multiple conditions)
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "bool": {
+      "must": [{"match": {"title": "project"}}],     // AND
+      "should": [{"match": {"tags": "urgent"}}],     // OR (boost)
+      "must_not": [{"term": {"status": "deleted"}}], // NOT
+      "filter": [{"term": {"workspace_id": "ws_1"}}] // AND (no score)
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{4. Multi-Match} (Search across multiple fields)
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "multi_match": {
+      "query": "update",
+      "fields": ["title^3", "description"]
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{5. Range Query}
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "range": {
+      "created_date": {
+        "gte": "2024-01-01",
+        "lte": "2024-12-31"
+      }
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Filter vs Query}
+
+\textbf{Query Context:} Affects relevance score
+\begin{lstlisting}[language=Java]
+"must": [{"match": {"title": "project"}}]  // Scores results
+\end{lstlisting}
+
+\textbf{Filter Context:} Binary yes/no, cached, faster
+\begin{lstlisting}[language=Java]
+"filter": [{"term": {"workspace_id": "ws_1"}}]  // No scoring
+\end{lstlisting}
+
+\textbf{Rule:} Use filter for exact matches (status, IDs, dates). Use query for text search.
+
+\subsection{ClickUp Search Query Example}
+
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "project update",
+            "fields": ["task_name^5", "description^2", "comments"]
+          }
+        }
+      ],
+      "filter": [
+        {"term": {"workspace_id": "ws_123"}},
+        {"terms": {"status": ["open", "in_progress"]}},
+        {"range": {"created_date": {"gte": "now-1y"}}}
+      ],
+      "should": [
+        {"term": {"assignee_id": "user_abc"}},  // Boost user's tasks
+        {"term": {"priority": "high"}}
+      ],
+      "must_not": [
+        {"term": {"archived": true}}
+      ]
+    }
+  },
+  "sort": [
+    {"_score": "desc"},
+    {"updated_at": "desc"}
+  ],
+  "size": 20
+}
+\end{lstlisting}
+
+\newpage
+
+\section{Priority 4: Vector Search Refresher}
+
+\subsection{When to Use Vector Search}
+
+\textbf{Keyword Search (BM25):} "kubernetes deployment"
+\begin{itemize}
+    \item Finds exact keyword matches
+    \item Fast, efficient, proven
+    \item Fails on synonyms: "k8s deployment" won't match
+\end{itemize}
+
+\textbf{Vector Search (Semantic):} "container orchestration setup"
+\begin{itemize}
+    \item Finds semantically similar content
+    \item Matches even without exact keywords
+    \item Slower, more expensive
+\end{itemize}
+
+\textbf{ClickUp Use Case:} User searches "meeting notes" → also finds "discussion summary", "call recap"
+
+\subsection{Hybrid Search (Best Practice)}
+
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "multi_match": {
+            "query": "project update",
+            "fields": ["title^3", "description"]
+          }
+        },
+        {
+          "knn": {
+            "field": "description_vector",
+            "query_vector": [0.23, -0.45, ...],  // 768 dims
+            "k": 10,
+            "num_candidates": 100
+          }
+        }
+      ],
+      "filter": [{"term": {"workspace_id": "ws_123"}}]
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{Combines:}
+\begin{itemize}
+    \item BM25 for exact keyword matches
+    \item Vector search for semantic similarity
+    \item Best of both worlds
+\end{itemize}
+
+\subsection{Vector Search Trade-offs}
+
+\textbf{Pros:}
+\begin{itemize}
+    \item Handles synonyms, paraphrases
+    \item Language-agnostic (multilingual)
+    \item Understands intent, context
+\end{itemize}
+
+\textbf{Cons:}
+\begin{itemize}
+    \item 10-100x more storage (768-dimensional vectors)
+    \item Slower (ANN search still expensive)
+    \item Needs pre-trained embeddings model
+    \item Black box (hard to debug)
+\end{itemize}
+
+\textbf{ClickUp Strategy:}
+\begin{itemize}
+    \item Primary: BM25 (fast, accurate for exact matches)
+    \item Fallback: Vector search if BM25 returns few results
+    \item Hybrid: Combine scores for complex queries
+\end{itemize}
+
+\newpage
+
+\section{ElasticSearch vs OpenSearch}
+
+\subsection{Key Differences}
+
+\begin{itemize}
+    \item \textbf{Licensing}: ES went proprietary (2021), OpenSearch is Apache 2.0
+    \item \textbf{Vendor}: ES by Elastic, OpenSearch by AWS + community
+    \item \textbf{Features}: ES has newer features (ELSER, security). OpenSearch catching up.
+    \item \textbf{Cloud}: AWS only supports OpenSearch, not ES
+    \item \textbf{Compatibility}: OpenSearch maintains ES API compatibility (mostly)
+    \item \textbf{Cost}: OpenSearch free, ES requires license for some features
+\end{itemize}
+
+\textbf{For ClickUp:} Likely using OpenSearch (AWS-hosted) or self-managed ES cluster.
+
+\subsection{When to Choose Which}
+
+\textbf{Choose OpenSearch if:}
+\begin{itemize}
+    \item Using AWS (native integration)
+    \item Want open-source without licensing concerns
+    \item Cost-sensitive
+    \item Need community control
+\end{itemize}
+
+\textbf{Choose ElasticSearch if:}
+\begin{itemize}
+    \item Need latest Elastic features (ML, security)
+    \item Want official Elastic Cloud
+    \item Existing Elastic ecosystem
+    \item Enterprise support critical
+\end{itemize}
+
+\newpage
+
+\section{2-Hour Prep: Quick Reference Cheat Sheet}
+
+\subsection{Must-Know Talking Points (Memorize These)}
+
+\begin{tcolorbox}[colback=yellow!10!white,colframe=orange!75!black,title=\textbf{TOP 3 THINGS TO SAY}]
+\begin{enumerate}
+    \item \textbf{Multi-tenancy:} "For ClickUp's scale with millions of workspaces, I'd use a shared index with workspace\_id filtering enforced at the middleware layer, never trusting the client. Large enterprise customers (>100K docs) would get dedicated indices for performance guarantees."
+
+    \item \textbf{Performance:} "Key optimization is routing by workspace\_id, which means queries search only 1 shard instead of all 10 - that's a 10x improvement. Combined with filter caching for workspace\_id and rate limiting per tenant."
+
+    \item \textbf{Ranking:} "I'd start with BM25 for text relevance, boost important fields like task\_name\textasciicircum 5, and layer on business logic using function\_score for priority, recency with exponential decay, and personalization."
+\end{enumerate}
+\end{tcolorbox}
+
+\subsection{The 5-Minute Mental Model}
+
+\textbf{Multi-Tenancy Architecture:}
+\begin{verbatim}
+Strategy: Shared Index + Filtering (scales to millions)
+
+Document:
+{
+  "workspace_id": "ws_123",  ← ALWAYS FILTER ON THIS
+  "accessible_by_user_ids": [...],
+  "accessible_by_team_ids": [...],
+  "task_name": "...",
+  ...
+}
+
+Query:
+ALWAYS: bool → filter → term: workspace_id
+ALWAYS: Inject server-side (never trust client!)
+
+Performance:
+- Route by workspace_id (1 shard vs 10 shards)
+- Cache workspace_id filters (high reuse)
+- Rate limit per workspace (100 QPS)
+\end{verbatim}
+
+\textbf{BM25 Ranking:}
+\begin{verbatim}
+BM25 = TF × IDF × Length_Normalization
+
+Key params:
+- k1 = 1.2 (term frequency saturation)
+- b = 0.75 (length normalization strength)
+
+Why BM25 > TF-IDF:
+- Logarithmic term frequency (prevents keyword stuffing)
+- Better length normalization
+- Tunable parameters
+\end{verbatim}
+
+\textbf{Field Boosting Pattern:}
+\begin{verbatim}
+{
+  "multi_match": {
+    "query": "project update",
+    "fields": [
+      "task_name^5",        ← Most important
+      "description^2",
+      "comments^1"
+    ]
+  }
+}
+
+Rule of thumb:
+- Title/Name: 5x
+- Description: 2x
+- Comments/Body: 1x
+- Metadata: 0.5x
+\end{verbatim}
+
+\subsection{Interview Question Templates}
+
+\textbf{Q: "Design search for ClickUp with 1M+ workspaces"}
+
+\textbf{A:}
+\begin{enumerate}
+    \item Architecture: Shared index with workspace\_id field
+    \item Security: Middleware enforces filter (never trust client)
+    \item Performance: Route by workspace\_id, cache filters
+    \item Tiering: Large workspaces (>100K docs) → dedicated indices
+    \item Ranking: BM25 + field boosting + business logic
+\end{enumerate}
+
+\textbf{Q: "How do you prevent cross-tenant data leaks?"}
+
+\textbf{A:}
+\begin{enumerate}
+    \item workspace\_id from auth token (not query param)
+    \item Middleware ALWAYS injects filter before ES
+    \item Validate all docs have workspace\_id at index time
+    \item Security audits: alert on queries without filter
+    \item Testing: penetration tests, chaos testing
+\end{enumerate}
+
+\textbf{Q: "How do you rank 'project update' results?"}
+
+\textbf{A:}
+\begin{enumerate}
+    \item Base: BM25 text relevance (ES default)
+    \item Fields: Boost task\_name\textasciicircum 5, description\textasciicircum 2
+    \item Business: function\_score for priority, status, assignee
+    \item Recency: Exponential decay over 90 days
+    \item Personalization: Boost user's tasks, team tasks
+\end{enumerate}
+
+\subsection{Code Snippets You Should Know}
+
+\textbf{1. Multi-tenancy Filter (CRITICAL):}
+\begin{lstlisting}
+def search(user, query_text):
+    workspace_id = user.workspace_id  # From auth
+
+    query = {
+        "query": {
+            "bool": {
+                "must": [{"match": {"title": query_text}}],
+                "filter": [{"term": {"workspace_id": workspace_id}}]
+            }
+        }
+    }
+    return es.search(index="tasks", body=query)
+\end{lstlisting}
+
+\textbf{2. Field Boosting:}
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "multi_match": {
+      "query": "project update",
+      "fields": ["task_name^5", "description^2", "comments^1"]
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{3. Function Score (Priority + Recency):}
+\begin{lstlisting}[language=Java]
+{
+  "query": {
+    "function_score": {
+      "query": {"match": {"title": "project"}},
+      "functions": [
+        {
+          "filter": {"term": {"priority": "high"}},
+          "weight": 2
+        },
+        {
+          "gauss": {
+            "created_date": {
+              "origin": "now",
+              "scale": "30d",
+              "decay": 0.5
+            }
+          }
+        }
+      ],
+      "boost_mode": "multiply"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Key Numbers to Remember}
+
+\begin{itemize}
+    \item \textbf{BM25 k1}: 1.2 (term frequency saturation)
+    \item \textbf{BM25 b}: 0.75 (length normalization)
+    \item \textbf{Field boost ratios}: 5:2:1 (title:description:body)
+    \item \textbf{Recency decay}: 90 days (exponential)
+    \item \textbf{Dedicated index threshold}: >100K docs per tenant
+    \item \textbf{Rate limit}: 100 QPS per workspace
+    \item \textbf{ES index limit}: ~1000s of indices (why shared index scales)
+\end{itemize}
+
+\subsection{Common Mistakes to Avoid}
+
+\begin{enumerate}
+    \item ❌ "Use one index per user" → Doesn't scale to millions
+    \item ❌ Forgetting workspace\_id filter → Data leak!
+    \item ❌ Client-side filtering → Security vulnerability!
+    \item ❌ Not mentioning routing → Missed performance win
+    \item ❌ Saying "TF-IDF" instead of "BM25" → Shows outdated knowledge
+    \item ❌ Only BM25, no business logic → Not production-ready
+\end{enumerate}
+
+\subsection{If You Blank on Details}
+
+\textbf{Safe fallback phrases:}
+\begin{itemize}
+    \item "I'd need to check the exact ES API syntax, but the concept is..."
+    \item "In production, I'd validate this with load testing to tune parameters..."
+    \item "I'd start with the default (BM25/k1=1.2) and A/B test adjustments..."
+    \item "Security is critical here - I'd enforce filters server-side and add audit logging..."
+\end{itemize}
+
+\textbf{When to say you don't know:}
+\begin{itemize}
+    \item "I haven't tuned BM25 parameters in production, but I understand the k1 and b parameters control saturation and length normalization."
+    \item "I'm familiar with the concept of vector search, but I'd want to measure precision/recall before choosing between semantic and keyword search."
+\end{itemize}
+
+\subsection{Last-Minute Review (15 mins before)}
+
+\textbf{Read these 3 sections:}
+\begin{enumerate}
+    \item Multi-Tenancy: Strategy 2 (Shared Index) + Security (lines 1558-1682)
+    \item Performance Optimizations: Routing + Caching (lines 1706-1822)
+    \item Interview Scenarios: Scenario 1 \& 2 (lines 2126-2220)
+\end{enumerate}
+
+\textbf{Mental checklist before you start:}
+\begin{itemize}
+    \item[$\square$] I can explain shared index + workspace\_id filtering
+    \item[$\square$] I know BM25 is better than TF-IDF (logarithmic term frequency)
+    \item[$\square$] I can write a multi\_match query with field boosting
+    \item[$\square$] I understand routing improves performance (1 shard vs 10)
+    \item[$\square$] I know security: server-side filter enforcement is critical
+\end{itemize}
+
+\newpage
 
 \vspace{2cm}
 
