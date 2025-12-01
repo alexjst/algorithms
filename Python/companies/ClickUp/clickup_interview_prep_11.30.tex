@@ -2271,6 +2271,92 @@ Rule of thumb:
     \item Personalization: Boost user's tasks, team tasks
 \end{enumerate}
 
+\subsection{Production Architecture: Gateway Pattern}
+
+\textbf{Key Insight:} Clients NEVER access ES directly - use a gateway/facade!
+
+\begin{verbatim}
+Client Apps --> Search Gateway --> Tiered ES Backends
+                     |                    |
+                     |              ┌─────┴─────┐
+                     |              |           |
+                  Enforces:    Enterprise  Premium  Shared
+                  - Auth         Clusters   Indices  Index
+                  - Filters
+                  - Routing
+                  - Rate limits
+\end{verbatim}
+
+\textbf{Why Gateway Pattern?}
+\begin{itemize}
+    \item \textbf{Security}: Single enforcement point, no direct ES access
+    \item \textbf{Flexibility}: Swap backends, A/B test, gradual migrations
+    \item \textbf{Control}: Rate limiting, query validation, audit logging
+    \item \textbf{Tiering}: Route large clients to dedicated resources
+\end{itemize}
+
+\textbf{Gateway Code Pattern:}
+\begin{lstlisting}
+class SearchGateway:
+    def search(self, user, query_text):
+        # 1. Authenticate
+        if not user.is_authenticated():
+            raise Unauthorized()
+
+        # 2. Get user's workspaces
+        workspaces = self.get_user_workspaces(user.id)
+
+        # 3. Rate limit per workspace
+        if not self.rate_limiter.check(workspace_id):
+            raise RateLimitExceeded()
+
+        # 4. Build query with ENFORCED filters
+        query = {
+            "query": {
+                "bool": {
+                    "must": [{"match": {"title": query_text}}],
+                    "filter": [
+                        {"term": {"workspace_id": workspace_id}},
+                        {"terms": {"accessible_by": [user.id]}}
+                    ]
+                }
+            }
+        }
+
+        # 5. Route to correct backend tier
+        backend = self.route_to_backend(workspace_id)
+
+        # 6. Execute and audit log
+        results = backend.search(query)
+        self.audit_log(user.id, workspace_id, query_text)
+
+        return results
+
+    def route_to_backend(self, workspace_id):
+        tier = self.tenant_registry.get_tier(workspace_id)
+
+        if tier == "enterprise":
+            return self.enterprise_cluster
+        elif tier == "premium":
+            return self.premium_index
+        else:
+            return self.shared_index
+\end{lstlisting}
+
+\textbf{Tiered Backend Strategy:}
+\begin{itemize}
+    \item \textbf{Enterprise (Top 0.1\%)}: Dedicated ES cluster, 1000 QPS, 99.99\% SLA
+    \item \textbf{Premium (Top 5\%)}: Dedicated index in shared cluster, 100 QPS
+    \item \textbf{Shared (94.9\%)}: Multi-tenant filtered index, 10 QPS
+\end{itemize}
+
+\textbf{When to Mention:}
+\begin{itemize}
+    \item Interviewer asks: "How would you design this in production?"
+    \item Discussing security: "In production, I'd add a gateway so clients never access ES directly"
+    \item Discussing scale: "Gateway routes large tenants to dedicated resources"
+\end{itemize}
+
 \subsection{Code Snippets You Should Know}
 
 \textbf{1. Multi-tenancy Filter (CRITICAL):}
