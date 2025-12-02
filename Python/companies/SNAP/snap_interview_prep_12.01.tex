@@ -228,9 +228,9 @@ Prepare 5 stories covering different leadership dimensions:
 
 \textbf{Option 1: Real-time (Kafka + Flink)}
 \begin{itemize}
-    \item \textbf{Pros:} Fresh data (<1 min), enables real-time bidding optimization
+    \item \textbf{Pros:} Fresh data ($<$1 min), enables real-time bidding optimization
     \item \textbf{Cons:} Complex infrastructure, higher cost (\$100K/year), difficult debugging
-    \item \textbf{Latency:} <1 minute end-to-end
+    \item \textbf{Latency:} $<$1 minute end-to-end
     \item \textbf{Cost:} High operational complexity
 \end{itemize}
 
@@ -341,7 +341,7 @@ Ad serving is fundamentally a retrieval and ranking problem. Your search experti
 
 \subsubsection{1. Multi-Stage Retrieval (Your Expertise!)}
 
-\textbf{Search Problem:} Find relevant documents from billions of items in <10ms.
+\textbf{Search Problem:} Find relevant documents from billions of items in $<$10ms.
 
 \textbf{Search Solution:} Multi-stage retrieval
 \begin{verbatim}
@@ -691,7 +691,7 @@ def serve_ad(user):
 
 "Great question! Before diving in, I want to clarify - in my experience building search systems at Roblox, I've found that ad serving is fundamentally a retrieval and ranking problem. The core challenge is:
 
-\textit{Given a user context (the 'query'), find the most relevant ads (the 'documents') from millions of campaigns, rank them by relevance $\times$ bid, and serve the winner - all in <100ms.}
+\textit{Given a user context (the 'query'), find the most relevant ads (the 'documents') from millions of campaigns, rank them by relevance $\times$ bid, and serve the winner - all in $<$100ms.}
 
 I'd approach this using the same multi-stage retrieval architecture we used for search:
 
@@ -770,7 +770,7 @@ Now, for Snapchat specifically, there are unique considerations around video ads
     \item \textbf{CPC (Cost Per Click):} cost per click (\$0.50-2.00)
     \item \textbf{Fill Rate:} \% of ad requests successfully filled (90-95\%)
     \item \textbf{eCPM (effective CPM):} CPC $\times$ CTR $\times$ 1000 (\$5-30)
-    \item \textbf{Latency:} p50, p99, p999 for ad serving (target: p99 <100ms)
+    \item \textbf{Latency:} p50, p99, p999 for ad serving (target: p99 $<$100ms)
     \item \textbf{Video Completion Rate:} \% watching full 6-10 second ad (target: 70-80\%)
 \end{itemize}
 \end{problembox}
@@ -855,7 +855,7 @@ User App --> API Gateway --> Ad Serving Layer --> Ad Selection Engine
 
 \subsubsection{1. User Targeting Engine}
 
-\textbf{Challenge:} Match ads to users in <20ms from pool of 1M active campaigns.
+\textbf{Challenge:} Match ads to users in $<$20ms from pool of 1M active campaigns.
 
 \textbf{Solution: Multi-Level Indexing}
 
@@ -902,7 +902,7 @@ return eligible_campaigns
 
 \subsubsection{2. Ranking Engine (ML-Based)}
 
-\textbf{Challenge:} Predict ad performance (pCTR) in <10ms.
+\textbf{Challenge:} Predict ad performance (pCTR) in $<$10ms.
 
 \textbf{Solution: Two-Stage Ranking}
 
@@ -1104,7 +1104,7 @@ class BudgetUpdater:
 \begin{itemize}
     \item Set soft limit at 95\% of budget (hard stop at 100\%)
     \item Alert advertisers at 80\%, 90\%, 95\% spend
-    \item Refund overspend (typically <1\% of budget)
+    \item Refund overspend (typically $<$1\% of budget)
 \end{itemize}
 
 \subsection{Scaling Considerations}
@@ -1218,8 +1218,8 @@ class AdCache:
 
 \textbf{3. Graceful Degradation}
 \begin{itemize}
-    \item Skip ML ranking if latency >80ms (use simple bid-based ranking)
-    \item Skip personalization if latency >60ms (use geo-based targeting only)
+    \item Skip ML ranking if latency $>$80ms (use simple bid-based ranking)
+    \item Skip personalization if latency $>$60ms (use geo-based targeting only)
     \item Always return an ad (even if suboptimal) - never blank space
 \end{itemize}
 
@@ -1480,7 +1480,7 @@ Lens Ad Flow:
 
 \textbf{Challenges:}
 \begin{itemize}
-    \item Assets must be <5MB (mobile bandwidth constraints)
+    \item Assets must be $<$5MB (mobile bandwidth constraints)
     \item Rendering must be 60fps (smooth AR experience)
     \item Works offline after initial download
     \item Difficult attribution (lens used days after download)
@@ -1584,7 +1584,7 @@ class MobileAdOptimizer:
 
 \subsection{Multi-Region Deployment}
 
-\textbf{Challenge:} Serve ads globally with <100ms latency.
+\textbf{Challenge:} Serve ads globally with $<$100ms latency.
 
 \textbf{Architecture:}
 
@@ -1629,7 +1629,7 @@ Central Region (US-West):
 
 "I want to start by noting that in my experience building large-scale search systems at Roblox, I've found that \textbf{ad serving is fundamentally a retrieval and ranking problem}.
 
-The core challenge: given a user context (the 'query'), find the most relevant ads (the 'documents') from millions of campaigns, rank by relevance $\times$ bid - all in <100ms.
+The core challenge: given a user context (the 'query'), find the most relevant ads (the 'documents') from millions of campaigns, rank by relevance $\times$ bid - all in $<$100ms.
 
 My search background directly applies to Snapchat's ads platform:
 \begin{itemize}
@@ -1684,7 +1684,7 @@ Let me walk through the architecture, starting with the latency budget..."
 \begin{itemize}
     \item \textbf{Scale:} 400M DAU, 3B+ video impressions/day
     \item \textbf{Format:} 99\% vertical video (9:16), 6-10 second ads
-    \item \textbf{Delivery:} Metadata in <50ms, video from CDN (progressive download)
+    \item \textbf{Delivery:} Metadata in $<$50ms, video from CDN (progressive download)
     \item \textbf{Optimization:} Pre-cache top 1000 ads, adaptive bitrate, video preloading
     \item \textbf{Tracking:} Quartile-based metrics (25\%, 50\%, 75\%, completion)
 \end{itemize}
@@ -1711,7 +1711,7 @@ Let me walk through the architecture, starting with the latency budget..."
 
 \textbf{4. AR Lens Ads - Unique Format}
 \begin{itemize}
-    \item Sponsored lenses/filters downloaded to device (<5MB assets)
+    \item Sponsored lenses/filters downloaded to device ($<$5MB assets)
     \item Client-side GPU rendering at 60fps for smooth AR
     \item Works offline after download (unlike traditional ads)
     \item Attribution challenge: lens used days after impression
@@ -1757,7 +1757,7 @@ Let me walk through the architecture, starting with the latency budget..."
     \item Separate OLTP (real-time serving) from OLAP (analytics)
     \item Data warehouse for historical queries (ETL every 5 min)
     \item Auto-scaling for traffic spikes (10x during major events)
-    \item Graceful degradation: skip ML ranking if latency >80ms
+    \item Graceful degradation: skip ML ranking if latency $>$80ms
 \end{itemize}
 
 \textbf{2. Fraud Detection}
@@ -1765,7 +1765,7 @@ Let me walk through the architecture, starting with the latency budget..."
     \item Device fingerprinting (detect emulators)
     \item Behavioral signals (time to click, click velocity)
     \item Geo signals (VPN detection)
-    \item Block score >70 threshold
+    \item Block score $>$70 threshold
     \item Cost: prevent 5-10\% fraud waste
 \end{itemize}
 \end{keyinsightbox}
@@ -1786,7 +1786,7 @@ eCPM & CPC * CTR * 1000 & \$5-30 \\
 \hline
 Fill Rate & filled requests / total requests & 90-95\% \\
 \hline
-Latency (p99) & 99th percentile response time & <100ms \\
+Latency (p99) & 99th percentile response time & $<$100ms \\
 \hline
 \end{tabular}
 
