@@ -192,7 +192,7 @@ Prepare 5 stories covering different leadership dimensions:
 \begin{testbox}
 \textbf{Example Structure:}
 
-\textbf{Situation:} "At DataHub, we needed to migrate 500M+ records from a monolithic search index to a multi-tenant architecture serving 10K+ organizations. The existing system had 2s p99 latency and frequent OOM crashes."
+\textbf{Situation:} "At Roblox, we needed to migrate 500M+ records from a monolithic search index to a multi-tenant architecture serving 10K+ organizations. The existing system had 2s p99 latency and frequent OOM crashes."
 
 \textbf{Task:} "As tech lead, I was responsible for designing the new architecture, coordinating 3 teams (backend, infra, data), and executing a zero-downtime migration over 6 months."
 
@@ -473,7 +473,7 @@ def hybrid_ad_targeting(user):
 
 \textbf{How to Present This:}
 \begin{itemize}
-    \item "At DataHub, we built hybrid search combining BM25 and vector embeddings. For ads, I'd use the same approach - rule-based targeting for precision (exact demographic matches) and semantic embeddings for recall (discover similar interests)."
+    \item "At Roblox, we built hybrid search combining BM25 and vector embeddings. For ads, I'd use the same approach - rule-based targeting for precision (exact demographic matches) and semantic embeddings for recall (discover similar interests)."
     \item "This addresses the cold-start problem - new campaigns without historical CTR data can leverage semantic similarity to user interests."
 \end{itemize}
 
@@ -590,7 +590,7 @@ class SemanticAdMatcher:
 
 \textbf{How to Present This:}
 \begin{itemize}
-    \item "We used sentence transformers for semantic search at DataHub. For Snapchat ads, I'd encode user behavior (Stories watched, Lenses used) into embeddings and match against ad embeddings for semantic targeting."
+    \item "We used sentence transformers for semantic search at Roblox. For Snapchat ads, I'd encode user behavior (Stories watched, Lenses used) into embeddings and match against ad embeddings for semantic targeting."
     \item "This goes beyond keyword matching - a user interested in 'fitness' content would also match ads about 'yoga', 'running', 'healthy eating' through semantic similarity."
 \end{itemize}
 
@@ -640,7 +640,7 @@ def serve_ad(user):
 
 \textbf{How to Present This:}
 \begin{itemize}
-    \item "At DataHub, we built multi-tenant search with strict workspace isolation. Ads systems have similar requirements - each advertiser's budget must be tracked separately, campaigns must respect spend limits, just like workspace quotas."
+    \item "At Roblox, we built multi-tenant search with strict workspace isolation. Ads systems have similar requirements - each advertiser's budget must be tracked separately, campaigns must respect spend limits, just like workspace quotas."
     \item "The sharding strategy is similar - shard by advertiser\_id (like workspace\_id) to isolate data and avoid cross-advertiser queries."
 \end{itemize}
 
@@ -689,7 +689,7 @@ def serve_ad(user):
 
 \textbf{Your Response:}
 
-"Great question! Before diving in, I want to clarify - in my experience building search systems at DataHub, I've found that ad serving is fundamentally a retrieval and ranking problem. The core challenge is:
+"Great question! Before diving in, I want to clarify - in my experience building search systems at Roblox, I've found that ad serving is fundamentally a retrieval and ranking problem. The core challenge is:
 
 \textit{Given a user context (the 'query'), find the most relevant ads (the 'documents') from millions of campaigns, rank them by relevance $\times$ bid, and serve the winner - all in <100ms.}
 
@@ -1627,7 +1627,7 @@ Central Region (US-West):
 \begin{keyinsightbox}
 \textbf{CRITICAL: Open with this framing to establish credibility}
 
-"I want to start by noting that in my experience building large-scale search systems at DataHub, I've found that \textbf{ad serving is fundamentally a retrieval and ranking problem}.
+"I want to start by noting that in my experience building large-scale search systems at Roblox, I've found that \textbf{ad serving is fundamentally a retrieval and ranking problem}.
 
 The core challenge: given a user context (the 'query'), find the most relevant ads (the 'documents') from millions of campaigns, rank by relevance $\times$ bid - all in <100ms.
 
