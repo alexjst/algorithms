@@ -1,60 +1,122 @@
-\documentclass[11pt,a4paper]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[margin=0.75in]{geometry}
-\usepackage{listings}
-\usepackage{xcolor}
+\documentclass[11pt,letterpaper]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{enumitem}
-\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{fontawesome5}
+
+% Colors - Snapchat branding
+\definecolor{snapyellow}{RGB}{255,252,0}
+\definecolor{snapblack}{RGB}{0,0,0}
+\definecolor{highlight}{RGB}{255,252,230}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codepurple}{RGB}{153,0,153}
+\definecolor{backcolour}{RGB}{248,248,248}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{SNAP Interview Prep}
+\rhead{Alex Yang}
+\cfoot{\thepage}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+% Custom boxes
+\newtcolorbox{keyinsight}{
+    colback=highlight,
+    colframe=snapyellow!80!black,
+    fonttitle=\bfseries,
+    title=\faLightbulb\ Key Insight
+}
+
+\newtcolorbox{criticalpoint}{
+    colback=red!5!white,
+    colframe=red!75!black,
+    fonttitle=\bfseries,
+    title=\faExclamationTriangle\ Critical Point
+}
+
+\newtcolorbox{actionitem}{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title=\faCheckCircle\ Action Item
+}
+
+\newtcolorbox{conceptbox}{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=\faBook\ Concept Review
+}
+
+\newtcolorbox{productbox}{
+    colback=yellow!5!white,
+    colframe=orange!75!black,
+    fonttitle=\bfseries,
+    title=\faCamera\ Product Focus
+}
 
 % Python code styling
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-
 \lstdefinestyle{pythonstyle}{
-    backgroundcolor=\color{backcolour},   
+    backgroundcolor=\color{backcolour},
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
     showstringspaces=false,
-    showtabs=false,                  
+    showtabs=false,
     tabsize=2,
     language=Python
 }
 
 \lstset{style=pythonstyle}
 
-\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
-\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
-
-\title{\textbf{SNAP (Snapchat) Backend Engineer\\Interview Preparation}}
-\author{Comprehensive Problem Set with Solutions}
-\date{2025}
+% Title
+\title{\textbf{SNAP (Snapchat) Backend Engineer\\Interview Preparation}\\
+\large Comprehensive Problem Set with Solutions}
+\author{Alex Yang}
+\date{Prepared: November 2024}
 
 \begin{document}
 
 \maketitle
-
 \tableofcontents
 \newpage
 
-\section{Introduction}
+% ============================================================
+\section{Interview Overview}
+% ============================================================
 
 \subsection{About SNAP Inc.}
 
-SNAP Inc. (founded 2011, Nasdaq: SNAP) is a camera company that created Snapchat, a multimedia messaging app with 400M+ daily active users worldwide. SNAP focuses on:
+\begin{productbox}
+\textbf{SNAP Inc. (founded 2011, Nasdaq: SNAP)} is a camera company that created Snapchat, a multimedia messaging app with 400M+ daily active users worldwide.
 
+\textbf{Core Products:}
 \begin{itemize}
     \item \textbf{Ephemeral Content}: Photos and videos that disappear after viewing
     \item \textbf{AR Technology}: Advanced face filters and lenses using computer vision
@@ -62,12 +124,13 @@ SNAP Inc. (founded 2011, Nasdaq: SNAP) is a camera company that created Snapchat
     \item \textbf{Spotlight}: Short-form video discovery platform
     \item \textbf{Real-time Communication}: Low-latency messaging and video streaming
 \end{itemize}
+\end{productbox}
 
 \subsection{Interview Process}
 
 Based on actual candidate experiences:
 
-\begin{enumerate}
+\begin{enumerate}[leftmargin=*]
     \item \textbf{Recruiter Screen} (30 min): Background, interest in camera/AR/social products
     \item \textbf{Technical Phone Screen} (45-60 min): 1-2 LeetCode medium problems, expects \textit{runnable code} (no pseudocode)
     \item \textbf{Onsite/Virtual} (4-6 hours):
@@ -78,7 +141,21 @@ Based on actual candidate experiences:
     \end{itemize}
 \end{enumerate}
 
-\subsection{Key Technical Focus Areas}
+\begin{criticalpoint}
+\textbf{SNAP's Unique Expectations:}
+
+\begin{itemize}
+    \item \textbf{Speed Matters}: They explicitly value fast problem-solving
+    \item \textbf{Runnable Code}: No pseudocode—must compile and run
+    \item \textbf{Product Knowledge}: Must understand and use Snapchat
+    \item \textbf{Values Alignment}: "Kind, Smart, Creative" evaluated throughout
+\end{itemize}
+\end{criticalpoint}
+
+\subsection{Technical Focus Areas}
+
+\begin{conceptbox}
+\textbf{Most Commonly Tested Topics:}
 
 \begin{itemize}
     \item \textbf{Graphs}: BFS/DFS, shortest path (Dijkstra, A*), grid traversal
@@ -89,10 +166,12 @@ Based on actual candidate experiences:
     \item \textbf{Heaps}: Priority queues, top K, scheduling
     \item \textbf{System Design}: CDN, real-time messaging, ephemeral content, microservices
 \end{itemize}
+\end{conceptbox}
 
-\subsection{Common Interview Questions (Actual)}
+\subsection{Frequently Asked Questions}
 
-From Glassdoor, LeetCode, 一亩三分地, and candidate reports:
+\begin{keyinsight}
+\textbf{Actual questions from Glassdoor, LeetCode, and candidate reports:}
 
 \begin{itemize}
     \item Shortest Path in Maze (with wall breaking)
@@ -103,14 +182,21 @@ From Glassdoor, LeetCode, 一亩三分地, and candidate reports:
     \item Number of Islands (variations)
     \item Design Stories feature / Real-time messaging / AR filter system
 \end{itemize}
+\end{keyinsight}
 
 \newpage
 
+% ============================================================
 \section{Problem 1: Shortest Path in Maze}
+% ============================================================
 
 \subsection{Problem Description}
 
-SNAP commonly asks graph/maze problems related to video games and AR navigation features. This problem appears frequently in their phone screens and onsite interviews.
+\begin{productbox}
+\textbf{Why SNAP Asks This:}
+
+SNAP commonly asks graph/maze problems related to video games, AR navigation features, and Snap Map functionality. This appears frequently in phone screens and onsite interviews.
+\end{productbox}
 
 \textbf{Given:} A 2D grid where 0 represents walkable path and 1 represents wall/obstacle.
 
@@ -142,46 +228,57 @@ shortest_path_with_breaking(grid, start, end)  # Returns: 5
     \item start and end are valid positions
 \end{itemize}
 
-\subsection{Solution}
+\subsection{Solution Approach}
 
-\textbf{Approach 1: BFS for Shortest Path (No Wall Breaking)}
+\begin{keyinsight}
+\textbf{Algorithm Selection:}
+
+\begin{itemize}
+    \item \textbf{BFS}: Use when all edges have equal weight (standard maze)
+    \item \textbf{Dijkstra}: Use when edges have different costs (wall-breaking variant)
+    \item BFS is simpler and faster for the basic problem
+    \item Dijkstra handles the weighted variant elegantly
+\end{itemize}
+\end{keyinsight}
+
+\subsection{Implementation - Approach 1: BFS (No Wall Breaking)}
 
 \begin{lstlisting}
 from collections import deque
 from typing import List, Tuple
 
-def shortest_path(grid: List[List[int]], 
+def shortest_path(grid: List[List[int]],
                   start: Tuple[int, int],
                   end: Tuple[int, int]) -> int:
     """BFS to find shortest path without breaking walls."""
     if not grid or not grid[0]:
         return -1
-    
+
     rows, cols = len(grid), len(grid[0])
     if grid[start[0]][start[1]] == 1 or grid[end[0]][end[1]] == 1:
         return -1
-    
+
     queue = deque([(start[0], start[1], 0)])
     visited = {start}
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    
+
     while queue:
         r, c, dist = queue.popleft()
-        
+
         if (r, c) == end:
             return dist
-        
+
         for dr, dc in directions:
             nr, nc = r + dr, c + dc
             if (0 <= nr < rows and 0 <= nc < cols and
                 grid[nr][nc] == 0 and (nr, nc) not in visited):
                 visited.add((nr, nc))
                 queue.append((nr, nc, dist + 1))
-    
+
     return -1
 \end{lstlisting}
 
-\textbf{Approach 2: Dijkstra for Minimum Cost (With Wall Breaking)}
+\subsection{Implementation - Approach 2: Dijkstra (With Wall Breaking)}
 
 \begin{lstlisting}
 import heapq
@@ -192,22 +289,22 @@ def shortest_path_with_breaking(grid: List[List[int]],
     """Dijkstra's algorithm allowing wall breaking."""
     if not grid or not grid[0]:
         return -1
-    
+
     rows, cols = len(grid), len(grid[0])
     heap = [(0, start[0], start[1])]  # (cost, row, col)
     visited = {}
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    
+
     while heap:
         cost, r, c = heapq.heappop(heap)
-        
+
         if (r, c) == end:
             return cost
-        
+
         if (r, c) in visited and visited[(r, c)] <= cost:
             continue
         visited[(r, c)] = cost
-        
+
         for dr, dc in directions:
             nr, nc = r + dr, c + dc
             if 0 <= nr < rows and 0 <= nc < cols:
@@ -215,7 +312,7 @@ def shortest_path_with_breaking(grid: List[List[int]],
                 new_cost = cost + 1
                 if (nr, nc) not in visited or visited[(nr, nc)] > new_cost:
                     heapq.heappush(heap, (new_cost, nr, nc))
-    
+
     return -1
 \end{lstlisting}
 
@@ -233,13 +330,31 @@ def shortest_path_with_breaking(grid: List[List[int]],
     \item \textbf{Space}: $O(R \times C)$ - heap and visited map
 \end{itemize}
 
+\begin{actionitem}
+\textbf{Interview Execution:}
+
+\begin{enumerate}
+    \item Clarify: Can we break walls? How many? Cost model?
+    \item Start with BFS for simple case
+    \item Explain upgrade to Dijkstra if weighted
+    \item Test with examples: empty grid, no path, single cell
+    \item Discuss optimization: bidirectional search if asked
+\end{enumerate}
+\end{actionitem}
+
 \newpage
 
+% ============================================================
 \section{Problem 2: Ephemeral Message Queue}
+% ============================================================
 
 \subsection{Problem Description}
 
-Snapchat's core feature is ephemeral messaging—messages that automatically disappear after viewing or after a time limit. This tests understanding of time-based data structures and queue management.
+\begin{productbox}
+\textbf{Snapchat's Core Feature:}
+
+Snapchat's defining characteristic is ephemeral messaging—messages that automatically disappear after viewing or after a time limit. This tests understanding of time-based data structures and efficient queue management.
+\end{productbox}
 
 \textbf{Requirements:}
 \begin{itemize}
@@ -263,13 +378,13 @@ class EphemeralMessageQueue:
         self.message_map = {}  # message_id -> message data
         self.expiration_heap = []  # (expires_at, message_id)
         self.next_id = 1
-    
-    def send_message(self, sender: str, recipient: str, 
+
+    def send_message(self, sender: str, recipient: str,
                      content: str, ttl_seconds: int) -> int:
         """Send message with TTL."""
         message_id = self.next_id
         self.next_id += 1
-        
+
         expires_at = time.time() + ttl_seconds
         message = {
             'id': message_id,
@@ -279,27 +394,27 @@ class EphemeralMessageQueue:
             'expires_at': expires_at,
             'viewed': False
         }
-        
+
         self.messages[recipient].append(message)
         self.message_map[message_id] = message
         heapq.heappush(self.expiration_heap, (expires_at, message_id))
-        
+
         return message_id
-    
+
     def get_messages(self, recipient: str) -> List[Dict]:
         """Get all non-expired, unviewed messages."""
         self._cleanup_expired()
-        
+
         current_time = time.time()
         valid_messages = []
-        
+
         for msg in self.messages[recipient]:
-            if (not msg['viewed'] and 
+            if (not msg['viewed'] and
                 msg['expires_at'] > current_time):
                 valid_messages.append(msg)
-        
+
         return valid_messages
-    
+
     def mark_viewed(self, recipient: str, message_id: int) -> None:
         """Mark as viewed and delete (Snapchat behavior)."""
         if message_id in self.message_map:
@@ -307,20 +422,20 @@ class EphemeralMessageQueue:
             msg['viewed'] = True
             # Remove from recipient's list
             self.messages[recipient] = [
-                m for m in self.messages[recipient] 
+                m for m in self.messages[recipient]
                 if m['id'] != message_id
             ]
             del self.message_map[message_id]
-    
+
     def _cleanup_expired(self) -> None:
         """Remove expired messages."""
         current_time = time.time()
-        
+
         while self.expiration_heap:
             expires_at, msg_id = self.expiration_heap[0]
             if expires_at > current_time:
                 break
-            
+
             heapq.heappop(self.expiration_heap)
             if msg_id in self.message_map:
                 msg = self.message_map[msg_id]
@@ -341,13 +456,32 @@ class EphemeralMessageQueue:
     \item \textbf{Space}: $O(n)$ for storing $n$ messages
 \end{itemize}
 
+\begin{keyinsight}
+\textbf{Design Trade-offs:}
+
+\begin{itemize}
+    \item \textbf{Min-heap}: Efficient $O(\log n)$ insertion, $O(1)$ peek for next expiration
+    \item \textbf{Hash map}: $O(1)$ message lookup by ID
+    \item \textbf{Lazy deletion}: Only clean up when checking messages (avoid background threads)
+    \item \textbf{Alternative}: Could use Redis with TTL for production scale
+\end{itemize}
+\end{keyinsight}
+
 \newpage
 
-\section{Problem 5: LRU Cache}
+% ============================================================
+\section{Problem 3: LRU Cache}
+% ============================================================
 
 \subsection{Problem Description}
 
-SNAP frequently asks this problem for understanding caching mechanisms in their infrastructure. Must implement get() and put() operations in $O(1)$ time.
+\begin{productbox}
+\textbf{Why SNAP Asks This:}
+
+SNAP frequently asks this problem to assess understanding of caching mechanisms critical to their infrastructure. Media content (photos/videos) must be cached efficiently for fast retrieval.
+
+\textbf{Must implement get() and put() operations in $O(1)$ time.}
+\end{productbox}
 
 \subsection{Solution}
 
@@ -368,29 +502,29 @@ class LRUCache:
         self.tail = ListNode()
         self.head.next = self.tail
         self.tail.prev = self.head
-    
+
     def _remove(self, node: ListNode) -> None:
         """Remove node from linked list."""
         node.prev.next = node.next
         node.next.prev = node.prev
-    
+
     def _add_to_head(self, node: ListNode) -> None:
         """Add node right after head (most recently used)."""
         node.next = self.head.next
         node.prev = self.head
         self.head.next.prev = node
         self.head.next = node
-    
+
     def get(self, key: int) -> int:
         if key not in self.cache:
             return -1
-        
+
         node = self.cache[key]
         # Move to head (most recently used)
         self._remove(node)
         self._add_to_head(node)
         return node.value
-    
+
     def put(self, key: int, value: int) -> None:
         if key in self.cache:
             # Update existing
@@ -405,7 +539,7 @@ class LRUCache:
                 lru = self.tail.prev
                 self._remove(lru)
                 del self.cache[lru.key]
-            
+
             new_node = ListNode(key, value)
             self.cache[key] = new_node
             self._add_to_head(new_node)
@@ -416,16 +550,38 @@ class LRUCache:
 \begin{itemize}
     \item \textbf{get}: $O(1)$ - hash lookup + linked list operations
     \item \textbf{put}: $O(1)$ - hash operations + linked list operations
-    \item \textbf{Space}: $O(capacity)$
+    \item \textbf{Space}: $O(\text{capacity})$
 \end{itemize}
+
+\begin{conceptbox}
+\textbf{Key Data Structure Insight:}
+
+\textbf{Why Hash Map + Doubly Linked List?}
+\begin{itemize}
+    \item \textbf{Hash Map}: $O(1)$ lookup by key
+    \item \textbf{Doubly Linked List}: $O(1)$ removal and insertion
+    \item \textbf{Head}: Most recently used
+    \item \textbf{Tail}: Least recently used (eviction candidate)
+\end{itemize}
+
+\textbf{Alternative approaches (worse):}
+\begin{itemize}
+    \item Array + timestamp: $O(n)$ to find LRU
+    \item Singly linked list: $O(n)$ to remove node
+    \item OrderedDict (Python): Correct but less impressive in interviews
+\end{itemize}
+\end{conceptbox}
 
 \newpage
 
+% ============================================================
 \section{System Design: Snapchat Stories}
+% ============================================================
 
 \subsection{Requirements}
 
-Design the Stories feature:
+Design the Stories feature that powers one of Snapchat's core experiences:
+
 \begin{itemize}
     \item Users can post photo/video Stories (24-hour lifespan)
     \item Friends can view Stories in chronological order
@@ -436,7 +592,9 @@ Design the Stories feature:
 
 \subsection{High-Level Architecture}
 
-\textbf{Components:}
+\begin{conceptbox}
+\textbf{System Components:}
+
 \begin{enumerate}
     \item \textbf{Upload Service}: Handle media uploads, compression
     \item \textbf{Storage Layer}: S3 for media, Cassandra for metadata
@@ -445,8 +603,11 @@ Design the Stories feature:
     \item \textbf{TTL Service}: Background job to delete expired Stories
     \item \textbf{Feed Service}: Generate personalized Story feeds
 \end{enumerate}
+\end{conceptbox}
 
-\textbf{Data Model (Cassandra):}
+\subsection{Data Model}
+
+\textbf{Cassandra Schema:}
 \begin{lstlisting}
 Story {
     story_id: UUID
@@ -463,117 +624,305 @@ StoryView {
     viewer_id: UUID
     viewed_at: Timestamp
 }
+
+UserFeed {
+    user_id: UUID
+    friend_stories: List<StoryMetadata>  # Denormalized
+    last_updated: Timestamp
+}
 \end{lstlisting}
 
-\textbf{Flow:}
+\subsection{System Flow}
+
+\textbf{Story Creation Flow:}
 \begin{enumerate}
-    \item User uploads photo/video → Upload Service
-    \item Compress/process media → FFmpeg workers
+    \item User uploads photo/video $\rightarrow$ Upload Service
+    \item Compress/process media $\rightarrow$ FFmpeg workers
     \item Store in S3, create Story record in Cassandra
     \item Push to CDN for distribution
     \item Notify friends via WebSocket/FCM
-    \item TTL service periodically scans for expired Stories
-    \item After 24h: Delete from S3 + Cassandra
+    \item Update friend feeds asynchronously
 \end{enumerate}
 
-\textbf{Optimizations:}
+\textbf{Story Viewing Flow:}
+\begin{enumerate}
+    \item User requests friend Stories
+    \item Feed Service queries Cassandra for recent Stories
+    \item Filter expired Stories (check expires\_at)
+    \item Serve media URLs from CDN (nearest edge location)
+    \item Record view in StoryView table
+    \item Update view\_count asynchronously
+\end{enumerate}
+
+\textbf{TTL/Expiration Flow:}
+\begin{enumerate}
+    \item Background cron job runs every hour
+    \item Scans Stories where expires\_at < current\_time
+    \item Batch delete from Cassandra
+    \item Queue S3 deletions (async)
+    \item Update CDN cache invalidation
+\end{enumerate}
+
+\subsection{Optimizations}
+
+\begin{keyinsight}
+\textbf{Performance Optimizations:}
+
 \begin{itemize}
-    \item \textbf{CDN Caching}: Cache popular Stories near users
+    \item \textbf{CDN Caching}: Cache popular Stories near users (99\% hit rate)
     \item \textbf{Adaptive Bitrate}: Serve different qualities based on bandwidth
     \item \textbf{Preloading}: Prefetch friend Stories in background
-    \item \textbf{Sharding}: Partition by user\_id for Cassandra
+    \item \textbf{Thumbnail Generation}: Show thumbnails before video loads
+    \item \textbf{Sharding}: Partition Cassandra by user\_id for horizontal scaling
+    \item \textbf{Feed Denormalization}: Pre-compute friend feeds for fast reads
 \end{itemize}
+\end{keyinsight}
+
+\subsection{Scale Calculations}
+
+\textbf{Capacity Estimation (400M DAU):}
+\begin{itemize}
+    \item Average 2 Stories/user/day: 800M Stories/day
+    \item Average Story size: 5MB (video) or 500KB (photo)
+    \item Weighted average: 2MB per Story
+    \item Storage: 800M $\times$ 2MB = 1.6PB/day
+    \item With 24h TTL: 1.6PB active storage
+    \item Bandwidth: 1.6PB / 86400s = 18.5 GB/s upload
+    \item View rate (10x upload): 185 GB/s download
+\end{itemize}
+
+\begin{criticalpoint}
+\textbf{Bottlenecks to Address:}
+
+\begin{enumerate}
+    \item \textbf{Upload Spikes}: Peak hours (evenings) see 5-10x normal traffic
+    \begin{itemize}
+        \item Solution: Auto-scaling upload workers, queue-based processing
+    \end{itemize}
+
+    \item \textbf{Hot Stories}: Viral content causes uneven CDN load
+    \begin{itemize}
+        \item Solution: Consistent hashing, cache warming, rate limiting
+    \end{itemize}
+
+    \item \textbf{Delete Operations}: 800M deletions/day at 24h mark
+    \begin{itemize}
+        \item Solution: Batch deletes, lazy deletion, S3 lifecycle policies
+    \end{itemize}
+\end{enumerate}
+\end{criticalpoint}
 
 \newpage
 
+% ============================================================
 \section{Interview Tips and Resources}
+% ============================================================
 
 \subsection{Key Success Factors}
 
+\begin{actionitem}
 \textbf{1. Speed Matters}
+
 \begin{itemize}
     \item SNAP explicitly values fast problem-solving
     \item Practice solving medium problems in 20-25 minutes
-    \item Have templates ready for common patterns (BFS, Dijkstra, etc.)
+    \item Have templates ready for common patterns (BFS, Dijkstra, DFS)
+    \item Type fast, think faster
 \end{itemize}
+\end{actionitem}
 
+\begin{actionitem}
 \textbf{2. Runnable Code Required}
+
 \begin{itemize}
     \item No pseudocode—must compile and run
     \item Test with examples during interview
-    \item Handle edge cases (null, empty, single element)
+    \item Handle edge cases: null, empty, single element
+    \item Syntax matters: missing colons/brackets = bad impression
 \end{itemize}
+\end{actionitem}
 
+\begin{actionitem}
 \textbf{3. Product Knowledge}
+
 \begin{itemize}
-    \item Use Snapchat and understand features deeply
+    \item Use Snapchat daily and understand features deeply
     \item Know: Stories, Spotlight, Lenses, Chat, Discover, Snap Map
     \item Discuss trade-offs in context of their products
+    \item Show genuine passion for camera/AR technology
 \end{itemize}
+\end{actionitem}
 
 \subsection{Study Resources}
 
 \textbf{Coding Practice:}
 \begin{itemize}
-    \item LeetCode: Company tag "Snapchat" or "SNAP" (Premium)
-    \item Focus: Graphs (BFS/DFS), Trees, Linked Lists, Arrays
-    \item Difficulty: Medium (70\%), Hard (30\%)
+    \item \textbf{LeetCode}: Company tag "Snapchat" or "SNAP" (Premium required)
+    \item \textbf{Focus Topics}: Graphs (BFS/DFS), Trees, Linked Lists, Arrays
+    \item \textbf{Difficulty}: Medium (70\%), Hard (30\%)
+    \item \textbf{Daily Practice}: 2-3 problems per day for 4-6 weeks
 \end{itemize}
 
 \textbf{System Design:}
 \begin{itemize}
-    \item SNAP Engineering Blog: eng.snap.com
-    \item "Designing Data-Intensive Applications" (Kleppmann)
-    \item Focus: CDN, real-time systems, ephemeral content
+    \item \textbf{SNAP Engineering Blog}: eng.snap.com
+    \item \textbf{Books}: "Designing Data-Intensive Applications" (Kleppmann)
+    \item \textbf{Focus Areas}: CDN, real-time systems, ephemeral content, AR pipelines
 \end{itemize}
 
 \textbf{Interview Experiences:}
 \begin{itemize}
-    \item Glassdoor SNAP reviews
-    \item 一亩三分地 (1Point3Acres) - Chinese forum
+    \item Glassdoor SNAP reviews (filter by Backend Engineer)
+    \item 1Point3Acres - Chinese forum with detailed reports
     \item Prepfully SNAP interview guide
     \item LeetCode Discuss: Snapchat interview threads
 \end{itemize}
 
 \subsection{Common Pitfalls}
 
+\begin{criticalpoint}
+\textbf{What Gets Candidates Rejected:}
+
 \begin{enumerate}
-    \item \textbf{Slow Coding}: SNAP values speed—practice timed coding
-    \item \textbf{Not Testing}: Run through examples with your code
+    \item \textbf{Slow Coding}: Taking 40+ min for a medium problem
+    \begin{itemize}
+        \item SNAP values speed—practice timed coding religiously
+    \end{itemize}
+
+    \item \textbf{Not Testing}: Writing code without running through examples
+    \begin{itemize}
+        \item Always test with 2-3 examples, including edge cases
+    \end{itemize}
+
     \item \textbf{Ignoring Edge Cases}: Null inputs, empty arrays, single elements
-    \item \textbf{Poor Communication}: Explain your approach before coding
-    \item \textbf{Lack of Product Knowledge}: Study Snapchat features
+    \begin{itemize}
+        \item Show defensive programming mindset
+    \end{itemize}
+
+    \item \textbf{Poor Communication}: Silent coding without explanation
+    \begin{itemize}
+        \item Explain approach before coding, talk through logic
+    \end{itemize}
+
+    \item \textbf{Lack of Product Knowledge}: Never used Snapchat
+    \begin{itemize}
+        \item Genuine interest in their products is non-negotiable
+    \end{itemize}
 \end{enumerate}
+\end{criticalpoint}
 
 \subsection{Behavioral Preparation}
 
-SNAP explicitly evaluates three values:
-\begin{itemize}
-    \item \textbf{Kind}: Collaborative, respectful, inclusive
-    \item \textbf{Smart}: Problem-solving, technical depth, learning mindset
-    \item \textbf{Creative}: Innovation, bold ideas, thinking differently
-\end{itemize}
+\begin{conceptbox}
+\textbf{SNAP's Three Core Values:}
 
-Prepare STAR stories demonstrating:
+SNAP explicitly evaluates candidates on three dimensions:
+
+\begin{enumerate}
+    \item \textbf{Kind}: Collaborative, respectful, inclusive
+    \begin{itemize}
+        \item Prepare examples of helping teammates
+        \item Show empathy and active listening
+        \item Discuss inclusive engineering practices
+    \end{itemize}
+
+    \item \textbf{Smart}: Problem-solving, technical depth, learning mindset
+    \begin{itemize}
+        \item Complex technical problems you solved
+        \item How you learn new technologies quickly
+        \item Times you debugged tricky issues
+    \end{itemize}
+
+    \item \textbf{Creative}: Innovation, bold ideas, thinking differently
+    \begin{itemize}
+        \item Novel solutions to engineering challenges
+        \item Times you questioned status quo
+        \item Side projects showing creativity
+    \end{itemize}
+\end{enumerate}
+\end{conceptbox}
+
+\textbf{Prepare STAR stories for:}
 \begin{itemize}
     \item Times you demonstrated kindness in team settings
     \item Complex technical problems you solved creatively
     \item Learning from failures
     \item Why SNAP/camera/AR technology excites you
+    \item Conflict resolution and collaboration
 \end{itemize}
+
+\newpage
+
+% ============================================================
+\section{Final Checklist}
+% ============================================================
+
+\subsection{Technical Preparation}
+
+\begin{actionitem}
+\textbf{Must-Practice Topics:}
+
+\begin{itemize}[label=\faCheckSquare]
+    \item Graph algorithms: BFS, DFS, Dijkstra, A*
+    \item Tree traversals: inorder, preorder, postorder, level-order
+    \item Linked list manipulation: reversal, cycle detection, deep copy
+    \item Dynamic programming: 1D/2D DP, memoization
+    \item String algorithms: sliding window, two pointers
+    \item Design patterns: LRU cache, pub-sub, observer
+\end{itemize}
+\end{actionitem}
+
+\subsection{Day Before Interview}
+
+\begin{actionitem}
+\textbf{Final Prep Checklist:}
+
+\begin{itemize}[label=\faCheckSquare]
+    \item Review 5-10 medium problems similar to SNAP questions
+    \item Practice talking out loud while coding
+    \item Test your setup: IDE, internet, video/audio
+    \item Review SNAP products: use Snapchat, check latest features
+    \item Prepare questions to ask interviewer about SNAP's tech stack
+    \item Review your resume—be ready to discuss every project
+    \item Get good sleep (critical for coding speed)
+\end{itemize}
+\end{actionitem}
+
+\subsection{During Interview}
+
+\begin{actionitem}
+\textbf{Interview Execution:}
+
+\begin{itemize}[label=\faCheckSquare]
+    \item Ask clarifying questions (constraints, edge cases, examples)
+    \item Explain approach before coding
+    \item Write clean, commented code
+    \item Test with examples as you go
+    \item Discuss complexity analysis
+    \item Propose optimizations if time permits
+    \item Show enthusiasm for SNAP's products
+\end{itemize}
+\end{actionitem}
 
 \section{Conclusion}
 
-SNAP interviews test strong algorithmic skills, system design thinking, and alignment with their values. Focus on:
+SNAP interviews test strong algorithmic skills, system design thinking, and alignment with their "Kind, Smart, Creative" values.
+
+\begin{keyinsight}
+\textbf{Success Formula:}
 
 \begin{enumerate}
-    \item \textbf{Speed and Accuracy}: Practice timed coding
-    \item \textbf{Graph Algorithms}: Very common at SNAP
-    \item \textbf{Clean Code}: Must be production-ready and runnable
+    \item \textbf{Speed and Accuracy}: Practice timed coding daily
+    \item \textbf{Graph Algorithms}: Very common at SNAP (BFS/DFS mastery)
+    \item \textbf{Clean Code}: Production-ready, runnable, well-tested
     \item \textbf{Real-time Systems}: Understand WebSockets, CDN, caching
     \item \textbf{Product Passion}: Show genuine interest in camera/AR/ephemeral content
+    \item \textbf{Values Alignment}: Demonstrate Kind, Smart, Creative through examples
 \end{enumerate}
+\end{keyinsight}
 
-Good luck with your SNAP interview!
+\begin{center}
+\Large\textbf{Good luck with your SNAP interview!}
+\end{center}
 
 \end{document}

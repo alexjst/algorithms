@@ -1,0 +1,1883 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{amssymb}
+
+% Configure hyperref for blue links without boxes
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue,
+    filecolor=blue
+}
+
+% Define custom colors
+\definecolor{problemblue}{RGB}{41, 128, 185}
+\definecolor{solutiongreen}{RGB}{39, 174, 96}
+\definecolor{testpurple}{RGB}{142, 68, 173}
+\definecolor{warningorange}{RGB}{230, 126, 34}
+\definecolor{tipblue}{RGB}{52, 152, 219}
+\definecolor{keyinsightred}{RGB}{231, 76, 60}
+
+% Define colored boxes
+\newtcolorbox{problembox}{
+    colback=problemblue!5,
+    colframe=problemblue,
+    title=Interview Component,
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{solutionbox}{
+    colback=solutiongreen!5,
+    colframe=solutiongreen,
+    title=Strategy \& Approach,
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{testbox}{
+    colback=testpurple!5,
+    colframe=testpurple,
+    title=Example Stories,
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{warningbox}{
+    colback=warningorange!5,
+    colframe=warningorange,
+    title=Key Considerations,
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{tipbox}{
+    colback=tipblue!5,
+    colframe=tipblue,
+    title=Pro Tips,
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{keyinsightbox}{
+    colback=keyinsightred!5,
+    colframe=keyinsightred,
+    title=Critical Talking Points,
+    fonttitle=\bfseries
+}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+\title{\textbf{SNAP Principal Engineer Interview\\Large Scale Ads System Design}}
+\author{Complete Preparation Guide - December 1, 2024}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Interview Overview}
+
+\subsection{What to Expect}
+
+\textbf{Interview Type:} Principal Engineer Technical Interview (60 minutes)
+
+\textbf{Interviewer:} Principal Engineer Beijie Xu
+
+\textbf{Format:}
+\begin{itemize}
+    \item 20 minutes: Behavioral/Leadership ("Tell me about a time when...")
+    \item 35 minutes: Large Scale Ads Product System Design
+    \item 5 minutes: Q\&A (your questions)
+\end{itemize}
+
+\textbf{Focus Areas:}
+\begin{itemize}
+    \item Leading large scale initiatives
+    \item Evaluating technical tradeoffs
+    \item Creating strategic roadmaps
+    \item System design exercise (ads platform)
+    \item Deep technical details and latency requirements
+\end{itemize}
+
+\subsection{Success Criteria}
+
+\begin{enumerate}
+    \item \textbf{Leadership}: Demonstrate experience leading large scale projects with cross-functional impact
+    \item \textbf{Technical Depth}: Go deep into ads system architecture, tradeoffs, and performance optimization
+    \item \textbf{Strategic Thinking}: Show ability to create roadmaps and evaluate long-term technical decisions
+    \item \textbf{Collaboration}: Think through solutions collaboratively, ask clarifying questions
+    \item \textbf{Avoid Brute Force}: Think through tradeoffs before jumping to solutions
+\end{enumerate}
+
+\begin{tipbox}
+\textbf{Key Insight:} This is a Principal Engineer role - focus on:
+\begin{itemize}
+    \item Breadth of technical leadership
+    \item Cross-team coordination
+    \item Long-term strategic impact
+    \item Mentoring and technical influence
+\end{itemize}
+\end{tipbox}
+
+\newpage
+
+\part{Behavioral Interview Prep (20 minutes)}
+
+\section{STAR Method Framework}
+
+\subsection{Structure for Every Story}
+
+\textbf{Situation (2-3 sentences):}
+\begin{itemize}
+    \item Set context: company, team size, business problem
+    \item Quantify scale: users, requests/sec, data volume
+    \item State the problem or opportunity
+\end{itemize}
+
+\textbf{Task (1-2 sentences):}
+\begin{itemize}
+    \item Your specific role and responsibility
+    \item What you were asked to accomplish
+    \item Why it mattered to the business
+\end{itemize}
+
+\textbf{Action (Most important - 60\% of time):}
+\begin{itemize}
+    \item Technical decisions you made (with alternatives considered)
+    \item How you led the team (delegation, unblocking, mentoring)
+    \item Tradeoffs you evaluated
+    \item Cross-functional coordination
+    \item Risk mitigation strategies
+\end{itemize}
+
+\textbf{Result (2-3 sentences):}
+\begin{itemize}
+    \item Quantifiable impact: latency improvement, cost reduction, revenue increase
+    \item Team/organizational impact: processes created, standards established
+    \item Long-term strategic value
+\end{itemize}
+
+\subsection{Story Bank - Top 5 Stories to Prepare}
+
+\begin{keyinsightbox}
+Prepare 5 stories covering different leadership dimensions:
+\begin{enumerate}
+    \item \textbf{Large Scale System Design}: Led architecture for high-throughput system
+    \item \textbf{Cross-Team Initiative}: Coordinated multiple teams to achieve shared goal
+    \item \textbf{Technical Tradeoff}: Made difficult technical decision under constraints
+    \item \textbf{Mentoring/Influence}: Elevated team technical capabilities
+    \item \textbf{Strategic Roadmap}: Created multi-quarter technical strategy
+\end{enumerate}
+\end{keyinsightbox}
+
+\section{Common Leadership Questions}
+
+\subsection{Tell me about leading a large scale initiative}
+
+\begin{testbox}
+\textbf{Example Structure:}
+
+\textbf{Situation:} "At DataHub, we needed to migrate 500M+ records from a monolithic search index to a multi-tenant architecture serving 10K+ organizations. The existing system had 2s p99 latency and frequent OOM crashes."
+
+\textbf{Task:} "As tech lead, I was responsible for designing the new architecture, coordinating 3 teams (backend, infra, data), and executing a zero-downtime migration over 6 months."
+
+\textbf{Action:}
+\begin{itemize}
+    \item \textbf{Technical Design:} Evaluated 3 approaches (index-per-tenant, shared index, hybrid). Selected hybrid model with tiered backends (Enterprise dedicated clusters, Premium dedicated indices, Shared multi-tenant index) based on cost vs performance tradeoffs.
+    \item \textbf{Tradeoff Analysis:} Index-per-tenant would cost \$500K/year in infrastructure but guarantee isolation. Shared index would cost \$50K but risk noisy neighbor. Hybrid gave 90\% cost savings while isolating top 5\% of customers.
+    \item \textbf{Risk Mitigation:} Built dual-write system to write to both old and new indices for 30 days. Added feature flag for instant rollback. Created shadow traffic testing to compare results before cutover.
+    \item \textbf{Team Coordination:} Established weekly sync with backend, infra, and SRE teams. Created migration playbook with rollback procedures. Trained on-call team on new architecture.
+    \item \textbf{Execution:} Migrated in waves - internal orgs first, then 10\% customers, then full rollout. Monitored latency, error rates, and cost metrics at each stage.
+\end{itemize}
+
+\textbf{Result:}
+\begin{itemize}
+    \item Reduced p99 latency from 2s to 300ms (85\% improvement)
+    \item Zero downtime during migration
+    \item Infrastructure cost reduced by \$400K/year
+    \item Architecture enabled new features: cross-workspace search, tenant-specific relevance tuning
+    \item Created migration playbook used by 4 other teams
+\end{itemize}
+\end{testbox}
+
+\subsection{Tell me about evaluating technical tradeoffs}
+
+\begin{testbox}
+\textbf{Example: Real-time vs Batch Processing for Ad Attribution}
+
+\textbf{Situation:} Need to attribute ad clicks to conversions for campaign ROI calculation. 100M clicks/day, 5M conversions/day.
+
+\textbf{Task:} Decide between real-time stream processing vs batch processing.
+
+\textbf{Tradeoff Analysis:}
+
+\textbf{Option 1: Real-time (Kafka + Flink)}
+\begin{itemize}
+    \item \textbf{Pros:} Fresh data (<1 min), enables real-time bidding optimization
+    \item \textbf{Cons:} Complex infrastructure, higher cost (\$100K/year), difficult debugging
+    \item \textbf{Latency:} <1 minute end-to-end
+    \item \textbf{Cost:} High operational complexity
+\end{itemize}
+
+\textbf{Option 2: Micro-batch (5 min intervals)}
+\begin{itemize}
+    \item \textbf{Pros:} Simpler code, easier debugging, 50\% lower cost
+    \item \textbf{Cons:} 5 min data delay
+    \item \textbf{Latency:} 5-10 minutes
+    \item \textbf{Cost:} Medium complexity
+\end{itemize}
+
+\textbf{Option 3: Hourly batch}
+\begin{itemize}
+    \item \textbf{Pros:} Simplest, lowest cost (\$20K/year), reliable
+    \item \textbf{Cons:} 1-2 hour delay, no real-time optimization
+    \item \textbf{Latency:} 1-2 hours
+    \item \textbf{Cost:} Low complexity
+\end{itemize}
+
+\textbf{Decision:} Selected micro-batch (5 min) because:
+\begin{itemize}
+    \item Advertisers check dashboards every 15-30 minutes (not second-by-second)
+    \item 5 min delay acceptable for campaign optimization decisions
+    \item 50\% cost reduction vs real-time
+    \item Simpler debugging = faster iteration on attribution models
+    \item Could upgrade to real-time later if business justified it
+\end{itemize}
+
+\textbf{Result:} Delivered attribution system in 3 months instead of 6, saved \$50K/year, achieved 99.9\% accuracy.
+\end{testbox}
+
+\subsection{Tell me about creating a strategic roadmap}
+
+\begin{testbox}
+\textbf{Example: Multi-Quarter Ads Platform Modernization}
+
+\textbf{Situation:} Legacy ads platform serving 10K advertisers with monolithic architecture, single database, no A/B testing capability. Scaling limited to 20K req/sec.
+
+\textbf{Task:} Create 12-month roadmap to modernize platform to support 10x growth (100K advertisers, 200K req/sec).
+
+\textbf{Strategic Roadmap (4 Phases):}
+
+\textbf{Q1: Foundation (Observability \& Data)}
+\begin{itemize}
+    \item Add distributed tracing (OpenTelemetry)
+    \item Build data warehouse for ads analytics
+    \item Implement feature flags for gradual rollouts
+    \item \textbf{Why First:} Can't improve what you can't measure. Need visibility before making changes.
+\end{itemize}
+
+\textbf{Q2: Decouple Services}
+\begin{itemize}
+    \item Extract Ad Serving into separate service
+    \item Migrate to Redis for ad metadata caching
+    \item Implement API gateway for rate limiting
+    \item \textbf{Why Second:} Most latency-sensitive path. Quick wins on performance.
+\end{itemize}
+
+\textbf{Q3: Scale Database}
+\begin{itemize}
+    \item Shard database by advertiser\_id
+    \item Implement read replicas for reporting queries
+    \item Move campaign analytics to data warehouse
+    \item \textbf{Why Third:} Database is bottleneck. Need sharding before hitting 50K req/sec.
+\end{itemize}
+
+\textbf{Q4: ML \& Optimization}
+\begin{itemize}
+    \item Build ML-based bid optimization
+    \item Implement real-time budget pacing
+    \item Add A/B testing framework for ad creatives
+    \item \textbf{Why Last:} Needs stable infrastructure first. Revenue optimization after scale problems solved.
+\end{itemize}
+
+\textbf{Principles:}
+\begin{itemize}
+    \item Each phase delivers standalone value
+    \item No "big bang" rewrites - incremental migration
+    \item Each phase derisk next phase
+    \item Balance technical debt cleanup with new features
+\end{itemize}
+
+\textbf{Result:} Executed 90\% of roadmap on time. Scaled to 150K req/sec (7.5x improvement). Enabled 3 new revenue features. Reduced incident rate by 60\%.
+\end{testbox}
+
+\newpage
+
+\part{Ads System Design Deep Dive (35 minutes)}
+
+\section{Leveraging Search Expertise for Ads Systems}
+
+\begin{keyinsightbox}
+\textbf{Key Insight: Ads Serving = Search Problem}
+
+Ad serving is fundamentally a retrieval and ranking problem. Your search expertise directly applies!
+
+\textbf{Mental Framework:}
+\begin{itemize}
+    \item \textbf{Query} = User context (demographics, interests, behavior)
+    \item \textbf{Documents} = Ad campaigns (millions of candidates)
+    \item \textbf{Retrieval} = Find top-K relevant ads from candidate pool
+    \item \textbf{Ranking} = Score ads by relevance $\times$ bid $\times$ quality
+    \item \textbf{Result} = Winning ad served to user
+\end{itemize}
+\end{keyinsightbox}
+
+\subsection{Search Concepts Applied to Ads}
+
+\subsubsection{1. Multi-Stage Retrieval (Your Expertise!)}
+
+\textbf{Search Problem:} Find relevant documents from billions of items in <10ms.
+
+\textbf{Search Solution:} Multi-stage retrieval
+\begin{verbatim}
+Stage 1: Broad retrieval (10M docs -> 1000 candidates) - 5ms
+Stage 2: Reranking (1000 -> 100) - 10ms
+Stage 3: Final ranking (100 -> 10) - 20ms
+\end{verbatim}
+
+\textbf{Ads Application:} Find relevant ads from millions of campaigns
+
+\begin{lstlisting}
+# Stage 1: Candidate Retrieval (Inverted Index)
+# "Male, 18-24, US, interested in sports"
+def retrieve_candidates(user_profile):
+    # Use inverted index (like search!)
+    candidates = []
+
+    # Geo filter (must match)
+    candidates = index.filter(country=user_profile.country)
+
+    # Demographic filter
+    candidates = candidates.filter(
+        age_range__contains=user_profile.age
+    )
+
+    # Interest-based retrieval (BM25 scoring)
+    for interest in user_profile.interests:
+        scored_ads = index.search(
+            field="targeting_keywords",
+            query=interest,
+            limit=1000
+        )
+        candidates.extend(scored_ads)
+
+    return candidates[:1000]  # Top 1000 candidates
+
+# Stage 2: Fast Ranking (Logistic Regression)
+def fast_rank(candidates, user):
+    scored = []
+    for ad in candidates:
+        # Simple features (like search ranking!)
+        score = (
+            ad.bid *
+            ad.historical_ctr *
+            user_ad_affinity(user, ad.category) *
+            ad.quality_score
+        )
+        scored.append((ad, score))
+
+    scored.sort(key=lambda x: x[1], reverse=True)
+    return scored[:20]  # Top 20 for next stage
+
+# Stage 3: Accurate Ranking (Deep Learning)
+def accurate_rank(top_candidates, user):
+    # Like search reranking with BERT!
+    for ad in top_candidates:
+        features = extract_deep_features(user, ad)
+        pCTR = deep_model.predict(features)
+        final_score = ad.bid * pCTR * ad.quality_score
+
+    return sorted_by_score[:3]  # Top 3 for auction
+\end{lstlisting}
+
+\textbf{How to Present This:}
+\begin{itemize}
+    \item "In my search experience, we used multi-stage retrieval to handle billions of documents. The same principle applies to ads - Stage 1 uses inverted indices for broad filtering, Stage 2 uses fast scoring, Stage 3 uses ML for accuracy."
+    \item "This is exactly like Elasticsearch's query-then-fetch or vector search with two-stage ranking."
+\end{itemize}
+
+\subsubsection{2. Hybrid Search = Hybrid Ad Targeting}
+
+\textbf{Your Search Expertise:} Hybrid search combining BM25 + vector embeddings
+
+\begin{lstlisting}
+# Search: Combine keyword match + semantic similarity
+def hybrid_search(query, documents):
+    # BM25 for keyword matching
+    bm25_results = bm25_index.search(query, top_k=100)
+
+    # Vector search for semantic similarity
+    query_embedding = encode(query)
+    vector_results = vector_index.search(
+        query_embedding,
+        top_k=100
+    )
+
+    # Combine scores
+    combined = reciprocal_rank_fusion(
+        bm25_results,
+        vector_results,
+        weights=[0.7, 0.3]
+    )
+
+    return combined[:10]
+\end{lstlisting}
+
+\textbf{Ads Application:} Hybrid ad targeting
+
+\begin{lstlisting}
+# Ads: Combine rule-based + semantic targeting
+def hybrid_ad_targeting(user):
+    # Rule-based targeting (like BM25)
+    # Explicit matches: age, gender, location
+    rule_based_ads = get_ads_matching_demographics(user)
+
+    # Semantic targeting (like vector search)
+    # Infer interests from behavior
+    user_embedding = encode_user_behavior(
+        user.recent_story_views,
+        user.recent_lens_uses,
+        user.recent_searches
+    )
+
+    # Find ads with similar semantic meaning
+    semantic_ads = vector_index.search(
+        user_embedding,
+        top_k=100
+    )
+
+    # Combine (rule-based for precision, semantic for recall)
+    combined = merge_results(
+        rule_based_ads,  # High precision, narrow
+        semantic_ads,    # High recall, broad
+        weights=[0.6, 0.4]
+    )
+
+    return combined[:20]
+\end{lstlisting}
+
+\textbf{How to Present This:}
+\begin{itemize}
+    \item "At DataHub, we built hybrid search combining BM25 and vector embeddings. For ads, I'd use the same approach - rule-based targeting for precision (exact demographic matches) and semantic embeddings for recall (discover similar interests)."
+    \item "This addresses the cold-start problem - new campaigns without historical CTR data can leverage semantic similarity to user interests."
+\end{itemize}
+
+\subsubsection{3. Learning to Rank (LTR)}
+
+\textbf{Your Search Expertise:} Learning to Rank for search results
+
+\textbf{Ads Application:} Predicting ad CTR and ranking
+
+\begin{lstlisting}
+# Search LTR: Predict relevance score
+class SearchRanker:
+    def rank(self, query, documents):
+        features = []
+        for doc in documents:
+            features.append([
+                bm25_score(query, doc),
+                query_doc_cosine_sim(query, doc),
+                doc.pagerank,
+                doc.freshness,
+                doc.length
+            ])
+
+        # Predict relevance
+        scores = model.predict(features)
+        return sort_by_scores(documents, scores)
+
+# Ads LTR: Predict CTR (click-through rate)
+class AdRanker:
+    def rank(self, user, ads):
+        features = []
+        for ad in ads:
+            features.append([
+                user_ad_affinity(user, ad),
+                ad.historical_ctr,
+                ad.recency,
+                user_engagement_with_category(user, ad.category),
+                time_of_day_factor(),
+                # Add more features...
+            ])
+
+        # Predict CTR
+        pCTR = model.predict(features)
+
+        # Rank by eCPM (expected revenue)
+        eCPM = ad.bid * pCTR * 1000
+        return sort_by_eCPM(ads)
+\end{lstlisting}
+
+\textbf{How to Present This:}
+\begin{itemize}
+    \item "In search, we used LTR models trained on click logs. For ads, it's the same concept - train on impression/click data to predict pCTR, then rank by bid $\times$ pCTR."
+    \item "The features are similar: user-item affinity, historical engagement, temporal factors, contextual signals."
+\end{itemize}
+
+\subsubsection{4. Vector Embeddings for Semantic Matching}
+
+\textbf{Your Search Expertise:} Dense retrieval with BERT/sentence transformers
+
+\textbf{Ads Application:} User and ad embeddings for semantic targeting
+
+\begin{lstlisting}
+# Search: Encode queries and documents
+query_embedding = bert_model.encode(query)
+doc_embeddings = bert_model.encode(documents)
+similarities = cosine_similarity(query_embedding, doc_embeddings)
+
+# Ads: Encode users and ads
+class SemanticAdMatcher:
+    def encode_user(self, user):
+        """
+        Create user embedding from behavior.
+        """
+        behaviors = [
+            user.recent_story_views,  # Stories watched
+            user.recent_searches,     # Search queries
+            user.recent_lens_uses     # Lenses tried
+        ]
+
+        # Concatenate behavior text
+        behavior_text = " ".join([
+            story.title for story in user.recent_story_views
+        ] + [
+            search.query for search in user.recent_searches
+        ])
+
+        # Encode with sentence transformer
+        user_embedding = model.encode(behavior_text)
+        return user_embedding
+
+    def encode_ad(self, ad):
+        """
+        Create ad embedding from campaign metadata.
+        """
+        ad_text = f"{ad.title} {ad.description} {ad.targeting_keywords}"
+        ad_embedding = model.encode(ad_text)
+        return ad_embedding
+
+    def find_similar_ads(self, user):
+        """
+        Dense retrieval: find ads semantically similar to user interests.
+        """
+        user_embedding = self.encode_user(user)
+
+        # Vector search in embedding space
+        similar_ads = vector_index.search(
+            user_embedding,
+            top_k=100,
+            metric="cosine"
+        )
+
+        return similar_ads
+\end{lstlisting}
+
+\textbf{How to Present This:}
+\begin{itemize}
+    \item "We used sentence transformers for semantic search at DataHub. For Snapchat ads, I'd encode user behavior (Stories watched, Lenses used) into embeddings and match against ad embeddings for semantic targeting."
+    \item "This goes beyond keyword matching - a user interested in 'fitness' content would also match ads about 'yoga', 'running', 'healthy eating' through semantic similarity."
+\end{itemize}
+
+\subsubsection{5. Multi-Tenancy and Isolation}
+
+\textbf{Your Search Expertise:} Multi-tenant search with workspace isolation
+
+\textbf{Ads Application:} Campaign isolation and budget management
+
+\begin{lstlisting}
+# Search: Workspace isolation
+def search(user, query):
+    # MUST filter by workspace - prevent data leaks
+    workspaces = get_user_workspaces(user.id)
+
+    results = elasticsearch.search({
+        "query": {
+            "bool": {
+                "must": [{"match": {"content": query}}],
+                "filter": [
+                    {"terms": {"workspace_id": workspaces}}
+                ]
+            }
+        }
+    })
+
+    return results
+
+# Ads: Advertiser isolation and budget enforcement
+def serve_ad(user):
+    # Get eligible campaigns (budget remaining)
+    campaigns = get_campaigns_with_budget()
+
+    # Each advertiser's campaigns are isolated
+    # Budget tracked per advertiser (like workspace quota)
+
+    eligible_ads = []
+    for campaign in campaigns:
+        # Check budget (like checking workspace quota)
+        if has_budget_remaining(campaign.advertiser_id):
+            eligible_ads.append(campaign)
+
+    # Rank and serve
+    ad = rank_and_select(eligible_ads, user)
+    return ad
+\end{lstlisting}
+
+\textbf{How to Present This:}
+\begin{itemize}
+    \item "At DataHub, we built multi-tenant search with strict workspace isolation. Ads systems have similar requirements - each advertiser's budget must be tracked separately, campaigns must respect spend limits, just like workspace quotas."
+    \item "The sharding strategy is similar - shard by advertiser\_id (like workspace\_id) to isolate data and avoid cross-advertiser queries."
+\end{itemize}
+
+\subsection{Key Talking Points: Search → Ads Translation}
+
+\begin{keyinsightbox}
+\textbf{When interviewer asks about ads system design, frame it as:}
+
+\begin{enumerate}
+    \item \textbf{"Ads serving is a retrieval problem"}
+    \begin{itemize}
+        \item "In my search work, we retrieved top-K documents from billions. Ads is the same - retrieve top candidates from millions of campaigns using inverted indices, then rank by bid $\times$ relevance."
+    \end{itemize}
+
+    \item \textbf{"Multi-stage ranking from search applies directly"}
+    \begin{itemize}
+        \item "We used 3-stage retrieval in search: broad retrieval (inverted index), fast ranking (simple features), accurate ranking (deep model). Same strategy for ads to meet 100ms latency SLA."
+    \end{itemize}
+
+    \item \textbf{"Hybrid search = Hybrid targeting"}
+    \begin{itemize}
+        \item "I built hybrid search combining BM25 and vector embeddings. For ads, I'd combine rule-based targeting (demographics) with semantic targeting (user behavior embeddings) for better precision-recall balance."
+    \end{itemize}
+
+    \item \textbf{"Learning to Rank → CTR prediction"}
+    \begin{itemize}
+        \item "LTR models in search predict relevance from click logs. For ads, train on impression/click data to predict pCTR, then rank by eCPM = bid $\times$ pCTR."
+    \end{itemize}
+
+    \item \textbf{"Cold start problem solutions"}
+    \begin{itemize}
+        \item "In search, new documents use content-based signals before getting engagement data. For ads, new campaigns can use semantic similarity to find users with related interests before accumulating CTR history."
+    \end{itemize}
+
+    \item \textbf{"Multi-tenancy patterns are identical"}
+    \begin{itemize}
+        \item "Multi-tenant search with workspace isolation is exactly like advertiser isolation with budget constraints. Same sharding strategies, same quota enforcement patterns."
+    \end{itemize}
+\end{enumerate}
+\end{keyinsightbox}
+
+\subsection{Example: How to Open the Discussion}
+
+\begin{testbox}
+\textbf{Interviewer:} "Design an ad serving system for Snapchat."
+
+\textbf{Your Response:}
+
+"Great question! Before diving in, I want to clarify - in my experience building search systems at DataHub, I've found that ad serving is fundamentally a retrieval and ranking problem. The core challenge is:
+
+\textit{Given a user context (the 'query'), find the most relevant ads (the 'documents') from millions of campaigns, rank them by relevance $\times$ bid, and serve the winner - all in <100ms.}
+
+I'd approach this using the same multi-stage retrieval architecture we used for search:
+
+\textbf{Stage 1: Candidate Retrieval (20ms)}
+\begin{itemize}
+    \item Use inverted indices to filter by demographics, geo, interests
+    \item Retrieve top 1000 candidates (like search's initial retrieval)
+\end{itemize}
+
+\textbf{Stage 2: Fast Ranking (30ms)}
+\begin{itemize}
+    \item Simple scoring: bid $\times$ historical\_ctr $\times$ user\_affinity
+    \item Narrow to top 20 candidates
+\end{itemize}
+
+\textbf{Stage 3: Accurate Ranking (30ms)}
+\begin{itemize}
+    \item Deep learning model to predict pCTR (like search reranking with BERT)
+    \item Final score: bid $\times$ pCTR
+\end{itemize}
+
+\textbf{Stage 4: Auction (10ms)}
+\begin{itemize}
+    \item Second-price auction among top 3
+\end{itemize}
+
+Now, for Snapchat specifically, there are unique considerations around video ads, mobile-first delivery, and privacy-first targeting. Let me dive into those..."
+
+\textbf{Why this works:}
+\begin{itemize}
+    \item Shows you understand the problem fundamentally (retrieval/ranking)
+    \item Leverages your search expertise explicitly
+    \item Demonstrates structured thinking (multi-stage architecture)
+    \item Sets you up to go deep into each component
+    \item Shows confidence translating expertise to new domain
+\end{itemize}
+\end{testbox}
+
+\newpage
+
+\section{Large Scale Ads System Architecture}
+
+\subsection{Problem Statement (Typical Interview Question)}
+
+\begin{problembox}
+\textbf{Design an ad serving system for Snapchat.}
+
+\textbf{Requirements:}
+\begin{itemize}
+    \item Support 400M+ daily active users (Snapchat scale)
+    \item Serve 3B+ ad impressions/day (35K-100K req/sec peak)
+    \item \textbf{Vertical video ads} - full-screen, mobile-first format
+    \item Multiple ad formats: Snap Ads, Story Ads, AR Lens Ads, Collection Ads
+    \item Real-time bidding with multiple advertisers competing
+    \item Sub-100ms latency for ad serving (p99)
+    \item Video CDN integration for fast delivery
+    \item Campaign budget tracking and pacing
+    \item Fraud detection and brand safety
+    \item \textbf{Privacy-first} (Gen Z audience, strict regulations)
+\end{itemize}
+
+\textbf{Snapchat-Specific Challenges:}
+\begin{itemize}
+    \item \textbf{Video-First:} 99\% of ads are vertical video (not display)
+    \item \textbf{Ephemeral Content:} Stories disappear after 24h (different from Facebook/Instagram)
+    \item \textbf{Mobile-Only:} iOS and Android native apps (no web)
+    \item \textbf{High Engagement, Short Sessions:} Users open 30+ times/day, but 5-10 min sessions
+    \item \textbf{Young Demographic:} 75\% under age 34 - privacy, safety critical
+    \item \textbf{AR Integration:} Sponsored lenses/filters - unique ad format
+\end{itemize}
+
+\textbf{Key Metrics:}
+\begin{itemize}
+    \item \textbf{CTR (Click-Through Rate):} clicks / impressions (target: 1-3\%)
+    \item \textbf{CPM (Cost Per Mille):} cost per 1000 impressions (\$1-10)
+    \item \textbf{CPC (Cost Per Click):} cost per click (\$0.50-2.00)
+    \item \textbf{Fill Rate:} \% of ad requests successfully filled (90-95\%)
+    \item \textbf{eCPM (effective CPM):} CPC $\times$ CTR $\times$ 1000 (\$5-30)
+    \item \textbf{Latency:} p50, p99, p999 for ad serving (target: p99 <100ms)
+    \item \textbf{Video Completion Rate:} \% watching full 6-10 second ad (target: 70-80\%)
+\end{itemize}
+\end{problembox}
+
+\subsection{High-Level Architecture}
+
+\begin{solutionbox}
+\textbf{Core Components:}
+
+\begin{verbatim}
+User App --> API Gateway --> Ad Serving Layer --> Ad Selection Engine
+                                      |                    |
+                                      |              +-----+-----+
+                                      |              |           |
+                                   Cache       Targeting   Ranking
+                                  (Redis)       Engine      Engine
+                                      |              |           |
+                                      |         +----+----+      |
+                                      |         |         |      |
+                                      +-----> User   Campaign    |
+                                             Profile   Data       |
+                                               DB        DB       |
+                                                                  |
+                          Budget Service <------------------------+
+                                |
+                          (Tracks spend in real-time)
+\end{verbatim}
+
+\textbf{Key Design Decisions:}
+\begin{enumerate}
+    \item \textbf{Separate Ad Serving from Ad Selection:} Ad serving is latency-critical (100ms SLA). Ad selection can be pre-computed or cached.
+    \item \textbf{Cache-First Architecture:} 90\% of requests served from Redis cache. Database only for cache misses.
+    \item \textbf{Asynchronous Budget Tracking:} Don't block ad serving on budget checks. Use eventual consistency.
+    \item \textbf{Tiered Targeting:} Broad targeting (country, age) in first pass. Granular targeting (interests, behavior) in second pass.
+\end{enumerate}
+\end{solutionbox}
+
+\subsection{Ad Serving Flow (Critical Path)}
+
+\begin{keyinsightbox}
+\textbf{Optimize for the 100ms latency requirement:}
+
+\textbf{Step 1: Request Processing (5ms)}
+\begin{itemize}
+    \item Validate request (user\_id, context, ad\_slot)
+    \item Extract user features (from cookie/token)
+    \item Enrich with geo, device, app context
+\end{itemize}
+
+\textbf{Step 2: Targeting \& Retrieval (20ms)}
+\begin{itemize}
+    \item Query Redis for eligible ad campaigns (filter by geo, age, device)
+    \item Retrieve top 100 candidate ads (from pre-filtered sets)
+    \item \textbf{Optimization:} Pre-compute user segments (e.g., "US\_Male\_18-24") and cache eligible ads per segment
+\end{itemize}
+
+\textbf{Step 3: Ranking \& Selection (30ms)}
+\begin{itemize}
+    \item Score each candidate ad: $score = bid \times pCTR \times quality$
+    \item Apply business rules: frequency capping, budget pacing, brand safety
+    \item Select top 3 ads for auction
+\end{itemize}
+
+\textbf{Step 4: Auction \& Pricing (10ms)}
+\begin{itemize}
+    \item Run second-price auction: winner pays 2nd highest bid + \$0.01
+    \item Calculate eCPM: $eCPM = CPC \times pCTR \times 1000$
+    \item Return winning ad with tracking pixels
+\end{itemize}
+
+\textbf{Step 5: Response \& Logging (35ms)}
+\begin{itemize}
+    \item Return ad creative (CDN URL, title, CTA)
+    \item Log impression event (async to Kafka)
+    \item Update budget tracker (async)
+\end{itemize}
+
+\textbf{Total: 5 + 20 + 30 + 10 + 35 = 100ms}
+\end{keyinsightbox}
+
+\subsection{Detailed Component Design}
+
+\subsubsection{1. User Targeting Engine}
+
+\textbf{Challenge:} Match ads to users in <20ms from pool of 1M active campaigns.
+
+\textbf{Solution: Multi-Level Indexing}
+
+\begin{lstlisting}
+# Level 1: Broad Segments (pre-computed hourly)
+user_segment = compute_segment(user_profile)
+# Example: "US_Male_18-24_Sports"
+
+# Level 2: Redis Sorted Sets per Segment
+# Key: segment:{user_segment}
+# Score: bid * pCTR (pre-computed)
+# Members: campaign_ids
+
+candidate_campaigns = redis.zrevrange(
+    f"segment:{user_segment}",
+    start=0,
+    end=100  # Top 100 candidates
+)
+
+# Level 3: Fine-Grained Filtering (in-memory)
+eligible_campaigns = []
+for campaign_id in candidate_campaigns:
+    campaign = get_campaign_from_cache(campaign_id)
+
+    # Check detailed targeting criteria
+    if matches_interests(user, campaign.interests):
+        if has_budget_remaining(campaign):
+            if passes_frequency_cap(user, campaign):
+                eligible_campaigns.append(campaign)
+
+    if len(eligible_campaigns) >= 20:
+        break  # Early exit
+
+return eligible_campaigns
+\end{lstlisting}
+
+\textbf{Key Optimizations:}
+\begin{itemize}
+    \item Pre-compute user segments (reduce targeting dimensions from 100 to 5)
+    \item Use Redis sorted sets for fast top-K retrieval
+    \item Cache campaign metadata in application memory (100MB)
+    \item Early exit once 20 eligible candidates found
+\end{itemize}
+
+\subsubsection{2. Ranking Engine (ML-Based)}
+
+\textbf{Challenge:} Predict ad performance (pCTR) in <10ms.
+
+\textbf{Solution: Two-Stage Ranking}
+
+\begin{lstlisting}
+class AdRanker:
+    def __init__(self):
+        # Stage 1: Simple logistic regression (in-memory)
+        self.fast_model = LogisticRegressionModel()
+
+        # Stage 2: Deep learning model (for top-K)
+        self.accurate_model = DNNModel()
+
+    def rank(self, user, candidates):
+        # Stage 1: Fast scoring (all candidates)
+        scored = []
+        for ad in candidates:
+            features = extract_features(user, ad)
+            pCTR = self.fast_model.predict(features)
+            score = ad.bid * pCTR * ad.quality_score
+            scored.append((ad, score, pCTR))
+
+        # Sort by score
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        # Stage 2: Accurate scoring (top 10 only)
+        top_10 = scored[:10]
+        refined = []
+        for ad, score, _ in top_10:
+            features = extract_detailed_features(user, ad)
+            pCTR = self.accurate_model.predict(features)
+            final_score = ad.bid * pCTR * ad.quality_score
+            refined.append((ad, final_score, pCTR))
+
+        refined.sort(key=lambda x: x[1], reverse=True)
+        return refined
+
+    def extract_features(self, user, ad):
+        # Fast features (10-20 features)
+        return [
+            user.age_bucket,
+            user.gender,
+            ad.category,
+            ad.historical_ctr,
+            hour_of_day(),
+            day_of_week()
+        ]
+
+    def extract_detailed_features(self, user, ad):
+        # Comprehensive features (100-200 features)
+        return [
+            *self.extract_features(user, ad),
+            user.recent_clicks,  # Last 10 clicked categories
+            user.recent_views,   # Last 50 viewed content
+            ad.creative_features,  # Image embeddings
+            user_ad_affinity_score(user, ad),
+            time_since_last_ad_of_category(user, ad.category)
+        ]
+\end{lstlisting}
+
+\textbf{Model Training Pipeline:}
+\begin{itemize}
+    \item Train on 30 days of click logs (1B impressions, 20M clicks)
+    \item Features: user demographics, ad attributes, context, historical CTR
+    \item Target: binary (clicked or not)
+    \item Update models daily with fresh data
+    \item A/B test new models (10\% traffic) before full rollout
+\end{itemize}
+
+\subsubsection{3. Budget Management Service}
+
+\textbf{Challenge:} Prevent campaign overspend while serving ads at 50K req/sec.
+
+\textbf{Problem:} If we check budget on every request:
+\begin{itemize}
+    \item Database bottleneck (50K writes/sec)
+    \item Race conditions (concurrent requests)
+    \item Latency impact (adds 20-50ms)
+\end{itemize}
+
+\textbf{Solution: Asynchronous Budget Tracking with Pacing}
+
+\begin{lstlisting}
+class BudgetManager:
+    def __init__(self):
+        # In-memory budget cache (updated every 10s)
+        self.budget_cache = {}  # {campaign_id: remaining_budget}
+
+        # Redis for distributed coordination
+        self.redis = RedisClient()
+
+        # Kafka for async spend updates
+        self.kafka_producer = KafkaProducer()
+
+    def can_serve(self, campaign_id, cost):
+        """
+        Fast check: is budget likely available?
+        Don't block on exact budget check.
+        """
+        cached_budget = self.budget_cache.get(campaign_id)
+
+        if cached_budget is None:
+            # Cache miss - fetch from Redis
+            cached_budget = self.redis.get(f"budget:{campaign_id}")
+            self.budget_cache[campaign_id] = cached_budget
+
+        # Fuzzy check with 10% buffer
+        if cached_budget < cost * 0.9:
+            return False
+
+        # Pacing: don't spend entire budget too quickly
+        pacing_rate = self.get_pacing_rate(campaign_id)
+        if random.random() > pacing_rate:
+            return False  # Throttle to spread spend over day
+
+        return True
+
+    def record_impression(self, campaign_id, cost):
+        """
+        Async: send spend event to Kafka.
+        Don't wait for confirmation.
+        """
+        event = {
+            "campaign_id": campaign_id,
+            "cost": cost,
+            "timestamp": time.time()
+        }
+        self.kafka_producer.send("ad_spend", event)
+
+        # Optimistic update to local cache
+        self.budget_cache[campaign_id] -= cost
+
+    def get_pacing_rate(self, campaign_id):
+        """
+        Pacing: spread budget evenly over campaign duration.
+
+        Example: $1000 budget for 10-day campaign
+        - Should spend $100/day
+        - If it's day 3 and spent $200, we're on pace
+        - If spent $400, we're ahead - slow down (return 0.5)
+        - If spent $100, we're behind - speed up (return 1.0)
+        """
+        campaign = self.get_campaign(campaign_id)
+
+        days_elapsed = (now() - campaign.start_date).days
+        days_remaining = (campaign.end_date - now()).days
+
+        expected_spend = (campaign.budget * days_elapsed
+                         / campaign.duration_days)
+        actual_spend = campaign.total_spend
+
+        if actual_spend > expected_spend * 1.2:
+            return 0.5  # Slow down (50% of requests)
+        elif actual_spend < expected_spend * 0.8:
+            return 1.0  # Speed up (100% of requests)
+        else:
+            return 0.9  # On pace (90% of requests)
+
+# Separate service: Budget Updater (consumes Kafka)
+class BudgetUpdater:
+    def run(self):
+        for message in kafka_consumer:
+            campaign_id = message["campaign_id"]
+            cost = message["cost"]
+
+            # Update database (batched every 10 seconds)
+            self.pending_updates[campaign_id] += cost
+
+            if time.time() - self.last_flush > 10:
+                self.flush_updates()
+
+    def flush_updates(self):
+        """
+        Batch update database every 10 seconds.
+        """
+        with db.transaction():
+            for campaign_id, cost in self.pending_updates.items():
+                db.execute("""
+                    UPDATE campaigns
+                    SET total_spend = total_spend + %s
+                    WHERE id = %s
+                """, (cost, campaign_id))
+
+                # Update Redis cache
+                redis.decrby(f"budget:{campaign_id}", cost)
+
+        self.pending_updates.clear()
+        self.last_flush = time.time()
+\end{lstlisting}
+
+\textbf{Tradeoffs:}
+\begin{itemize}
+    \item \textbf{Pro:} Zero latency impact on ad serving (async updates)
+    \item \textbf{Pro:} High throughput (50K req/sec without database bottleneck)
+    \item \textbf{Con:} Eventual consistency - may overspend by 1-2\% before detection
+    \item \textbf{Con:} Complex state management (cache, Redis, database)
+\end{itemize}
+
+\textbf{Mitigation for Overspend:}
+\begin{itemize}
+    \item Set soft limit at 95\% of budget (hard stop at 100\%)
+    \item Alert advertisers at 80\%, 90\%, 95\% spend
+    \item Refund overspend (typically <1\% of budget)
+\end{itemize}
+
+\subsection{Scaling Considerations}
+
+\subsubsection{Database Sharding Strategy}
+
+\textbf{Challenge:} Single database can't handle 50K req/sec + analytics queries.
+
+\textbf{Solution: Separate OLTP and OLAP}
+
+\begin{verbatim}
+Shard Key: advertiser_id
+
+Shard 1 (advertisers 0-999):
+  - Campaigns for advertisers 0-999
+  - Real-time metrics (impressions, clicks, spend)
+  - Read replicas for reporting queries
+
+Shard 2 (advertisers 1000-1999):
+  - Campaigns for advertisers 1000-1999
+  - ...
+
+Data Warehouse (Redshift/BigQuery):
+  - ETL pipeline (every 5 minutes)
+  - Historical data (90 days)
+  - Complex analytics queries
+  - Campaign performance reports
+\end{verbatim}
+
+\textbf{Why Shard by advertiser\_id:}
+\begin{itemize}
+    \item Advertisers query only their own campaigns (no cross-shard queries)
+    \item Budget tracking per advertiser (no distributed transactions)
+    \item Easy to add shards as advertiser count grows
+\end{itemize}
+
+\subsubsection{Caching Strategy}
+
+\textbf{Multi-Layer Cache:}
+
+\begin{lstlisting}
+class AdCache:
+    def __init__(self):
+        # L1: Application memory (100MB)
+        self.l1_cache = {}  # Hot campaigns (top 1000)
+
+        # L2: Redis (10GB)
+        self.redis = RedisClient()
+
+        # L3: Database (source of truth)
+        self.db = DatabaseClient()
+
+    def get_campaign(self, campaign_id):
+        # L1 cache check (1ms)
+        if campaign_id in self.l1_cache:
+            return self.l1_cache[campaign_id]
+
+        # L2 cache check (5ms)
+        campaign = self.redis.get(f"campaign:{campaign_id}")
+        if campaign:
+            self.l1_cache[campaign_id] = campaign  # Populate L1
+            return campaign
+
+        # L3 database query (50ms)
+        campaign = self.db.query(
+            "SELECT * FROM campaigns WHERE id = %s",
+            (campaign_id,)
+        )
+
+        # Populate L2 and L1
+        self.redis.setex(f"campaign:{campaign_id}", 3600, campaign)
+        self.l1_cache[campaign_id] = campaign
+
+        return campaign
+
+    def invalidate(self, campaign_id):
+        """
+        When campaign updated, invalidate all cache layers.
+        """
+        del self.l1_cache[campaign_id]
+        self.redis.delete(f"campaign:{campaign_id}")
+\end{lstlisting}
+
+\textbf{Cache Hit Rates:}
+\begin{itemize}
+    \item L1 (memory): 80\% hit rate, 1ms latency
+    \item L2 (Redis): 18\% hit rate, 5ms latency
+    \item L3 (database): 2\% hit rate, 50ms latency
+    \item \textbf{Overall p99 latency: 10ms}
+\end{itemize}
+
+\subsubsection{Handling Traffic Spikes}
+
+\textbf{Challenge:} Super Bowl ads cause 10x traffic spike (500K req/sec).
+
+\textbf{Solutions:}
+
+\textbf{1. Auto-Scaling}
+\begin{itemize}
+    \item Kubernetes HPA (Horizontal Pod Autoscaler)
+    \item Scale out ad serving pods based on CPU/latency
+    \item Pre-warm instances 1 hour before known events
+\end{itemize}
+
+\textbf{2. Rate Limiting}
+\begin{itemize}
+    \item Limit per advertiser: 1000 req/sec max
+    \item Shed load gracefully: return cached house ads if overloaded
+    \item Priority tiers: premium advertisers get guaranteed QPS
+\end{itemize}
+
+\textbf{3. Graceful Degradation}
+\begin{itemize}
+    \item Skip ML ranking if latency >80ms (use simple bid-based ranking)
+    \item Skip personalization if latency >60ms (use geo-based targeting only)
+    \item Always return an ad (even if suboptimal) - never blank space
+\end{itemize}
+
+\subsection{Critical Tradeoffs Discussion}
+
+\begin{warningbox}
+\textbf{Be ready to discuss these tradeoffs in depth:}
+
+\textbf{1. Consistency vs Latency (Budget Tracking)}
+\begin{itemize}
+    \item Strong consistency: every request checks database (50ms latency, 1K req/sec max)
+    \item Eventual consistency: async updates (5ms latency, 50K req/sec, 1-2\% overspend risk)
+    \item \textbf{Decision:} Eventual consistency with 95\% soft limit and overspend refunds
+\end{itemize}
+
+\textbf{2. Accuracy vs Speed (Ranking)}
+\begin{itemize}
+    \item Deep learning: +10\% CTR improvement, 50ms latency
+    \item Logistic regression: baseline CTR, 5ms latency
+    \item \textbf{Decision:} Two-stage ranking (fast model for all, deep model for top-10)
+\end{itemize}
+
+\textbf{3. Personalization vs Privacy}
+\begin{itemize}
+    \item Full personalization: use browsing history, clicks, location (privacy concerns)
+    \item Contextual only: use current page context (less effective targeting)
+    \item \textbf{Decision:} Hybrid with user consent + differential privacy for aggregated signals
+\end{itemize}
+
+\textbf{4. Real-Time vs Batch (Analytics)}
+\begin{itemize}
+    \item Real-time: advertisers see metrics in 1 minute (complex, expensive)
+    \item Batch: advertisers see metrics in 15 minutes (simpler, cheaper)
+    \item \textbf{Decision:} Hybrid - impressions real-time (Kafka), conversions batch (hourly)
+\end{itemize}
+
+\textbf{5. Cost vs Performance (Infrastructure)}
+\begin{itemize}
+    \item Dedicated Redis per advertiser: perfect isolation, \$1M/year
+    \item Shared Redis with namespacing: 99\% isolation, \$100K/year
+    \item \textbf{Decision:} Shared Redis with strict monitoring and alerts
+\end{itemize}
+\end{warningbox}
+
+\newpage
+
+\section{Advanced Topics}
+
+\subsection{Real-Time Bidding (RTB)}
+
+\textbf{Challenge:} Integrate with external ad exchanges - must respond in 100ms.
+
+\begin{verbatim}
+External Ad Exchange (Google AdX, Facebook Audience Network)
+           |
+           | Bid Request (50ms timeout)
+           v
+    Our Bidding Service
+           |
+    +------+------+
+    |             |
+Targeting    Ranking
+ Engine      Engine
+    |             |
+    +------+------+
+           |
+      Bid Response
+   (bid price, ad creative)
+\end{verbatim}
+
+\textbf{Optimization: Pre-Compute Bids}
+\begin{itemize}
+    \item For each campaign, pre-compute bid ranges per user segment
+    \item Store in Redis: \texttt{bid:campaign:\{id\}:segment:\{segment\}} = \$2.50
+    \item On bid request, lookup pre-computed bid (5ms) instead of running full ML model (30ms)
+\end{itemize}
+
+\subsection{Fraud Detection}
+
+\textbf{Common Fraud Patterns:}
+\begin{itemize}
+    \item \textbf{Click Farms:} Bot networks generating fake clicks
+    \item \textbf{Impression Fraud:} Hidden iframes loading ads (no real views)
+    \item \textbf{Attribution Fraud:} Fake install attributions to get CPI payouts
+\end{itemize}
+
+\textbf{Detection Techniques:}
+
+\begin{lstlisting}
+class FraudDetector:
+    def is_suspicious(self, impression):
+        score = 0
+
+        # 1. Device fingerprinting
+        if self.is_emulator(impression.device):
+            score += 50
+
+        # 2. Behavioral signals
+        if impression.time_to_click < 0.1:  # Too fast (bot)
+            score += 30
+
+        if self.click_count(impression.ip) > 100:  # Too many clicks
+            score += 40
+
+        # 3. Geo signals
+        if self.is_vpn(impression.ip):
+            score += 20
+
+        # 4. Historical patterns
+        if impression.user_id in self.known_fraudsters:
+            score += 100
+
+        return score > 70  # Threshold for blocking
+
+    def get_click_velocity(self, user_id):
+        """
+        Detect unnatural click patterns.
+        Normal user: 1-3 clicks/hour
+        Bot: 100+ clicks/hour
+        """
+        recent_clicks = redis.zcount(
+            f"clicks:{user_id}",
+            min=time.time() - 3600,  # Last hour
+            max=time.time()
+        )
+        return recent_clicks
+\end{lstlisting}
+
+\subsection{A/B Testing Framework}
+
+\textbf{Use Cases:}
+\begin{itemize}
+    \item Test new ranking algorithms
+    \item Test different ad formats
+    \item Test pricing strategies (second-price vs first-price auction)
+\end{itemize}
+
+\begin{lstlisting}
+class ABTestFramework:
+    def get_variant(self, user_id, experiment_name):
+        """
+        Consistent assignment: same user always gets same variant.
+        """
+        hash_val = hashlib.md5(
+            f"{user_id}:{experiment_name}".encode()
+        ).hexdigest()
+
+        bucket = int(hash_val[:8], 16) % 100
+
+        experiment = self.get_experiment(experiment_name)
+
+        if bucket < experiment.control_pct:
+            return "control"
+        elif bucket < experiment.control_pct + experiment.test_pct:
+            return "test"
+        else:
+            return "excluded"  # Not in experiment
+
+    def serve_ad(self, user_id, context):
+        variant = self.get_variant(user_id, "ranking_v2")
+
+        if variant == "control":
+            ranker = self.baseline_ranker
+        elif variant == "test":
+            ranker = self.new_ranker
+        else:
+            ranker = self.baseline_ranker
+
+        ad = ranker.rank(context)
+
+        # Log for experiment analysis
+        self.log_experiment_impression(
+            user_id, "ranking_v2", variant, ad.id
+        )
+
+        return ad
+\end{lstlisting}
+
+\subsection{Snapchat-Specific System Design Considerations}
+
+\subsubsection{Video Ad Serving Architecture}
+
+\textbf{Challenge:} Serve vertical video ads at scale - 3B+ impressions/day, 100MB+ video files.
+
+\textbf{Architecture:}
+
+\begin{lstlisting}
+# Video Ad Delivery Flow
+class VideoAdServer:
+    def serve_video_ad(self, user, context):
+        # 1. Select ad (same as display ads - 50ms)
+        ad = self.select_ad(user, context)
+
+        # 2. Return video metadata (NOT the video file)
+        # Client downloads video from CDN
+        return {
+            "ad_id": ad.id,
+            "video_url": self.get_cdn_url(ad.video_id),
+            "thumbnail_url": self.get_cdn_url(ad.thumbnail_id),
+            "duration": ad.duration,  # e.g., 6 seconds
+            "cta": ad.call_to_action,
+            "tracking_pixels": {
+                "impression": f"https://track.snap.com/imp/{ad.id}",
+                "quartile_25": f"https://track.snap.com/q25/{ad.id}",
+                "quartile_50": f"https://track.snap.com/q50/{ad.id}",
+                "quartile_75": f"https://track.snap.com/q75/{ad.id}",
+                "complete": f"https://track.snap.com/comp/{ad.id}",
+                "click": f"https://track.snap.com/click/{ad.id}"
+            }
+        }
+
+    def get_cdn_url(self, video_id):
+        """
+        Return geographically-optimized CDN URL.
+        """
+        user_region = self.get_user_region()
+
+        # Multi-CDN strategy (Fastly, Akamai, CloudFront)
+        cdn = self.select_cdn(user_region)
+
+        return f"https://{cdn}.snapcdn.com/video/{video_id}.mp4"
+
+    def select_cdn(self, region):
+        """
+        Route to fastest CDN per region.
+        """
+        if region == "US":
+            return "us-west.cdn"
+        elif region == "EU":
+            return "eu-central.cdn"
+        elif region == "APAC":
+            return "apac-east.cdn"
+\end{lstlisting}
+
+\textbf{Key Optimizations:}
+\begin{itemize}
+    \item \textbf{Pre-cache hot videos:} Top 1000 ads cached on edge servers globally
+    \item \textbf{Adaptive bitrate:} Serve 480p/720p/1080p based on network speed
+    \item \textbf{Progressive download:} Start playback before full video downloaded
+    \item \textbf{Video preloading:} Prefetch next ad while user watches current content
+\end{itemize}
+
+\subsubsection{AR Lens Ads - Unique Challenge}
+
+\textbf{Problem:} Sponsored AR lenses (face filters) require real-time rendering on device.
+
+\textbf{Architecture:}
+
+\begin{verbatim}
+Lens Ad Flow:
+1. User opens Snapchat camera
+2. Client downloads lens manifest (JSON, 10KB) from CDN
+3. Client downloads 3D assets (meshes, textures, 5MB) from CDN
+4. Client renders AR effect using local GPU
+5. Log impression event when lens applied
+6. Log engagement event when photo/video shared
+\end{verbatim}
+
+\textbf{Challenges:}
+\begin{itemize}
+    \item Assets must be <5MB (mobile bandwidth constraints)
+    \item Rendering must be 60fps (smooth AR experience)
+    \item Works offline after initial download
+    \item Difficult attribution (lens used days after download)
+\end{itemize}
+
+\subsubsection{Privacy-First Ad Targeting}
+
+\textbf{Challenge:} Target ads without invasive tracking (Gen Z values privacy).
+
+\textbf{Snapchat's Approach:}
+
+\begin{lstlisting}
+class PrivacyFirstTargeting:
+    def get_targetable_attributes(self, user):
+        """
+        Limited targeting - privacy-preserving.
+        """
+        return {
+            # Basic demographics (user-provided)
+            "age_range": user.age_range,  # e.g., "18-24"
+            "gender": user.gender,
+            "location": user.city,  # City-level (not precise GPS)
+
+            # Interest-based (inferred from content, not browsing)
+            "interests": self.get_snap_interests(user),
+            # e.g., ["sports", "music", "fashion"]
+
+            # NO cross-site tracking
+            # NO third-party data brokers
+            # NO pixel tracking on external websites
+        }
+
+    def get_snap_interests(self, user):
+        """
+        Infer interests from Snapchat activity ONLY.
+        """
+        interests = []
+
+        # Stories user watches
+        for story in user.recent_story_views:
+            interests.append(story.category)
+
+        # Lenses user tries
+        for lens in user.recent_lens_uses:
+            interests.append(lens.category)
+
+        # Discover content user reads
+        for article in user.recent_discover_views:
+            interests.append(article.category)
+
+        return list(set(interests))  # Deduplicate
+\end{lstlisting}
+
+\textbf{Tradeoff:}
+\begin{itemize}
+    \item \textbf{Pro:} User trust, regulatory compliance, brand safety
+    \item \textbf{Con:} Lower ad relevance (CPM \$2-5 vs Facebook \$7-10)
+    \item \textbf{Decision:} Snapchat prioritizes user experience over ad revenue per user
+\end{itemize}
+
+\subsubsection{Mobile-First Infrastructure}
+
+\textbf{Challenge:} 100\% mobile traffic (iOS/Android), no web fallback.
+
+\textbf{Considerations:}
+
+\begin{itemize}
+    \item \textbf{Battery Efficiency:} Minimize CPU/GPU usage for ad rendering
+    \item \textbf{Bandwidth Optimization:} Adaptive quality, video compression
+    \item \textbf{Offline Support:} Cache ads for offline viewing
+    \item \textbf{Push Notifications:} Re-engagement campaigns via push
+    \item \textbf{App Version Fragmentation:} Support 10+ versions simultaneously
+\end{itemize}
+
+\begin{lstlisting}
+class MobileAdOptimizer:
+    def optimize_for_device(self, ad, device_info):
+        """
+        Adapt ad delivery based on device capabilities.
+        """
+        if device_info.network == "wifi":
+            # High quality, pre-cache multiple ads
+            return self.get_hd_video(ad), self.prefetch_next_ads(3)
+
+        elif device_info.network == "4G":
+            # Standard quality, prefetch 1 ad
+            return self.get_sd_video(ad), self.prefetch_next_ads(1)
+
+        elif device_info.network == "3G":
+            # Low quality, no prefetch
+            return self.get_low_quality_video(ad), None
+
+        if device_info.battery_level < 20:
+            # Low battery mode: reduce quality, skip video preload
+            return self.get_low_quality_video(ad), None
+
+        if device_info.storage_available < 500MB:
+            # Low storage: don't cache ads
+            return ad, None
+\end{lstlisting}
+
+\subsection{Multi-Region Deployment}
+
+\textbf{Challenge:} Serve ads globally with <100ms latency.
+
+\textbf{Architecture:}
+
+\begin{verbatim}
+Region: US-East
+  - Ad Serving Cluster
+  - Redis Cache (hot campaigns)
+  - User Profile DB (read replica)
+
+Region: EU-West
+  - Ad Serving Cluster
+  - Redis Cache (hot campaigns)
+  - User Profile DB (read replica)
+
+Region: AP-Southeast
+  - Ad Serving Cluster
+  - Redis Cache (hot campaigns)
+  - User Profile DB (read replica)
+
+Central Region (US-West):
+  - Campaign DB (master)
+  - Budget Tracking Service
+  - Analytics Data Warehouse
+\end{verbatim}
+
+\textbf{Data Consistency:}
+\begin{itemize}
+    \item Campaign metadata: replicated globally (10 min lag acceptable)
+    \item User profiles: replicated globally (5 min lag acceptable)
+    \item Budget tracking: centralized (eventual consistency, 1 min lag)
+    \item Real-time metrics: local aggregation, global rollup every 15 min
+\end{itemize}
+
+\newpage
+
+\section{2-Hour Quick Reference Cheat Sheet}
+
+\subsection{Opening Statement: Leverage Your Search Expertise}
+
+\begin{keyinsightbox}
+\textbf{CRITICAL: Open with this framing to establish credibility}
+
+"I want to start by noting that in my experience building large-scale search systems at DataHub, I've found that \textbf{ad serving is fundamentally a retrieval and ranking problem}.
+
+The core challenge: given a user context (the 'query'), find the most relevant ads (the 'documents') from millions of campaigns, rank by relevance $\times$ bid - all in <100ms.
+
+My search background directly applies to Snapchat's ads platform:
+\begin{itemize}
+    \item \textbf{Multi-stage retrieval:} inverted index → fast ranking → ML reranking (same as search)
+    \item \textbf{Hybrid targeting:} BM25 + vector embeddings for semantic matching
+    \item \textbf{Learning to Rank:} CTR prediction models (same features as search relevance)
+    \item \textbf{Multi-tenancy:} advertiser isolation = workspace isolation patterns
+    \item \textbf{Snapchat-specific:} Video CDN delivery, privacy-first targeting, AR lens ads
+\end{itemize}
+
+Let me walk through the architecture, starting with the latency budget..."
+
+\textbf{Pro tip:} Pause after this to see if interviewer wants to go breadth-first or depth-first. Adapt based on their response.
+
+\textbf{Why this works:} Immediately demonstrates you understand the problem fundamentally and have directly relevant expertise. Turns potential weakness (no ads background) into strength (deep retrieval/ranking expertise).
+\end{keyinsightbox}
+
+\subsection{Top 3 Behavioral Talking Points}
+
+\begin{keyinsightbox}
+\textbf{1. Large Scale Migration Story}
+\begin{itemize}
+    \item Context: 500M records, 3 teams, 6 months
+    \item My role: Tech lead, architecture, coordination
+    \item Technical decisions: Hybrid multi-tenancy (cost vs performance)
+    \item Risk mitigation: Dual-write, feature flags, shadow traffic
+    \item Result: 85\% latency improvement, zero downtime, \$400K savings
+\end{itemize}
+
+\textbf{2. Technical Tradeoff Example}
+\begin{itemize}
+    \item Problem: Real-time vs batch for ad attribution
+    \item Options: Real-time (complex, \$100K), micro-batch (5 min, \$50K), hourly batch (\$20K)
+    \item Analysis: User behavior (check every 15-30 min) didn't justify real-time
+    \item Decision: Micro-batch (5 min) - sweet spot of freshness vs complexity
+    \item Result: 50\% cost savings, delivered 2x faster
+\end{itemize}
+
+\textbf{3. Strategic Roadmap Creation}
+\begin{itemize}
+    \item Goal: Scale ads platform 10x (20K to 200K req/sec)
+    \item 4-phase roadmap: Observability → Decouple Services → Scale DB → ML Optimization
+    \item Principle: Each phase delivers standalone value and de-risks next phase
+    \item Result: Executed 90\%, scaled 7.5x, reduced incidents 60\%
+\end{itemize}
+\end{keyinsightbox}
+
+\subsection{Top 7 Snapchat-Specific Talking Points}
+
+\begin{keyinsightbox}
+\textbf{1. Video Ad Serving at Snapchat Scale}
+\begin{itemize}
+    \item \textbf{Scale:} 400M DAU, 3B+ video impressions/day
+    \item \textbf{Format:} 99\% vertical video (9:16), 6-10 second ads
+    \item \textbf{Delivery:} Metadata in <50ms, video from CDN (progressive download)
+    \item \textbf{Optimization:} Pre-cache top 1000 ads, adaptive bitrate, video preloading
+    \item \textbf{Tracking:} Quartile-based metrics (25\%, 50\%, 75\%, completion)
+\end{itemize}
+
+\textbf{2. Ad Serving Latency Budget (100ms total) - Memorize This!}
+\begin{itemize}
+    \item Request processing: 5ms (validate, extract features)
+    \item Targeting \& retrieval: 20ms (Redis, pre-filtered candidates)
+    \item Ranking: 30ms (Stage 1: fast model → Stage 2: deep model top-10)
+    \item Auction: 10ms (second-price auction)
+    \item Response \& logging: 35ms (async Kafka)
+    \item \textbf{Key insight:} Multi-stage ranking same as search (fast → accurate)
+\end{itemize}
+
+\textbf{3. Privacy-First Targeting (Snapchat Differentiator)}
+\begin{itemize}
+    \item \textbf{Challenge:} Gen Z values privacy - no invasive tracking
+    \item \textbf{Snapchat Approach:} First-party data only (Stories, Lenses, Discover)
+    \item NO cross-site tracking, NO third-party data brokers
+    \item City-level location (not GPS), interest inference from in-app behavior
+    \item \textbf{Tradeoff:} Lower CPM (\$2-5 vs Facebook \$7-10), higher user trust
+    \item \textbf{Principal-level insight:} Product decision prioritizes UX over revenue/user
+\end{itemize}
+
+\textbf{4. AR Lens Ads - Unique Format}
+\begin{itemize}
+    \item Sponsored lenses/filters downloaded to device (<5MB assets)
+    \item Client-side GPU rendering at 60fps for smooth AR
+    \item Works offline after download (unlike traditional ads)
+    \item Attribution challenge: lens used days after impression
+    \item High engagement: 10-20x interaction rate vs standard video ads
+\end{itemize}
+
+\textbf{5. Budget Tracking Tradeoff}
+\begin{itemize}
+    \item Challenge: 100K req/sec peak, can't check database every request
+    \item Solution: Eventual consistency with async updates
+    \item Cache budget in Redis, update every 10 seconds via Kafka batching
+    \item Pacing algorithm to spread budget over campaign duration
+    \item Accept 1-2\% overspend risk, refund advertisers
+    \item \textbf{Pro:} Zero latency impact, high throughput
+    \item \textbf{Con:} Eventual consistency, complex state management
+\end{itemize}
+
+\textbf{6. Multi-Layer Caching}
+\begin{itemize}
+    \item L1 (memory): Top 1000 campaigns, 80\% hit rate, 1ms
+    \item L2 (Redis): All active campaigns, 18\% hit rate, 5ms
+    \item L3 (DB): Source of truth, 2\% hit rate, 50ms
+    \item Overall p99 latency: 10ms
+\end{itemize}
+
+\textbf{7. Mobile-First Optimization}
+\begin{itemize}
+    \item \textbf{100\% mobile:} iOS/Android native apps (no web)
+    \item \textbf{Network-aware:} Adaptive quality (WiFi: HD, 4G: SD, 3G: low)
+    \item \textbf{Battery-conscious:} Low battery mode reduces quality, skips preload
+    \item \textbf{Offline support:} Cache ads for offline viewing
+    \item \textbf{Version fragmentation:} Support 10+ app versions simultaneously
+    \item \textbf{Push re-engagement:} Campaign ads via push notifications
+\end{itemize}
+\end{keyinsightbox}
+
+\subsection{Additional System Design Points}
+
+\begin{keyinsightbox}
+\textbf{1. Scaling Strategy}
+\begin{itemize}
+    \item Database: Shard by advertiser\_id (no cross-shard queries)
+    \item Separate OLTP (real-time serving) from OLAP (analytics)
+    \item Data warehouse for historical queries (ETL every 5 min)
+    \item Auto-scaling for traffic spikes (10x during major events)
+    \item Graceful degradation: skip ML ranking if latency >80ms
+\end{itemize}
+
+\textbf{2. Fraud Detection}
+\begin{itemize}
+    \item Device fingerprinting (detect emulators)
+    \item Behavioral signals (time to click, click velocity)
+    \item Geo signals (VPN detection)
+    \item Block score >70 threshold
+    \item Cost: prevent 5-10\% fraud waste
+\end{itemize}
+\end{keyinsightbox}
+
+\subsection{Key Metrics to Know}
+
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Metric} & \textbf{Formula} & \textbf{Typical Value} \\
+\hline
+CTR & clicks / impressions & 1-3\% \\
+\hline
+CPM & cost per 1000 impressions & \$1-10 \\
+\hline
+CPC & cost per click & \$0.50-2.00 \\
+\hline
+eCPM & CPC * CTR * 1000 & \$5-30 \\
+\hline
+Fill Rate & filled requests / total requests & 90-95\% \\
+\hline
+Latency (p99) & 99th percentile response time & <100ms \\
+\hline
+\end{tabular}
+
+\subsection{Questions to Ask Interviewer}
+
+\begin{enumerate}
+    \item What's the biggest scaling challenge for Snapchat's video ad platform today?
+    \item How does Snapchat balance user experience (Gen Z expectations) with ad monetization?
+    \item What's unique about AR Lens ads from an infrastructure perspective?
+    \item How does Snapchat's privacy-first approach affect ad targeting effectiveness?
+    \item What's the team structure for ads infrastructure? How do iOS/Android/Backend teams coordinate?
+    \item How does Snapchat measure ad quality/relevance beyond CTR (e.g., completion rate, swipe-away rate)?
+    \item What's the strategy for competing with TikTok and Instagram Reels in the video ads space?
+\end{enumerate}
+
+\subsection{Red Flags to Avoid}
+
+\begin{warningbox}
+\textbf{Don't say:}
+\begin{itemize}
+    \item "We'll just use microservices" (without justifying why)
+    \item "NoSQL is always better than SQL" (depends on use case)
+    \item "We'll make it real-time" (expensive, may not be needed)
+    \item "This is how Google does it" (different scale, different constraints)
+\end{itemize}
+
+\textbf{Instead say:}
+\begin{itemize}
+    \item "Let me think through the tradeoffs..."
+    \item "What are the latency requirements?" (clarify before designing)
+    \item "We could do X, but the downside is Y. Given the constraints, I'd choose Z"
+    \item "I'd start with a simple architecture and add complexity only when needed"
+\end{itemize}
+\end{warningbox}
+
+\subsection{Day-of-Interview Checklist}
+
+\begin{tipbox}
+\textbf{30 Minutes Before Interview:}
+\begin{enumerate}
+    \item Review Opening Statement (search → ads connection)
+    \item Review Top 7 Snapchat-Specific Talking Points
+    \item Review Top 3 Behavioral Stories
+    \item Glance at Key Metrics table
+    \item Remember: Ask clarifying questions, think through tradeoffs, quantify impact
+\end{enumerate}
+
+\textbf{First 60 Seconds:}
+\begin{itemize}
+    \item When asked about system design, immediately establish the search-retrieval framing
+    \item "Ad serving is fundamentally a retrieval and ranking problem..."
+    \item This positions you as an expert from the start
+\end{itemize}
+\end{tipbox}
+
+\subsection{Principal Engineer Differentiation}
+
+\begin{keyinsightbox}
+\textbf{How to stand out as Principal-level:}
+
+\textbf{1. Think Beyond Code}
+\begin{itemize}
+    \item Mention: team coordination, technical roadmap, organization-wide impact
+    \item "I created a migration playbook that 4 other teams used"
+    \item "I established architectural review process for cross-team consistency"
+\end{itemize}
+
+\textbf{2. Quantify Impact}
+\begin{itemize}
+    \item Not: "improved performance"
+    \item Instead: "reduced p99 latency from 2s to 300ms, saving \$400K/year"
+\end{itemize}
+
+\textbf{3. Show Strategic Thinking}
+\begin{itemize}
+    \item Explain why you chose this approach over alternatives
+    \item Discuss long-term maintainability, not just quick wins
+    \item "This design allows us to add feature X in Q3 without major refactor"
+\end{itemize}
+
+\textbf{4. Acknowledge Tradeoffs}
+\begin{itemize}
+    \item "We chose eventual consistency to optimize for latency, accepting 1-2\% overspend risk"
+    \item "This adds operational complexity, but the cost savings justify it"
+\end{itemize}
+
+\textbf{5. Cross-Functional Coordination}
+\begin{itemize}
+    \item "I worked with product, data science, and infra teams to align on requirements"
+    \item "I created a shared RFC process for architectural decisions"
+\end{itemize}
+\end{keyinsightbox}
+
+\end{document}
