@@ -91,13 +91,27 @@
 \title{\textbf{Augment Code Interview Preparation}\\
 \large Network Ports \& Process Management}
 \author{Alex Yang}
-\date{Prepared: November 26, 2024}
+\date{Prepared: November 26, 2024 | Updated: December 3, 2024}
 
 \begin{document}
 
 \maketitle
 \tableofcontents
 \newpage
+
+\begin{actionitem}
+\textbf{Update Note (December 3, 2024):}
+
+This document has been enhanced based on detailed clarification from the interviewer (Qasim). The reconstructed question provides more specific details about:
+\begin{itemize}
+    \item Exact structure of process records (status field, optional port)
+    \item Precise wording of each part's requirements
+    \item Emphasis on avoiding unnecessary copying in Part 2
+    \item Specific concurrent access scenarios for Part 3
+\end{itemize}
+
+All core concepts and solutions remain valid. Updates focus on alignment with exact problem statement.
+\end{actionitem}
 
 % ============================================================
 \section{Interview Overview}
@@ -110,6 +124,32 @@
     \item \textbf{Duration:} 50 minutes
     \item \textbf{Company:} Augment Code (AI Coding Startup)
 \end{itemize}
+
+\subsection{Reconstructed Problem (from Qasim, Dec 2024)}
+
+\begin{tcolorbox}[colback=yellow!10!white, colframe=orange!75!black, title=\faInfoCircle\ Exact Problem Statement]
+
+\textbf{You are given:}
+\begin{itemize}
+    \item A list of process records.
+    \item Each record contains:
+    \begin{itemize}
+        \item a process ID,
+        \item a status indicating whether the process is alive or dead, and
+        \item possibly a network port if the process is alive and using one.
+    \end{itemize}
+    \item A function \texttt{getChildren(processId)}, which returns the list of child process IDs for a given process.
+\end{itemize}
+
+\textbf{Part 1:}
+Write a function that, given a root process ID, returns all network ports used by the alive processes in the subtree rooted at that process. This includes the root process (if alive) and all its descendants. You must work from the provided list of processes and the \texttt{getChildren} function.
+
+\textbf{Part 2:}
+Describe and implement an efficient method to remove all dead processes from the same list of process records. This should be done in a way that avoids unnecessary copying and minimizes time complexity.
+
+\textbf{Part 3:}
+No coding is required. Explain how you would modify your design so that the system is thread-safe and supports concurrent access, for example by multiple threads reading process information or performing garbage collection simultaneously.
+\end{tcolorbox}
 
 \subsection{Interview Structure}
 
@@ -166,7 +206,19 @@
 
 \subsection{Problem Statement}
 
-\textbf{Context:} You have a database of processes where each process can have child processes forming a tree hierarchy. Some processes are listening on network ports. You need to find all ports used by a given process and all its descendants.
+\textbf{Given:}
+\begin{itemize}
+    \item A list of process records
+    \item Each record contains:
+    \begin{itemize}
+        \item A process ID (PID)
+        \item A status indicating whether the process is alive or dead
+        \item Possibly a network port if the process is alive and using one
+    \end{itemize}
+    \item A function \texttt{getChildren(processId)} which returns the list of child process IDs for a given process
+\end{itemize}
+
+\textbf{Task:} Write a function that, given a root process ID, returns all network ports used by the alive processes in the subtree rooted at that process. This includes the root process (if alive) and all its descendants.
 
 \subsubsection{Data Structures}
 
@@ -177,8 +229,22 @@ class ProcessRecord:
         self.pid = pid              # Process ID (unique)
         self.parent_pid = parent_pid # Parent PID (None for root)
         self.ports = ports          # List of port numbers [80, 443]
-        self.is_alive = is_alive    # Boolean: True/False
+                                    # Can be empty [] if no ports
+                                    # Note: Problem states "possibly a port"
+        self.is_alive = is_alive    # Boolean: True/False (status)
 \end{lstlisting}
+
+\begin{keyinsight}
+\textbf{Implementation Note:}
+
+The problem states each record has "possibly a network port" (singular, optional). In practice, this can be represented as:
+\begin{itemize}
+    \item A list that may be empty: \texttt{ports = []} (no ports) or \texttt{ports = [80]} (one port)
+    \item A single optional value: \texttt{port = None} or \texttt{port = 80}
+\end{itemize}
+
+The list representation is more flexible (processes can listen on multiple ports) and the algorithm works the same way. The examples below use lists, but the approach applies to any representation.
+\end{keyinsight}
 
 \textbf{Database Interface:}
 \begin{lstlisting}
@@ -205,6 +271,17 @@ class ProcessDatabase:
 
 \subsection{Requirements}
 
+\begin{criticalpoint}
+\textbf{Important Constraint:}
+
+You \textbf{must work from} the provided list of processes and the \texttt{getChildren()} function. This means:
+\begin{itemize}
+    \item You cannot build your own tree structure initially
+    \item You must use the given API to traverse the hierarchy
+    \item Start by using what's provided, optimize later if needed
+\end{itemize}
+\end{criticalpoint}
+
 \textbf{Implement:}
 \begin{lstlisting}
 def find_all_ports(database: ProcessDatabase, root_pid: int) -> List[int]:
@@ -222,6 +299,7 @@ def find_all_ports(database: ProcessDatabase, root_pid: int) -> List[int]:
         - Only include ALIVE processes
         - Traverse entire subtree recursively
         - Handle dead processes gracefully
+        - Must work from provided list and getChildren function
     """
     pass
 \end{lstlisting}
@@ -479,14 +557,24 @@ def find_all_ports_space_optimized(database: ProcessDatabase, root_pid: int) -> 
 
 \subsection{Problem Statement}
 
-After finding ports, we need to compact the process database by removing dead processes. The interviewer describes this as "similar to moving all 1s in a binary array to the beginning."
+\textbf{Task:} Describe and implement an efficient method to remove all dead processes from the same list of process records.
 
-\textbf{Task:} Implement garbage collection that:
+\textbf{Key Requirements:}
 \begin{itemize}
-    \item Moves all alive processes to the front of the array
-    \item Moves all dead processes to the back
-    \item Maintains relative order of alive processes
-    \item Operates in-place (minimal extra space)
+    \item Remove dead processes from the list
+    \item Avoid unnecessary copying
+    \item Minimize time complexity
+    \item Should be done in a way that's efficient and practical
+\end{itemize}
+
+\textbf{Interviewer hint:} This is similar to "moving all 1s in a binary array to the beginning" - a classic two-pointer partitioning problem.
+
+\textbf{What this means:}
+\begin{itemize}
+    \item Move all alive processes to the front of the array
+    \item Move all dead processes to the back (or remove them entirely)
+    \item Maintain relative order of alive processes
+    \item Operate in-place with minimal extra space
 \end{itemize}
 
 \subsection{Array Analogy}
@@ -670,9 +758,18 @@ def garbage_collect_stable(processes: List[ProcessRecord]) -> int:
 
 \subsection{Problem Context}
 
-The interviewer asks: "How would you make this system thread-safe if multiple threads are reading/writing the process database simultaneously?"
+\textbf{Task:} Explain how you would modify your design so that the system is thread-safe and supports concurrent access.
+
+\textbf{Scenario:} Multiple threads might be:
+\begin{itemize}
+    \item Reading process information (calling \texttt{find\_all\_ports()}, \texttt{get\_process()})
+    \item Performing garbage collection (removing dead processes)
+    \item Doing both simultaneously
+\end{itemize}
 
 \textbf{No coding required - design discussion only.}
+
+\textbf{Key question:} How do you ensure correctness when multiple threads access the same process list concurrently?
 
 \subsection{Concurrency Concepts}
 
